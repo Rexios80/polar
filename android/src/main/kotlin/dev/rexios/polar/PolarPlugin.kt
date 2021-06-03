@@ -21,20 +21,12 @@ import java.util.*
 
 /** PolarPlugin */
 class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvider, ActivityAware {
-    private val polar = "polar"
-    private val start = "start"
-    private val stop = "stop"
-    private val connection = "connection"
-    private val battery = "battery"
-    private val hr = "hr"
-    private val rrs = "rrs"
-
     private lateinit var channel: MethodChannel
     private lateinit var context: Context
     private var api: PolarBleApi? = null
 
     override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-        channel = MethodChannel(flutterPluginBinding.binaryMessenger, polar)
+        channel = MethodChannel(flutterPluginBinding.binaryMessenger, "polar")
         channel.setMethodCallHandler(this)
 
         context = flutterPluginBinding.applicationContext
@@ -42,8 +34,8 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
 
     override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
         when (call.method) {
-            start -> start()
-            stop -> stop()
+            "start" -> start(call.arguments as String)
+            "stop" -> stop()
             else -> result.notImplemented()
         }
     }
@@ -52,7 +44,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
         channel.setMethodCallHandler(null)
     }
 
-    private fun start() {
+    private fun start(deviceId: String) {
         // TODO: Do in plugin
 //      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 //        this.requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
@@ -66,8 +58,9 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
 // e.g. PolarBleApiDefaultImpl.defaultImplementation(this, PolarBleApi.FEATURE_HR |
 // PolarBleApi.FEATURE_BATTERY_INFO);
 // batteryLevelReceived callback is invoked after connection
-        api = PolarBleApiDefaultImpl.defaultImplementation(context, PolarBleApi.ALL_FEATURES);
+        api = PolarBleApiDefaultImpl.defaultImplementation(context, PolarBleApi.ALL_FEATURES)
         api?.setApiCallback(this)
+        api?.connectToDevice(deviceId)
     }
 
     private fun stop() {
@@ -95,13 +88,13 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
     override fun blePowerStateChanged(p0: Boolean) {}
 
     override fun deviceConnected(p0: PolarDeviceInfo) {
-        channel.invokeMethod(connection, true)
+        channel.invokeMethod("connection", true)
     }
 
     override fun deviceConnecting(p0: PolarDeviceInfo) {}
 
     override fun deviceDisconnected(p0: PolarDeviceInfo) {
-        channel.invokeMethod(connection, false)
+        channel.invokeMethod("connection", false)
     }
 
     override fun streamingFeaturesReady(
@@ -117,12 +110,12 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
     override fun disInformationReceived(p0: String, p1: UUID, p2: String) {}
 
     override fun batteryLevelReceived(p0: String, p1: Int) {
-        channel.invokeMethod(battery, p1)
+        channel.invokeMethod("battery", p1)
     }
 
     override fun hrNotificationReceived(p0: String, p1: PolarHrData) {
-        channel.invokeMethod(hr, p1.hr)
-        channel.invokeMethod(rrs, p1.rrs)
+        channel.invokeMethod("hr", p1.hr)
+        channel.invokeMethod("rrs", p1.rrs)
     }
 
     override fun polarFtpFeatureReady(p0: String) {}
