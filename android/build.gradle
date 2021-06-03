@@ -18,9 +18,18 @@ rootProject.allprojects {
     repositories {
         google()
         jcenter()
-        flatDir {
-            dirs 'libs'
-            dirs project(':polar').file('libs')
+
+        // This is stupid, but local file dependencies weren't working
+        ivy {
+            url 'https://github.com/'
+
+            patternLayout {
+                artifact '/[organisation]/polar-ble-sdk/raw/[revision]/polar-sdk-android/libs/[module].[ext]'
+            }
+
+            // This is required in Gradle 6.0+ as metadata file (ivy.xml)
+            // is mandatory. Docs linked below this code section
+            metadataSources { artifact() }
         }
     }
 }
@@ -42,9 +51,9 @@ android {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
-    implementation(name:'polar-ble-sdk', ext:'aar')
+    implementation 'polarofficial:polar-ble-sdk:3.1.0@aar'
     // Only needed if FEATURE_POLAR_FILE_TRANSFER used
-    implementation(name:'polar-protobuf-release', ext:'aar')
+    implementation 'polarofficial:polar-protobuf-release:3.1.0@aar'
     // Only needed if FEATURE_POLAR_FILE_TRANSFER used
     implementation 'commons-io:commons-io:2.8.0'
     // Only needed if FEATURE_POLAR_FILE_TRANSFER used
