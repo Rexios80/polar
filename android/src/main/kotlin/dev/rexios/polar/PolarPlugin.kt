@@ -3,10 +3,8 @@ package dev.rexios.polar
 import android.content.Context
 import androidx.annotation.NonNull
 import androidx.lifecycle.Lifecycle
-
 import androidx.lifecycle.Lifecycle.Event
 import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.LifecycleObserver
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -23,12 +21,14 @@ import java.util.*
 
 /** PolarPlugin */
 class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvider, ActivityAware {
+    val polar = "polar"
+
     private lateinit var channel: MethodChannel
     private lateinit var context: Context
     private var api: PolarBleApi? = null
 
     override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-        channel = MethodChannel(flutterPluginBinding.binaryMessenger, "polar")
+        channel = MethodChannel(flutterPluginBinding.binaryMessenger, polar)
         channel.setMethodCallHandler(this)
 
         context = flutterPluginBinding.applicationContext
@@ -70,7 +70,8 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
                 Event.ON_PAUSE -> api?.backgroundEntered()
                 Event.ON_RESUME -> api?.foregroundEntered()
                 Event.ON_DESTROY -> api?.shutDown()
-                else -> {}
+                else -> {
+                }
             }
         })
     }
@@ -81,50 +82,37 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
 
     override fun onDetachedFromActivity() {}
 
-    override fun blePowerStateChanged(p0: Boolean) {
-        TODO("Not yet implemented")
-    }
+    override fun blePowerStateChanged(p0: Boolean) {}
 
     override fun deviceConnected(p0: PolarDeviceInfo) {
-        TODO("Not yet implemented")
+        channel.invokeMethod(polar, "{ connected: true }")
     }
 
-    override fun deviceConnecting(p0: PolarDeviceInfo) {
-        TODO("Not yet implemented")
-    }
+    override fun deviceConnecting(p0: PolarDeviceInfo) {}
 
     override fun deviceDisconnected(p0: PolarDeviceInfo) {
-        TODO("Not yet implemented")
+        channel.invokeMethod(polar, "{ connected: false }")
     }
 
     override fun streamingFeaturesReady(
         p0: String,
         p1: MutableSet<PolarBleApi.DeviceStreamingFeature>
     ) {
-        TODO("Not yet implemented")
     }
 
-    override fun sdkModeFeatureAvailable(p0: String) {
-        TODO("Not yet implemented")
-    }
+    override fun sdkModeFeatureAvailable(p0: String) {}
 
-    override fun hrFeatureReady(p0: String) {
-        TODO("Not yet implemented")
-    }
+    override fun hrFeatureReady(p0: String) {}
 
-    override fun disInformationReceived(p0: String, p1: UUID, p2: String) {
-        TODO("Not yet implemented")
-    }
+    override fun disInformationReceived(p0: String, p1: UUID, p2: String) {}
 
     override fun batteryLevelReceived(p0: String, p1: Int) {
-        TODO("Not yet implemented")
+        channel.invokeMethod(polar, "{ battery: $p1 }")
     }
 
     override fun hrNotificationReceived(p0: String, p1: PolarHrData) {
-        TODO("Not yet implemented")
+        channel.invokeMethod(polar, "{ hr: ${p1.hr}, rrs: ${p1.rrs} }")
     }
 
-    override fun polarFtpFeatureReady(p0: String) {
-        TODO("Not yet implemented")
-    }
+    override fun polarFtpFeatureReady(p0: String) {}
 }
