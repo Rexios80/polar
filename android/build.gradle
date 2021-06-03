@@ -61,6 +61,8 @@ dependencies {
     implementation 'io.reactivex.rxjava3:rxjava:3.0.4'
     implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'
 
+    implementation 'com.google.code.gson:gson:2.8.7'
+
     // These are so android libraries can be referenced without seeing red everywhere
     // DO NOT COMMIT UNCOMMENTED
     // You also need these to be commented for the app to run

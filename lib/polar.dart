@@ -4,32 +4,66 @@ import 'dart:io' show Platform;
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+part 'polar_api_observer.dart';
+part 'polar_ble_api.dart';
+part 'polar_device_info.dart';
+part 'polar_hr_data.dart';
+
 class Polar {
   static const MethodChannel _channel = const MethodChannel('polar');
-  final _connectionStreamController = StreamController<bool>.broadcast();
-  final _batteryStreamController = StreamController<int>.broadcast();
-  final _hrStreamController = StreamController<int>.broadcast();
-  final _rrsStreamController = StreamController<List<int>>.broadcast();
 
-  Stream<bool> get connectionStream => _connectionStreamController.stream;
-  Stream<int> get batteryStream => _batteryStreamController.stream;
-  Stream<int> get hrStream => _hrStreamController.stream;
-  Stream<List<int>> get rrsStream => _rrsStreamController.stream;
+  final PolarApiObserver _observer;
 
-  Polar() {
+  Polar(this._observer) {
     _channel.setMethodCallHandler((call) {
       switch (call.method) {
-        case 'connection':
-          _connectionStreamController.add(call.arguments);
+        case 'blePowerStateChanged':
+          _observer.blePowerStateChanged(call.arguments);
           break;
-        case 'battery':
-          _batteryStreamController.add(call.arguments);
+        case 'deviceConnected':
+          _observer.deviceConnected(PolarDeviceInfo.fromJson(call.arguments));
           break;
-        case 'hr':
-          _hrStreamController.add(call.arguments);
+        case 'deviceConnecting':
+          _observer.deviceConnecting(PolarDeviceInfo.fromJson(call.arguments));
           break;
-        case 'rrs':
-          _rrsStreamController.add(call.arguments);
+        case 'deviceDisconnected':
+          _observer
+              .deviceDisconnected(PolarDeviceInfo.fromJson(call.arguments));
+          break;
+        case 'streamingFeaturesReady':
+          // TODO: This definitely doesn't work
+          _observer.streamingFeaturesReady(
+            call.arguments[0],
+            call.arguments[1],
+          );
+          break;
+        case 'sdkModeFeatureAvailable':
+          _observer.sdkModeFeatureAvailable(call.arguments);
+          break;
+        case 'hrFeatureReady':
+          _observer.hrFeatureReady(call.arguments);
+          break;
+        case 'disInformationReceived':
+          _observer.disInformationReceived(
+            call.arguments[0],
+            call.arguments[1],
+            call.arguments[2],
+          );
+          break;
+        case 'batteryLevelReceived':
+          _observer.batteryLevelReceived(
+            call.arguments[0],
+            call.arguments[1],
+          );
+          break;
+        case 'hrNotificationReceived':
+          _observer.hrNotificationReceived(
+            call.arguments[0],
+            PolarHrData.fromJson(call.arguments[1]),
+          );
+          break;
+        case 'polarFtpFeatureReady':
+          _observer.polarFtpFeatureReady(call.arguments);
           break;
       }
 
@@ -37,17 +71,17 @@ class Polar {
     });
   }
 
-  /// Start the API with the given [deviceId]
-  void start(String deviceId) async {
+  /// Connect to a device with the given [deviceId]
+  void connectToDevice(String deviceId) async {
     if (Platform.isAndroid) {
       await Permission.location.request();
     }
 
-    _channel.invokeMethod('start', deviceId);
+    _channel.invokeMethod('connectToDevice', deviceId);
   }
 
-  /// Stop the API
-  void stop() {
-    _channel.invokeMethod('stop');
+  /// Disconnect from a device with the given [deviceId]
+  void disconnectFromDevice(String deviceId) {
+    _channel.invokeMethod('disconnectFromDevice', deviceId);
   }
 }

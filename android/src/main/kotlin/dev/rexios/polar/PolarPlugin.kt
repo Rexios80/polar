@@ -5,6 +5,7 @@ import androidx.annotation.NonNull
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Lifecycle.Event
 import androidx.lifecycle.LifecycleEventObserver
+import com.google.gson.Gson
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -22,20 +23,22 @@ import java.util.*
 /** PolarPlugin */
 class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvider, ActivityAware {
     private lateinit var channel: MethodChannel
-    private lateinit var context: Context
-    private var api: PolarBleApi? = null
+    private lateinit var api: PolarBleApi
+
+    private val gson = Gson()
 
     override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "polar")
         channel.setMethodCallHandler(this)
 
-        context = flutterPluginBinding.applicationContext
+        api = PolarBleApiDefaultImpl.defaultImplementation(flutterPluginBinding.applicationContext, PolarBleApi.ALL_FEATURES)
+        api.setApiCallback(this)
     }
 
     override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
         when (call.method) {
-            "start" -> start(call.arguments as String)
-            "stop" -> stop()
+            "connectToDevice" -> api.connectToDevice(call.arguments as String)
+            "disconnectFromDevice" -> api.disconnectFromDevice(call.arguments as String)
             else -> result.notImplemented()
         }
     }
@@ -44,22 +47,12 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
         channel.setMethodCallHandler(null)
     }
 
-    private fun start(deviceId: String) {
-        api = PolarBleApiDefaultImpl.defaultImplementation(context, PolarBleApi.ALL_FEATURES)
-        api?.setApiCallback(this)
-        api?.connectToDevice(deviceId)
-    }
-
-    private fun stop() {
-        api?.shutDown()
-    }
-
     override fun onAttachedToActivity(p0: ActivityPluginBinding) {
         (p0.lifecycle as Lifecycle).addObserver(LifecycleEventObserver { _, event ->
             when (event) {
-                Event.ON_PAUSE -> api?.backgroundEntered()
-                Event.ON_RESUME -> api?.foregroundEntered()
-                Event.ON_DESTROY -> api?.shutDown()
+                Event.ON_PAUSE -> api.backgroundEntered()
+                Event.ON_RESUME -> api.foregroundEntered()
+                Event.ON_DESTROY -> api.shutDown()
                 else -> {
                 }
             }
@@ -72,38 +65,50 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
 
     override fun onDetachedFromActivity() {}
 
-    override fun blePowerStateChanged(p0: Boolean) {}
-
-    override fun deviceConnected(p0: PolarDeviceInfo) {
-        channel.invokeMethod("connection", true)
+    override fun blePowerStateChanged(p0: Boolean) {
+        channel.invokeMethod("blePowerStateChanged", p0)
     }
 
-    override fun deviceConnecting(p0: PolarDeviceInfo) {}
+    override fun deviceConnected(p0: PolarDeviceInfo) {
+        channel.invokeMethod("deviceConnected", gson.toJson(p0))
+    }
+
+    override fun deviceConnecting(p0: PolarDeviceInfo) {
+        channel.invokeMethod("deviceConnecting", gson.toJson(p0))
+    }
 
     override fun deviceDisconnected(p0: PolarDeviceInfo) {
-        channel.invokeMethod("connection", false)
+        channel.invokeMethod("deviceDisconnected", gson.toJson(p0))
     }
 
     override fun streamingFeaturesReady(
         p0: String,
         p1: MutableSet<PolarBleApi.DeviceStreamingFeature>
     ) {
+        channel.invokeMethod("streamingFeaturesReady", listOf(p0, gson.toJson(p1)))
     }
 
-    override fun sdkModeFeatureAvailable(p0: String) {}
+    override fun sdkModeFeatureAvailable(p0: String) {
+        channel.invokeMethod("sdkModeFeatureAvailable", p0)
+    }
 
-    override fun hrFeatureReady(p0: String) {}
+    override fun hrFeatureReady(p0: String) {
+        channel.invokeMethod("hrFeatureReady", p0)
+    }
 
-    override fun disInformationReceived(p0: String, p1: UUID, p2: String) {}
+    override fun disInformationReceived(p0: String, p1: UUID, p2: String) {
+        channel.invokeMethod("disInformationReceived", listOf(p0, p1.toString(), p2))
+    }
 
     override fun batteryLevelReceived(p0: String, p1: Int) {
-        channel.invokeMethod("battery", p1)
+        channel.invokeMethod("batteryLevelReceived", listOf(p0, p1))
     }
 
     override fun hrNotificationReceived(p0: String, p1: PolarHrData) {
-        channel.invokeMethod("hr", p1.hr)
-        channel.invokeMethod("rrs", p1.rrs)
+        channel.invokeMethod("hrNotificationReceived", listOf(p0, gson.toJson(p1)))
     }
 
-    override fun polarFtpFeatureReady(p0: String) {}
+    override fun polarFtpFeatureReady(p0: String) {
+        channel.invokeMethod("polarFtpFeatureReady", p0)
+    }
 }
