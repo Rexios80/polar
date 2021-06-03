@@ -45,19 +45,6 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
     }
 
     private fun start(deviceId: String) {
-        // TODO: Do in plugin
-//      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//        this.requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-//      }
-//// callback is invoked after granted or denied permissions
-//      @Override
-//      public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
-//      }
-
-        // NOTICE all features are enabled, if only interested on particular feature(s) like info Heart rate and Battery info then
-// e.g. PolarBleApiDefaultImpl.defaultImplementation(this, PolarBleApi.FEATURE_HR |
-// PolarBleApi.FEATURE_BATTERY_INFO);
-// batteryLevelReceived callback is invoked after connection
         api = PolarBleApiDefaultImpl.defaultImplementation(context, PolarBleApi.ALL_FEATURES)
         api?.setApiCallback(this)
         api?.connectToDevice(deviceId)
