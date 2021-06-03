@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:polar/polar.dart';
 
 void main() {
   runApp(MyApp());
@@ -10,11 +11,17 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  String _platformVersion = 'Unknown';
+  int battery = -1;
+  int hr = -1;
 
   @override
   void initState() {
     super.initState();
+
+    final polar = Polar();
+    polar.batteryStream.listen((event) => setState(() => battery = event));
+    polar.hrStream.listen((event) => setState(() => hr = event));
+    polar.start('1C709B20');
   }
 
   @override
@@ -22,10 +29,15 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Plugin example app'),
+          title: const Text('Polar example app'),
         ),
         body: Center(
-          child: Text('Running on: $_platformVersion\n'),
+          child: Column(
+            children: [
+              Text('Battery: $battery'),
+              Text('Heart rate: $hr'),
+            ],
+          ),
         ),
       ),
     );
