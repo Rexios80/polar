@@ -1,0 +1,33 @@
+PODS:
+  - Flutter (1.0.0)
+  - polar (0.0.1):
+    - Flutter
+    - PolarBleSdk
+  - PolarBleSdk (3.1.0):
+    - RxSwift (= 6.1.0)
+  - RxSwift (6.1.0)
+
+DEPENDENCIES:
+  - Flutter (from `Flutter`)
+  - polar (from `.symlinks/plugins/polar/ios`)
+
+SPEC REPOS:
+  trunk:
+    - PolarBleSdk
+    - RxSwift
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: Flutter
+  polar:
+    :path: ".symlinks/plugins/polar/ios"
+
+SPEC CHECKSUMS:
+  Flutter: 434fef37c0980e73bb6479ef766c45957d4b510c
+  polar: eddf9e03d28362a9915d598110a926c1beb0850f
+  PolarBleSdk: 0b112f4273db0382a273caab5841f3db5e0509fb
+  RxSwift: a834e5c538e89eca0cae86f403f4fbf0336786ce
+
+PODFILE CHECKSUM: 775997f741c536251164e3eacf6e34abf2eb7a17
+
+COCOAPODS: 1.10.1
