@@ -33,28 +33,19 @@ public class SwiftPolarPlugin:
         instance.channel.setMethodCallHandler {
             (call: FlutterMethodCall, _: @escaping FlutterResult) -> Void in
             switch call.method {
-            case "start":
-                instance.start(deviceId: call.arguments as! String)
-            case "stop":
-                instance.stop()
+            case "connectToDevice":
+                instance.api.connectToDevice(call.arguments as! String)
+            case "disconnectFromDevice":
+                instance.api.disconnectFromDevice(call.arguments as! String)
             default: break
             }
         }
-    }
-
-    private func start(deviceId: String) {
-        self.deviceId = deviceId
-        try? api.connectToDevice(deviceId ?? "")
-    }
-
-    private func stop() {
-        try? api.disconnectFromDevice(deviceId ?? "")
     }
     
     public func deviceConnecting(_ polarDeviceInfo: PolarDeviceInfo) {}
     
     public func deviceConnected(_ polarDeviceInfo: PolarDeviceInfo) {
-        channel.invokeMethod("connection", arguments: true)
+        channel.invokeMethod("deviceConnected", arguments: )
     }
     
     public func deviceDisconnected(_ polarDeviceInfo: PolarDeviceInfo) {
