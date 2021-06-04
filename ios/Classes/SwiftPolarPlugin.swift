@@ -71,7 +71,7 @@ public class SwiftPolarPlugin:
         guard let data = try? encoder.encode(PolarHrDataCodable(data)), let arguments = String(data: data, encoding: .utf8) else {
             return
         }
-        channel.invokeMethod("hrNotificationReceived", arguments: arguments)
+        channel.invokeMethod("hrNotificationReceived", arguments: [identifier, arguments])
     }
     
     public func hrFeatureReady(_ identifier: String) {

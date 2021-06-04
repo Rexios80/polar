@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io' show Platform;
 
 import 'package:enum_to_string/enum_to_string.dart';
@@ -22,14 +23,16 @@ class Polar {
           _observer.blePowerStateChanged(call.arguments);
           break;
         case 'deviceConnected':
-          _observer.deviceConnected(PolarDeviceInfo.fromJson(call.arguments));
+          _observer.deviceConnected(
+              PolarDeviceInfo.fromJson(jsonDecode(call.arguments)));
           break;
         case 'deviceConnecting':
-          _observer.deviceConnecting(PolarDeviceInfo.fromJson(call.arguments));
+          _observer.deviceConnecting(
+              PolarDeviceInfo.fromJson(jsonDecode(call.arguments)));
           break;
         case 'deviceDisconnected':
-          _observer
-              .deviceDisconnected(PolarDeviceInfo.fromJson(call.arguments));
+          _observer.deviceDisconnected(
+              PolarDeviceInfo.fromJson(jsonDecode(call.arguments)));
           break;
         case 'streamingFeaturesReady':
           _observer.streamingFeaturesReady(
@@ -64,7 +67,7 @@ class Polar {
         case 'hrNotificationReceived':
           _observer.hrNotificationReceived(
             call.arguments[0],
-            PolarHrData.fromJson(call.arguments[1]),
+            PolarHrData.fromJson(jsonDecode(call.arguments[1])),
           );
           break;
         case 'polarFtpFeatureReady':

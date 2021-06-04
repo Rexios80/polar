@@ -20,6 +20,6 @@ class PolarDeviceInfo {
     address = json['address'];
     rssi = json['rssi'];
     name = json['name'];
-    isConnectable = json['isConnectable'];
+    isConnectable = json['isConnectable'] ?? json['connectable'];
   }
 }

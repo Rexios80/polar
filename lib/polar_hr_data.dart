@@ -6,7 +6,6 @@ class PolarHrData {
   late final List<int> rrsMs;
   late final bool contactStatus;
   late final bool contactStatusSupported;
-  late final bool rrAvailable;
 
   PolarHrData(
     this.hr,
@@ -14,15 +13,13 @@ class PolarHrData {
     this.rrsMs,
     this.contactStatus,
     this.contactStatusSupported,
-    this.rrAvailable,
   );
 
   PolarHrData.fromJson(Map<String, dynamic> json) {
     hr = json['hr'];
-    rrs = json['rrs'];
-    rrsMs = json['rrsMs'];
-    contactStatus = json['contactStatus'];
-    contactStatusSupported = json['contactStatusSupported'];
-    rrAvailable = json['rrAvailable'];
+    rrs = (json['rrs'] as List).map((e) => e as int).toList();
+    rrsMs = (json['rrsMs'] as List).map((e) => e as int).toList();
+    contactStatus = json['contactStatus'] ?? json['contact'];
+    contactStatusSupported = json['contactStatusSupported'] ?? json['contactSupported'];
   }
 }

@@ -29,25 +29,21 @@ class _MyAppState extends State<MyApp> with PolarApiObserver {
       home: Scaffold(
         appBar: AppBar(
           title: const Text('Polar example app'),
+          actions: [
+            IconButton(
+              icon: Icon(Icons.play_arrow),
+              onPressed: () => polar.connectToDevice(deviceId),
+            ),
+            IconButton(
+              icon: Icon(Icons.stop),
+              onPressed: () => polar.disconnectFromDevice(deviceId),
+            ),
+          ],
         ),
-        body: Center(
-          child: Column(
-            children: [
-              TextButton(
-                onPressed: () => polar.connectToDevice(deviceId),
-                child: Text('Connect'),
-              ),
-              TextButton(
-                onPressed: () => polar.disconnectFromDevice(deviceId),
-                child: Text('Disconnect'),
-              ),
-              ListView(
-                padding: EdgeInsets.all(10),
-                shrinkWrap: true,
-                children: logs.reversed.map((e) => Text(e)).toList(),
-              ),
-            ],
-          ),
+        body: ListView(
+          padding: EdgeInsets.all(10),
+          shrinkWrap: true,
+          children: logs.reversed.map((e) => Text(e)).toList(),
         ),
       ),
     );
