@@ -1,6 +1,6 @@
 name: polar
-description: Plugin wrapper for the Polar SDK
-version: 0.1.5
+description: This is a Dart plugin wrapper for the Polar SDK on Android and iOS
+version: 0.1.6
 homepage: https://github.com/Rexios80/polar
 
 environment:

@@ -18,3 +18,6 @@ Removed unnecessary location permission on iOS
 
 ## 0.1.5
 Added bluetooth background mode for iOS
+
+## 0.1.6
+Give me my Pub points
