@@ -46,7 +46,7 @@ Info.plist:
 <string>Used to connect to Polar devices</string>
 ```
 
-### Use it
+## Use it
 
 ```
 class MyClass with PolarApiObserver {
