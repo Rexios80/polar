@@ -11,15 +11,16 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> with PolarApiObserver {
-  int battery = -1;
-  int hr = -1;
+  static const deviceId = '1C709B20';
+
+  late final polar;
+  List<String> logs = ['Service started'];
 
   @override
   void initState() {
     super.initState();
 
-    final polar = Polar(this);
-    polar.connectToDevice('1C709B20');
+    polar = Polar(this);
   }
 
   @override
@@ -32,8 +33,19 @@ class _MyAppState extends State<MyApp> with PolarApiObserver {
         body: Center(
           child: Column(
             children: [
-              Text('Battery: $battery'),
-              Text('Heart rate: $hr'),
+              TextButton(
+                onPressed: () => polar.connectToDevice(deviceId),
+                child: Text('Connect'),
+              ),
+              TextButton(
+                onPressed: () => polar.disconnectFromDevice(deviceId),
+                child: Text('Disconnect'),
+              ),
+              ListView(
+                padding: EdgeInsets.all(10),
+                shrinkWrap: true,
+                children: logs.reversed.map((e) => Text(e)).toList(),
+              ),
             ],
           ),
         ),
@@ -41,59 +53,65 @@ class _MyAppState extends State<MyApp> with PolarApiObserver {
     );
   }
 
+  void log(String log) {
+    setState(() {
+      logs.add(log);
+    });
+  }
+
   @override
   void batteryLevelReceived(String deviceId, int level) {
-    // TODO: implement batteryLevelReceived
+    log('batteryLevelReceived: [$deviceId, $level]');
   }
 
   @override
   void blePowerStateChanged(bool state) {
-    // TODO: implement blePowerStateChanged
+    log('blePowerStateChanged: $state');
   }
 
   @override
   void deviceConnected(PolarDeviceInfo info) {
-    // TODO: implement deviceConnected
+    log('deviceConnected: ${info.deviceId}');
   }
 
   @override
   void deviceConnecting(PolarDeviceInfo info) {
-    // TODO: implement deviceConnecting
+    log('deviceConnecting: ${info.deviceId}');
   }
 
   @override
   void deviceDisconnected(PolarDeviceInfo info) {
-    // TODO: implement deviceDisconnected
+    log('deviceDisconnected: ${info.deviceId}');
   }
 
   @override
   void disInformationReceived(String deviceId, String uuid, String info) {
-    // TODO: implement disInformationReceived
+    log('disInformationReceived: [$deviceId, $uuid, $info]');
   }
 
   @override
   void hrFeatureReady(String deviceId) {
-    // TODO: implement hrFeatureReady
+    log('hrFeatureReady: $deviceId');
   }
 
   @override
   void hrNotificationReceived(String deviceId, PolarHrData data) {
-    // TODO: implement hrNotificationReceived
+    log('hrNotificationReceived: [$deviceId, ${data.hr}]');
   }
 
   @override
   void polarFtpFeatureReady(String deviceId) {
-    // TODO: implement polarFtpFeatureReady
+    log('polarFtpFeatureReady: $deviceId');
   }
 
   @override
   void sdkModeFeatureAvailable(String deviceId) {
-    // TODO: implement sdkModeFeatureAvailable
+    log('sdkModeFeatureAvailable: $deviceId');
   }
 
   @override
   void streamingFeaturesReady(
       String deviceId, List<DeviceStreamingFeature> features) {
-    // TODO: implement streamingFeaturesReady
+    log('streamingFeaturesReady: [$deviceId, $features]');
   }
 }

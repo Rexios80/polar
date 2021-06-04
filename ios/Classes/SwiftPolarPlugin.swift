@@ -43,15 +43,24 @@ public class SwiftPolarPlugin:
     }
     
     public func deviceConnecting(_ polarDeviceInfo: PolarDeviceInfo) {
-        channel.invokeMethod("deviceConnecting", arguments: try? encoder.encode(PolarDeviceInfoCodable(polarDeviceInfo)))
+        guard let data = try? encoder.encode(PolarDeviceInfoCodable(polarDeviceInfo)) else {
+            return
+        }
+        channel.invokeMethod("deviceConnecting", arguments: String(data: data, encoding: .utf8))
     }
     
     public func deviceConnected(_ polarDeviceInfo: PolarDeviceInfo) {
-        channel.invokeMethod("deviceConnected", arguments: try? encoder.encode(PolarDeviceInfoCodable(polarDeviceInfo)))
+        guard let data = try? encoder.encode(PolarDeviceInfoCodable(polarDeviceInfo)) else {
+            return
+        }
+        channel.invokeMethod("deviceConnected", arguments: String(data: data, encoding: .utf8)))
     }
     
     public func deviceDisconnected(_ polarDeviceInfo: PolarDeviceInfo) {
-        channel.invokeMethod("deviceDisconnected", arguments: try? encoder.encode(PolarDeviceInfoCodable(polarDeviceInfo)))
+        guard let data = try? encoder.encode(PolarDeviceInfoCodable(polarDeviceInfo)) else {
+            return
+        }
+        channel.invokeMethod("deviceDisconnected", arguments: String(data: data, encoding: .utf8)))
     }
     
     public func batteryLevelReceived(_ identifier: String, batteryLevel: UInt) {
@@ -59,7 +68,10 @@ public class SwiftPolarPlugin:
     }
     
     public func hrValueReceived(_ identifier: String, data: PolarHrData) {
-        channel.invokeMethod("hrNotificationReceived", arguments: try? encoder.encode(PolarHrDataCodable(data)))
+        guard let data = try? encoder.encode(PolarHrDataCodable(data)) else {
+            return
+        }
+        channel.invokeMethod("hrNotificationReceived", arguments: String(data: data, encoding: .utf8)))
     }
     
     public func hrFeatureReady(_ identifier: String) {

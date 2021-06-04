@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io' show Platform;
+import 'dart:typed_data';
 
+import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -31,10 +33,14 @@ class Polar {
               .deviceDisconnected(PolarDeviceInfo.fromJson(call.arguments));
           break;
         case 'streamingFeaturesReady':
-          // TODO: This definitely doesn't work
           _observer.streamingFeaturesReady(
             call.arguments[0],
-            call.arguments[1],
+            (call.arguments[1] as List<String>)
+                .map((e) =>
+                    EnumToString.fromString(
+                        DeviceStreamingFeature.values, e.toLowerCase()) ??
+                    DeviceStreamingFeature.error)
+                .toList(),
           );
           break;
         case 'sdkModeFeatureAvailable':

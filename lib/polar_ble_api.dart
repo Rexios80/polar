@@ -1,10 +1,11 @@
-part of'polar.dart';
+part of 'polar.dart';
 
 enum DeviceStreamingFeature {
-  ECG,
-  ACC,
-  PPG,
-  PPI,
-  GYRO,
-  MAGNETOMETER,
+  ecg,
+  acc,
+  ppg,
+  ppi,
+  gyro,
+  magnetometer,
+  error,
 }
