@@ -15,3 +15,6 @@ Updated changelog
 
 ## 0.1.4
 Removed unnecessary location permission on iOS
+
+## 0.1.5
+Added bluetooth background mode for iOS
