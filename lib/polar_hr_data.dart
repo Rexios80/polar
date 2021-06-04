@@ -12,6 +12,7 @@ class PolarHrData {
     rrs = (json['rrs'] as List).map((e) => e as int).toList();
     rrsMs = (json['rrsMs'] as List).map((e) => e as int).toList();
     contactStatus = json['contactStatus'] ?? json['contact'];
-    contactStatusSupported = json['contactStatusSupported'] ?? json['contactSupported'];
+    contactStatusSupported =
+        json['contactStatusSupported'] ?? json['contactSupported'];
   }
 }
