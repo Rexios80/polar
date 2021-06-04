@@ -32,7 +32,6 @@ post_install do |installer|
 
       config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= [
         '$(inherited)',
-        'PERMISSION_LOCATION=1',
       ]
     end
   end
