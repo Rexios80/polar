@@ -31,12 +31,12 @@ class _MyAppState extends State<MyApp> with PolarApiObserver {
           title: const Text('Polar example app'),
           actions: [
             IconButton(
-              icon: Icon(Icons.play_arrow),
-              onPressed: () => polar.connectToDevice(deviceId),
-            ),
-            IconButton(
               icon: Icon(Icons.stop),
               onPressed: () => polar.disconnectFromDevice(deviceId),
+            ),
+            IconButton(
+              icon: Icon(Icons.play_arrow),
+              onPressed: () => polar.connectToDevice(deviceId),
             ),
           ],
         ),

@@ -16,6 +16,7 @@ class Polar {
 
   final PolarApiObserver _observer;
 
+  /// Initialize the Polar API
   Polar(this._observer) {
     _channel.setMethodCallHandler((call) {
       switch (call.method) {
@@ -24,15 +25,15 @@ class Polar {
           break;
         case 'deviceConnected':
           _observer.deviceConnected(
-              PolarDeviceInfo.fromJson(jsonDecode(call.arguments)));
+              PolarDeviceInfo._fromJson(jsonDecode(call.arguments)));
           break;
         case 'deviceConnecting':
           _observer.deviceConnecting(
-              PolarDeviceInfo.fromJson(jsonDecode(call.arguments)));
+              PolarDeviceInfo._fromJson(jsonDecode(call.arguments)));
           break;
         case 'deviceDisconnected':
           _observer.deviceDisconnected(
-              PolarDeviceInfo.fromJson(jsonDecode(call.arguments)));
+              PolarDeviceInfo._fromJson(jsonDecode(call.arguments)));
           break;
         case 'streamingFeaturesReady':
           _observer.streamingFeaturesReady(
@@ -67,7 +68,7 @@ class Polar {
         case 'hrNotificationReceived':
           _observer.hrNotificationReceived(
             call.arguments[0],
-            PolarHrData.fromJson(jsonDecode(call.arguments[1])),
+            PolarHrData._fromJson(jsonDecode(call.arguments[1])),
           );
           break;
         case 'polarFtpFeatureReady':

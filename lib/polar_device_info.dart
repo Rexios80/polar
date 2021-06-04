@@ -7,15 +7,7 @@ class PolarDeviceInfo {
   late final String name;
   late final bool isConnectable;
 
-  PolarDeviceInfo(
-    this.deviceId,
-    this.address,
-    this.rssi,
-    this.name,
-    this.isConnectable,
-  );
-
-  PolarDeviceInfo.fromJson(Map<String, dynamic> json) {
+  PolarDeviceInfo._fromJson(Map<String, dynamic> json) {
     deviceId = json['deviceId'];
     address = json['address'];
     rssi = json['rssi'];
