@@ -1,4 +1,4 @@
-part of'polar.dart';
+part of 'polar.dart';
 
 class PolarHrData {
   late final int hr;

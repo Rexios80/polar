@@ -43,24 +43,24 @@ public class SwiftPolarPlugin:
     }
     
     public func deviceConnecting(_ polarDeviceInfo: PolarDeviceInfo) {
-        guard let data = try? encoder.encode(PolarDeviceInfoCodable(polarDeviceInfo)) else {
+        guard let data = try? encoder.encode(PolarDeviceInfoCodable(polarDeviceInfo)), let arguments = String(data: data, encoding: .utf8) else {
             return
         }
-        channel.invokeMethod("deviceConnecting", arguments: String(data: data, encoding: .utf8))
+        channel.invokeMethod("deviceConnecting", arguments: arguments)
     }
     
     public func deviceConnected(_ polarDeviceInfo: PolarDeviceInfo) {
-        guard let data = try? encoder.encode(PolarDeviceInfoCodable(polarDeviceInfo)) else {
+        guard let data = try? encoder.encode(PolarDeviceInfoCodable(polarDeviceInfo)), let arguments = String(data: data, encoding: .utf8) else {
             return
         }
-        channel.invokeMethod("deviceConnected", arguments: String(data: data, encoding: .utf8)))
+        channel.invokeMethod("deviceConnected", arguments: arguments)
     }
     
     public func deviceDisconnected(_ polarDeviceInfo: PolarDeviceInfo) {
-        guard let data = try? encoder.encode(PolarDeviceInfoCodable(polarDeviceInfo)) else {
+        guard let data = try? encoder.encode(PolarDeviceInfoCodable(polarDeviceInfo)), let arguments = String(data: data, encoding: .utf8) else {
             return
         }
-        channel.invokeMethod("deviceDisconnected", arguments: String(data: data, encoding: .utf8)))
+        channel.invokeMethod("deviceDisconnected", arguments: arguments)
     }
     
     public func batteryLevelReceived(_ identifier: String, batteryLevel: UInt) {
@@ -68,10 +68,10 @@ public class SwiftPolarPlugin:
     }
     
     public func hrValueReceived(_ identifier: String, data: PolarHrData) {
-        guard let data = try? encoder.encode(PolarHrDataCodable(data)) else {
+        guard let data = try? encoder.encode(PolarHrDataCodable(data)), let arguments = String(data: data, encoding: .utf8) else {
             return
         }
-        channel.invokeMethod("hrNotificationReceived", arguments: String(data: data, encoding: .utf8)))
+        channel.invokeMethod("hrNotificationReceived", arguments: arguments)
     }
     
     public func hrFeatureReady(_ identifier: String) {

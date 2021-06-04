@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io' show Platform;
-import 'dart:typed_data';
 
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/services.dart';
