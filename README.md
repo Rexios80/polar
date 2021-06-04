@@ -43,6 +43,10 @@ Info.plist:
 ```
 <key>NSBluetoothAlwaysUsageDescription</key>
 <string>Used to connect to Polar devices</string>
+<key>UIBackgroundModes</key>
+<array>
+  <string>bluetooth-central</string>
+</array>
 ```
 
 ## Use it
