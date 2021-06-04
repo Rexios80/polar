@@ -12,3 +12,6 @@ Updated readme
 
 ## 0.1.3
 Updated changelog
+
+## 0.1.4
+Removed unnecessary location permission on iOS
