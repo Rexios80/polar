@@ -13,7 +13,7 @@ public class SwiftPolarPlugin:
 {
     var api = PolarBleApiDefaultImpl.polarImplementation(DispatchQueue.main, features: Features.allFeatures.rawValue)
     let channel: FlutterMethodChannel
-    var deviceId: String?
+    let encoder = JSONEncoder()
     
     init(channel: FlutterMethodChannel) {
         self.channel = channel
@@ -34,40 +34,51 @@ public class SwiftPolarPlugin:
             (call: FlutterMethodCall, _: @escaping FlutterResult) -> Void in
             switch call.method {
             case "connectToDevice":
-                instance.api.connectToDevice(call.arguments as! String)
+                try? instance.api.connectToDevice(call.arguments as! String)
             case "disconnectFromDevice":
-                instance.api.disconnectFromDevice(call.arguments as! String)
+                try? instance.api.disconnectFromDevice(call.arguments as! String)
             default: break
             }
         }
     }
     
-    public func deviceConnecting(_ polarDeviceInfo: PolarDeviceInfo) {}
+    public func deviceConnecting(_ polarDeviceInfo: PolarDeviceInfo) {
+        channel.invokeMethod("deviceConnecting", arguments: try? encoder.encode(PolarDeviceInfoCodable(polarDeviceInfo)))
+    }
     
     public func deviceConnected(_ polarDeviceInfo: PolarDeviceInfo) {
-        channel.invokeMethod("deviceConnected", arguments: )
+        channel.invokeMethod("deviceConnected", arguments: try? encoder.encode(PolarDeviceInfoCodable(polarDeviceInfo)))
     }
     
     public func deviceDisconnected(_ polarDeviceInfo: PolarDeviceInfo) {
-        channel.invokeMethod("connection", arguments: false)
+        channel.invokeMethod("deviceDisconnected", arguments: try? encoder.encode(PolarDeviceInfoCodable(polarDeviceInfo)))
     }
     
     public func batteryLevelReceived(_ identifier: String, batteryLevel: UInt) {
-        channel.invokeMethod("battery", arguments: batteryLevel)
+        channel.invokeMethod("batteryLevelReceived", arguments: [identifier, batteryLevel])
     }
     
     public func hrValueReceived(_ identifier: String, data: PolarHrData) {
-        channel.invokeMethod("hr", arguments: data.hr)
-        channel.invokeMethod("rrs", arguments: data.rrs)
+        channel.invokeMethod("hrNotificationReceived", arguments: try? encoder.encode(PolarHrDataCodable(data)))
     }
     
-    public func hrFeatureReady(_ identifier: String) {}
+    public func hrFeatureReady(_ identifier: String) {
+        channel.invokeMethod("hrFeatureReady", arguments: identifier)
+    }
     
-    public func streamingFeaturesReady(_ identifier: String, streamingFeatures: Set<DeviceStreamingFeature>) {}
+    public func streamingFeaturesReady(_ identifier: String, streamingFeatures: Set<DeviceStreamingFeature>) {
+        channel.invokeMethod("streamingFeaturesReady", arguments: [identifier, streamingFeatures.description])
+    }
     
-    public func blePowerOn() {}
+    public func blePowerOn() {
+        channel.invokeMethod("blePowerStateChanged", arguments: true)
+    }
     
-    public func blePowerOff() {}
+    public func blePowerOff() {
+        channel.invokeMethod("blePowerStateChanged", arguments: false)
+    }
         
-    public func ftpFeatureReady(_ identifier: String) {}
+    public func ftpFeatureReady(_ identifier: String) {
+        channel.invokeMethod("ftpFeatureReady", arguments: identifier)
+    }
 }

@@ -1,5 +1,6 @@
 import UIKit
 import Flutter
+import PolarBleSdk
 
 @UIApplicationMain
 @objc class AppDelegate: FlutterAppDelegate {
