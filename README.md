@@ -49,8 +49,66 @@ Info.plist:
 ### Use it
 
 ```
-final polar = Polar();
-polar.batteryStream.listen((event) => setState(() => battery = event));
-polar.hrStream.listen((event) => setState(() => hr = event));
-polar.start('1C709B20');
+class MyClass with PolarApiObserver {
+  void connect() {
+    final polar = Polar(this);
+    polar.connectToDevice('deviceId');
+  }
+
+  @override
+  void batteryLevelReceived(String deviceId, int level) {
+    // TODO
+  }
+
+  @override
+  void blePowerStateChanged(bool state) {
+    // TODO
+  }
+
+  @override
+  void deviceConnected(PolarDeviceInfo info) {
+    // TODO
+  }
+
+  @override
+  void deviceConnecting(PolarDeviceInfo info) {
+    // TODO
+  }
+
+  @override
+  void deviceDisconnected(PolarDeviceInfo info) {
+    // TODO
+  }
+
+  @override
+  void disInformationReceived(String deviceId, String uuid, String info) {
+    // TODO
+  }
+
+  @override
+  void hrFeatureReady(String deviceId) {
+    // TODO
+  }
+
+  @override
+  void hrNotificationReceived(String deviceId, PolarHrData data) {
+    // TODO
+  }
+
+  @override
+  void polarFtpFeatureReady(String deviceId) {
+    // TODO
+  }
+
+  @override
+  void sdkModeFeatureAvailable(String deviceId) {
+    // TODO
+  }
+
+  @override
+  void streamingFeaturesReady(
+      String deviceId, List<DeviceStreamingFeature> features) {
+    // TODO
+  }
+}
 ```
