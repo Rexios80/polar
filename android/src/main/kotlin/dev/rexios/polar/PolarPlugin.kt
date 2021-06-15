@@ -15,10 +15,7 @@ import io.flutter.plugin.common.MethodChannel.Result
 import polar.com.sdk.api.PolarBleApi
 import polar.com.sdk.api.PolarBleApiCallbackProvider
 import polar.com.sdk.api.PolarBleApiDefaultImpl
-import polar.com.sdk.api.model.PolarDeviceInfo
-import polar.com.sdk.api.model.PolarHrData
-import polar.com.sdk.api.model.PolarOhrPPIData
-import polar.com.sdk.api.model.PolarSensorSetting
+import polar.com.sdk.api.model.*
 import java.util.*
 
 /** PolarPlugin */
@@ -136,7 +133,6 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
     }
 
     private fun startOhrPPIStreaming(identifier: String) {
-        PolarOhrPPIData.PolarOhrPPISample
         api.startOhrPPIStreaming(identifier).subscribe {
             channel.invokeMethod("ohrPPIReceived", gson.toJson(it))
         }

@@ -6,5 +6,14 @@ enum OhrDataType {
 }
 
 extension OhrDataTypeExtension on OhrDataType {
-  // TODO: To/from json with differences between Android/iOS
+  static OhrDataType fromJson(dynamic json) {
+    if (Platform.isIOS) {
+      return OhrDataType.values[json as int];
+    } else {
+      // This is android
+      return EnumToString.fromString(
+              OhrDataType.values, (json as String).toLowerCase()) ??
+          OhrDataType.unknown;
+    }
+  }
 }

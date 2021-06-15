@@ -5,9 +5,10 @@ class PolarSensorSetting {
 
   PolarSensorSetting(this.settings);
 
-  Map<String, dynamic> toJson() => {
-    // TODO
-  };
+  // TODO: This probably breaks the platform code
+  // They are expecting ints, but jsonEncode only supports Map<String, dynamic>
+  Map<String, dynamic> toJson() => Map.fromIterable(settings.entries,
+      key: (e) => e.key.toString(), value: (e) => e.value);
 }
 
 enum SettingType {

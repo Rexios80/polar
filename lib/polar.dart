@@ -20,24 +20,56 @@ class Polar {
 
   final PolarApiObserver _observer;
 
+  final _ecgStreamController = StreamController<PolarEcgData>.broadcast();
+  final _accStreamController = StreamController<PolarAccData>.broadcast();
+  final _gyroStreamController = StreamController<PolarGyroData>.broadcast();
+  final _magnetometerStreamController =
+      StreamController<PolarMagnetometerData>.broadcast();
+  final _ohrStreamController = StreamController<PolarOhrData>.broadcast();
+  final _ohrPPIStreamController = StreamController<PolarPpiData>.broadcast();
+
   /// Initialize the Polar API
   Polar(this._observer) {
     _channel.setMethodCallHandler((call) {
       switch (call.method) {
+        case 'ecgDataReceived':
+          _ecgStreamController
+              .add(PolarEcgData.fromJson(jsonDecode(call.arguments)));
+          break;
+        case 'accDataReceived':
+          _accStreamController
+              .add(PolarAccData.fromJson(jsonDecode(call.arguments)));
+          break;
+        case 'gyroDataReceived':
+          _gyroStreamController
+              .add(PolarGyroData.fromJson(jsonDecode(call.arguments)));
+          break;
+        case 'magnetometerDataReceived':
+          _magnetometerStreamController
+              .add(PolarMagnetometerData.fromJson(jsonDecode(call.arguments)));
+          break;
+        case 'ohrDataReceived':
+          _ohrStreamController
+              .add(PolarOhrData.fromJson(jsonDecode(call.arguments)));
+          break;
+        case 'ohrPPIReceived':
+          _ohrPPIStreamController
+              .add(PolarPpiData.fromJson(jsonDecode(call.arguments)));
+          break;
         case 'blePowerStateChanged':
           _observer.blePowerStateChanged(call.arguments);
           break;
         case 'deviceConnected':
           _observer.deviceConnected(
-              PolarDeviceInfo._fromJson(jsonDecode(call.arguments)));
+              PolarDeviceInfo.fromJson(jsonDecode(call.arguments)));
           break;
         case 'deviceConnecting':
           _observer.deviceConnecting(
-              PolarDeviceInfo._fromJson(jsonDecode(call.arguments)));
+              PolarDeviceInfo.fromJson(jsonDecode(call.arguments)));
           break;
         case 'deviceDisconnected':
           _observer.deviceDisconnected(
-              PolarDeviceInfo._fromJson(jsonDecode(call.arguments)));
+              PolarDeviceInfo.fromJson(jsonDecode(call.arguments)));
           break;
         case 'streamingFeaturesReady':
           _observer.streamingFeaturesReady(
@@ -72,7 +104,7 @@ class Polar {
         case 'hrNotificationReceived':
           _observer.hrNotificationReceived(
             call.arguments[0],
-            PolarHrData._fromJson(jsonDecode(call.arguments[1])),
+            PolarHrData.fromJson(jsonDecode(call.arguments[1])),
           );
           break;
         case 'polarFtpFeatureReady':
@@ -96,5 +128,71 @@ class Polar {
   /// Disconnect from a device with the given [deviceId]
   void disconnectFromDevice(String deviceId) {
     _channel.invokeMethod('disconnectFromDevice', deviceId);
+  }
+
+  Stream<PolarEcgData> startEcgStreaming(
+    String deviceId,
+    PolarSensorSetting settings,
+  ) {
+    _channel.invokeMethod('startEcgStreaming', [
+      deviceId,
+      jsonEncode(settings),
+    ]);
+    return _ecgStreamController.stream;
+  }
+
+  Stream<PolarAccData> startAccStreaming(
+    String deviceId,
+    PolarSensorSetting settings,
+  ) {
+    _channel.invokeMethod('startAccStreaming', [
+      deviceId,
+      jsonEncode(settings),
+    ]);
+    return _accStreamController.stream;
+  }
+
+  Stream<PolarGyroData> startGyroStreaming(
+    String deviceId,
+    PolarSensorSetting settings,
+  ) {
+    _channel.invokeMethod('startGyroStreaming', [
+      deviceId,
+      jsonEncode(settings),
+    ]);
+    return _gyroStreamController.stream;
+  }
+
+  Stream<PolarMagnetometerData> startMagnetometerStreaming(
+    String deviceId,
+    PolarSensorSetting settings,
+  ) {
+    _channel.invokeMethod('startMagnetometerStreaming', [
+      deviceId,
+      jsonEncode(settings),
+    ]);
+    return _magnetometerStreamController.stream;
+  }
+
+  Stream<PolarOhrData> startOhrStreaming(
+    String deviceId,
+    PolarSensorSetting settings,
+  ) {
+    _channel.invokeMethod('startOhrStreaming', [
+      deviceId,
+      jsonEncode(settings),
+    ]);
+    return _ohrStreamController.stream;
+  }
+
+  Stream<PolarPpiData> startOhrPPIStreaming(
+    String deviceId,
+    PolarSensorSetting settings,
+  ) {
+    _channel.invokeMethod('startOhrPPIStreaming', [
+      deviceId,
+      jsonEncode(settings),
+    ]);
+    return _ohrPPIStreamController.stream;
   }
 }

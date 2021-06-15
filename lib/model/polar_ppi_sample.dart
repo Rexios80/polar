@@ -8,7 +8,7 @@ class PolarPpiSample {
   final bool skinContactStatus;
   final bool skinContactSupported;
 
-  PolarPpiSample._fromJson(Map<String, dynamic> json)
+  PolarPpiSample.fromJson(Map<String, dynamic> json)
       : ppi = json['ppi'],
         errorEstimate = json['errorEstimate'],
         hr = json['hr'],

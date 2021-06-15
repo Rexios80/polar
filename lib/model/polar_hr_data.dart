@@ -7,7 +7,7 @@ class PolarHrData {
   final bool contactStatus;
   final bool contactStatusSupported;
 
-  PolarHrData._fromJson(Map<String, dynamic> json)
+  PolarHrData.fromJson(Map<String, dynamic> json)
       : hr = json['hr'],
         rrs = (json['rrs'] as List).map((e) => e as int).toList(),
         rrsMs = (json['rrsMs'] as List).map((e) => e as int).toList(),
