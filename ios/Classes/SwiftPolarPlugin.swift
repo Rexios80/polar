@@ -11,7 +11,7 @@ public class SwiftPolarPlugin:
     PolarBleApiDeviceFeaturesObserver,
     PolarBleApiDeviceHrObserver
 {
-    let api = PolarBleApiDefaultImpl.polarImplementation(DispatchQueue.main, features: Features.allFeatures.rawValue)
+    var api = PolarBleApiDefaultImpl.polarImplementation(DispatchQueue.main, features: Features.allFeatures.rawValue)
     let channel: FlutterMethodChannel
     let encoder = JSONEncoder()
     
@@ -44,31 +44,31 @@ public class SwiftPolarPlugin:
                     let arguments = call.arguments as! [Any]
                     try instance.startEcgStreaming(
                         arguments[0] as! String,
-                        decoder.decode((PolarSensorSettingCodable.self, from: arguments[1] as! String).data(using: .utf8)).polarSensorSetting
+                        decoder.decode(PolarSensorSettingCodable.self, from: (arguments[1] as! String).data(using: .utf8)!).polarSensorSetting
                     )
                 case "startAccStreaming":
                     let arguments = call.arguments as! [Any]
                     try instance.startAccStreaming(
                         arguments[0] as! String,
-                        decoder.decode((PolarSensorSettingCodable.self, from: arguments[1] as! String).data(using: .utf8)).polarSensorSetting
+                        decoder.decode(PolarSensorSettingCodable.self, from: (arguments[1] as! String).data(using: .utf8)!).polarSensorSetting
                     )
                 case "startGyroStreaming":
                     let arguments = call.arguments as! [Any]
                     try instance.startGyroStreaming(
                         arguments[0] as! String,
-                        decoder.decode((PolarSensorSettingCodable.self, from: arguments[1] as! String).data(using: .utf8)).polarSensorSetting
+                        decoder.decode(PolarSensorSettingCodable.self, from: (arguments[1] as! String).data(using: .utf8)!).polarSensorSetting
                     )
                 case "startMagnetometerStreaming":
                     let arguments = call.arguments as! [Any]
                     try instance.startMagnetometerStreaming(
                         arguments[0] as! String,
-                        decoder.decode((PolarSensorSettingCodable.self, from: arguments[1] as! String).data(using: .utf8)).polarSensorSetting
+                        decoder.decode(PolarSensorSettingCodable.self, from: (arguments[1] as! String).data(using: .utf8)!).polarSensorSetting
                     )
                 case "startOhrStreaming":
                     let arguments = call.arguments as! [Any]
                     try instance.startOhrStreaming(
                         arguments[0] as! String,
-                        decoder.decode((PolarSensorSettingCodable.self, from: arguments[1] as! String).data(using: .utf8)).polarSensorSetting
+                        decoder.decode(PolarSensorSettingCodable.self, from: (arguments[1] as! String).data(using: .utf8)!).polarSensorSetting
                     )
                 case "startOhrPPIStreaming":
                     try instance.startOhrPPIStreaming(call.arguments as! String)
