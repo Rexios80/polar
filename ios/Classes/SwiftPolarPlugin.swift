@@ -14,7 +14,6 @@ public class SwiftPolarPlugin:
     let api = PolarBleApiDefaultImpl.polarImplementation(DispatchQueue.main, features: Features.allFeatures.rawValue)
     let channel: FlutterMethodChannel
     let encoder = JSONEncoder()
-    let decoder = JSONDecoder()
     
     init(channel: FlutterMethodChannel) {
         self.channel = channel
@@ -31,6 +30,8 @@ public class SwiftPolarPlugin:
         let instance = SwiftPolarPlugin(channel: FlutterMethodChannel(name: "polar", binaryMessenger: registrar.messenger()))
         registrar.addMethodCallDelegate(instance, channel: instance.channel)
 
+        let decoder = JSONDecoder()
+        
         instance.channel.setMethodCallHandler {
             (call: FlutterMethodCall, _: @escaping FlutterResult) -> Void in
             do {
@@ -40,40 +41,102 @@ public class SwiftPolarPlugin:
                 case "disconnectFromDevice":
                     try instance.api.disconnectFromDevice(call.arguments as! String)
                 case "startEcgStreaming":
-                    try instance.api.startEcgStreaming(
-                        call.arguments[0] as! String,
-                        decoder.decode(PolarEcgData.Type, from: call.arguments[1] as! String)
+                    let arguments = call.arguments as! [Any]
+                    try instance.startEcgStreaming(
+                        arguments[0] as! String,
+                        decoder.decode((PolarSensorSettingCodable.self, from: arguments[1] as! String).data(using: .utf8)).polarSensorSetting
                     )
                 case "startAccStreaming":
-                    try instance.api.startAccStreaming(
-                        call.arguments[0] as! String,
-                        decoder.decode(PolarAccData.Type, from: call.arguments[1] as! String)
+                    let arguments = call.arguments as! [Any]
+                    try instance.startAccStreaming(
+                        arguments[0] as! String,
+                        decoder.decode((PolarSensorSettingCodable.self, from: arguments[1] as! String).data(using: .utf8)).polarSensorSetting
                     )
                 case "startGyroStreaming":
-                    try instance.api.startGyroStreaming(
-                        call.arguments[0] as! String,
-                        decoder.decode(PolarGyroData.Type, from: call.arguments[1] as! String)
+                    let arguments = call.arguments as! [Any]
+                    try instance.startGyroStreaming(
+                        arguments[0] as! String,
+                        decoder.decode((PolarSensorSettingCodable.self, from: arguments[1] as! String).data(using: .utf8)).polarSensorSetting
                     )
                 case "startMagnetometerStreaming":
-                    try instance.api.startMagnetometerStreaming(
-                        call.arguments[0] as! String,
-                        decoder.decode(PolarMagnetometerData.Type, from: call.arguments[1] as! String)
+                    let arguments = call.arguments as! [Any]
+                    try instance.startMagnetometerStreaming(
+                        arguments[0] as! String,
+                        decoder.decode((PolarSensorSettingCodable.self, from: arguments[1] as! String).data(using: .utf8)).polarSensorSetting
                     )
                 case "startOhrStreaming":
-                    try instance.api.startOhrStreaming(
-                        call.arguments[0] as! String,
-                        decoder.decode(PolarOhrData.Type, from: call.arguments[1] as! String)
+                    let arguments = call.arguments as! [Any]
+                    try instance.startOhrStreaming(
+                        arguments[0] as! String,
+                        decoder.decode((PolarSensorSettingCodable.self, from: arguments[1] as! String).data(using: .utf8)).polarSensorSetting
                     )
                 case "startOhrPPIStreaming":
-                    try instance.api.startOhrPPIStreaming(
-                        call.arguments[0] as! String
-                        decoder.decode(PolarPpiData.Type, from: call.arguments[1] as! String)
-                    )
+                    try instance.startOhrPPIStreaming(call.arguments as! String)
                 default: break
                 }
             } catch {
                 print(error.localizedDescription)
             }
+        }
+    }
+    
+    func startEcgStreaming(_ identifier: String, _ settings: PolarSensorSetting) throws {
+        let _ = api.startEcgStreaming(identifier, settings: settings).subscribe { event in
+            guard let polarEcgData = event.element,
+                  let data = try? self.encoder.encode(PolarEcgDataCodable(polarEcgData)),
+                  let arguments = String(data: data, encoding: .utf8)
+            else { return }
+            self.channel.invokeMethod("ecgDataReceived", arguments: arguments)
+        }
+    }
+    
+    func startAccStreaming(_ identifier: String, _ settings: PolarSensorSetting) throws {
+        let _ = api.startAccStreaming(identifier, settings: settings).subscribe { event in
+            guard let polarEcgData = event.element,
+                  let data = try? self.encoder.encode(PolarAccDataCodable(polarEcgData)),
+                  let arguments = String(data: data, encoding: .utf8)
+            else { return }
+            self.channel.invokeMethod("accDataReceived", arguments: arguments)
+        }
+    }
+    
+    func startGyroStreaming(_ identifier: String, _ settings: PolarSensorSetting) throws {
+        let _ = api.startGyroStreaming(identifier, settings: settings).subscribe { event in
+            guard let polarGyroData = event.element,
+                  let data = try? self.encoder.encode(PolarGyroDataCodable(polarGyroData)),
+                  let arguments = String(data: data, encoding: .utf8)
+            else { return }
+            self.channel.invokeMethod("gyroDataReceived", arguments: arguments)
+        }
+    }
+    
+    func startMagnetometerStreaming(_ identifier: String, _ settings: PolarSensorSetting) throws {
+        let _ = api.startMagnetometerStreaming(identifier, settings: settings).subscribe { event in
+            guard let polarMagnetometerData = event.element,
+                  let data = try? self.encoder.encode(PolarMagnetometerDataCodable(polarMagnetometerData)),
+                  let arguments = String(data: data, encoding: .utf8)
+            else { return }
+            self.channel.invokeMethod("magnetometerDataReceived", arguments: arguments)
+        }
+    }
+    
+    func startOhrStreaming(_ identifier: String, _ settings: PolarSensorSetting) throws {
+        let _ = api.startOhrStreaming(identifier, settings: settings).subscribe { event in
+            guard let polarOhrData = event.element,
+                  let data = try? self.encoder.encode(PolarOhrDataCodable(polarOhrData)),
+                  let arguments = String(data: data, encoding: .utf8)
+            else { return }
+            self.channel.invokeMethod("ohrDataReceived", arguments: arguments)
+        }
+    }
+    
+    func startOhrPPIStreaming(_ identifier: String) throws {
+        let _ = api.startOhrPPIStreaming(identifier).subscribe { event in
+            guard let polarPpiData = event.element,
+                  let data = try? self.encoder.encode(PolarPpiDataCodable(polarPpiData)),
+                  let arguments = String(data: data, encoding: .utf8)
+            else { return }
+            self.channel.invokeMethod("ohrPPIReceived", arguments: arguments)
         }
     }
     

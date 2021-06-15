@@ -7,9 +7,9 @@ import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 part 'polar_api_observer.dart';
-part 'polar_ble_api.dart';
-part 'polar_device_info.dart';
-part 'polar_hr_data.dart';
+part 'model/device_streaming_feature.dart';
+part 'model/polar_device_info.dart';
+part 'model/polar_hr_data.dart';
 
 class Polar {
   static const MethodChannel _channel = const MethodChannel('polar');

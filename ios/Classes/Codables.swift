@@ -58,3 +58,187 @@ class PolarHrDataCodable: Encodable {
     }
 }
 
+class PolarEcgDataCodable: Encodable {
+    let polarEcgData: PolarEcgData
+    
+    init(_ polarEcgData: PolarEcgData) {
+        self.polarEcgData = polarEcgData
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case timeStamp
+        case samples
+    }
+    
+    func encode(to encoder: Encoder) {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try? container.encode(polarEcgData.timeStamp, forKey: .timeStamp)
+        try? container.encode(polarEcgData.samples, forKey: .samples)
+    }
+}
+
+class PolarAccDataCodable: Encodable {
+    let polarAccData: PolarAccData
+    
+    init(_ polarAccData: PolarAccData) {
+        self.polarAccData = polarAccData
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case timeStamp
+        case samples
+    }
+    
+    func encode(to encoder: Encoder) {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try? container.encode(polarAccData.timeStamp, forKey: .timeStamp)
+        try? container.encode(polarAccData.samples.map { [$0.x, $0.y, $0.z] }, forKey: .samples)
+    }
+}
+
+class PolarExerciseDataCodable: Encodable {
+    let polarExerciseData: PolarExerciseData
+    
+    init(_ polarExerciseData: PolarExerciseData) {
+        self.polarExerciseData = polarExerciseData
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case interval
+        case samples
+    }
+    
+    func encode(to encoder: Encoder) {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try? container.encode(polarExerciseData.interval, forKey: .interval)
+        try? container.encode(polarExerciseData.samples, forKey: .samples)
+    }
+}
+
+// class PolarExerciseEntryCodable TODO
+
+class PolarGyroDataCodable: Encodable {
+    let polarGyroData: PolarGyroData
+    
+    init(_ polarGyroData: PolarGyroData) {
+        self.polarGyroData = polarGyroData
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case timeStamp
+        case samples
+    }
+    
+    func encode(to encoder: Encoder) {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try? container.encode(polarGyroData.timeStamp, forKey: .timeStamp)
+        try? container.encode(polarGyroData.samples.map { [$0.x, $0.y, $0.z] }, forKey: .samples)
+    }
+}
+
+// class PolarHrBroadcastDataCodable TODO
+
+class PolarMagnetometerDataCodable: Encodable {
+    let polarMagnetometerData: PolarMagnetometerData
+    
+    init(_ polarMagnetometerData: PolarMagnetometerData) {
+        self.polarMagnetometerData = polarMagnetometerData
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case timeStamp
+        case samples
+    }
+    
+    func encode(to encoder: Encoder) {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try? container.encode(polarMagnetometerData.timeStamp, forKey: .timeStamp)
+        try? container.encode(polarMagnetometerData.samples.map { [$0.x, $0.y, $0.z] }, forKey: .samples)
+    }
+}
+
+class PolarOhrDataCodable: Encodable {
+    let polarOhrData: PolarOhrData
+    
+    init(_ polarOhrData: PolarOhrData) {
+        self.polarOhrData = polarOhrData
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case timeStamp
+        case type
+        case samples
+    }
+    
+    func encode(to encoder: Encoder) {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try? container.encode(polarOhrData.timeStamp, forKey: .timeStamp)
+        try? container.encode(polarOhrData.type.rawValue, forKey: .type)
+        try? container.encode(polarOhrData.samples, forKey: .samples)
+    }
+}
+
+class PolarPpiDataCodable: Encodable {
+    let polarPpiData: PolarPpiData
+    
+    init(_ polarPpiData: PolarPpiData) {
+        self.polarPpiData = polarPpiData
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case timeStamp
+        case samples
+    }
+    
+    func encode(to encoder: Encoder) {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try? container.encode(polarPpiData.timeStamp, forKey: .timeStamp)
+        try? container.encode(polarPpiData.samples.map {
+            [
+                $0.hr,
+                Int($0.ppInMs),
+                Int($0.ppErrorEstimate),
+                $0.blockerBit,
+                $0.skinContactStatus,
+                $0.skinContactSupported
+            ]
+        }, forKey: .samples)
+    }
+}
+
+class PolarSensorSettingCodable: Codable {
+    let polarSensorSetting: PolarSensorSetting
+    
+    init(_ polarSensorSetting: PolarSensorSetting) {
+        self.polarSensorSetting = polarSensorSetting
+    }
+    
+    required init(from decoder: Decoder) {
+        let container = try? decoder.container(keyedBy: CodingKeys.self)
+        
+        let dict: [Int: UInt32] = (try? container?.decode([Int: UInt32].self, forKey: .settings)) ?? [:]
+        let newDict = Dictionary(
+            uniqueKeysWithValues:
+            dict.map { key, value in
+                (PolarSensorSetting.SettingType(rawValue: key) ?? PolarSensorSetting.SettingType.unknown, value)
+            }
+        )
+        
+        polarSensorSetting = PolarSensorSetting(newDict)
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case settings
+    }
+    
+    func encode(to encoder: Encoder) {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        let newDict = Dictionary(
+            uniqueKeysWithValues:
+            polarSensorSetting.settings.map { key, value in (key.rawValue, value) }
+        )
+        
+        try? container.encode(newDict, forKey: .settings)
+    }
+}

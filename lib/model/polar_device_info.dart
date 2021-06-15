@@ -1,4 +1,4 @@
-part of 'polar.dart';
+part of '../polar.dart';
 
 class PolarDeviceInfo {
   late final String deviceId;

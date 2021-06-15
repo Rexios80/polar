@@ -1,4 +1,4 @@
-part of 'polar.dart';
+part of '../polar.dart';
 
 /// Polar streaming features
 enum DeviceStreamingFeature {
