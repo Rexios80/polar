@@ -10,6 +10,10 @@ part 'polar_api_observer.dart';
 part 'model/device_streaming_feature.dart';
 part 'model/polar_device_info.dart';
 part 'model/polar_hr_data.dart';
+part 'model/polar_streaming.dart';
+part 'model/ohr_data_type.dart';
+part 'model/polar_ppi_sample.dart';
+part 'model/polar_sensor_setting.dart';
 
 class Polar {
   static const MethodChannel _channel = const MethodChannel('polar');

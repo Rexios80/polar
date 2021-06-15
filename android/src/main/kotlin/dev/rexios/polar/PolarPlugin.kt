@@ -17,6 +17,7 @@ import polar.com.sdk.api.PolarBleApiCallbackProvider
 import polar.com.sdk.api.PolarBleApiDefaultImpl
 import polar.com.sdk.api.model.PolarDeviceInfo
 import polar.com.sdk.api.model.PolarHrData
+import polar.com.sdk.api.model.PolarOhrPPIData
 import polar.com.sdk.api.model.PolarSensorSetting
 import java.util.*
 
@@ -104,37 +105,38 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
 
     override fun onDetachedFromActivity() {}
 
-    fun startEcgStreaming(identifier: String, settings: PolarSensorSetting) {
+    private fun startEcgStreaming(identifier: String, settings: PolarSensorSetting) {
         api.startEcgStreaming(identifier, settings).subscribe {
             channel.invokeMethod("ecgDataReceived", gson.toJson(it))
         }
     }
 
-    fun startAccStreaming(identifier: String, settings: PolarSensorSetting) {
+    private fun startAccStreaming(identifier: String, settings: PolarSensorSetting) {
         api.startAccStreaming(identifier, settings).subscribe {
             channel.invokeMethod("accDataReceived", gson.toJson(it))
         }
     }
 
-    fun startGyroStreaming(identifier: String, settings: PolarSensorSetting) {
+    private fun startGyroStreaming(identifier: String, settings: PolarSensorSetting) {
         api.startGyroStreaming(identifier, settings).subscribe {
             channel.invokeMethod("gyroDataReceived", gson.toJson(it))
         }
     }
 
-    fun startMagnetometerStreaming(identifier: String, settings: PolarSensorSetting) {
+    private fun startMagnetometerStreaming(identifier: String, settings: PolarSensorSetting) {
         api.startMagnetometerStreaming(identifier, settings).subscribe {
             channel.invokeMethod("magnetometerDataReceived", gson.toJson(it))
         }
     }
 
-    fun startOhrStreaming(identifier: String, settings: PolarSensorSetting) {
+    private fun startOhrStreaming(identifier: String, settings: PolarSensorSetting) {
         api.startOhrStreaming(identifier, settings).subscribe {
             channel.invokeMethod("ohrDataReceived", gson.toJson(it))
         }
     }
 
-    fun startOhrPPIStreaming(identifier: String) {
+    private fun startOhrPPIStreaming(identifier: String) {
+        PolarOhrPPIData.PolarOhrPPISample
         api.startOhrPPIStreaming(identifier).subscribe {
             channel.invokeMethod("ohrPPIReceived", gson.toJson(it))
         }

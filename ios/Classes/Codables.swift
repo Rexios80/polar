@@ -195,12 +195,12 @@ class PolarPpiDataCodable: Encodable {
         try? container.encode(polarPpiData.timeStamp, forKey: .timeStamp)
         try? container.encode(polarPpiData.samples.map {
             [
-                $0.hr,
-                Int($0.ppInMs),
-                Int($0.ppErrorEstimate),
-                $0.blockerBit,
-                $0.skinContactStatus,
-                $0.skinContactSupported
+                "hr": $0.hr,
+                "ppInMs": Int($0.ppInMs),
+                "errorEstimate": Int($0.ppErrorEstimate),
+                "blockerBit": $0.blockerBit,
+                "skinContactStatus": $0.skinContactStatus,
+                "skinContactSupported": $0.skinContactSupported
             ]
         }, forKey: .samples)
     }

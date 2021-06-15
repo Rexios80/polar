@@ -1,18 +1,17 @@
 part of '../polar.dart';
 
 class PolarHrData {
-  late final int hr;
-  late final List<int> rrs;
-  late final List<int> rrsMs;
-  late final bool contactStatus;
-  late final bool contactStatusSupported;
+  final int hr;
+  final List<int> rrs;
+  final List<int> rrsMs;
+  final bool contactStatus;
+  final bool contactStatusSupported;
 
-  PolarHrData._fromJson(Map<String, dynamic> json) {
-    hr = json['hr'];
-    rrs = (json['rrs'] as List).map((e) => e as int).toList();
-    rrsMs = (json['rrsMs'] as List).map((e) => e as int).toList();
-    contactStatus = json['contactStatus'] ?? json['contact'];
-    contactStatusSupported =
-        json['contactStatusSupported'] ?? json['contactSupported'];
-  }
+  PolarHrData._fromJson(Map<String, dynamic> json)
+      : hr = json['hr'],
+        rrs = (json['rrs'] as List).map((e) => e as int).toList(),
+        rrsMs = (json['rrsMs'] as List).map((e) => e as int).toList(),
+        contactStatus = json['contactStatus'] ?? json['contact'],
+        contactStatusSupported =
+            json['contactStatusSupported'] ?? json['contactSupported'];
 }
