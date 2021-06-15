@@ -57,3 +57,4 @@ class PolarHrDataCodable: Encodable {
         try? container.encode(polarHrData.contactSupported, forKey: .contactSupported)
     }
 }
+

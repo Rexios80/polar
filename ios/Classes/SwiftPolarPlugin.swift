@@ -11,9 +11,10 @@ public class SwiftPolarPlugin:
     PolarBleApiDeviceFeaturesObserver,
     PolarBleApiDeviceHrObserver
 {
-    var api = PolarBleApiDefaultImpl.polarImplementation(DispatchQueue.main, features: Features.allFeatures.rawValue)
+    let api = PolarBleApiDefaultImpl.polarImplementation(DispatchQueue.main, features: Features.allFeatures.rawValue)
     let channel: FlutterMethodChannel
     let encoder = JSONEncoder()
+    let decoder = JSONDecoder()
     
     init(channel: FlutterMethodChannel) {
         self.channel = channel
@@ -32,12 +33,46 @@ public class SwiftPolarPlugin:
 
         instance.channel.setMethodCallHandler {
             (call: FlutterMethodCall, _: @escaping FlutterResult) -> Void in
-            switch call.method {
-            case "connectToDevice":
-                try? instance.api.connectToDevice(call.arguments as! String)
-            case "disconnectFromDevice":
-                try? instance.api.disconnectFromDevice(call.arguments as! String)
-            default: break
+            do {
+                switch call.method {
+                case "connectToDevice":
+                    try instance.api.connectToDevice(call.arguments as! String)
+                case "disconnectFromDevice":
+                    try instance.api.disconnectFromDevice(call.arguments as! String)
+                case "startEcgStreaming":
+                    try instance.api.startEcgStreaming(
+                        call.arguments[0] as! String,
+                        decoder.decode(PolarEcgData.Type, from: call.arguments[1] as! String)
+                    )
+                case "startAccStreaming":
+                    try instance.api.startAccStreaming(
+                        call.arguments[0] as! String,
+                        decoder.decode(PolarAccData.Type, from: call.arguments[1] as! String)
+                    )
+                case "startGyroStreaming":
+                    try instance.api.startGyroStreaming(
+                        call.arguments[0] as! String,
+                        decoder.decode(PolarGyroData.Type, from: call.arguments[1] as! String)
+                    )
+                case "startMagnetometerStreaming":
+                    try instance.api.startMagnetometerStreaming(
+                        call.arguments[0] as! String,
+                        decoder.decode(PolarMagnetometerData.Type, from: call.arguments[1] as! String)
+                    )
+                case "startOhrStreaming":
+                    try instance.api.startOhrStreaming(
+                        call.arguments[0] as! String,
+                        decoder.decode(PolarOhrData.Type, from: call.arguments[1] as! String)
+                    )
+                case "startOhrPPIStreaming":
+                    try instance.api.startOhrPPIStreaming(
+                        call.arguments[0] as! String
+                        decoder.decode(PolarPpiData.Type, from: call.arguments[1] as! String)
+                    )
+                default: break
+                }
+            } catch {
+                print(error.localizedDescription)
             }
         }
     }
