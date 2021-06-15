@@ -1,6 +1,5 @@
 package dev.rexios.polar
 
-import android.content.Context
 import androidx.annotation.NonNull
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Lifecycle.Event
@@ -18,6 +17,7 @@ import polar.com.sdk.api.PolarBleApiCallbackProvider
 import polar.com.sdk.api.PolarBleApiDefaultImpl
 import polar.com.sdk.api.model.PolarDeviceInfo
 import polar.com.sdk.api.model.PolarHrData
+import polar.com.sdk.api.model.PolarSensorSetting
 import java.util.*
 
 /** PolarPlugin */
@@ -31,7 +31,10 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "polar")
         channel.setMethodCallHandler(this)
 
-        api = PolarBleApiDefaultImpl.defaultImplementation(flutterPluginBinding.applicationContext, PolarBleApi.ALL_FEATURES)
+        api = PolarBleApiDefaultImpl.defaultImplementation(
+            flutterPluginBinding.applicationContext,
+            PolarBleApi.ALL_FEATURES
+        )
         api.setApiCallback(this)
     }
 
@@ -39,6 +42,42 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
         when (call.method) {
             "connectToDevice" -> api.connectToDevice(call.arguments as String)
             "disconnectFromDevice" -> api.disconnectFromDevice(call.arguments as String)
+            "startEcgStreaming" -> {
+                val arguments = call.arguments as List<*>
+                startEcgStreaming(
+                    arguments[0] as String,
+                    gson.fromJson(arguments[1] as String, PolarSensorSetting::class.java)
+                )
+            }
+            "startAccStreaming" -> {
+                val arguments = call.arguments as List<*>
+                startAccStreaming(
+                    arguments[0] as String,
+                    gson.fromJson(arguments[1] as String, PolarSensorSetting::class.java)
+                )
+            }
+            "startGyroStreaming" -> {
+                val arguments = call.arguments as List<*>
+                startGyroStreaming(
+                    arguments[0] as String,
+                    gson.fromJson(arguments[1] as String, PolarSensorSetting::class.java)
+                )
+            }
+            "startMagnetometerStreaming" -> {
+                val arguments = call.arguments as List<*>
+                startMagnetometerStreaming(
+                    arguments[0] as String,
+                    gson.fromJson(arguments[1] as String, PolarSensorSetting::class.java)
+                )
+            }
+            "startOhrStreaming" -> {
+                val arguments = call.arguments as List<*>
+                startOhrStreaming(
+                    arguments[0] as String,
+                    gson.fromJson(arguments[1] as String, PolarSensorSetting::class.java)
+                )
+            }
+            "startOhrPPIStreaming" -> startOhrPPIStreaming(call.arguments as String)
             else -> result.notImplemented()
         }
     }
@@ -64,6 +103,42 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
     override fun onReattachedToActivityForConfigChanges(p0: ActivityPluginBinding) {}
 
     override fun onDetachedFromActivity() {}
+
+    fun startEcgStreaming(identifier: String, settings: PolarSensorSetting) {
+        api.startEcgStreaming(identifier, settings).subscribe {
+            channel.invokeMethod("ecgDataReceived", gson.toJson(it))
+        }
+    }
+
+    fun startAccStreaming(identifier: String, settings: PolarSensorSetting) {
+        api.startAccStreaming(identifier, settings).subscribe {
+            channel.invokeMethod("accDataReceived", gson.toJson(it))
+        }
+    }
+
+    fun startGyroStreaming(identifier: String, settings: PolarSensorSetting) {
+        api.startGyroStreaming(identifier, settings).subscribe {
+            channel.invokeMethod("gyroDataReceived", gson.toJson(it))
+        }
+    }
+
+    fun startMagnetometerStreaming(identifier: String, settings: PolarSensorSetting) {
+        api.startMagnetometerStreaming(identifier, settings).subscribe {
+            channel.invokeMethod("magnetometerDataReceived", gson.toJson(it))
+        }
+    }
+
+    fun startOhrStreaming(identifier: String, settings: PolarSensorSetting) {
+        api.startOhrStreaming(identifier, settings).subscribe {
+            channel.invokeMethod("ohrDataReceived", gson.toJson(it))
+        }
+    }
+
+    fun startOhrPPIStreaming(identifier: String) {
+        api.startOhrPPIStreaming(identifier).subscribe {
+            channel.invokeMethod("ohrPPIReceived", gson.toJson(it))
+        }
+    }
 
     override fun blePowerStateChanged(p0: Boolean) {
         channel.invokeMethod("blePowerStateChanged", p0)
