@@ -68,17 +68,17 @@ class _MyAppState extends State<MyApp> with PolarApiObserver {
 
   @override
   void deviceConnected(PolarDeviceInfo info) {
-    log('deviceConnected: ${info.identifier}');
+    log('deviceConnected: ${info.deviceId}');
   }
 
   @override
   void deviceConnecting(PolarDeviceInfo info) {
-    log('deviceConnecting: ${info.identifier}');
+    log('deviceConnecting: ${info.deviceId}');
   }
 
   @override
   void deviceDisconnected(PolarDeviceInfo info) {
-    log('deviceDisconnected: ${info.identifier}');
+    log('deviceDisconnected: ${info.deviceId}');
   }
 
   @override
