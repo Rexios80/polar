@@ -41,7 +41,7 @@ extension DeviceStreamingFeatureExtension on DeviceStreamingFeature {
       return DeviceStreamingFeature.values.indexOf(this);
     } else {
       // This is Android
-      return EnumToString.convertToString(this).toScreamingSnakeCase();
+      return ReCase(EnumToString.convertToString(this)).snakeCase.toUpperCase();
     }
   }
 }

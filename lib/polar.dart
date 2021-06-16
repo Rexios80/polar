@@ -6,7 +6,6 @@ import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:recase/recase.dart';
-import 'util/snake_case.dart';
 
 part 'polar_api_observer.dart';
 part 'model/device_streaming_feature.dart';

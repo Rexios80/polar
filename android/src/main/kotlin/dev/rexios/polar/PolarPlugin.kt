@@ -21,6 +21,7 @@ import polar.com.sdk.api.PolarBleApiCallbackProvider
 import polar.com.sdk.api.PolarBleApiDefaultImpl
 import polar.com.sdk.api.model.PolarDeviceInfo
 import polar.com.sdk.api.model.PolarHrData
+import polar.com.sdk.api.model.PolarOhrData
 import polar.com.sdk.api.model.PolarSensorSetting
 import java.util.*
 
@@ -168,6 +169,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
     }
 
     private fun startOhrStreaming(identifier: String, settings: PolarSensorSetting) {
+        PolarOhrData
         api.startOhrStreaming(identifier, settings).subscribe({
             invokeOnUiThread("ohrDataReceived", gson.toJson(it))
         }, { Log.e(tag, it.localizedMessage ?: "Unknown ohrStreaming error") })
