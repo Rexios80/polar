@@ -108,13 +108,16 @@ class _MyAppState extends State<MyApp> with PolarApiObserver {
 
   @override
   void streamingFeaturesReady(
-      String identifier, List<DeviceStreamingFeature> features) {
+      String identifier, List<DeviceStreamingFeature> features) async {
     log('streamingFeaturesReady: [$identifier, $features]');
     if (features.contains(DeviceStreamingFeature.ecg)) {
+      final settings = await polar.requestStreamSettings(
+          identifier, DeviceStreamingFeature.ecg);
+      if (settings == null) return;
       polar
           .startEcgStreaming(
             identifier,
-            PolarSensorSetting({}),
+            settings,
           )
           .listen((e) => log(e.samples.toString()));
     }

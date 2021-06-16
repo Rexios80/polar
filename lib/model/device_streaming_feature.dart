@@ -30,9 +30,18 @@ extension DeviceStreamingFeatureExtension on DeviceStreamingFeature {
       return DeviceStreamingFeature.values[json as int];
     } else {
       // This is android
-      return EnumToString.fromString(
-              DeviceStreamingFeature.values, ReCase(json as String).camelCase) ??
+      return EnumToString.fromString(DeviceStreamingFeature.values,
+              ReCase(json as String).camelCase) ??
           DeviceStreamingFeature.error;
+    }
+  }
+
+  dynamic toJson() {
+    if (Platform.isIOS) {
+      return DeviceStreamingFeature.values.indexOf(this);
+    } else {
+      // This is Android
+      return EnumToString.convertToString(this).toScreamingSnakeCase();
     }
   }
 }
