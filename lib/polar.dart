@@ -75,11 +75,8 @@ class Polar {
         case 'streamingFeaturesReady':
           _observer.streamingFeaturesReady(
             call.arguments[0],
-            (call.arguments[1] as List<String>)
-                .map((e) =>
-                    EnumToString.fromString(
-                        DeviceStreamingFeature.values, e.toLowerCase()) ??
-                    DeviceStreamingFeature.error)
+            (jsonDecode(call.arguments[1]) as List)
+                .map((e) => DeviceStreamingFeatureExtension.fromJson(e))
                 .toList(),
           );
           break;
