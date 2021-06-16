@@ -113,13 +113,64 @@ class _MyAppState extends State<MyApp> with PolarApiObserver {
     if (features.contains(DeviceStreamingFeature.ecg)) {
       final settings = await polar.requestStreamSettings(
           identifier, DeviceStreamingFeature.ecg);
-      if (settings == null) return;
       polar
           .startEcgStreaming(
             identifier,
             settings,
           )
-          .listen((e) => log(e.samples.toString()));
+          .listen((e) => log('ECG data: ${e.samples}'));
+    }
+    if (features.contains(DeviceStreamingFeature.acc)) {
+      final settings = await polar.requestStreamSettings(
+          identifier, DeviceStreamingFeature.acc);
+      polar
+          .startAccStreaming(
+        identifier,
+        settings,
+      )
+          .listen((e) {
+        log('ACC data: ${e.samples}');
+      });
+    }
+    if (features.contains(DeviceStreamingFeature.gyro)) {
+      final settings = await polar.requestStreamSettings(
+          identifier, DeviceStreamingFeature.gyro);
+      polar
+          .startGyroStreaming(
+            identifier,
+            settings,
+          )
+          .listen((e) => log('Gyro data: ${e.samples}'));
+    }
+    if (features.contains(DeviceStreamingFeature.magnetometer)) {
+      final settings = await polar.requestStreamSettings(
+          identifier, DeviceStreamingFeature.acc);
+      polar
+          .startMagnetometerStreaming(
+            identifier,
+            settings,
+          )
+          .listen((e) => log('Magnetometer data: ${e.samples}'));
+    }
+    if (features.contains(DeviceStreamingFeature.ppg)) {
+      final settings = await polar.requestStreamSettings(
+          identifier, DeviceStreamingFeature.ppg);
+      polar
+          .startOhrStreaming(
+            identifier,
+            settings,
+          )
+          .listen((e) => log('PPG data: ${e.samples}'));
+    }
+    if (features.contains(DeviceStreamingFeature.ppi)) {
+      final settings = await polar.requestStreamSettings(
+          identifier, DeviceStreamingFeature.ppi);
+      polar
+          .startOhrPPIStreaming(
+            identifier,
+            settings,
+          )
+          .listen((e) => log('PPI data: ${e.samples}'));
     }
   }
 }

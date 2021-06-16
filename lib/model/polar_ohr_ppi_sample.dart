@@ -1,6 +1,6 @@
 part of '../polar.dart';
 
-class PolarPpiSample {
+class PolarOhrPpiSample {
   final int ppi;
   final int errorEstimate;
   final int hr;
@@ -8,7 +8,7 @@ class PolarPpiSample {
   final bool skinContactStatus;
   final bool skinContactSupported;
 
-  PolarPpiSample.fromJson(Map<String, dynamic> json)
+  PolarOhrPpiSample.fromJson(Map<String, dynamic> json)
       : ppi = json['ppi'],
         errorEstimate = json['errorEstimate'],
         hr = json['hr'],

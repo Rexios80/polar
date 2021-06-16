@@ -5,6 +5,7 @@ import 'dart:io' show Platform;
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:polar/model/xyz.dart';
 import 'package:recase/recase.dart';
 
 part 'polar_api_observer.dart';
@@ -13,7 +14,7 @@ part 'model/polar_device_info.dart';
 part 'model/polar_hr_data.dart';
 part 'model/polar_streaming.dart';
 part 'model/ohr_data_type.dart';
-part 'model/polar_ppi_sample.dart';
+part 'model/polar_ohr_ppi_sample.dart';
 part 'model/polar_sensor_setting.dart';
 
 class Polar {
@@ -128,7 +129,7 @@ class Polar {
     _channel.invokeMethod('disconnectFromDevice', identifier);
   }
 
-  Future<PolarSensorSetting?> requestStreamSettings(
+  Future<PolarSensorSetting> requestStreamSettings(
     String identifier,
     DeviceStreamingFeature feature,
   ) async {
@@ -136,12 +137,8 @@ class Polar {
       'requestStreamSettings',
       [identifier, feature.toJson()],
     );
-    try {
-      final json = jsonDecode(response);
-      return PolarSensorSetting.fromJson(json);
-    } catch (error) {
-      print(error);
-    }
+    final json = jsonDecode(response);
+    return PolarSensorSetting.fromJson(json);
   }
 
   // TODO: Make settings optional?

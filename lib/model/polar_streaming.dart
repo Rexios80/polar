@@ -11,13 +11,12 @@ class PolarEcgData {
 
 class PolarAccData {
   final int timeStamp;
-  final List<List<int>> samples;
+  final List<Xyz> samples;
 
   PolarAccData.fromJson(Map<String, dynamic> json)
       : timeStamp = json['timeStamp'],
-        samples = (json['samples'] as List)
-            .map((e) => (e as List).map((e) => e as int).toList())
-            .toList();
+        samples =
+            (json['samples'] as List).map((e) => Xyz.fromJson(e)).toList();
 }
 
 class PolarExerciseData {
@@ -31,24 +30,22 @@ class PolarExerciseData {
 
 class PolarGyroData {
   final int timeStamp;
-  final List<List<double>> samples;
+  final List<Xyz> samples;
 
   PolarGyroData.fromJson(Map<String, dynamic> json)
       : timeStamp = json['timeStamp'],
-        samples = (json['samples'] as List)
-            .map((e) => (e as List).map((e) => e as double).toList())
-            .toList();
+        samples =
+            (json['samples'] as List).map((e) => Xyz.fromJson(e)).toList();
 }
 
 class PolarMagnetometerData {
   final int timeStamp;
-  final List<List<double>> samples;
+  final List<Xyz> samples;
 
   PolarMagnetometerData.fromJson(Map<String, dynamic> json)
       : timeStamp = json['timeStamp'],
-        samples = (json['samples'] as List)
-            .map((e) => (e as List).map((e) => e as double).toList())
-            .toList();
+        samples =
+            (json['samples'] as List).map((e) => Xyz.fromJson(e)).toList();
 }
 
 class PolarOhrData {
@@ -59,18 +56,23 @@ class PolarOhrData {
   PolarOhrData.fromJson(Map<String, dynamic> json)
       : timeStamp = json['timeStamp'],
         type = OhrDataTypeExtension.fromJson(json['type']),
-        samples = (json['samples'] as List)
-            .map((e) => (e as List).map((e) => e as int).toList())
-            .toList();
+        samples = Platform.isIOS
+            ? (json['samples'] as List)
+                .map((e) => (e as List).map((e) => e as int).toList())
+                .toList()
+            : (json['samples'] as List)
+                .map((e) =>
+                    (e['channelSamples'] as List).map((e) => e as int).toList())
+                .toList();
 }
 
 class PolarPpiData {
   final int timeStamp;
-  final List<PolarPpiSample> samples;
+  final List<PolarOhrPpiSample> samples;
 
   PolarPpiData.fromJson(Map<String, dynamic> json)
       : timeStamp = json['timeStamp'],
         samples = (json['samples'] as List)
-            .map((e) => PolarPpiSample.fromJson(e))
+            .map((e) => PolarOhrPpiSample.fromJson(e))
             .toList();
 }

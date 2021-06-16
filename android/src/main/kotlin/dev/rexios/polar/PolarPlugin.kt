@@ -21,7 +21,6 @@ import polar.com.sdk.api.PolarBleApiCallbackProvider
 import polar.com.sdk.api.PolarBleApiDefaultImpl
 import polar.com.sdk.api.model.PolarDeviceInfo
 import polar.com.sdk.api.model.PolarHrData
-import polar.com.sdk.api.model.PolarOhrData
 import polar.com.sdk.api.model.PolarSensorSetting
 import java.util.*
 

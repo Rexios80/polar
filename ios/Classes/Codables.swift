@@ -92,7 +92,13 @@ class PolarAccDataCodable: Encodable {
     func encode(to encoder: Encoder) {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try? container.encode(polarAccData.timeStamp, forKey: .timeStamp)
-        try? container.encode(polarAccData.samples.map { [$0.x, $0.y, $0.z] }, forKey: .samples)
+        try? container.encode(polarAccData.samples.map {
+            [
+                "x": $0.x,
+                "y": $0.y,
+                "z": $0.z
+            ]
+        }, forKey: .samples)
     }
 }
 
@@ -132,7 +138,13 @@ class PolarGyroDataCodable: Encodable {
     func encode(to encoder: Encoder) {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try? container.encode(polarGyroData.timeStamp, forKey: .timeStamp)
-        try? container.encode(polarGyroData.samples.map { [$0.x, $0.y, $0.z] }, forKey: .samples)
+        try? container.encode(polarGyroData.samples.map {
+            [
+                "x": $0.x,
+                "y": $0.y,
+                "z": $0.z
+            ]
+        }, forKey: .samples)
     }
 }
 
@@ -153,7 +165,13 @@ class PolarMagnetometerDataCodable: Encodable {
     func encode(to encoder: Encoder) {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try? container.encode(polarMagnetometerData.timeStamp, forKey: .timeStamp)
-        try? container.encode(polarMagnetometerData.samples.map { [$0.x, $0.y, $0.z] }, forKey: .samples)
+        try? container.encode(polarMagnetometerData.samples.map {
+            [
+                "x": $0.x,
+                "y": $0.y,
+                "z": $0.z
+            ]
+        }, forKey: .samples)
     }
 }
 
