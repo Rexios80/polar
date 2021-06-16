@@ -21,12 +21,6 @@ class _MyAppState extends State<MyApp> with PolarApiObserver {
     super.initState();
 
     polar = Polar(this);
-    polar
-        .startEcgStreaming(
-          deviceId,
-          PolarSensorSetting({}),
-        )
-        .listen((e) => log(e.samples.toString()));
   }
 
   @override
@@ -116,5 +110,13 @@ class _MyAppState extends State<MyApp> with PolarApiObserver {
   void streamingFeaturesReady(
       String deviceId, List<DeviceStreamingFeature> features) {
     log('streamingFeaturesReady: [$deviceId, $features]');
+    if (features.contains(DeviceStreamingFeature.ecg)) {
+      polar
+        .startEcgStreaming(
+          deviceId,
+          PolarSensorSetting({}),
+        )
+        .listen((e) => log(e.samples.toString()));
+    }
   }
 }

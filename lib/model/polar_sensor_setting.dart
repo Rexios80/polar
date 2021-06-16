@@ -5,8 +5,6 @@ class PolarSensorSetting {
 
   PolarSensorSetting(this.settings);
 
-  // TODO: This probably breaks the platform code
-  // iOS is expecting ints, but jsonEncode only supports Map<String, dynamic>
   Map<String, dynamic> toJson() {
     if (Platform.isIOS) {
       return Map.fromIterable(settings.entries,
