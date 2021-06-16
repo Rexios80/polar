@@ -169,7 +169,6 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
     }
 
     private fun startOhrStreaming(identifier: String, settings: PolarSensorSetting) {
-        PolarOhrData
         api.startOhrStreaming(identifier, settings).subscribe({
             invokeOnUiThread("ohrDataReceived", gson.toJson(it))
         }, { Log.e(tag, it.localizedMessage ?: "Unknown ohrStreaming error") })
