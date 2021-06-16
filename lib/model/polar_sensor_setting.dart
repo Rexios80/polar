@@ -6,9 +6,17 @@ class PolarSensorSetting {
   PolarSensorSetting(this.settings);
 
   // TODO: This probably breaks the platform code
-  // They are expecting ints, but jsonEncode only supports Map<String, dynamic>
-  Map<String, dynamic> toJson() => Map.fromIterable(settings.entries,
-      key: (e) => e.key.toString(), value: (e) => e.value);
+  // iOS is expecting ints, but jsonEncode only supports Map<String, dynamic>
+  Map<String, dynamic> toJson() {
+    if (Platform.isIOS) {
+      return Map.fromIterable(settings.entries,
+          key: (e) => SettingType.values.indexOf(e.key).toString(), value: (e) => e.value);
+    } else {
+      // This is Android
+      return Map.fromIterable(settings.entries,
+          key: (e) => e.key.toString().toScreamingSnakeCase(), value: (e) => e.value);
+    }
+  }
 }
 
 enum SettingType {

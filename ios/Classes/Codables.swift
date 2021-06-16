@@ -216,11 +216,12 @@ class PolarSensorSettingCodable: Codable {
     required init(from decoder: Decoder) {
         let container = try? decoder.container(keyedBy: CodingKeys.self)
         
-        let dict: [Int: UInt32] = (try? container?.decode([Int: UInt32].self, forKey: .settings)) ?? [:]
+        // Flutter can only send [String: UInt32]
+        let dict: [String: UInt32] = (try? container?.decode([String: UInt32].self, forKey: .settings)) ?? [:]
         let newDict = Dictionary(
             uniqueKeysWithValues:
             dict.map { key, value in
-                (PolarSensorSetting.SettingType(rawValue: key) ?? PolarSensorSetting.SettingType.unknown, value)
+                (PolarSensorSetting.SettingType(rawValue: Int(key) ?? -1) ?? PolarSensorSetting.SettingType.unknown, value)
             }
         )
         

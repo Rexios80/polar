@@ -29,8 +29,6 @@ class PolarExerciseData {
         samples = (json['samples'] as List).map((e) => e as int).toList();
 }
 
-// class PolarExerciseEntryCodable TODO
-
 class PolarGyroData {
   final int timeStamp;
   final List<List<double>> samples;
@@ -41,8 +39,6 @@ class PolarGyroData {
             .map((e) => (e as List).map((e) => e as double).toList())
             .toList();
 }
-
-// class PolarHrBroadcastDataCodable TODO
 
 class PolarMagnetometerData {
   final int timeStamp;
