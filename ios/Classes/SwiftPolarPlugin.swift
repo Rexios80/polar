@@ -81,63 +81,57 @@ public class SwiftPolarPlugin:
     }
     
     func startEcgStreaming(_ identifier: String, _ settings: PolarSensorSetting) throws {
-        let _ = api.startEcgStreaming(identifier, settings: settings).subscribe { event in
-            guard let polarEcgData = event.element,
-                  let data = try? self.encoder.encode(PolarEcgDataCodable(polarEcgData)),
+        _ = api.startEcgStreaming(identifier, settings: settings).subscribe(onNext: { data in
+            guard let data = try? self.encoder.encode(PolarEcgDataCodable(data)),
                   let arguments = String(data: data, encoding: .utf8)
             else { return }
             self.channel.invokeMethod("ecgDataReceived", arguments: arguments)
-        }
+        }, onError: { print($0.localizedDescription) })
     }
     
     func startAccStreaming(_ identifier: String, _ settings: PolarSensorSetting) throws {
-        let _ = api.startAccStreaming(identifier, settings: settings).subscribe { event in
-            guard let polarEcgData = event.element,
-                  let data = try? self.encoder.encode(PolarAccDataCodable(polarEcgData)),
+        _ = api.startAccStreaming(identifier, settings: settings).subscribe(onNext: { data in
+            guard let data = try? self.encoder.encode(PolarAccDataCodable(data)),
                   let arguments = String(data: data, encoding: .utf8)
             else { return }
             self.channel.invokeMethod("accDataReceived", arguments: arguments)
-        }
+        }, onError: { print($0.localizedDescription) })
     }
     
     func startGyroStreaming(_ identifier: String, _ settings: PolarSensorSetting) throws {
-        let _ = api.startGyroStreaming(identifier, settings: settings).subscribe { event in
-            guard let polarGyroData = event.element,
-                  let data = try? self.encoder.encode(PolarGyroDataCodable(polarGyroData)),
+        _ = api.startGyroStreaming(identifier, settings: settings).subscribe(onNext: { data in
+            guard let data = try? self.encoder.encode(PolarGyroDataCodable(data)),
                   let arguments = String(data: data, encoding: .utf8)
             else { return }
             self.channel.invokeMethod("gyroDataReceived", arguments: arguments)
-        }
+        }, onError: { print($0.localizedDescription) })
     }
     
     func startMagnetometerStreaming(_ identifier: String, _ settings: PolarSensorSetting) throws {
-        let _ = api.startMagnetometerStreaming(identifier, settings: settings).subscribe { event in
-            guard let polarMagnetometerData = event.element,
-                  let data = try? self.encoder.encode(PolarMagnetometerDataCodable(polarMagnetometerData)),
+        _ = api.startMagnetometerStreaming(identifier, settings: settings).subscribe(onNext:  { data in
+            guard let data = try? self.encoder.encode(PolarMagnetometerDataCodable(data)),
                   let arguments = String(data: data, encoding: .utf8)
             else { return }
             self.channel.invokeMethod("magnetometerDataReceived", arguments: arguments)
-        }
+        }, onError: { print($0.localizedDescription) })
     }
     
     func startOhrStreaming(_ identifier: String, _ settings: PolarSensorSetting) throws {
-        let _ = api.startOhrStreaming(identifier, settings: settings).subscribe { event in
-            guard let polarOhrData = event.element,
-                  let data = try? self.encoder.encode(PolarOhrDataCodable(polarOhrData)),
+        _ = api.startOhrStreaming(identifier, settings: settings).subscribe(onNext: { data in
+            guard let data = try? self.encoder.encode(PolarOhrDataCodable(data)),
                   let arguments = String(data: data, encoding: .utf8)
             else { return }
             self.channel.invokeMethod("ohrDataReceived", arguments: arguments)
-        }
+        }, onError: { print($0.localizedDescription) })
     }
     
     func startOhrPPIStreaming(_ identifier: String) throws {
-        let _ = api.startOhrPPIStreaming(identifier).subscribe { event in
-            guard let polarPpiData = event.element,
-                  let data = try? self.encoder.encode(PolarPpiDataCodable(polarPpiData)),
+        _ = api.startOhrPPIStreaming(identifier).subscribe(onNext: { data in
+            guard let data = try? self.encoder.encode(PolarPpiDataCodable(data)),
                   let arguments = String(data: data, encoding: .utf8)
             else { return }
             self.channel.invokeMethod("ohrPPIReceived", arguments: arguments)
-        }
+        }, onError: { print($0.localizedDescription) })
     }
     
     public func deviceConnecting(_ polarDeviceInfo: PolarDeviceInfo) {

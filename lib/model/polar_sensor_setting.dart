@@ -1,7 +1,7 @@
 part of '../polar.dart';
 
 class PolarSensorSetting {
-  final Map<SettingType, int> settings;
+  final Map<PolarSettingType, int> settings;
 
   PolarSensorSetting(this.settings);
 
@@ -10,7 +10,7 @@ class PolarSensorSetting {
   Map<String, dynamic> toJson() {
     if (Platform.isIOS) {
       return Map.fromIterable(settings.entries,
-          key: (e) => SettingType.values.indexOf(e.key).toString(), value: (e) => e.value);
+          key: (e) => PolarSettingType.values.indexOf(e.key).toString(), value: (e) => e.value);
     } else {
       // This is Android
       return Map.fromIterable(settings.entries,
@@ -19,7 +19,7 @@ class PolarSensorSetting {
   }
 }
 
-enum SettingType {
+enum PolarSettingType {
   /// sample rate in hz
   sampleRate,
 

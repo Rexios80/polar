@@ -13,7 +13,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> with PolarApiObserver {
   static const deviceId = '1C709B20';
 
-  late final polar;
+  late final Polar polar;
   List<String> logs = ['Service started'];
 
   @override
@@ -21,6 +21,12 @@ class _MyAppState extends State<MyApp> with PolarApiObserver {
     super.initState();
 
     polar = Polar(this);
+    polar
+        .startEcgStreaming(
+          deviceId,
+          PolarSensorSetting({}),
+        )
+        .listen((e) => log(e.samples.toString()));
   }
 
   @override
@@ -50,6 +56,7 @@ class _MyAppState extends State<MyApp> with PolarApiObserver {
   }
 
   void log(String log) {
+    print(log);
     setState(() {
       logs.add(log);
     });

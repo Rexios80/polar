@@ -131,6 +131,7 @@ class Polar {
     _channel.invokeMethod('disconnectFromDevice', deviceId);
   }
 
+  // TODO: Make settings optional?
   Stream<PolarEcgData> startEcgStreaming(
     String deviceId,
     PolarSensorSetting settings,
