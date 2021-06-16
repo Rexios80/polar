@@ -13,6 +13,7 @@ dependencies:
   
   permission_handler: ^8.0.0+2
   enum_to_string: ^2.0.1
+  recase: ^4.0.0
 
 dev_dependencies:
   flutter_test:

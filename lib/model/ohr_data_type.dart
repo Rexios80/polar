@@ -12,7 +12,7 @@ extension OhrDataTypeExtension on OhrDataType {
     } else {
       // This is android
       return EnumToString.fromString(
-              OhrDataType.values, (json as String).toLowerCase()) ??
+              OhrDataType.values, ReCase(json as String).camelCase) ??
           OhrDataType.unknown;
     }
   }

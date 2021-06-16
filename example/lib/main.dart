@@ -11,7 +11,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> with PolarApiObserver {
-  static const deviceId = '1C709B20';
+  static const identifier = '1C709B20';
 
   late final Polar polar;
   List<String> logs = ['Service started'];
@@ -32,11 +32,11 @@ class _MyAppState extends State<MyApp> with PolarApiObserver {
           actions: [
             IconButton(
               icon: Icon(Icons.stop),
-              onPressed: () => polar.disconnectFromDevice(deviceId),
+              onPressed: () => polar.disconnectFromDevice(identifier),
             ),
             IconButton(
               icon: Icon(Icons.play_arrow),
-              onPressed: () => polar.connectToDevice(deviceId),
+              onPressed: () => polar.connectToDevice(identifier),
             ),
           ],
         ),
@@ -57,8 +57,8 @@ class _MyAppState extends State<MyApp> with PolarApiObserver {
   }
 
   @override
-  void batteryLevelReceived(String deviceId, int level) {
-    log('batteryLevelReceived: [$deviceId, $level]');
+  void batteryLevelReceived(String identifier, int level) {
+    log('batteryLevelReceived: [$identifier, $level]');
   }
 
   @override
@@ -68,55 +68,55 @@ class _MyAppState extends State<MyApp> with PolarApiObserver {
 
   @override
   void deviceConnected(PolarDeviceInfo info) {
-    log('deviceConnected: ${info.deviceId}');
+    log('deviceConnected: ${info.identifier}');
   }
 
   @override
   void deviceConnecting(PolarDeviceInfo info) {
-    log('deviceConnecting: ${info.deviceId}');
+    log('deviceConnecting: ${info.identifier}');
   }
 
   @override
   void deviceDisconnected(PolarDeviceInfo info) {
-    log('deviceDisconnected: ${info.deviceId}');
+    log('deviceDisconnected: ${info.identifier}');
   }
 
   @override
-  void disInformationReceived(String deviceId, String uuid, String info) {
-    log('disInformationReceived: [$deviceId, $uuid, $info]');
+  void disInformationReceived(String identifier, String uuid, String info) {
+    log('disInformationReceived: [$identifier, $uuid, $info]');
   }
 
   @override
-  void hrFeatureReady(String deviceId) {
-    log('hrFeatureReady: $deviceId');
+  void hrFeatureReady(String identifier) {
+    log('hrFeatureReady: $identifier');
   }
 
   @override
-  void hrNotificationReceived(String deviceId, PolarHrData data) {
-    log('hrNotificationReceived: [$deviceId, ${data.hr}]');
+  void hrNotificationReceived(String identifier, PolarHrData data) {
+    log('hrNotificationReceived: [$identifier, ${data.hr}]');
   }
 
   @override
-  void polarFtpFeatureReady(String deviceId) {
-    log('polarFtpFeatureReady: $deviceId');
+  void polarFtpFeatureReady(String identifier) {
+    log('polarFtpFeatureReady: $identifier');
   }
 
   @override
-  void sdkModeFeatureAvailable(String deviceId) {
-    log('sdkModeFeatureAvailable: $deviceId');
+  void sdkModeFeatureAvailable(String identifier) {
+    log('sdkModeFeatureAvailable: $identifier');
   }
 
   @override
   void streamingFeaturesReady(
-      String deviceId, List<DeviceStreamingFeature> features) {
-    log('streamingFeaturesReady: [$deviceId, $features]');
+      String identifier, List<DeviceStreamingFeature> features) {
+    log('streamingFeaturesReady: [$identifier, $features]');
     if (features.contains(DeviceStreamingFeature.ecg)) {
       polar
-        .startEcgStreaming(
-          deviceId,
-          PolarSensorSetting({}),
-        )
-        .listen((e) => log(e.samples.toString()));
+          .startEcgStreaming(
+            identifier,
+            PolarSensorSetting({}),
+          )
+          .listen((e) => log(e.samples.toString()));
     }
   }
 }

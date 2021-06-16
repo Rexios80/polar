@@ -123,6 +123,13 @@ packages:
       relative: true
     source: path
     version: "0.1.6"
+  recase:
+    dependency: transitive
+    description:
+      name: recase
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "4.0.0"
   sky_engine:
     dependency: transitive
     description: flutter

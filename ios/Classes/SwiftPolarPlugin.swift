@@ -33,7 +33,7 @@ public class SwiftPolarPlugin:
         let decoder = JSONDecoder()
         
         instance.channel.setMethodCallHandler {
-            (call: FlutterMethodCall, _: @escaping FlutterResult) -> Void in
+            (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
             do {
                 switch call.method {
                 case "connectToDevice":
@@ -44,7 +44,8 @@ public class SwiftPolarPlugin:
                     let arguments = call.arguments as! [Any]
                     try instance.requestStreamSettings(
                         arguments[0] as! String,
-                        DeviceStreamingFeature(rawValue: arguments[1] as! Int)!
+                        DeviceStreamingFeature(rawValue: arguments[1] as! Int)!,
+                        result
                     )
                 case "startEcgStreaming":
                     let arguments = call.arguments as! [Any]
@@ -92,16 +93,17 @@ public class SwiftPolarPlugin:
                 }
             } catch {
                 NSLog(error.localizedDescription)
+                result(error)
             }
         }
     }
     
-    func requestStreamSettings(_ identifier: String, _ feature: DeviceStreamingFeature) throws {
+    func requestStreamSettings(_ identifier: String, _ feature: DeviceStreamingFeature, _ result: @escaping FlutterResult) throws {
         _ = api.requestStreamSettings(identifier, feature: feature).subscribe(onSuccess: { data in
             guard let data = try? self.encoder.encode(PolarSensorSettingCodable(data)),
                   let arguments = String(data: data, encoding: .utf8)
             else { return }
-            self.channel.invokeMethod("sensorSettingReceived", arguments: arguments)
+            result(arguments)
         }, onFailure: { NSLog($0.localizedDescription) })
     }
     

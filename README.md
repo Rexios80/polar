@@ -57,11 +57,11 @@ Info.plist:
 class MyClass with PolarApiObserver {
   void connect() {
     final polar = Polar(this);
-    polar.connectToDevice('deviceId');
+    polar.connectToDevice('identifier');
   }
 
   @override
-  void batteryLevelReceived(String deviceId, int level) {
+  void batteryLevelReceived(String identifier, int level) {
     // TODO
   }
 
@@ -86,33 +86,33 @@ class MyClass with PolarApiObserver {
   }
 
   @override
-  void disInformationReceived(String deviceId, String uuid, String info) {
+  void disInformationReceived(String identifier, String uuid, String info) {
     // TODO
   }
 
   @override
-  void hrFeatureReady(String deviceId) {
+  void hrFeatureReady(String identifier) {
     // TODO
   }
 
   @override
-  void hrNotificationReceived(String deviceId, PolarHrData data) {
+  void hrNotificationReceived(String identifier, PolarHrData data) {
     // TODO
   }
 
   @override
-  void polarFtpFeatureReady(String deviceId) {
+  void polarFtpFeatureReady(String identifier) {
     // TODO
   }
 
   @override
-  void sdkModeFeatureAvailable(String deviceId) {
+  void sdkModeFeatureAvailable(String identifier) {
     // TODO
   }
 
   @override
   void streamingFeaturesReady(
-      String deviceId, List<DeviceStreamingFeature> features) {
+      String identifier, List<DeviceStreamingFeature> features) {
     // TODO
   }
 }

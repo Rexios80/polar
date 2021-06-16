@@ -5,6 +5,7 @@ import 'dart:io' show Platform;
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:recase/recase.dart';
 import 'util/snake_case.dart';
 
 part 'polar_api_observer.dart';
@@ -114,82 +115,95 @@ class Polar {
     });
   }
 
-  /// Connect to a device with the given [deviceId]
-  void connectToDevice(String deviceId) async {
+  /// Connect to a device with the given [identifier]
+  void connectToDevice(String identifier) async {
     if (Platform.isAndroid) {
       await Permission.location.request();
     }
 
-    _channel.invokeMethod('connectToDevice', deviceId);
+    _channel.invokeMethod('connectToDevice', identifier);
   }
 
-  /// Disconnect from a device with the given [deviceId]
-  void disconnectFromDevice(String deviceId) {
-    _channel.invokeMethod('disconnectFromDevice', deviceId);
+  /// Disconnect from a device with the given [identifier]
+  void disconnectFromDevice(String identifier) {
+    _channel.invokeMethod('disconnectFromDevice', identifier);
+  }
+
+  Future<PolarSensorSetting?> requestStreamSettings(
+    String identifier,
+    DeviceStreamingFeature feature,
+  ) async {
+    final response = await _channel.invokeMethod('requestStreamSettings');
+    try {
+      final json = jsonDecode(response);
+      return PolarSensorSetting.fromJson(json);
+    } catch (error) {
+      print(error);
+    }
   }
 
   // TODO: Make settings optional?
   Stream<PolarEcgData> startEcgStreaming(
-    String deviceId,
+    String identifier,
     PolarSensorSetting settings,
   ) {
     _channel.invokeMethod('startEcgStreaming', [
-      deviceId,
+      identifier,
       jsonEncode(settings),
     ]);
     return _ecgStreamController.stream;
   }
 
   Stream<PolarAccData> startAccStreaming(
-    String deviceId,
+    String identifier,
     PolarSensorSetting settings,
   ) {
     _channel.invokeMethod('startAccStreaming', [
-      deviceId,
+      identifier,
       jsonEncode(settings),
     ]);
     return _accStreamController.stream;
   }
 
   Stream<PolarGyroData> startGyroStreaming(
-    String deviceId,
+    String identifier,
     PolarSensorSetting settings,
   ) {
     _channel.invokeMethod('startGyroStreaming', [
-      deviceId,
+      identifier,
       jsonEncode(settings),
     ]);
     return _gyroStreamController.stream;
   }
 
   Stream<PolarMagnetometerData> startMagnetometerStreaming(
-    String deviceId,
+    String identifier,
     PolarSensorSetting settings,
   ) {
     _channel.invokeMethod('startMagnetometerStreaming', [
-      deviceId,
+      identifier,
       jsonEncode(settings),
     ]);
     return _magnetometerStreamController.stream;
   }
 
   Stream<PolarOhrData> startOhrStreaming(
-    String deviceId,
+    String identifier,
     PolarSensorSetting settings,
   ) {
     _channel.invokeMethod('startOhrStreaming', [
-      deviceId,
+      identifier,
       jsonEncode(settings),
     ]);
     return _ohrStreamController.stream;
   }
 
   Stream<PolarPpiData> startOhrPPIStreaming(
-    String deviceId,
+    String identifier,
     PolarSensorSetting settings,
   ) {
     _channel.invokeMethod('startOhrPPIStreaming', [
-      deviceId,
+      identifier,
       jsonEncode(settings),
     ]);
     return _ohrPPIStreamController.stream;

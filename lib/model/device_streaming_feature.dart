@@ -31,7 +31,7 @@ extension DeviceStreamingFeatureExtension on DeviceStreamingFeature {
     } else {
       // This is android
       return EnumToString.fromString(
-              DeviceStreamingFeature.values, (json as String).toLowerCase()) ??
+              DeviceStreamingFeature.values, ReCase(json as String).camelCase) ??
           DeviceStreamingFeature.error;
     }
   }
