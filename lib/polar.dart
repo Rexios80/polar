@@ -133,7 +133,10 @@ class Polar {
     String identifier,
     DeviceStreamingFeature feature,
   ) async {
-    final response = await _channel.invokeMethod('requestStreamSettings', [identifier, feature.toJson()],);
+    final response = await _channel.invokeMethod(
+      'requestStreamSettings',
+      [identifier, feature.toJson()],
+    );
     try {
       final json = jsonDecode(response);
       return PolarSensorSetting.fromJson(json);

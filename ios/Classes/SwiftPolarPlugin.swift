@@ -104,7 +104,7 @@ public class SwiftPolarPlugin:
                   let arguments = String(data: data, encoding: .utf8)
             else { return }
             result(arguments)
-        }, onFailure: { NSLog($0.localizedDescription) })
+        }, onFailure: { result($0) })
     }
     
     func startEcgStreaming(_ identifier: String, _ settings: PolarSensorSetting) throws {
