@@ -127,14 +127,20 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
         }
     }
 
+    private fun runOnUiThread(runnable: () -> Unit) {
+        Handler(Looper.getMainLooper()).post { runnable() }
+    }
+
     private fun requestStreamSettings(
         identifier: String,
         feature: DeviceStreamingFeature,
         result: Result
     ) {
         api.requestStreamSettings(identifier, feature).subscribe({
-            result.success(it)
-        }, { result.error(it.localizedMessage, null, null) })
+            runOnUiThread { result.success(gson.toJson(it)) }
+        }, {
+            runOnUiThread { result.error(it.localizedMessage, null, null) }
+        })
     }
 
     private fun startEcgStreaming(identifier: String, settings: PolarSensorSetting) {
