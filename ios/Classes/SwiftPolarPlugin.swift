@@ -40,35 +40,51 @@ public class SwiftPolarPlugin:
                     try instance.api.connectToDevice(call.arguments as! String)
                 case "disconnectFromDevice":
                     try instance.api.disconnectFromDevice(call.arguments as! String)
+                case "requestStreamSettings":
+                    let arguments = call.arguments as! [Any]
+                    try instance.requestStreamSettings(
+                        arguments[0] as! String,
+                        DeviceStreamingFeature(rawValue: arguments[1] as! Int)!
+                    )
                 case "startEcgStreaming":
                     let arguments = call.arguments as! [Any]
                     try instance.startEcgStreaming(
                         arguments[0] as! String,
-                        decoder.decode(PolarSensorSettingCodable.self, from: (arguments[1] as! String).data(using: .utf8)!).polarSensorSetting
+                        decoder.decode(PolarSensorSettingCodable.self, from: (arguments[1] as! String)
+                            .data(using: .utf8)!)
+                            .polarSensorSetting
                     )
                 case "startAccStreaming":
                     let arguments = call.arguments as! [Any]
                     try instance.startAccStreaming(
                         arguments[0] as! String,
-                        decoder.decode(PolarSensorSettingCodable.self, from: (arguments[1] as! String).data(using: .utf8)!).polarSensorSetting
+                        decoder.decode(PolarSensorSettingCodable.self, from: (arguments[1] as! String)
+                            .data(using: .utf8)!)
+                            .polarSensorSetting
                     )
                 case "startGyroStreaming":
                     let arguments = call.arguments as! [Any]
                     try instance.startGyroStreaming(
                         arguments[0] as! String,
-                        decoder.decode(PolarSensorSettingCodable.self, from: (arguments[1] as! String).data(using: .utf8)!).polarSensorSetting
+                        decoder.decode(PolarSensorSettingCodable.self, from: (arguments[1] as! String)
+                            .data(using: .utf8)!)
+                            .polarSensorSetting
                     )
                 case "startMagnetometerStreaming":
                     let arguments = call.arguments as! [Any]
                     try instance.startMagnetometerStreaming(
                         arguments[0] as! String,
-                        decoder.decode(PolarSensorSettingCodable.self, from: (arguments[1] as! String).data(using: .utf8)!).polarSensorSetting
+                        decoder.decode(PolarSensorSettingCodable.self, from: (arguments[1] as! String)
+                            .data(using: .utf8)!)
+                            .polarSensorSetting
                     )
                 case "startOhrStreaming":
                     let arguments = call.arguments as! [Any]
                     try instance.startOhrStreaming(
                         arguments[0] as! String,
-                        decoder.decode(PolarSensorSettingCodable.self, from: (arguments[1] as! String).data(using: .utf8)!).polarSensorSetting
+                        decoder.decode(PolarSensorSettingCodable.self, from: (arguments[1] as! String)
+                            .data(using: .utf8)!)
+                            .polarSensorSetting
                     )
                 case "startOhrPPIStreaming":
                     try instance.startOhrPPIStreaming(call.arguments as! String)
@@ -78,6 +94,15 @@ public class SwiftPolarPlugin:
                 NSLog(error.localizedDescription)
             }
         }
+    }
+    
+    func requestStreamSettings(_ identifier: String, _ feature: DeviceStreamingFeature) throws {
+        _ = api.requestStreamSettings(identifier, feature: feature).subscribe(onSuccess: { data in
+            guard let data = try? self.encoder.encode(PolarSensorSettingCodable(data)),
+                  let arguments = String(data: data, encoding: .utf8)
+            else { return }
+            self.channel.invokeMethod("sensorSettingReceived", arguments: arguments)
+        }, onFailure: { NSLog($0.localizedDescription) })
     }
     
     func startEcgStreaming(_ identifier: String, _ settings: PolarSensorSetting) throws {
@@ -135,21 +160,27 @@ public class SwiftPolarPlugin:
     }
     
     public func deviceConnecting(_ polarDeviceInfo: PolarDeviceInfo) {
-        guard let data = try? encoder.encode(PolarDeviceInfoCodable(polarDeviceInfo)), let arguments = String(data: data, encoding: .utf8) else {
+        guard let data = try? encoder.encode(PolarDeviceInfoCodable(polarDeviceInfo)),
+              let arguments = String(data: data, encoding: .utf8)
+        else {
             return
         }
         channel.invokeMethod("deviceConnecting", arguments: arguments)
     }
     
     public func deviceConnected(_ polarDeviceInfo: PolarDeviceInfo) {
-        guard let data = try? encoder.encode(PolarDeviceInfoCodable(polarDeviceInfo)), let arguments = String(data: data, encoding: .utf8) else {
+        guard let data = try? encoder.encode(PolarDeviceInfoCodable(polarDeviceInfo)),
+              let arguments = String(data: data, encoding: .utf8)
+        else {
             return
         }
         channel.invokeMethod("deviceConnected", arguments: arguments)
     }
     
     public func deviceDisconnected(_ polarDeviceInfo: PolarDeviceInfo) {
-        guard let data = try? encoder.encode(PolarDeviceInfoCodable(polarDeviceInfo)), let arguments = String(data: data, encoding: .utf8) else {
+        guard let data = try? encoder.encode(PolarDeviceInfoCodable(polarDeviceInfo)),
+              let arguments = String(data: data, encoding: .utf8)
+        else {
             return
         }
         channel.invokeMethod("deviceDisconnected", arguments: arguments)
@@ -160,7 +191,9 @@ public class SwiftPolarPlugin:
     }
     
     public func hrValueReceived(_ identifier: String, data: PolarHrData) {
-        guard let data = try? encoder.encode(PolarHrDataCodable(data)), let arguments = String(data: data, encoding: .utf8) else {
+        guard let data = try? encoder.encode(PolarHrDataCodable(data)),
+              let arguments = String(data: data, encoding: .utf8)
+        else {
             return
         }
         channel.invokeMethod("hrNotificationReceived", arguments: [identifier, arguments])
@@ -171,7 +204,9 @@ public class SwiftPolarPlugin:
     }
     
     public func streamingFeaturesReady(_ identifier: String, streamingFeatures: Set<DeviceStreamingFeature>) {
-        guard let data = try? encoder.encode(streamingFeatures.map { $0.rawValue }), let encodedFeatures = String(data: data, encoding: .utf8) else {
+        guard let data = try? encoder.encode(streamingFeatures.map { $0.rawValue }),
+              let encodedFeatures = String(data: data, encoding: .utf8)
+        else {
             return
         }
         channel.invokeMethod("streamingFeaturesReady", arguments: [
