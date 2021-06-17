@@ -141,70 +141,140 @@ class Polar {
     return PolarSensorSetting.fromJson(json);
   }
 
-  // TODO: Make settings optional?
   Stream<PolarEcgData> startEcgStreaming(
+    String identifier, {
+    PolarSensorSetting? settings,
+  }) {
+    _startEcgStreamingInternal(identifier, settings);
+    return _ecgStreamController.stream;
+  }
+
+  void _startEcgStreamingInternal(
     String identifier,
-    PolarSensorSetting settings,
-  ) {
+    PolarSensorSetting? settings,
+  ) async {
+    settings ??= await requestStreamSettings(
+      identifier,
+      DeviceStreamingFeature.ecg,
+    );
+
     _channel.invokeMethod('startEcgStreaming', [
       identifier,
       jsonEncode(settings),
     ]);
-    return _ecgStreamController.stream;
   }
 
   Stream<PolarAccData> startAccStreaming(
-    String identifier,
-    PolarSensorSetting settings,
-  ) {
+    String identifier, {
+    PolarSensorSetting? settings,
+  }) {
+    _startAccStreamingInternal(identifier);
+    return _accStreamController.stream;
+  }
+
+  void _startAccStreamingInternal(
+    String identifier, {
+    PolarSensorSetting? settings,
+  }) async {
+    settings ??= await requestStreamSettings(
+      identifier,
+      DeviceStreamingFeature.acc,
+    );
+
     _channel.invokeMethod('startAccStreaming', [
       identifier,
       jsonEncode(settings),
     ]);
-    return _accStreamController.stream;
   }
 
   Stream<PolarGyroData> startGyroStreaming(
+    String identifier, {
+    PolarSensorSetting? settings,
+  }) {
+    _startGyroStreamingInternal(identifier, settings);
+    return _gyroStreamController.stream;
+  }
+
+  void _startGyroStreamingInternal(
     String identifier,
-    PolarSensorSetting settings,
-  ) {
+    PolarSensorSetting? settings,
+  ) async {
+    settings ??= await requestStreamSettings(
+      identifier,
+      DeviceStreamingFeature.gyro,
+    );
+
     _channel.invokeMethod('startGyroStreaming', [
       identifier,
       jsonEncode(settings),
     ]);
-    return _gyroStreamController.stream;
   }
 
   Stream<PolarMagnetometerData> startMagnetometerStreaming(
+    String identifier, {
+    PolarSensorSetting? settings,
+  }) {
+    _startMagnetometerStreamingInternal(identifier, settings);
+    return _magnetometerStreamController.stream;
+  }
+
+  void _startMagnetometerStreamingInternal(
     String identifier,
-    PolarSensorSetting settings,
-  ) {
+    PolarSensorSetting? settings,
+  ) async {
+    settings ??= await requestStreamSettings(
+      identifier,
+      DeviceStreamingFeature.magnetometer,
+    );
+
     _channel.invokeMethod('startMagnetometerStreaming', [
       identifier,
       jsonEncode(settings),
     ]);
-    return _magnetometerStreamController.stream;
   }
 
   Stream<PolarOhrData> startOhrStreaming(
+    String identifier, {
+    PolarSensorSetting? settings,
+  }) {
+    _startOhrStreamingInternal(identifier, settings);
+    return _ohrStreamController.stream;
+  }
+
+  void _startOhrStreamingInternal(
     String identifier,
-    PolarSensorSetting settings,
-  ) {
+    PolarSensorSetting? settings,
+  ) async {
+    settings ??= await requestStreamSettings(
+      identifier,
+      DeviceStreamingFeature.ppg,
+    );
+
     _channel.invokeMethod('startOhrStreaming', [
       identifier,
       jsonEncode(settings),
     ]);
-    return _ohrStreamController.stream;
   }
 
   Stream<PolarPpiData> startOhrPPIStreaming(
+    String identifier, {
+    PolarSensorSetting? settings,
+  }) {
+    return _ohrPPIStreamController.stream;
+  }
+
+  void _startOhrPPIStreamingInternal(
     String identifier,
-    PolarSensorSetting settings,
-  ) {
+    PolarSensorSetting? settings,
+  ) async {
+    settings ??= await requestStreamSettings(
+      identifier,
+      DeviceStreamingFeature.ppi,
+    );
+
     _channel.invokeMethod('startOhrPPIStreaming', [
       identifier,
       jsonEncode(settings),
     ]);
-    return _ohrPPIStreamController.stream;
   }
 }
