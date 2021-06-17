@@ -10,7 +10,7 @@ class MyApp extends StatefulWidget {
   _MyAppState createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> with PolarApiObserver {
+class _MyAppState extends State<MyApp> {
   static const identifier = '1C709B20';
 
   late final Polar polar;
@@ -20,7 +20,16 @@ class _MyAppState extends State<MyApp> with PolarApiObserver {
   void initState() {
     super.initState();
 
-    polar = Polar(this);
+    polar = Polar();
+
+    polar.heartRateStream.listen((e) => log('Heart rate: ${e.data.hr}'));
+    polar.streamingFeaturesReadyStream.listen((e) {
+      if (e.features.contains(DeviceStreamingFeature.ecg)) {
+        polar
+            .startEcgStreaming(e.identifier)
+            .listen((e) => log('ECG data: ${e.samples}'));
+      }
+    });
   }
 
   @override
@@ -54,91 +63,5 @@ class _MyAppState extends State<MyApp> with PolarApiObserver {
     setState(() {
       logs.add(log);
     });
-  }
-
-  @override
-  void batteryLevelReceived(String identifier, int level) {
-    log('batteryLevelReceived: [$identifier, $level]');
-  }
-
-  @override
-  void blePowerStateChanged(bool state) {
-    log('blePowerStateChanged: $state');
-  }
-
-  @override
-  void deviceConnected(PolarDeviceInfo info) {
-    log('deviceConnected: ${info.deviceId}');
-  }
-
-  @override
-  void deviceConnecting(PolarDeviceInfo info) {
-    log('deviceConnecting: ${info.deviceId}');
-  }
-
-  @override
-  void deviceDisconnected(PolarDeviceInfo info) {
-    log('deviceDisconnected: ${info.deviceId}');
-  }
-
-  @override
-  void disInformationReceived(String identifier, String uuid, String info) {
-    log('disInformationReceived: [$identifier, $uuid, $info]');
-  }
-
-  @override
-  void hrFeatureReady(String identifier) {
-    log('hrFeatureReady: $identifier');
-  }
-
-  @override
-  void hrNotificationReceived(String identifier, PolarHrData data) {
-    log('hrNotificationReceived: [$identifier, ${data.hr}]');
-  }
-
-  @override
-  void polarFtpFeatureReady(String identifier) {
-    log('polarFtpFeatureReady: $identifier');
-  }
-
-  @override
-  void sdkModeFeatureAvailable(String identifier) {
-    log('sdkModeFeatureAvailable: $identifier');
-  }
-
-  @override
-  void streamingFeaturesReady(
-      String identifier, List<DeviceStreamingFeature> features) async {
-    log('streamingFeaturesReady: [$identifier, $features]');
-    if (features.contains(DeviceStreamingFeature.ecg)) {
-      polar
-          .startEcgStreaming(identifier)
-          .listen((e) => log('ECG data: ${e.samples}'));
-    }
-    if (features.contains(DeviceStreamingFeature.acc)) {
-      polar.startAccStreaming(identifier).listen((e) {
-        log('ACC data: ${e.samples}');
-      });
-    }
-    if (features.contains(DeviceStreamingFeature.gyro)) {
-      polar
-          .startGyroStreaming(identifier)
-          .listen((e) => log('Gyro data: ${e.samples}'));
-    }
-    if (features.contains(DeviceStreamingFeature.magnetometer)) {
-      polar
-          .startMagnetometerStreaming(identifier)
-          .listen((e) => log('Magnetometer data: ${e.samples}'));
-    }
-    if (features.contains(DeviceStreamingFeature.ppg)) {
-      polar
-          .startOhrStreaming(identifier)
-          .listen((e) => log('PPG data: ${e.samples}'));
-    }
-    if (features.contains(DeviceStreamingFeature.ppi)) {
-      polar
-          .startOhrPPIStreaming(identifier)
-          .listen((e) => log('PPI data: ${e.samples}'));
-    }
   }
 }
