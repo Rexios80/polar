@@ -21,3 +21,6 @@ Added bluetooth background mode for iOS
 
 ## 0.1.6
 Give me my Pub points
+
+# 0.2.0
+Added streaming features and made the API more user friendly

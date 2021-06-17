@@ -310,6 +310,7 @@ class Polar {
     String identifier, {
     PolarSensorSetting? settings,
   }) {
+    _startOhrPPIStreamingInternal(identifier, settings);
     return _ohrPPIStreamController.stream;
   }
 

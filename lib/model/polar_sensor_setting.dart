@@ -16,7 +16,9 @@ class PolarSensorSetting {
       // This is Android
       return {
         'settings': Map.fromIterable(settings.entries,
-            key: (e) => ReCase(EnumToString.convertToString(e.key)).snakeCase.toUpperCase(),
+            key: (e) => ReCase(EnumToString.convertToString(e.key))
+                .snakeCase
+                .toUpperCase(),
             value: (e) => e.value),
       };
     }

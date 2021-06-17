@@ -3,7 +3,6 @@ class Xyz {
   final double y;
   final double z;
 
-
   Xyz.fromJson(Map<String, dynamic> json)
       // Divide by 1 to convert to double
       : x = json['x'] / 1,
