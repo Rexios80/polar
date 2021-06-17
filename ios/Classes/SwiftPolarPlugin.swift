@@ -112,7 +112,7 @@ public class SwiftPolarPlugin:
             guard let data = try? self.encoder.encode(PolarEcgDataCodable(data)),
                   let arguments = String(data: data, encoding: .utf8)
             else { return }
-            self.channel.invokeMethod("ecgDataReceived", arguments: arguments)
+            self.channel.invokeMethod("ecgDataReceived", arguments: [identifier, arguments])
         }, onError: { NSLog($0.localizedDescription) })
     }
     
@@ -121,7 +121,7 @@ public class SwiftPolarPlugin:
             guard let data = try? self.encoder.encode(PolarAccDataCodable(data)),
                   let arguments = String(data: data, encoding: .utf8)
             else { return }
-            self.channel.invokeMethod("accDataReceived", arguments: arguments)
+            self.channel.invokeMethod("accDataReceived", arguments: [identifier, arguments])
         }, onError: { NSLog($0.localizedDescription) })
     }
     
@@ -130,7 +130,7 @@ public class SwiftPolarPlugin:
             guard let data = try? self.encoder.encode(PolarGyroDataCodable(data)),
                   let arguments = String(data: data, encoding: .utf8)
             else { return }
-            self.channel.invokeMethod("gyroDataReceived", arguments: arguments)
+            self.channel.invokeMethod("gyroDataReceived", arguments: [identifier, arguments])
         }, onError: { NSLog($0.localizedDescription) })
     }
     
@@ -139,7 +139,7 @@ public class SwiftPolarPlugin:
             guard let data = try? self.encoder.encode(PolarMagnetometerDataCodable(data)),
                   let arguments = String(data: data, encoding: .utf8)
             else { return }
-            self.channel.invokeMethod("magnetometerDataReceived", arguments: arguments)
+            self.channel.invokeMethod("magnetometerDataReceived", arguments: [identifier, arguments])
         }, onError: { NSLog($0.localizedDescription) })
     }
     
@@ -148,7 +148,7 @@ public class SwiftPolarPlugin:
             guard let data = try? self.encoder.encode(PolarOhrDataCodable(data)),
                   let arguments = String(data: data, encoding: .utf8)
             else { return }
-            self.channel.invokeMethod("ohrDataReceived", arguments: arguments)
+            self.channel.invokeMethod("ohrDataReceived", arguments: [identifier, arguments])
         }, onError: { NSLog($0.localizedDescription) })
     }
     
@@ -157,7 +157,7 @@ public class SwiftPolarPlugin:
             guard let data = try? self.encoder.encode(PolarPpiDataCodable(data)),
                   let arguments = String(data: data, encoding: .utf8)
             else { return }
-            self.channel.invokeMethod("ohrPPIReceived", arguments: arguments)
+            self.channel.invokeMethod("ohrPPIReceived", arguments: [identifier, arguments])
         }, onError: { NSLog($0.localizedDescription) })
     }
     

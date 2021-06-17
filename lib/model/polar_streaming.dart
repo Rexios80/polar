@@ -1,59 +1,65 @@
 part of '../polar.dart';
 
 class PolarEcgData {
+  final String identifier;
   final int timeStamp;
   final List<int> samples;
 
-  PolarEcgData.fromJson(Map<String, dynamic> json)
+  PolarEcgData.fromJson(this.identifier, Map<String, dynamic> json)
       : timeStamp = json['timeStamp'],
         samples = (json['samples'] as List).map((e) => e as int).toList();
 }
 
 class PolarAccData {
+  final String identifier;
   final int timeStamp;
   final List<Xyz> samples;
 
-  PolarAccData.fromJson(Map<String, dynamic> json)
+  PolarAccData.fromJson(this.identifier, Map<String, dynamic> json)
       : timeStamp = json['timeStamp'],
         samples =
             (json['samples'] as List).map((e) => Xyz.fromJson(e)).toList();
 }
 
 class PolarExerciseData {
+  final String identifier;
   final int interval;
   final List<int> samples;
 
-  PolarExerciseData.fromJson(Map<String, dynamic> json)
+  PolarExerciseData.fromJson(this.identifier, Map<String, dynamic> json)
       : interval = json['interval'],
         samples = (json['samples'] as List).map((e) => e as int).toList();
 }
 
 class PolarGyroData {
+  final String identifier;
   final int timeStamp;
   final List<Xyz> samples;
 
-  PolarGyroData.fromJson(Map<String, dynamic> json)
+  PolarGyroData.fromJson(this.identifier, Map<String, dynamic> json)
       : timeStamp = json['timeStamp'],
         samples =
             (json['samples'] as List).map((e) => Xyz.fromJson(e)).toList();
 }
 
 class PolarMagnetometerData {
+  final String identifier;
   final int timeStamp;
   final List<Xyz> samples;
 
-  PolarMagnetometerData.fromJson(Map<String, dynamic> json)
+  PolarMagnetometerData.fromJson(this.identifier, Map<String, dynamic> json)
       : timeStamp = json['timeStamp'],
         samples =
             (json['samples'] as List).map((e) => Xyz.fromJson(e)).toList();
 }
 
 class PolarOhrData {
+  final String identifier;
   final int timeStamp;
   final OhrDataType type;
   final List<List<int>> samples;
 
-  PolarOhrData.fromJson(Map<String, dynamic> json)
+  PolarOhrData.fromJson(this.identifier, Map<String, dynamic> json)
       : timeStamp = json['timeStamp'],
         type = OhrDataTypeExtension.fromJson(json['type']),
         samples = Platform.isIOS
@@ -67,10 +73,11 @@ class PolarOhrData {
 }
 
 class PolarPpiData {
+  final String identifier;
   final int timeStamp;
   final List<PolarOhrPpiSample> samples;
 
-  PolarPpiData.fromJson(Map<String, dynamic> json)
+  PolarPpiData.fromJson(this.identifier, Map<String, dynamic> json)
       : timeStamp = json['timeStamp'],
         samples = (json['samples'] as List)
             .map((e) => PolarOhrPpiSample.fromJson(e))

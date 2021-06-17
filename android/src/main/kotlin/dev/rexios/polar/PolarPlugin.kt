@@ -145,37 +145,37 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
 
     private fun startEcgStreaming(identifier: String, settings: PolarSensorSetting) {
         api.startEcgStreaming(identifier, settings).subscribe({
-            invokeOnUiThread("ecgDataReceived", gson.toJson(it))
+            invokeOnUiThread("ecgDataReceived", listOf(identifier, gson.toJson(it)))
         }, { Log.e(tag, it.localizedMessage ?: "Unknown ecgStreaming error") })
     }
 
     private fun startAccStreaming(identifier: String, settings: PolarSensorSetting) {
         api.startAccStreaming(identifier, settings).subscribe({
-            invokeOnUiThread("accDataReceived", gson.toJson(it))
+            invokeOnUiThread("accDataReceived", listOf(identifier, gson.toJson(it)))
         }, { Log.e(tag, it.localizedMessage ?: "Unknown accStreaming error") })
     }
 
     private fun startGyroStreaming(identifier: String, settings: PolarSensorSetting) {
         api.startGyroStreaming(identifier, settings).subscribe({
-            invokeOnUiThread("gyroDataReceived", gson.toJson(it))
+            invokeOnUiThread("gyroDataReceived", listOf(identifier, gson.toJson(it)))
         }, { Log.e(tag, it.localizedMessage ?: "Unknown gyroStreaming error") })
     }
 
     private fun startMagnetometerStreaming(identifier: String, settings: PolarSensorSetting) {
         api.startMagnetometerStreaming(identifier, settings).subscribe({
-            invokeOnUiThread("magnetometerDataReceived", gson.toJson(it))
+            invokeOnUiThread("magnetometerDataReceived", listOf(identifier, gson.toJson(it)))
         }, { Log.e(tag, it.localizedMessage ?: "Unknown magnetometerStreaming error") })
     }
 
     private fun startOhrStreaming(identifier: String, settings: PolarSensorSetting) {
         api.startOhrStreaming(identifier, settings).subscribe({
-            invokeOnUiThread("ohrDataReceived", gson.toJson(it))
+            invokeOnUiThread("ohrDataReceived", listOf(identifier, gson.toJson(it)))
         }, { Log.e(tag, it.localizedMessage ?: "Unknown ohrStreaming error") })
     }
 
     private fun startOhrPPIStreaming(identifier: String) {
         api.startOhrPPIStreaming(identifier).subscribe({
-            invokeOnUiThread("ohrPPIReceived", gson.toJson(it))
+            invokeOnUiThread("ohrPPIReceived", listOf(identifier, gson.toJson(it)))
         }, { Log.e(tag, it.localizedMessage ?: "Unknown ohrPPIStreaming error") })
     }
 

@@ -77,28 +77,40 @@ class Polar {
     _channel.setMethodCallHandler((call) {
       switch (call.method) {
         case 'ecgDataReceived':
-          _ecgStreamController
-              .add(PolarEcgData.fromJson(jsonDecode(call.arguments)));
+          _ecgStreamController.add(PolarEcgData.fromJson(
+            call.arguments[0],
+            jsonDecode(call.arguments[1]),
+          ));
           break;
         case 'accDataReceived':
-          _accStreamController
-              .add(PolarAccData.fromJson(jsonDecode(call.arguments)));
+          _accStreamController.add(PolarAccData.fromJson(
+            call.arguments[0],
+            jsonDecode(call.arguments[1]),
+          ));
           break;
         case 'gyroDataReceived':
-          _gyroStreamController
-              .add(PolarGyroData.fromJson(jsonDecode(call.arguments)));
+          _gyroStreamController.add(PolarGyroData.fromJson(
+            call.arguments[0],
+            jsonDecode(call.arguments[1]),
+          ));
           break;
         case 'magnetometerDataReceived':
-          _magnetometerStreamController
-              .add(PolarMagnetometerData.fromJson(jsonDecode(call.arguments)));
+          _magnetometerStreamController.add(PolarMagnetometerData.fromJson(
+            call.arguments[0],
+            jsonDecode(call.arguments[1]),
+          ));
           break;
         case 'ohrDataReceived':
-          _ohrStreamController
-              .add(PolarOhrData.fromJson(jsonDecode(call.arguments)));
+          _ohrStreamController.add(PolarOhrData.fromJson(
+            call.arguments[0],
+            jsonDecode(call.arguments[1]),
+          ));
           break;
         case 'ohrPPIReceived':
-          _ohrPPIStreamController
-              .add(PolarPpiData.fromJson(jsonDecode(call.arguments)));
+          _ohrPPIStreamController.add(PolarPpiData.fromJson(
+            call.arguments[0],
+            jsonDecode(call.arguments[1]),
+          ));
           break;
         case 'blePowerStateChanged':
           _blePowerStateStreamController.add(call.arguments);
@@ -196,7 +208,7 @@ class Polar {
     PolarSensorSetting? settings,
   }) {
     _startEcgStreamingInternal(identifier, settings);
-    return _ecgStreamController.stream;
+    return _ecgStreamController.stream.where((e) => e.identifier == identifier);
   }
 
   void _startEcgStreamingInternal(
@@ -219,7 +231,7 @@ class Polar {
     PolarSensorSetting? settings,
   }) {
     _startAccStreamingInternal(identifier);
-    return _accStreamController.stream;
+    return _accStreamController.stream.where((e) => e.identifier == identifier);
   }
 
   void _startAccStreamingInternal(
@@ -242,7 +254,8 @@ class Polar {
     PolarSensorSetting? settings,
   }) {
     _startGyroStreamingInternal(identifier, settings);
-    return _gyroStreamController.stream;
+    return _gyroStreamController.stream
+        .where((e) => e.identifier == identifier);
   }
 
   void _startGyroStreamingInternal(
@@ -265,7 +278,8 @@ class Polar {
     PolarSensorSetting? settings,
   }) {
     _startMagnetometerStreamingInternal(identifier, settings);
-    return _magnetometerStreamController.stream;
+    return _magnetometerStreamController.stream
+        .where((e) => e.identifier == identifier);
   }
 
   void _startMagnetometerStreamingInternal(
@@ -288,7 +302,7 @@ class Polar {
     PolarSensorSetting? settings,
   }) {
     _startOhrStreamingInternal(identifier, settings);
-    return _ohrStreamController.stream;
+    return _ohrStreamController.stream.where((e) => e.identifier == identifier);
   }
 
   void _startOhrStreamingInternal(
@@ -311,7 +325,8 @@ class Polar {
     PolarSensorSetting? settings,
   }) {
     _startOhrPPIStreamingInternal(identifier, settings);
-    return _ohrPPIStreamController.stream;
+    return _ohrPPIStreamController.stream
+        .where((e) => e.identifier == identifier);
   }
 
   void _startOhrPPIStreamingInternal(
