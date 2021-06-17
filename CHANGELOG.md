@@ -24,3 +24,6 @@ Give me my Pub points
 
 # 0.2.0
 Added streaming features and made the API more user friendly
+
+# 0.2.1
+Filter streaming data by identifier to match the native API
