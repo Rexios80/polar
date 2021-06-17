@@ -22,13 +22,9 @@ class _MyAppState extends State<MyApp> {
 
     polar = Polar();
     polar.heartRateStream.listen((e) => log('Heart rate: ${e.data.hr}'));
-    polar.streamingFeaturesReadyStream.listen((e) {
-      if (e.features.contains(DeviceStreamingFeature.ecg)) {
-        polar
-            .startEcgStreaming(e.identifier)
-            .listen((e) => log('ECG data: ${e.samples}'));
-      }
-    });
+    polar
+        .startEcgStreaming(identifier)
+        .listen((e) => log('ECG data: ${e.samples}'));
   }
 
   @override
