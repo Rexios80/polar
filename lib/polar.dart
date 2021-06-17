@@ -72,10 +72,6 @@ class Polar {
   Stream<String> get ftpFeatureReadyStream =>
       _ftpFeatureReadyStreamController.stream;
 
-  /// Used internally to keep track of which streaming features are ready
-  /// for each device
-  final _featuresReadyMap = <String, Map<DeviceStreamingFeature, Completer>>{};
-
   /// Initialize the Polar API
   Polar() {
     _channel.setMethodCallHandler((call) {
@@ -132,14 +128,14 @@ class Polar {
               .add(PolarDeviceInfo.fromJson(jsonDecode(call.arguments)));
           break;
         case 'streamingFeaturesReady':
-          final identifier = call.arguments[0];
-          final features = (jsonDecode(call.arguments[1]) as List)
-              .map((e) => DeviceStreamingFeatureExtension.fromJson(e))
-              .toList();
           _streamingFeaturesReadyStreamController.add(
-            PolarStreamingFeaturesReadyEvent(identifier, features),
+            PolarStreamingFeaturesReadyEvent(
+              call.arguments[0],
+              (jsonDecode(call.arguments[1]) as List)
+                  .map((e) => DeviceStreamingFeatureExtension.fromJson(e))
+                  .toList(),
+            ),
           );
-          _streamingFeaturesReady(identifier, features);
           break;
         case 'sdkModeFeatureAvailable':
           _sdkModeFeatureAvailableStreamController.add(call.arguments);
@@ -188,27 +184,11 @@ class Polar {
     }
 
     _channel.invokeMethod('connectToDevice', identifier);
-
-    // Track the streaming features that are ready for use later
-    _featuresReadyMap[identifier] = Map.fromIterable(
-      DeviceStreamingFeature.values,
-      key: (e) => e,
-      value: (e) => Completer(),
-    );
   }
 
   /// Disconnect from a device with the given [identifier]
   void disconnectFromDevice(String identifier) {
     _channel.invokeMethod('disconnectFromDevice', identifier);
-  }
-
-  void _streamingFeaturesReady(
-    String identifier,
-    List<DeviceStreamingFeature> features,
-  ) {
-    features.forEach((e) {
-      _featuresReadyMap[identifier]?[e]?.complete();
-    });
   }
 
   Future<PolarSensorSetting> requestStreamSettings(
@@ -235,8 +215,6 @@ class Polar {
     String identifier,
     PolarSensorSetting? settings,
   ) async {
-    await _featuresReadyMap[identifier]?[DeviceStreamingFeature.ecg]?.future;
-
     settings ??= await requestStreamSettings(
       identifier,
       DeviceStreamingFeature.ecg,
@@ -260,8 +238,6 @@ class Polar {
     String identifier, {
     PolarSensorSetting? settings,
   }) async {
-    await _featuresReadyMap[identifier]?[DeviceStreamingFeature.acc]?.future;
-
     settings ??= await requestStreamSettings(
       identifier,
       DeviceStreamingFeature.acc,
@@ -286,8 +262,6 @@ class Polar {
     String identifier,
     PolarSensorSetting? settings,
   ) async {
-    await _featuresReadyMap[identifier]?[DeviceStreamingFeature.gyro]?.future;
-    
     settings ??= await requestStreamSettings(
       identifier,
       DeviceStreamingFeature.gyro,
@@ -312,8 +286,6 @@ class Polar {
     String identifier,
     PolarSensorSetting? settings,
   ) async {
-    await _featuresReadyMap[identifier]?[DeviceStreamingFeature.magnetometer]?.future;
-    
     settings ??= await requestStreamSettings(
       identifier,
       DeviceStreamingFeature.magnetometer,
@@ -337,8 +309,6 @@ class Polar {
     String identifier,
     PolarSensorSetting? settings,
   ) async {
-    await _featuresReadyMap[identifier]?[DeviceStreamingFeature.ppg]?.future;
-    
     settings ??= await requestStreamSettings(
       identifier,
       DeviceStreamingFeature.ppg,
@@ -363,8 +333,6 @@ class Polar {
     String identifier,
     PolarSensorSetting? settings,
   ) async {
-    await _featuresReadyMap[identifier]?[DeviceStreamingFeature.ppi]?.future;
-    
     settings ??= await requestStreamSettings(
       identifier,
       DeviceStreamingFeature.ppi,
