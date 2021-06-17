@@ -27,3 +27,6 @@ Added streaming features and made the API more user friendly
 
 # 0.2.1
 Filter streaming data by identifier to match the native API
+
+# 0.2.2
+Fixed a crash that could happen on iOS
