@@ -54,66 +54,13 @@ Info.plist:
 ## Use it
 
 ```
-class MyClass with PolarApiObserver {
-  void connect() {
-    final polar = Polar(this);
-    polar.connectToDevice('identifier');
+polar = Polar();
+polar.heartRateStream.listen((e) => print('Heart rate: ${e.data.hr}'));
+polar.streamingFeaturesReadyStream.listen((e) {
+  if (e.features.contains(DeviceStreamingFeature.ecg)) {
+    polar
+        .startEcgStreaming(e.identifier)
+        .listen((e) => print('ECG data: ${e.samples}'));
   }
-
-  @override
-  void batteryLevelReceived(String identifier, int level) {
-    // TODO
-  }
-
-  @override
-  void blePowerStateChanged(bool state) {
-    // TODO
-  }
-
-  @override
-  void deviceConnected(PolarDeviceInfo info) {
-    // TODO
-  }
-
-  @override
-  void deviceConnecting(PolarDeviceInfo info) {
-    // TODO
-  }
-
-  @override
-  void deviceDisconnected(PolarDeviceInfo info) {
-    // TODO
-  }
-
-  @override
-  void disInformationReceived(String identifier, String uuid, String info) {
-    // TODO
-  }
-
-  @override
-  void hrFeatureReady(String identifier) {
-    // TODO
-  }
-
-  @override
-  void hrNotificationReceived(String identifier, PolarHrData data) {
-    // TODO
-  }
-
-  @override
-  void polarFtpFeatureReady(String identifier) {
-    // TODO
-  }
-
-  @override
-  void sdkModeFeatureAvailable(String identifier) {
-    // TODO
-  }
-
-  @override
-  void streamingFeaturesReady(
-      String identifier, List<DeviceStreamingFeature> features) {
-    // TODO
-  }
-}
+});
 ```
