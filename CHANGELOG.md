@@ -30,3 +30,6 @@ Filter streaming data by identifier to match the native API
 
 # 0.2.2
 Fixed a crash that could happen on iOS
+
+# 0.2.3
+Fixed an issue PPI streaming

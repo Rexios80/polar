@@ -11,7 +11,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  static const identifier = '1C709B20';
+  static const identifier = '1C709025';
 
   late final Polar polar;
   List<String> logs = ['Service started'];
@@ -29,6 +29,9 @@ class _MyAppState extends State<MyApp> {
             .listen((e) => log('ECG data: ${e.samples}'));
       }
     });
+    polar.deviceConnectingStream.listen((_) => log('Device connecting'));
+    polar.deviceConnectedStream.listen((_) => log('Device connected'));
+    polar.deviceDisconnectedStream.listen((_) => log('Device disconnected'));
   }
 
   @override

@@ -320,27 +320,9 @@ class Polar {
     ]);
   }
 
-  Stream<PolarPpiData> startOhrPPIStreaming(
-    String identifier, {
-    PolarSensorSetting? settings,
-  }) {
-    _startOhrPPIStreamingInternal(identifier, settings);
+  Stream<PolarPpiData> startOhrPPIStreaming(String identifier) {
+    _channel.invokeMethod('startOhrPPIStreaming', identifier);
     return _ohrPPIStreamController.stream
         .where((e) => e.identifier == identifier);
-  }
-
-  void _startOhrPPIStreamingInternal(
-    String identifier,
-    PolarSensorSetting? settings,
-  ) async {
-    settings ??= await requestStreamSettings(
-      identifier,
-      DeviceStreamingFeature.ppi,
-    );
-
-    _channel.invokeMethod('startOhrPPIStreaming', [
-      identifier,
-      jsonEncode(settings),
-    ]);
   }
 }
