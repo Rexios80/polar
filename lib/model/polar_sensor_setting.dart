@@ -1,10 +1,16 @@
 part of '../polar.dart';
 
+/// polar sensor settings class
 class PolarSensorSetting {
+  /// current settings available / set
   final Map<PolarSettingType, List<int>> settings;
 
+  /// constructor with desired settings
+  ///
+  /// - Parameter settings: single key value pairs to start stream
   PolarSensorSetting(this.settings);
 
+  /// Convert a [PolarSensorSetting] to json
   Map<String, dynamic> toJson() {
     if (Platform.isIOS) {
       return {
@@ -24,6 +30,7 @@ class PolarSensorSetting {
     }
   }
 
+  /// Create a [PolarSensorSetting] from json
   PolarSensorSetting.fromJson(Map<String, dynamic> json)
       : settings = Map<PolarSettingType, List<int>>.fromIterable(
           (json['settings'] as Map<String, dynamic>).entries,
@@ -32,6 +39,7 @@ class PolarSensorSetting {
         );
 }
 
+/// settings type
 enum PolarSettingType {
   /// sample rate in hz
   sampleRate,
@@ -53,6 +61,7 @@ enum PolarSettingType {
 }
 
 extension PolarSettingTypeExtension on PolarSettingType {
+  /// Convert a [PolarSettingType] to json
   static PolarSettingType fromJson(dynamic json) {
     if (Platform.isIOS) {
       return PolarSettingType.values[int.parse(json as String)];

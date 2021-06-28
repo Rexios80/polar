@@ -1,6 +1,6 @@
 part of '../polar.dart';
 
-/// Polar streaming features
+/// device streaming features
 enum DeviceStreamingFeature {
   /// ECG
   ecg,
@@ -25,6 +25,7 @@ enum DeviceStreamingFeature {
 }
 
 extension DeviceStreamingFeatureExtension on DeviceStreamingFeature {
+  /// Create a [DeviceStreamingFeature] from json
   static DeviceStreamingFeature fromJson(dynamic json) {
     if (Platform.isIOS) {
       return DeviceStreamingFeature.values[json as int];
@@ -36,6 +37,7 @@ extension DeviceStreamingFeatureExtension on DeviceStreamingFeature {
     }
   }
 
+  /// Convert a [DeviceStreamingFeature] to json
   dynamic toJson() {
     if (Platform.isIOS) {
       return DeviceStreamingFeature.values.indexOf(this);
