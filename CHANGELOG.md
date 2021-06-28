@@ -22,17 +22,20 @@ Added bluetooth background mode for iOS
 ## 0.1.6
 Give me my Pub points
 
-# 0.2.0
+## 0.2.0
 Added streaming features and made the API more user friendly
 
-# 0.2.1
+## 0.2.1
 Filter streaming data by identifier to match the native API
 
-# 0.2.2
+## 0.2.2
 Fixed a crash that could happen on iOS
 
-# 0.2.3
+## 0.2.3
 Fixed an issue PPI streaming
 
-# 1.0.0
+## 1.0.0
 Copied documentation from the iOS PolarBleSdk
+
+## 1.0.1
+Fixed changelog formatting
