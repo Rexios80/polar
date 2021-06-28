@@ -33,3 +33,6 @@ Fixed a crash that could happen on iOS
 
 # 0.2.3
 Fixed an issue PPI streaming
+
+# 1.0.0
+Copied documentation from the iOS PolarBleSdk
