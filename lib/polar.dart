@@ -65,14 +65,14 @@ class Polar {
   /// - Parameter identifier: Polar device info
   Stream<PolarDeviceInfo> get deviceConnectingStream =>
       _deviceConnectingStreamController.stream;
-  
+
   /// Connection lost to device.
   /// If PolarBleApi#disconnectFromPolarDevice is not called, a new connection attempt is dispatched automatically.
   ///
   /// - Parameter identifier: Polar device info
   Stream<PolarDeviceInfo> get deviceDisconnectedStream =>
       _deviceDisconnectedStreamController.stream;
-    
+
   /// feature ready callback
   Stream<PolarStreamingFeaturesReadyEvent> get streamingFeaturesReadyStream =>
       _streamingFeaturesReadyStreamController.stream;
@@ -80,7 +80,7 @@ class Polar {
   /// sdk mode feature available in this device and ready for usage callback
   Stream<String> get sdkModeFeatureAvailableStream =>
       _sdkModeFeatureAvailableStreamController.stream;
-  
+
   /// Device HR feature is ready. HR transmission is starting in a short while.
   ///
   /// - Parameter identifier: Polar device id

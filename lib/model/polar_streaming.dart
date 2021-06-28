@@ -75,7 +75,7 @@ class PolarMagnetometerData {
   /// Polar device id
   final String identifier;
 
-  /// Last sample timestamp in nanoseconds. 
+  /// Last sample timestamp in nanoseconds.
   final int timeStamp;
 
   /// in Gauss
