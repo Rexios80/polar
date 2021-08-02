@@ -52,14 +52,10 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
     implementation 'polarofficial:polar-ble-sdk:3.2.0@aar'
-    // Only needed if FEATURE_POLAR_FILE_TRANSFER used
-    implementation 'polarofficial:polar-protobuf-release:3.2.0@aar'
-    // Only needed if FEATURE_POLAR_FILE_TRANSFER used
-    implementation 'commons-io:commons-io:2.8.0'
-    // Only needed if FEATURE_POLAR_FILE_TRANSFER used
-    implementation 'com.google.protobuf:protobuf-javalite:3.14.0'
     implementation 'io.reactivex.rxjava3:rxjava:3.0.4'
     implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'
+    implementation 'commons-io:commons-io:2.8.0'
+    implementation 'com.google.protobuf:protobuf-javalite:3.14.0'
 
     implementation 'com.google.code.gson:gson:2.8.7'
 
