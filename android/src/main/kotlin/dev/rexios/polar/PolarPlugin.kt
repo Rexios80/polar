@@ -7,6 +7,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Lifecycle.Event
 import androidx.lifecycle.LifecycleEventObserver
 import com.google.gson.Gson
+import com.polar.sdk.api.PolarBleApi
+import com.polar.sdk.api.PolarBleApiCallbackProvider
+import com.polar.sdk.api.PolarBleApiDefaultImpl
+import com.polar.sdk.api.model.PolarDeviceInfo
+import com.polar.sdk.api.model.PolarHrData
+import com.polar.sdk.api.model.PolarSensorSetting
 import io.flutter.Log
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
@@ -15,13 +21,6 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
-import polar.com.sdk.api.PolarBleApi
-import polar.com.sdk.api.PolarBleApi.DeviceStreamingFeature
-import polar.com.sdk.api.PolarBleApiCallbackProvider
-import polar.com.sdk.api.PolarBleApiDefaultImpl
-import polar.com.sdk.api.model.PolarDeviceInfo
-import polar.com.sdk.api.model.PolarHrData
-import polar.com.sdk.api.model.PolarSensorSetting
 import java.util.*
 
 /** PolarPlugin */
@@ -133,7 +132,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
 
     private fun requestStreamSettings(
         identifier: String,
-        feature: DeviceStreamingFeature,
+        feature: PolarBleApi.DeviceStreamingFeature,
         result: Result
     ) {
         api.requestStreamSettings(identifier, feature).subscribe({
@@ -197,7 +196,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
 
     override fun streamingFeaturesReady(
         p0: String,
-        p1: MutableSet<DeviceStreamingFeature>
+        p1: MutableSet<PolarBleApi.DeviceStreamingFeature>
     ) {
         invokeOnUiThread("streamingFeaturesReady", listOf(p0, gson.toJson(p1)))
     }
