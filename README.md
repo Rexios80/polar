@@ -10,8 +10,8 @@ app/build.gradle:
 
 ```
 dependencies {
-    implementation 'polarofficial:polar-ble-sdk:3.1.0@aar'
-    implementation 'polarofficial:polar-protobuf-release:3.1.0@aar'
+    implementation 'polarofficial:polar-ble-sdk:3.2.0@aar'
+    implementation 'polarofficial:polar-protobuf-release:3.2.0@aar'
 }
 ```
 
