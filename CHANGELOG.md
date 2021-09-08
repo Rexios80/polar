@@ -1,3 +1,6 @@
+## 1.1.1
+Updated Polar SDK and readme for Android
+
 ## 1.1.0
 Updated Polar SDK
 

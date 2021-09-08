@@ -11,7 +11,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  static const identifier = '1C709025';
+  static const identifier = '1C709B20';
 
   late final Polar polar;
   List<String> logs = ['Service started'];
@@ -43,11 +43,17 @@ class _MyAppState extends State<MyApp> {
           actions: [
             IconButton(
               icon: Icon(Icons.stop),
-              onPressed: () => polar.disconnectFromDevice(identifier),
+              onPressed: () {
+                log('Disconnecting from device: $identifier');
+                polar.disconnectFromDevice(identifier);
+              },
             ),
             IconButton(
               icon: Icon(Icons.play_arrow),
-              onPressed: () => polar.connectToDevice(identifier),
+              onPressed: () {
+                log('Connecting to device: $identifier');
+                polar.connectToDevice(identifier);
+              },
             ),
           ],
         ),

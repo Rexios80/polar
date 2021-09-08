@@ -8,17 +8,28 @@ Plugin wrapper for the Polar SDK
 
 app/build.gradle:
 
-```
+```groovy
+android {
+  buildTypes {
+    release {
+      minifyEnabled false
+      shrinkResources false
+    }
+  }
+}
+
 dependencies {
-    implementation 'polarofficial:polar-ble-sdk:3.2.0@aar'
+    implementation 'polarofficial:polar-ble-sdk:3.2.1@aar'
 }
 ```
+
+If you can figure out how to get it to work in release mode without disabling minify please make a pull request.
 
 ### iOS
 
 Podfile:
 
-```
+```groovy
 platform :ios, '12.0'
 
 post_install do |installer|
@@ -39,7 +50,7 @@ end
 
 Info.plist:
 
-```
+```xml
 <key>NSBluetoothAlwaysUsageDescription</key>
 <string>Used to connect to Polar devices</string>
 <key>NSBluetoothPeripheralUsageDescription</key>
@@ -52,7 +63,7 @@ Info.plist:
 
 ## Use it
 
-```
+```dart
 polar = Polar();
 polar.heartRateStream.listen((e) => print('Heart rate: ${e.data.hr}'));
 polar.streamingFeaturesReadyStream.listen((e) {
