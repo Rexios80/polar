@@ -1,4 +1,7 @@
-part of '../polar.dart';
+import 'dart:io';
+
+import 'package:enum_to_string/enum_to_string.dart';
+import 'package:recase/recase.dart';
 
 /// polar sensor settings class
 class PolarSensorSetting {

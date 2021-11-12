@@ -1,5 +1,3 @@
-part of '../polar.dart';
-
 /// Polar Ohr PPI sample
 class PolarOhrPpiSample {
   /// ppInMs Pulse to Pulse interval in milliseconds.

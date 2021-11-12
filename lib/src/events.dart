@@ -1,4 +1,5 @@
-part of 'polar.dart';
+import 'package:polar/src/model/device_streaming_feature.dart';
+import 'package:polar/src/model/polar_hr_data.dart';
 
 /// feature ready callback
 class PolarStreamingFeaturesReadyEvent {

@@ -1,5 +1,3 @@
-part of '../polar.dart';
-
 /// Polar hr data
 class PolarHrData {
   /// hr in BPM

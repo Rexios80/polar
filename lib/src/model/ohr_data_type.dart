@@ -1,4 +1,6 @@
-part of '../polar.dart';
+import 'dart:io';
+
+import 'package:enum_to_string/enum_to_string.dart';
 
 /// OHR data source enum
 enum OhrDataType {

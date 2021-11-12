@@ -1,4 +1,8 @@
-part of '../polar.dart';
+import 'dart:io';
+
+import 'package:polar/src/model/ohr_data_type.dart';
+import 'package:polar/src/model/polar_ohr_ppi_sample.dart';
+import 'package:polar/src/model/xyz.dart';
 
 /// Polar Ecg data
 class PolarEcgData {

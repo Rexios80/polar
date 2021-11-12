@@ -1,5 +1,3 @@
-part of '../polar.dart';
-
 /// Polar device info
 class PolarDeviceInfo {
   /// polar device id or UUID for 3rd party sensors
