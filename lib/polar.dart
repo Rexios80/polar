@@ -19,7 +19,7 @@ part 'events.dart';
 
 /// Flutter implementation of the [PolarBleSdk]
 class Polar {
-  static const MethodChannel _channel = const MethodChannel('polar');
+  static const MethodChannel _channel = MethodChannel('polar');
 
   // Streaming
   final _ecgStreamController = StreamController<PolarEcgData>.broadcast();
@@ -123,40 +123,52 @@ class Polar {
     _channel.setMethodCallHandler((call) {
       switch (call.method) {
         case 'ecgDataReceived':
-          _ecgStreamController.add(PolarEcgData.fromJson(
-            call.arguments[0],
-            jsonDecode(call.arguments[1]),
-          ));
+          _ecgStreamController.add(
+            PolarEcgData.fromJson(
+              call.arguments[0],
+              jsonDecode(call.arguments[1]),
+            ),
+          );
           break;
         case 'accDataReceived':
-          _accStreamController.add(PolarAccData.fromJson(
-            call.arguments[0],
-            jsonDecode(call.arguments[1]),
-          ));
+          _accStreamController.add(
+            PolarAccData.fromJson(
+              call.arguments[0],
+              jsonDecode(call.arguments[1]),
+            ),
+          );
           break;
         case 'gyroDataReceived':
-          _gyroStreamController.add(PolarGyroData.fromJson(
-            call.arguments[0],
-            jsonDecode(call.arguments[1]),
-          ));
+          _gyroStreamController.add(
+            PolarGyroData.fromJson(
+              call.arguments[0],
+              jsonDecode(call.arguments[1]),
+            ),
+          );
           break;
         case 'magnetometerDataReceived':
-          _magnetometerStreamController.add(PolarMagnetometerData.fromJson(
-            call.arguments[0],
-            jsonDecode(call.arguments[1]),
-          ));
+          _magnetometerStreamController.add(
+            PolarMagnetometerData.fromJson(
+              call.arguments[0],
+              jsonDecode(call.arguments[1]),
+            ),
+          );
           break;
         case 'ohrDataReceived':
-          _ohrStreamController.add(PolarOhrData.fromJson(
-            call.arguments[0],
-            jsonDecode(call.arguments[1]),
-          ));
+          _ohrStreamController.add(
+            PolarOhrData.fromJson(
+              call.arguments[0],
+              jsonDecode(call.arguments[1]),
+            ),
+          );
           break;
         case 'ohrPPIReceived':
-          _ohrPPIStreamController.add(PolarPpiData.fromJson(
-            call.arguments[0],
-            jsonDecode(call.arguments[1]),
-          ));
+          _ohrPPIStreamController.add(
+            PolarPpiData.fromJson(
+              call.arguments[0],
+              jsonDecode(call.arguments[1]),
+            ),
+          );
           break;
         case 'blePowerStateChanged':
           _blePowerStateStreamController.add(call.arguments);
@@ -231,7 +243,7 @@ class Polar {
       await Permission.location.request();
     }
 
-    _channel.invokeMethod('connectToDevice', identifier);
+    unawaited(_channel.invokeMethod('connectToDevice', identifier));
   }
 
   /// Disconnect from the current Polar device.
@@ -291,10 +303,12 @@ class Polar {
       DeviceStreamingFeature.ecg,
     );
 
-    _channel.invokeMethod('startEcgStreaming', [
-      identifier,
-      jsonEncode(settings),
-    ]);
+    unawaited(
+      _channel.invokeMethod('startEcgStreaming', [
+        identifier,
+        jsonEncode(settings),
+      ]),
+    );
   }
 
   ///  Start ACC (Accelerometer) stream. ACC stream is stopped if the connection is closed, error occurs or stream is disposed.
@@ -323,10 +337,12 @@ class Polar {
       DeviceStreamingFeature.acc,
     );
 
-    _channel.invokeMethod('startAccStreaming', [
-      identifier,
-      jsonEncode(settings),
-    ]);
+    unawaited(
+      _channel.invokeMethod('startAccStreaming', [
+        identifier,
+        jsonEncode(settings),
+      ]),
+    );
   }
 
   /// Start Gyro stream. Gyro stream is stopped if the connection is closed, error occurs during start or stream is disposed.
@@ -353,10 +369,12 @@ class Polar {
       DeviceStreamingFeature.gyro,
     );
 
-    _channel.invokeMethod('startGyroStreaming', [
-      identifier,
-      jsonEncode(settings),
-    ]);
+    unawaited(
+      _channel.invokeMethod('startGyroStreaming', [
+        identifier,
+        jsonEncode(settings),
+      ]),
+    );
   }
 
   /// Start magnetometer stream. Magnetometer stream is stopped if the connection is closed, error occurs or stream is disposed.
@@ -383,10 +401,12 @@ class Polar {
       DeviceStreamingFeature.magnetometer,
     );
 
-    _channel.invokeMethod('startMagnetometerStreaming', [
-      identifier,
-      jsonEncode(settings),
-    ]);
+    unawaited(
+      _channel.invokeMethod('startMagnetometerStreaming', [
+        identifier,
+        jsonEncode(settings),
+      ]),
+    );
   }
 
   /// Start OHR (Optical heart rate) PPG (Photoplethysmography) stream. PPG stream is stopped if the connection is closed, error occurs or stream is disposed.
@@ -415,10 +435,12 @@ class Polar {
       DeviceStreamingFeature.ppg,
     );
 
-    _channel.invokeMethod('startOhrStreaming', [
-      identifier,
-      jsonEncode(settings),
-    ]);
+    unawaited(
+      _channel.invokeMethod('startOhrStreaming', [
+        identifier,
+        jsonEncode(settings),
+      ]),
+    );
   }
 
   /// Start OHR (Optical heart rate) PPI (Pulse to Pulse interval) stream.

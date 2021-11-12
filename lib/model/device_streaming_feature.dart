@@ -24,6 +24,7 @@ enum DeviceStreamingFeature {
   error,
 }
 
+/// Extension on [DeviceStreamingFeature]
 extension DeviceStreamingFeatureExtension on DeviceStreamingFeature {
   /// Create a [DeviceStreamingFeature] from json
   static DeviceStreamingFeature fromJson(dynamic json) {
@@ -31,8 +32,10 @@ extension DeviceStreamingFeatureExtension on DeviceStreamingFeature {
       return DeviceStreamingFeature.values[json as int];
     } else {
       // This is android
-      return EnumToString.fromString(DeviceStreamingFeature.values,
-              ReCase(json as String).camelCase) ??
+      return EnumToString.fromString(
+            DeviceStreamingFeature.values,
+            ReCase(json as String).camelCase,
+          ) ??
           DeviceStreamingFeature.error;
     }
   }

@@ -111,8 +111,11 @@ class PolarOhrData {
                 .map((e) => (e as List).map((e) => e as int).toList())
                 .toList()
             : (json['samples'] as List)
-                .map((e) =>
-                    (e['channelSamples'] as List).map((e) => e as int).toList())
+                .map(
+                  (e) => (e['channelSamples'] as List)
+                      .map((e) => e as int)
+                      .toList(),
+                )
                 .toList();
 }
 
