@@ -89,7 +89,7 @@ public class SwiftPolarPlugin:
                     )
                 case "startOhrPPIStreaming":
                     try instance.startOhrPPIStreaming(call.arguments as! String)
-                default: break
+                default: result(FlutterMethodNotImplemented)
                 }
             } catch {
                 NSLog(error.localizedDescription)
