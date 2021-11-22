@@ -1,3 +1,7 @@
+## 1.2.0
+- Restructured the package to use exports
+- Updated Polar SDK
+
 ## 1.1.1
 Updated Polar SDK and readme for Android
 
