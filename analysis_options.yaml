@@ -1,13 +1,1 @@
-include: package:flutter_lints/flutter.yaml
-
-analyzer:
-  exclude:
-    # workaround for https://github.com/dart-lang/sdk/issues/42910
-    - 'example/**'
-
-linter:
-  rules:
-    - prefer_single_quotes
-    - unawaited_futures
-    - require_trailing_commas
-    - public_member_api_docs
+include: package:rexios_lints/flutter/package.yaml

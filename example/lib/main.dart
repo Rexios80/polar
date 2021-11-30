@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:polar/polar.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 /// Example app
 class MyApp extends StatefulWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   _MyAppState createState() => _MyAppState();
 }
@@ -43,14 +45,14 @@ class _MyAppState extends State<MyApp> {
           title: const Text('Polar example app'),
           actions: [
             IconButton(
-              icon: Icon(Icons.stop),
+              icon: const Icon(Icons.stop),
               onPressed: () {
                 log('Disconnecting from device: $identifier');
                 polar.disconnectFromDevice(identifier);
               },
             ),
             IconButton(
-              icon: Icon(Icons.play_arrow),
+              icon: const Icon(Icons.play_arrow),
               onPressed: () {
                 log('Connecting to device: $identifier');
                 polar.connectToDevice(identifier);
@@ -59,7 +61,7 @@ class _MyAppState extends State<MyApp> {
           ],
         ),
         body: ListView(
-          padding: EdgeInsets.all(10),
+          padding: const EdgeInsets.all(10),
           shrinkWrap: true,
           children: logs.reversed.map((e) => Text(e)).toList(),
         ),
@@ -68,6 +70,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   void log(String log) {
+    // ignore: avoid_print
     print(log);
     setState(() {
       logs.add(log);
