@@ -1,3 +1,8 @@
+## 1.3.0
+- Updated analysis options
+- Updated Polar SDK
+- Removed EnumToString dependency
+
 ## 1.2.0
 - Restructured the package to use exports
 - Updated Polar SDK
