@@ -1,3 +1,6 @@
+## 1.4.0
+- Fixed ProGuard issues. Disabling minify is no longer required.
+
 ## 1.3.0
 - Updated analysis options
 - Updated Polar SDK

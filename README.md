@@ -9,21 +9,10 @@ Plugin wrapper for the Polar SDK
 app/build.gradle:
 
 ```groovy
-android {
-  buildTypes {
-    release {
-      minifyEnabled false
-      shrinkResources false
-    }
-  }
-}
-
 dependencies {
     implementation 'polarofficial:polar-ble-sdk:3.2.5@aar'
 }
 ```
-
-If you can figure out how to get it to work in release mode without disabling minify please make a pull request.
 
 ### iOS
 
