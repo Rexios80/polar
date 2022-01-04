@@ -19,7 +19,7 @@ android {
 }
 
 dependencies {
-    implementation 'polarofficial:polar-ble-sdk:3.2.4@aar'
+    implementation 'polarofficial:polar-ble-sdk:3.2.5@aar'
 }
 ```
 

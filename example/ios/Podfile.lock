@@ -5,7 +5,7 @@ PODS:
   - polar (0.0.1):
     - Flutter
     - PolarBleSdk
-  - PolarBleSdk (3.2.4):
+  - PolarBleSdk (3.2.5):
     - RxSwift (= 6.2.0)
   - RxSwift (6.2.0)
 
@@ -31,7 +31,7 @@ SPEC CHECKSUMS:
   Flutter: 50d75fe2f02b26cc09d224853bb45737f8b3214a
   permission_handler: ccb20a9fad0ee9b1314a52b70b76b473c5f8dab0
   polar: 8d7e709080beb25035cd0783352de0a405d35f8c
-  PolarBleSdk: abf37031fd5ed027a24cd7e321def7073d269635
+  PolarBleSdk: f3955d9b016f1dae3cbae241b910e5de0bd4240b
   RxSwift: d356ab7bee873611322f134c5f9ef379fa183d8f
 
 PODFILE CHECKSUM: 6fb175f17a8a6a103b68cfdb2cd2e6bc033704b9
