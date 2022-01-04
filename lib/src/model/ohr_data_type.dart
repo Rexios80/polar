@@ -1,7 +1,5 @@
 import 'dart:io';
 
-import 'package:enum_to_string/enum_to_string.dart';
-
 /// OHR data source enum
 enum OhrDataType {
   /// 3 ppg + 1 ambient
@@ -20,11 +18,7 @@ extension OhrDataTypeExtension on OhrDataType {
       return OhrDataType.values[json as int];
     } else {
       // This is android
-      return EnumToString.fromString(
-            OhrDataType.values,
-            (json as String).toLowerCase(),
-          ) ??
-          OhrDataType.unknown;
+      return OhrDataType.values.byName((json as String).toLowerCase());
     }
   }
 }

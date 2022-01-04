@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:enum_to_string/enum_to_string.dart';
 import 'package:recase/recase.dart';
 
 /// device streaming features
@@ -35,11 +34,8 @@ extension DeviceStreamingFeatureExtension on DeviceStreamingFeature {
       return DeviceStreamingFeature.values[json as int];
     } else {
       // This is android
-      return EnumToString.fromString(
-            DeviceStreamingFeature.values,
-            ReCase(json as String).camelCase,
-          ) ??
-          DeviceStreamingFeature.error;
+      return DeviceStreamingFeature.values
+          .byName(ReCase(json as String).camelCase);
     }
   }
 
@@ -49,7 +45,7 @@ extension DeviceStreamingFeatureExtension on DeviceStreamingFeature {
       return DeviceStreamingFeature.values.indexOf(this);
     } else {
       // This is Android
-      return ReCase(EnumToString.convertToString(this)).snakeCase.toUpperCase();
+      return ReCase(name).snakeCase.toUpperCase();
     }
   }
 }

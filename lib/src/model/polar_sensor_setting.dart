@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:enum_to_string/enum_to_string.dart';
 import 'package:recase/recase.dart';
 
 /// polar sensor settings class
@@ -27,8 +26,7 @@ class PolarSensorSetting {
       return {
         'settings': {
           for (var e in settings.entries)
-            ReCase(EnumToString.convertToString(e.key)).snakeCase.toUpperCase():
-                e.value
+            ReCase(e.key.name).snakeCase.toUpperCase(): e.value
         },
       };
     }
@@ -72,11 +70,7 @@ extension PolarSettingTypeExtension on PolarSettingType {
       return PolarSettingType.values[int.parse(json as String)];
     } else {
       // This is android
-      return EnumToString.fromString(
-            PolarSettingType.values,
-            ReCase(json as String).camelCase,
-          ) ??
-          PolarSettingType.unknown;
+      return PolarSettingType.values.byName(ReCase(json as String).camelCase);
     }
   }
 }
