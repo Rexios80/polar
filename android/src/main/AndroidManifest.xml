@@ -1,6 +1,7 @@
+<!--* Commented permissions must be added by the end developer -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="dev.rexios.polar">
   <!-- Polar SDK needs Bluetooth scan permission to search for BLE devices.-->
-  <uses-permission android:name="android.permission.BLUETOOTH_SCAN" android:usesPermissionFlags="neverForLocation" />
+  <!-- <uses-permission android:name="android.permission.BLUETOOTH_SCAN" android:usesPermissionFlags="neverForLocation" /> -->
 
   <!-- Polar SDK needs Bluetooth connect permission to connect for found BLE devices.-->
   <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
@@ -15,9 +16,9 @@
 
   <!-- Polar SDK needs the fine location permission to get results for Bluetooth scan. Request
     fine location permission on devices with API 30 (Android Q). -->
-  <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" android:maxSdkVersion="30" />
+  <!-- <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" android:maxSdkVersion="30" /> -->
 
   <!-- The coarse location permission is needed, if fine location permission is requested. Request
      coarse location permission on devices with API 30 (Android Q). -->
-  <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" android:maxSdkVersion="30" />
+  <!-- <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" android:maxSdkVersion="30" /> -->
 </manifest>

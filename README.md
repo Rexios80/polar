@@ -14,6 +14,18 @@ dependencies {
 }
 ```
 
+android/app/src/main/AndroidManifest.xml:
+
+```xml
+<uses-permission android:name="android.permission.BLUETOOTH_SCAN" android:usesPermissionFlags="neverForLocation" />
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" android:maxSdkVersion="30" />
+<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" android:maxSdkVersion="30" />
+```
+
+If you use `BLUETOOTH_SCAN` to determine location, remove `android:usesPermissionFlags="neverForLocation"`
+
+If you use location services in your app, remove `android:maxSdkVersion="30"` from the location permission tags
+
 ### iOS
 
 Podfile:

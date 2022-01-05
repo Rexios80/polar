@@ -1,3 +1,7 @@
+## 1.5.0
+- Fixed conflict with location permissions
+- Updated documentation
+
 ## 1.4.0
 - Fixed ProGuard issues. Disabling minify is no longer required.
 
