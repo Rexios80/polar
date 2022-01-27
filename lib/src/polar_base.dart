@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/services.dart';
@@ -118,7 +119,7 @@ class Polar {
   ///
   /// DartDocs are copied from the iOS version of the SDK and are only included for reference.
   Polar({this.bluetoothScanNeverForLocation = true}) {
-    _channel.setMethodCallHandler((call) {
+    _channel.setMethodCallHandler((call) async {
       switch (call.method) {
         case 'ecgDataReceived':
           _ecgStreamController.add(
@@ -127,7 +128,7 @@ class Polar {
               jsonDecode(call.arguments[1]),
             ),
           );
-          break;
+          return;
         case 'accDataReceived':
           _accStreamController.add(
             PolarAccData.fromJson(
@@ -135,7 +136,7 @@ class Polar {
               jsonDecode(call.arguments[1]),
             ),
           );
-          break;
+          return;
         case 'gyroDataReceived':
           _gyroStreamController.add(
             PolarGyroData.fromJson(
@@ -143,7 +144,7 @@ class Polar {
               jsonDecode(call.arguments[1]),
             ),
           );
-          break;
+          return;
         case 'magnetometerDataReceived':
           _magnetometerStreamController.add(
             PolarMagnetometerData.fromJson(
@@ -151,7 +152,7 @@ class Polar {
               jsonDecode(call.arguments[1]),
             ),
           );
-          break;
+          return;
         case 'ohrDataReceived':
           _ohrStreamController.add(
             PolarOhrData.fromJson(
@@ -159,7 +160,7 @@ class Polar {
               jsonDecode(call.arguments[1]),
             ),
           );
-          break;
+          return;
         case 'ohrPPIReceived':
           _ohrPPIStreamController.add(
             PolarPpiData.fromJson(
@@ -167,22 +168,22 @@ class Polar {
               jsonDecode(call.arguments[1]),
             ),
           );
-          break;
+          return;
         case 'blePowerStateChanged':
           _blePowerStateStreamController.add(call.arguments);
-          break;
+          return;
         case 'deviceConnected':
           _deviceConnectedStreamController
               .add(PolarDeviceInfo.fromJson(jsonDecode(call.arguments)));
-          break;
+          return;
         case 'deviceConnecting':
           _deviceConnectingStreamController
               .add(PolarDeviceInfo.fromJson(jsonDecode(call.arguments)));
-          break;
+          return;
         case 'deviceDisconnected':
           _deviceDisconnectedStreamController
               .add(PolarDeviceInfo.fromJson(jsonDecode(call.arguments)));
-          break;
+          return;
         case 'streamingFeaturesReady':
           _streamingFeaturesReadyStreamController.add(
             PolarStreamingFeaturesReadyEvent(
@@ -192,13 +193,13 @@ class Polar {
                   .toList(),
             ),
           );
-          break;
+          return;
         case 'sdkModeFeatureAvailable':
           _sdkModeFeatureAvailableStreamController.add(call.arguments);
-          break;
+          return;
         case 'hrFeatureReady':
           _hrFeatureReadyStreamController.add(call.arguments);
-          break;
+          return;
         case 'disInformationReceived':
           _disInformationStreamController.add(
             PolarDisInformationEvent(
@@ -207,7 +208,7 @@ class Polar {
               call.arguments[2],
             ),
           );
-          break;
+          return;
         case 'batteryLevelReceived':
           _batteryLevelStreamController.add(
             PolarBatteryLevelEvent(
@@ -215,7 +216,7 @@ class Polar {
               call.arguments[1],
             ),
           );
-          break;
+          return;
         case 'hrNotificationReceived':
           _heartRateStreamController.add(
             PolarHeartRateEvent(
@@ -223,13 +224,13 @@ class Polar {
               PolarHrData.fromJson(jsonDecode(call.arguments[1])),
             ),
           );
-          break;
+          return;
         case 'polarFtpFeatureReady':
           _ftpFeatureReadyStreamController.add(call.arguments);
-          break;
+          return;
+        default:
+          throw UnimplementedError(call.method);
       }
-
-      return Future.value();
     });
   }
 
@@ -237,18 +238,21 @@ class Polar {
   /// - Parameter identifier: Polar device id printed on the sensor/device or UUID.
   /// - Throws: InvalidArgument if identifier is invalid polar device id or invalid uuid
   void connectToDevice(String identifier) async {
-    final androidDeviceInfo = await DeviceInfoPlugin().androidInfo;
-    final sdkInt = androidDeviceInfo.version.sdkInt;
-    // If we are on Android M+
-    if (sdkInt != null && sdkInt >= 23) {
-      // If we are on an Android version before S or bluetooth scan is used to derive location
-      if (sdkInt < 31 || !bluetoothScanNeverForLocation) {
-        await Permission.location.request();
-      }
-      // If we are on Android S+
-      if (sdkInt >= 31) {
-        await Permission.bluetoothScan.request();
-        await Permission.bluetoothConnect.request();
+    if (Platform.isAndroid) {
+      final androidDeviceInfo = await DeviceInfoPlugin().androidInfo;
+      final sdkInt = androidDeviceInfo.version.sdkInt;
+
+      // If we are on Android M+
+      if (sdkInt != null && sdkInt >= 23) {
+        // If we are on an Android version before S or bluetooth scan is used to derive location
+        if (sdkInt < 31 || !bluetoothScanNeverForLocation) {
+          await Permission.location.request();
+        }
+        // If we are on Android S+
+        if (sdkInt >= 31) {
+          await Permission.bluetoothScan.request();
+          await Permission.bluetoothConnect.request();
+        }
       }
     }
 

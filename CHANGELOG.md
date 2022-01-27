@@ -2,6 +2,8 @@
 - Updated Polar SDK
 - Minimum iOS deployment target is now 13
 - Changes to post_install section of Podfile are no longer required
+- Request the required permissions on Android S+
+- Fixed battery level not being received on iOS
 
 ## 1.5.0
 - Fixed conflict with location permissions

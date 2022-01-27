@@ -26,6 +26,7 @@ public class SwiftPolarPlugin:
         api.deviceHrObserver = self
         api.powerStateObserver = self
         api.deviceFeaturesObserver = self
+        api.deviceInfoObserver = self
     }
 
     public static func register(with registrar: FlutterPluginRegistrar) {

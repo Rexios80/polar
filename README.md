@@ -10,6 +10,7 @@ app/build.gradle:
 
 ```groovy
 dependencies {
+    // You will need to update this line whenever this plugin updates
     implementation 'polarofficial:polar-ble-sdk:3.2.6@aar'
 }
 ```
