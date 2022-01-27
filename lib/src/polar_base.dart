@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:polar/src/model/device_streaming_feature.dart';
@@ -111,9 +111,13 @@ class Polar {
   Stream<String> get ftpFeatureReadyStream =>
       _ftpFeatureReadyStreamController.stream;
 
+  /// Will request location permission on Android S+ if false
+  final bool bluetoothScanNeverForLocation;
+
   /// Initialize the Polar API.
+  ///
   /// DartDocs are copied from the iOS version of the SDK and are only included for reference.
-  Polar() {
+  Polar({this.bluetoothScanNeverForLocation = true}) {
     _channel.setMethodCallHandler((call) {
       switch (call.method) {
         case 'ecgDataReceived':
@@ -233,8 +237,19 @@ class Polar {
   /// - Parameter identifier: Polar device id printed on the sensor/device or UUID.
   /// - Throws: InvalidArgument if identifier is invalid polar device id or invalid uuid
   void connectToDevice(String identifier) async {
-    if (Platform.isAndroid) {
-      await Permission.location.request();
+    final androidDeviceInfo = await DeviceInfoPlugin().androidInfo;
+    final sdkInt = androidDeviceInfo.version.sdkInt;
+    // If we are on Android M+
+    if (sdkInt != null && sdkInt >= 23) {
+      // If we are on an Android version before S or bluetooth scan is used to derive location
+      if (sdkInt < 31 || !bluetoothScanNeverForLocation) {
+        await Permission.location.request();
+      }
+      // If we are on Android S+
+      if (sdkInt >= 31) {
+        await Permission.bluetoothScan.request();
+        await Permission.bluetoothConnect.request();
+      }
     }
 
     unawaited(_channel.invokeMethod('connectToDevice', identifier));
