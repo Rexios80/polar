@@ -2,6 +2,7 @@ import Flutter
 import PolarBleSdk
 import RxSwift
 import UIKit
+import CoreBluetooth
 
 public class SwiftPolarPlugin:
     NSObject,
@@ -9,7 +10,8 @@ public class SwiftPolarPlugin:
     PolarBleApiObserver,
     PolarBleApiPowerStateObserver,
     PolarBleApiDeviceFeaturesObserver,
-    PolarBleApiDeviceHrObserver
+    PolarBleApiDeviceHrObserver,
+    PolarBleApiDeviceInfoObserver
 {
     var api = PolarBleApiDefaultImpl.polarImplementation(DispatchQueue.main, features: Features.allFeatures.rawValue)
     let channel: FlutterMethodChannel
@@ -227,5 +229,9 @@ public class SwiftPolarPlugin:
         
     public func ftpFeatureReady(_ identifier: String) {
         channel.invokeMethod("ftpFeatureReady", arguments: identifier)
+    }
+    
+    public func disInformationReceived(_ identifier: String, uuid: CBUUID, value: String) {
+        channel.invokeMethod("disInformationReceived", arguments: [identifier, uuid.uuidString, value])
     }
 }

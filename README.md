@@ -10,7 +10,7 @@ app/build.gradle:
 
 ```groovy
 dependencies {
-    implementation 'polarofficial:polar-ble-sdk:3.2.5@aar'
+    implementation 'polarofficial:polar-ble-sdk:3.2.6@aar'
 }
 ```
 
@@ -30,23 +30,8 @@ If you use location services in your app, remove `android:maxSdkVersion="30"` fr
 
 Podfile:
 
-```groovy
-platform :ios, '12.0'
-
-post_install do |installer|
-  installer.pods_project.targets.each do |target|
-    flutter_additional_ios_build_settings(target)
-    target.build_configurations.each do |config|
-      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '12.0'
-      config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
-      config.build_settings['BUILD_LIBRARY_FOR_DISTRIBUTION'] = 'YES'
-
-      config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= [
-        '$(inherited)',
-      ]
-    end
-  end
-end
+```ruby
+platform :ios, '13.0'
 ```
 
 Info.plist:

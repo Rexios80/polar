@@ -1,3 +1,8 @@
+## 1.6.0
+- Updated Polar SDK
+- Minimum iOS deployment target is now 13
+- Changes to post_install section of Podfile are no longer required
+
 ## 1.5.0
 - Fixed conflict with location permissions
 - Updated documentation
