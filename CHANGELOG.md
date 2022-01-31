@@ -1,3 +1,6 @@
+## 1.7.0
+- Specify version constraint for Polar SDK on iOS
+
 ## 1.6.0
 - Updated Polar SDK
 - Minimum iOS deployment target is now 13
