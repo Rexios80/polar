@@ -44,8 +44,14 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
 
     override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
         when (call.method) {
-            "connectToDevice" -> api.connectToDevice(call.arguments as String)
-            "disconnectFromDevice" -> api.disconnectFromDevice(call.arguments as String)
+            "connectToDevice" -> {
+                api.connectToDevice(call.arguments as String)
+                result.success(null)
+            }
+            "disconnectFromDevice" -> {
+                api.disconnectFromDevice(call.arguments as String)
+                result.success(null)
+            }
             "requestStreamSettings" -> {
                 val arguments = call.arguments as List<*>
                 requestStreamSettings(
@@ -63,6 +69,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
                     arguments[0] as String,
                     gson.fromJson(arguments[1] as String, PolarSensorSetting::class.java)
                 )
+                result.success(null)
             }
             "startAccStreaming" -> {
                 val arguments = call.arguments as List<*>
@@ -70,6 +77,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
                     arguments[0] as String,
                     gson.fromJson(arguments[1] as String, PolarSensorSetting::class.java)
                 )
+                result.success(null)
             }
             "startGyroStreaming" -> {
                 val arguments = call.arguments as List<*>
@@ -77,6 +85,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
                     arguments[0] as String,
                     gson.fromJson(arguments[1] as String, PolarSensorSetting::class.java)
                 )
+                result.success(null)
             }
             "startMagnetometerStreaming" -> {
                 val arguments = call.arguments as List<*>
@@ -84,6 +93,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
                     arguments[0] as String,
                     gson.fromJson(arguments[1] as String, PolarSensorSetting::class.java)
                 )
+                result.success(null)
             }
             "startOhrStreaming" -> {
                 val arguments = call.arguments as List<*>
@@ -91,8 +101,12 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
                     arguments[0] as String,
                     gson.fromJson(arguments[1] as String, PolarSensorSetting::class.java)
                 )
+                result.success(null)
             }
-            "startOhrPPIStreaming" -> startOhrPPIStreaming(call.arguments as String)
+            "startOhrPPIStreaming" -> {
+                startOhrPPIStreaming(call.arguments as String)
+                result.success(null)
+            }
             else -> result.notImplemented()
         }
     }

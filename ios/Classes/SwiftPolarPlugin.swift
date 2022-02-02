@@ -41,8 +41,10 @@ public class SwiftPolarPlugin:
                 switch call.method {
                 case "connectToDevice":
                     try instance.api.connectToDevice(call.arguments as! String)
+                    result(nil)
                 case "disconnectFromDevice":
                     try instance.api.disconnectFromDevice(call.arguments as! String)
+                    result(nil)
                 case "requestStreamSettings":
                     let arguments = call.arguments as! [Any]
                     try instance.requestStreamSettings(
@@ -58,6 +60,7 @@ public class SwiftPolarPlugin:
                             .data(using: .utf8)!)
                             .polarSensorSetting
                     )
+                    result(nil)
                 case "startAccStreaming":
                     let arguments = call.arguments as! [Any]
                     try instance.startAccStreaming(
@@ -66,6 +69,7 @@ public class SwiftPolarPlugin:
                             .data(using: .utf8)!)
                             .polarSensorSetting
                     )
+                    result(nil)
                 case "startGyroStreaming":
                     let arguments = call.arguments as! [Any]
                     try instance.startGyroStreaming(
@@ -74,6 +78,7 @@ public class SwiftPolarPlugin:
                             .data(using: .utf8)!)
                             .polarSensorSetting
                     )
+                    result(nil)
                 case "startMagnetometerStreaming":
                     let arguments = call.arguments as! [Any]
                     try instance.startMagnetometerStreaming(
@@ -82,6 +87,7 @@ public class SwiftPolarPlugin:
                             .data(using: .utf8)!)
                             .polarSensorSetting
                     )
+                    result(nil)
                 case "startOhrStreaming":
                     let arguments = call.arguments as! [Any]
                     try instance.startOhrStreaming(
@@ -90,8 +96,10 @@ public class SwiftPolarPlugin:
                             .data(using: .utf8)!)
                             .polarSensorSetting
                     )
+                    result(nil)
                 case "startOhrPPIStreaming":
                     try instance.startOhrPPIStreaming(call.arguments as! String)
+                    result(nil)
                 default: result(FlutterMethodNotImplemented)
                 }
             } catch {
