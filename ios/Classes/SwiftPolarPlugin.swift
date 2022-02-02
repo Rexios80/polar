@@ -1,8 +1,8 @@
+import CoreBluetooth
 import Flutter
 import PolarBleSdk
 import RxSwift
 import UIKit
-import CoreBluetooth
 
 public class SwiftPolarPlugin:
     NSObject,
@@ -57,8 +57,7 @@ public class SwiftPolarPlugin:
                     try instance.startEcgStreaming(
                         arguments[0] as! String,
                         decoder.decode(PolarSensorSettingCodable.self, from: (arguments[1] as! String)
-                            .data(using: .utf8)!)
-                            .polarSensorSetting
+                            .data(using: .utf8)!).polarSensorSetting
                     )
                     result(nil)
                 case "startAccStreaming":
@@ -66,8 +65,7 @@ public class SwiftPolarPlugin:
                     try instance.startAccStreaming(
                         arguments[0] as! String,
                         decoder.decode(PolarSensorSettingCodable.self, from: (arguments[1] as! String)
-                            .data(using: .utf8)!)
-                            .polarSensorSetting
+                            .data(using: .utf8)!).polarSensorSetting
                     )
                     result(nil)
                 case "startGyroStreaming":
@@ -75,8 +73,7 @@ public class SwiftPolarPlugin:
                     try instance.startGyroStreaming(
                         arguments[0] as! String,
                         decoder.decode(PolarSensorSettingCodable.self, from: (arguments[1] as! String)
-                            .data(using: .utf8)!)
-                            .polarSensorSetting
+                            .data(using: .utf8)!).polarSensorSetting
                     )
                     result(nil)
                 case "startMagnetometerStreaming":
@@ -84,8 +81,7 @@ public class SwiftPolarPlugin:
                     try instance.startMagnetometerStreaming(
                         arguments[0] as! String,
                         decoder.decode(PolarSensorSettingCodable.self, from: (arguments[1] as! String)
-                            .data(using: .utf8)!)
-                            .polarSensorSetting
+                            .data(using: .utf8)!).polarSensorSetting
                     )
                     result(nil)
                 case "startOhrStreaming":
@@ -93,8 +89,7 @@ public class SwiftPolarPlugin:
                     try instance.startOhrStreaming(
                         arguments[0] as! String,
                         decoder.decode(PolarSensorSettingCodable.self, from: (arguments[1] as! String)
-                            .data(using: .utf8)!)
-                            .polarSensorSetting
+                            .data(using: .utf8)!).polarSensorSetting
                     )
                     result(nil)
                 case "startOhrPPIStreaming":
@@ -103,8 +98,7 @@ public class SwiftPolarPlugin:
                 default: result(FlutterMethodNotImplemented)
                 }
             } catch {
-                NSLog(error.localizedDescription)
-                result(error)
+                result(FlutterError(code: "Error in Polar plugin", message: error.localizedDescription, details: error))
             }
         }
     }
@@ -115,7 +109,7 @@ public class SwiftPolarPlugin:
                   let arguments = String(data: data, encoding: .utf8)
             else { return }
             result(arguments)
-        }, onFailure: { result($0.localizedDescription) })
+        }, onFailure: { result(FlutterError(code: "Unable to request stream settings", message: $0.localizedDescription, details: $0)) })
     }
     
     func startEcgStreaming(_ identifier: String, _ settings: PolarSensorSetting) throws {
