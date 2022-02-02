@@ -135,9 +135,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
 
     // Apparently you have to call invokeMethod on the UI thread
     private fun invokeOnUiThread(method: String, arguments: Any?, callback: Result? = null) {
-        Handler(Looper.getMainLooper()).post {
-            channel.invokeMethod(method, arguments, callback)
-        }
+       runOnUiThread { channel.invokeMethod(method, arguments, callback) }
     }
 
     private fun runOnUiThread(runnable: () -> Unit) {
