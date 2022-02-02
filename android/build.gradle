@@ -53,7 +53,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
     // Dependencies for Polar SDK
-    implementation 'polarofficial:polar-ble-sdk:3.2.6@aar'
+    api 'polarofficial:polar-ble-sdk:3.2.6@aar'
     implementation 'io.reactivex.rxjava3:rxjava:3.1.1'
     implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'
     implementation 'commons-io:commons-io:2.10.0'

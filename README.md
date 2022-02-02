@@ -6,15 +6,6 @@ Plugin wrapper for the Polar SDK
 
 ### Android
 
-app/build.gradle:
-
-```groovy
-dependencies {
-    // You will need to update this line whenever this plugin updates
-    implementation 'polarofficial:polar-ble-sdk:3.2.6@aar'
-}
-```
-
 android/app/src/main/AndroidManifest.xml:
 
 ```xml

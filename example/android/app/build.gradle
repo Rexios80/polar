@@ -56,6 +56,4 @@ flutter {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-
-    implementation 'polarofficial:polar-ble-sdk:3.2.6@aar'
 }
