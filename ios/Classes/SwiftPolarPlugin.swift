@@ -98,7 +98,7 @@ public class SwiftPolarPlugin:
                 default: result(FlutterMethodNotImplemented)
                 }
             } catch {
-                result(FlutterError(code: "Error in Polar plugin", message: error.localizedDescription, details: error))
+                result(FlutterError(code: "Error in Polar plugin", message: error.localizedDescription, details: nil))
             }
         }
     }
@@ -109,7 +109,7 @@ public class SwiftPolarPlugin:
                   let arguments = String(data: data, encoding: .utf8)
             else { return }
             result(arguments)
-        }, onFailure: { result(FlutterError(code: "Unable to request stream settings", message: $0.localizedDescription, details: $0)) })
+        }, onFailure: { result(FlutterError(code: "Unable to request stream settings", message: $0.localizedDescription, details: nil)) })
     }
     
     func startEcgStreaming(_ identifier: String, _ settings: PolarSensorSetting) throws {
