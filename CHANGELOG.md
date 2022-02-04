@@ -1,3 +1,7 @@
+## 1.8.0
+- Fixed dangling native method calls
+- Changed to android/app/build.gradle are no longer required
+
 ## 1.7.0
 - Specify version constraint for Polar SDK on iOS
 
