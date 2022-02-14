@@ -1,3 +1,7 @@
+## 1.9.0
+- Updated Polar SDK to 3.2.7
+- Updated documentation
+
 ## 1.8.1
 - Fixed typo
 

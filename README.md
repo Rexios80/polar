@@ -1,6 +1,6 @@
 # polar
 
-Plugin wrapper for the Polar SDK
+Plugin wrapper for the [Polar SDK](https://github.com/polarofficial/polar-ble-sdk)
 
 ## Getting Started
 
@@ -41,16 +41,26 @@ Info.plist:
 </array>
 ```
 
-## Use it
+## Usage
 
+<!-- embedme readme/usage.dart -->
 ```dart
-polar = Polar();
-polar.heartRateStream.listen((e) => print('Heart rate: ${e.data.hr}'));
-polar.streamingFeaturesReadyStream.listen((e) {
-  if (e.features.contains(DeviceStreamingFeature.ecg)) {
-    polar
-        .startEcgStreaming(e.identifier)
-        .listen((e) => print('ECG data: ${e.samples}'));
-  }
-});
+import 'package:flutter/foundation.dart';
+import 'package:polar/polar.dart';
+
+const identifier = '1C709B20';
+final polar = Polar();
+
+void example() {
+  polar.heartRateStream.listen((e) => debugPrint('Heart rate: ${e.data.hr}'));
+  polar.streamingFeaturesReadyStream.listen((e) {
+    if (e.features.contains(DeviceStreamingFeature.ecg)) {
+      polar
+          .startEcgStreaming(e.identifier)
+          .listen((e) => debugPrint('ECG data: ${e.samples}'));
+    }
+  });
+  polar.connectToDevice(identifier);
+}
+
 ```

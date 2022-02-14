@@ -10,7 +10,7 @@ enum OhrDataType {
   unknown,
 }
 
-/// Extensiopn on [OhrDataType]
+/// Extension on [OhrDataType]
 extension OhrDataTypeExtension on OhrDataType {
   /// Create an [OhrDataType] from json
   static OhrDataType fromJson(dynamic json) {

@@ -16,14 +16,13 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   static const identifier = '1C709B20';
 
-  late final Polar polar;
-  List<String> logs = ['Service started'];
+  final polar = Polar();
+  final logs = ['Service started'];
 
   @override
   void initState() {
     super.initState();
 
-    polar = Polar();
     polar.heartRateStream.listen((e) => log('Heart rate: ${e.data.hr}'));
     polar.batteryLevelStream.listen((e) => log('Battery: ${e.level}'));
     polar.streamingFeaturesReadyStream.listen((e) {
