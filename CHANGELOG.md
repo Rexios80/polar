@@ -1,3 +1,6 @@
+## 1.10.0
+- Fixed lifecycle issues on Android
+
 ## 1.9.0
 - Updated Polar SDK to 3.2.7
 - Updated documentation
