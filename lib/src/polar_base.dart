@@ -115,9 +115,11 @@ class Polar {
   /// Will request location permission on Android S+ if false
   final bool bluetoothScanNeverForLocation;
 
-  /// Initialize the Polar API.
+  /// Initialize the Polar API
   ///
-  /// DartDocs are copied from the iOS version of the SDK and are only included for reference.
+  /// DartDocs are copied from the iOS version of the SDK and are only included for reference
+  ///
+  /// The plugin will request location permission on Android S+ if [bluetoothScanNeverForLocation] is false
   Polar({this.bluetoothScanNeverForLocation = true}) {
     _channel.setMethodCallHandler((call) async {
       switch (call.method) {
