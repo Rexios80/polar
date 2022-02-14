@@ -11,6 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
   
+  flutter_plugin_android_lifecycle: ^2.0.5
   permission_handler: ^8.0.0+2
   device_info_plus: ^3.2.1
   recase: ^4.0.0

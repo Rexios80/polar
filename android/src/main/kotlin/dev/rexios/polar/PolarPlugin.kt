@@ -3,7 +3,6 @@ package dev.rexios.polar
 import android.os.Handler
 import android.os.Looper
 import androidx.annotation.NonNull
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Lifecycle.Event
 import androidx.lifecycle.LifecycleEventObserver
 import com.google.gson.Gson
@@ -17,6 +16,7 @@ import io.flutter.Log
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
+import io.flutter.embedding.engine.plugins.lifecycle.FlutterLifecycleAdapter
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
@@ -116,8 +116,9 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
         api.shutDown()
     }
 
-    override fun onAttachedToActivity(p0: ActivityPluginBinding) {
-        (p0.lifecycle as Lifecycle).addObserver(LifecycleEventObserver { _, event ->
+    override fun onAttachedToActivity(binding: ActivityPluginBinding) {
+        val lifecycle = FlutterLifecycleAdapter.getActivityLifecycle(binding)
+        lifecycle.addObserver(LifecycleEventObserver { _, event ->
             when (event) {
                 Event.ON_PAUSE -> api.backgroundEntered()
                 Event.ON_RESUME -> api.foregroundEntered()
@@ -130,7 +131,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
 
     override fun onDetachedFromActivityForConfigChanges() {}
 
-    override fun onReattachedToActivityForConfigChanges(p0: ActivityPluginBinding) {}
+    override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {}
 
     override fun onDetachedFromActivity() {}
 
@@ -191,50 +192,50 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
         }, { Log.e(tag, it.localizedMessage ?: "Unknown ohrPPIStreaming error") })
     }
 
-    override fun blePowerStateChanged(p0: Boolean) {
-        invokeOnUiThread("blePowerStateChanged", p0)
+    override fun blePowerStateChanged(powered: Boolean) {
+        invokeOnUiThread("blePowerStateChanged", powered)
     }
 
-    override fun deviceConnected(p0: PolarDeviceInfo) {
-        invokeOnUiThread("deviceConnected", gson.toJson(p0))
+    override fun deviceConnected(info: PolarDeviceInfo) {
+        invokeOnUiThread("deviceConnected", gson.toJson(info))
     }
 
-    override fun deviceConnecting(p0: PolarDeviceInfo) {
-        invokeOnUiThread("deviceConnecting", gson.toJson(p0))
+    override fun deviceConnecting(info: PolarDeviceInfo) {
+        invokeOnUiThread("deviceConnecting", gson.toJson(info))
     }
 
-    override fun deviceDisconnected(p0: PolarDeviceInfo) {
-        invokeOnUiThread("deviceDisconnected", gson.toJson(p0))
+    override fun deviceDisconnected(info: PolarDeviceInfo) {
+        invokeOnUiThread("deviceDisconnected", gson.toJson(info))
     }
 
     override fun streamingFeaturesReady(
-        p0: String,
-        p1: MutableSet<PolarBleApi.DeviceStreamingFeature>
+        identifier: String,
+        features: MutableSet<PolarBleApi.DeviceStreamingFeature>
     ) {
-        invokeOnUiThread("streamingFeaturesReady", listOf(p0, gson.toJson(p1)))
+        invokeOnUiThread("streamingFeaturesReady", listOf(identifier, gson.toJson(features)))
     }
 
-    override fun sdkModeFeatureAvailable(p0: String) {
-        invokeOnUiThread("sdkModeFeatureAvailable", p0)
+    override fun sdkModeFeatureAvailable(identifier: String) {
+        invokeOnUiThread("sdkModeFeatureAvailable", identifier)
     }
 
-    override fun hrFeatureReady(p0: String) {
-        invokeOnUiThread("hrFeatureReady", p0)
+    override fun hrFeatureReady(identifier: String) {
+        invokeOnUiThread("hrFeatureReady", identifier)
     }
 
-    override fun disInformationReceived(p0: String, p1: UUID, p2: String) {
-        invokeOnUiThread("disInformationReceived", listOf(p0, p1.toString(), p2))
+    override fun disInformationReceived(identifier: String, uuid: UUID, value: String) {
+        invokeOnUiThread("disInformationReceived", listOf(identifier, uuid.toString(), value))
     }
 
-    override fun batteryLevelReceived(p0: String, p1: Int) {
-        invokeOnUiThread("batteryLevelReceived", listOf(p0, p1))
+    override fun batteryLevelReceived(identifier: String, level: Int) {
+        invokeOnUiThread("batteryLevelReceived", listOf(identifier, level))
     }
 
-    override fun hrNotificationReceived(p0: String, p1: PolarHrData) {
-        invokeOnUiThread("hrNotificationReceived", listOf(p0, gson.toJson(p1)))
+    override fun hrNotificationReceived(identifier: String, data: PolarHrData) {
+        invokeOnUiThread("hrNotificationReceived", listOf(identifier, gson.toJson(data)))
     }
 
-    override fun polarFtpFeatureReady(p0: String) {
-        invokeOnUiThread("polarFtpFeatureReady", p0)
+    override fun polarFtpFeatureReady(identifier: String) {
+        invokeOnUiThread("polarFtpFeatureReady", identifier)
     }
 }
