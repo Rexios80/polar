@@ -113,6 +113,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
 
     override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
+        api.shutDown()
     }
 
     override fun onAttachedToActivity(p0: ActivityPluginBinding) {
@@ -135,7 +136,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
 
     // Apparently you have to call invokeMethod on the UI thread
     private fun invokeOnUiThread(method: String, arguments: Any?, callback: Result? = null) {
-       runOnUiThread { channel.invokeMethod(method, arguments, callback) }
+        runOnUiThread { channel.invokeMethod(method, arguments, callback) }
     }
 
     private fun runOnUiThread(runnable: () -> Unit) {
