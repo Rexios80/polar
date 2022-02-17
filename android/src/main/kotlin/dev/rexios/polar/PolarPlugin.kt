@@ -25,7 +25,7 @@ import java.util.*
 
 /** PolarPlugin */
 class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvider, ActivityAware {
-    private val tag = "PolarPlugin"
+    private val tag = "Polar"
     private lateinit var channel: MethodChannel
     private lateinit var api: PolarBleApi
 
@@ -40,6 +40,11 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
             PolarBleApi.ALL_FEATURES
         )
         api.setApiCallback(this)
+    }
+
+    override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
+        channel.setMethodCallHandler(null)
+        shutdown()
     }
 
     override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
@@ -111,28 +116,20 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
         }
     }
 
-    override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
-        channel.setMethodCallHandler(null)
-        api.shutDown()
-    }
-
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
         val lifecycle = FlutterLifecycleAdapter.getActivityLifecycle(binding)
         lifecycle.addObserver(LifecycleEventObserver { _, event ->
             when (event) {
                 Event.ON_PAUSE -> api.backgroundEntered()
                 Event.ON_RESUME -> api.foregroundEntered()
-                Event.ON_DESTROY -> api.shutDown()
-                else -> {
-                }
+                Event.ON_DESTROY -> shutdown()
+                else -> {}
             }
         })
     }
 
     override fun onDetachedFromActivityForConfigChanges() {}
-
     override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {}
-
     override fun onDetachedFromActivity() {}
 
     // Apparently you have to call invokeMethod on the UI thread
@@ -142,6 +139,14 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
 
     private fun runOnUiThread(runnable: () -> Unit) {
         Handler(Looper.getMainLooper()).post { runnable() }
+    }
+
+    private fun shutdown() {
+        try {
+            api.shutDown()
+        } catch (e: Exception) {
+            // This will throw if the api is already shut down
+        }
     }
 
     private fun requestStreamSettings(

@@ -1,3 +1,6 @@
+## 1.11.0
+- Fixed crash on Android when detaching from engine
+
 ## 1.10.0
 - Fixed lifecycle issues on Android
 
