@@ -49,7 +49,7 @@ class Polar {
   /// helper to ask ble power state
   Stream<bool> get blePowerStateStream => _blePowerStateStreamController.stream;
 
-  /// Device connnection has been established.
+  /// Device connection has been established.
   ///
   /// - Parameter identifier: Polar device info
   Stream<PolarDeviceInfo> get deviceConnectedStream =>
