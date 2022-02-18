@@ -239,6 +239,8 @@ class Polar {
   /// Request a connection to a Polar device. Invokes `PolarBleApiObservers` polarDeviceConnected.
   /// - Parameter identifier: Polar device id printed on the sensor/device or UUID.
   /// - Throws: InvalidArgument if identifier is invalid polar device id or invalid uuid
+  /// 
+  /// Will request the necessary permissions
   void connectToDevice(String identifier) async {
     if (Platform.isAndroid) {
       final androidDeviceInfo = await DeviceInfoPlugin().androidInfo;

@@ -1,3 +1,6 @@
+## 1.12.0
+- No longer requests bluetooth permission on app startup on iOS
+
 ## 1.11.0
 - Fixed crash on Android when detaching from engine
 
