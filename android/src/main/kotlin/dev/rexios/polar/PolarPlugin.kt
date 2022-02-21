@@ -120,7 +120,6 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
         val lifecycle = FlutterLifecycleAdapter.getActivityLifecycle(binding)
         lifecycle.addObserver(LifecycleEventObserver { _, event ->
             when (event) {
-                Event.ON_PAUSE -> api.backgroundEntered()
                 Event.ON_RESUME -> api.foregroundEntered()
                 Event.ON_DESTROY -> shutdown()
                 else -> {}

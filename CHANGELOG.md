@@ -1,3 +1,6 @@
+## 1.13.0
+- Updated Polar SDK to 3.2.8
+
 ## 1.12.0
 - No longer requests bluetooth permission on app startup on iOS
 
