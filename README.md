@@ -2,6 +2,10 @@
 
 Plugin wrapper for the [Polar SDK](https://github.com/polarofficial/polar-ble-sdk)
 
+## Note
+
+This is an unofficial wrapper for the Polar SDK. For any questions regarding the underlying SDKs or Polar devices in general, please see the [official repository](https://github.com/polarofficial/polar-ble-sdk).
+
 ## Getting Started
 
 ### Android
