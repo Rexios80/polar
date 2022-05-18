@@ -1,3 +1,6 @@
+## 1.16.0
+- Updated Polar SDK to 3.3.1
+
 ## 1.15.0
 - Updated Polar SDK to 3.2.10
 
