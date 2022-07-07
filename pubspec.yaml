@@ -1,6 +1,6 @@
 name: polar
 description: This is a Dart plugin wrapper for the Polar SDK on Android and iOS
-version: 1.17.0
+version: 2.0.0
 homepage: https://github.com/Rexios80/polar
 
 environment:
@@ -12,15 +12,15 @@ dependencies:
     sdk: flutter
   
   flutter_plugin_android_lifecycle: ^2.0.5
-  permission_handler: ^9.1.0
-  device_info_plus: ^3.2.1
+  permission_handler: ^10.0.0
+  device_info_plus: ^4.0.0
   recase: ^4.0.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   
-  rexios_lints: ^2.0.1
+  rexios_lints: ^3.0.0
 
 flutter:
   plugin:

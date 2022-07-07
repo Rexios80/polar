@@ -49,14 +49,14 @@ packages:
       name: cupertino_icons
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.4"
+    version: "1.0.5"
   device_info_plus:
     dependency: transitive
     description:
       name: device_info_plus
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.2.3"
+    version: "4.0.0"
   device_info_plus_linux:
     dependency: transitive
     description:
@@ -190,14 +190,14 @@ packages:
       name: permission_handler
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "9.2.0"
+    version: "10.0.0"
   permission_handler_android:
     dependency: transitive
     description:
       name: permission_handler_android
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "9.0.2+1"
+    version: "10.0.0"
   permission_handler_apple:
     dependency: transitive
     description:
@@ -232,7 +232,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "1.17.0"
+    version: "2.0.0"
   recase:
     dependency: transitive
     description:
@@ -246,7 +246,7 @@ packages:
       name: rexios_lints
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.1"
+    version: "3.0.0"
   sky_engine:
     dependency: transitive
     description: flutter

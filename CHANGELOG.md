@@ -1,3 +1,7 @@
+## 2.0.0
+- BREAKING CHANGE: Updated Android compileSdkVersion to 33 for `permission_handler`
+- Updated dependencies
+
 ## 1.17.0
 - Updated Polar SDK to 3.3.2
 
