@@ -8,7 +8,7 @@ class PolarDeviceInfo {
   /// Probably empty on modern Android versions.
   final String address;
 
-  /// polar device id or UUID for 3rd party sensors
+  /// RSSI (Received Signal Strength Indicator) value from advertisement
   final int rssi;
 
   /// local name from advertisement
