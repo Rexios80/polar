@@ -14,11 +14,15 @@ enum OhrDataType {
 extension OhrDataTypeExtension on OhrDataType {
   /// Create an [OhrDataType] from json
   static OhrDataType fromJson(dynamic json) {
-    if (Platform.isIOS) {
-      return OhrDataType.values[json as int];
-    } else {
-      // This is android
-      return OhrDataType.values.byName((json as String).toLowerCase());
+    try {
+      if (Platform.isIOS) {
+        return OhrDataType.values[json as int];
+      } else {
+        // This is android
+        return OhrDataType.values.byName((json as String).toLowerCase());
+      }
+    } catch (e) {
+      return OhrDataType.unknown;
     }
   }
 }
