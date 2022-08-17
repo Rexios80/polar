@@ -2,7 +2,6 @@ package dev.rexios.polar
 
 import android.os.Handler
 import android.os.Looper
-import androidx.annotation.NonNull
 import androidx.lifecycle.Lifecycle.Event
 import androidx.lifecycle.LifecycleEventObserver
 import com.google.gson.Gson
@@ -23,6 +22,8 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import java.util.*
 
+fun Any?.discard() = Unit
+
 /** PolarPlugin */
 class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvider, ActivityAware {
     private val tag = "Polar"
@@ -31,7 +32,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
 
     private val gson = Gson()
 
-    override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+    override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "polar")
         channel.setMethodCallHandler(this)
 
@@ -42,12 +43,12 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
         api.setApiCallback(this)
     }
 
-    override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
+    override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
         shutdown()
     }
 
-    override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
+    override fun onMethodCall(call: MethodCall, result: Result) {
         when (call.method) {
             "connectToDevice" -> {
                 api.connectToDevice(call.arguments as String)
@@ -156,44 +157,50 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
         api.requestStreamSettings(identifier, feature).subscribe({
             runOnUiThread { result.success(gson.toJson(it)) }
         }, {
-            runOnUiThread { result.error(it.localizedMessage, null, null) }
-        })
+            runOnUiThread {
+                result.error(
+                    it.localizedMessage ?: "Unknown  error requesting streaming settings",
+                    null,
+                    null,
+                )
+            }
+        }).discard()
     }
 
     private fun startEcgStreaming(identifier: String, settings: PolarSensorSetting) {
         api.startEcgStreaming(identifier, settings).subscribe({
             invokeOnUiThread("ecgDataReceived", listOf(identifier, gson.toJson(it)))
-        }, { Log.e(tag, it.localizedMessage ?: "Unknown ecgStreaming error") })
+        }, { Log.e(tag, it.localizedMessage ?: "Unknown ecgStreaming error") }).discard()
     }
 
     private fun startAccStreaming(identifier: String, settings: PolarSensorSetting) {
         api.startAccStreaming(identifier, settings).subscribe({
             invokeOnUiThread("accDataReceived", listOf(identifier, gson.toJson(it)))
-        }, { Log.e(tag, it.localizedMessage ?: "Unknown accStreaming error") })
+        }, { Log.e(tag, it.localizedMessage ?: "Unknown accStreaming error") }).discard()
     }
 
     private fun startGyroStreaming(identifier: String, settings: PolarSensorSetting) {
         api.startGyroStreaming(identifier, settings).subscribe({
             invokeOnUiThread("gyroDataReceived", listOf(identifier, gson.toJson(it)))
-        }, { Log.e(tag, it.localizedMessage ?: "Unknown gyroStreaming error") })
+        }, { Log.e(tag, it.localizedMessage ?: "Unknown gyroStreaming error") }).discard()
     }
 
     private fun startMagnetometerStreaming(identifier: String, settings: PolarSensorSetting) {
         api.startMagnetometerStreaming(identifier, settings).subscribe({
             invokeOnUiThread("magnetometerDataReceived", listOf(identifier, gson.toJson(it)))
-        }, { Log.e(tag, it.localizedMessage ?: "Unknown magnetometerStreaming error") })
+        }, { Log.e(tag, it.localizedMessage ?: "Unknown magnetometerStreaming error") }).discard()
     }
 
     private fun startOhrStreaming(identifier: String, settings: PolarSensorSetting) {
         api.startOhrStreaming(identifier, settings).subscribe({
             invokeOnUiThread("ohrDataReceived", listOf(identifier, gson.toJson(it)))
-        }, { Log.e(tag, it.localizedMessage ?: "Unknown ohrStreaming error") })
+        }, { Log.e(tag, it.localizedMessage ?: "Unknown ohrStreaming error") }).discard()
     }
 
     private fun startOhrPPIStreaming(identifier: String) {
         api.startOhrPPIStreaming(identifier).subscribe({
             invokeOnUiThread("ohrPPIReceived", listOf(identifier, gson.toJson(it)))
-        }, { Log.e(tag, it.localizedMessage ?: "Unknown ohrPPIStreaming error") })
+        }, { Log.e(tag, it.localizedMessage ?: "Unknown ohrPPIStreaming error") }).discard()
     }
 
     override fun blePowerStateChanged(powered: Boolean) {

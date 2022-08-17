@@ -1,3 +1,5 @@
+import 'dart:io';
+
 /// Polar Ohr PPI sample
 class PolarOhrPpiSample {
   /// ppInMs Pulse to Pulse interval in milliseconds.
@@ -26,7 +28,12 @@ class PolarOhrPpiSample {
       : ppi = json['ppi'],
         errorEstimate = json['errorEstimate'],
         hr = json['hr'],
-        blockerBit = json['blockerBit'],
-        skinContactStatus = json['skinContactStatus'],
-        skinContactSupported = json['skinContactSupported'];
+        blockerBit =
+            Platform.isIOS ? json['blockerBit'] != 0 : json['blockerBit'],
+        skinContactStatus = Platform.isIOS
+            ? json['skinContactStatus'] != 0
+            : json['skinContactStatus'],
+        skinContactSupported = Platform.isIOS
+            ? json['skinContactSupported'] != 0
+            : json['skinContactSupported'];
 }
