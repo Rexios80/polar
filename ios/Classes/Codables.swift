@@ -214,7 +214,7 @@ class PolarPpiDataCodable: Encodable {
         try? container.encode(polarPpiData.samples.map {
             [
                 "hr": $0.hr,
-                "ppInMs": Int($0.ppInMs),
+                "ppi": Int($0.ppInMs),
                 "errorEstimate": Int($0.ppErrorEstimate),
                 "blockerBit": $0.blockerBit,
                 "skinContactStatus": $0.skinContactStatus,
