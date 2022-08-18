@@ -1,3 +1,6 @@
+## 2.1.0
+- Fixes issues deserializing `OhrDataType` and `PolarOhrPpiSample`
+
 ## 2.0.0
 - BREAKING CHANGE: Updated Android compileSdkVersion to 33 for `permission_handler`
 - Updated dependencies
