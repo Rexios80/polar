@@ -240,8 +240,20 @@ class Polar {
   /// - Parameter identifier: Polar device id printed on the sensor/device or UUID.
   /// - Throws: InvalidArgument if identifier is invalid polar device id or invalid uuid
   ///
-  /// Will request the necessary permissions
-  Future<void> connectToDevice(String identifier) async {
+  /// Will request the necessary permissions if [requestPermissions] is true
+  Future<void> connectToDevice(
+    String identifier, {
+    bool requestPermissions = true,
+  }) async {
+    if (requestPermissions) {
+      await this.requestPermissions();
+    }
+
+    unawaited(_channel.invokeMethod('connectToDevice', identifier));
+  }
+
+  /// Request the necessary permissions on Android
+  Future<void> requestPermissions() async {
     if (Platform.isAndroid) {
       final androidDeviceInfo = await DeviceInfoPlugin().androidInfo;
       final sdkInt = androidDeviceInfo.version.sdkInt;
@@ -259,8 +271,6 @@ class Polar {
         }
       }
     }
-
-    unawaited(_channel.invokeMethod('connectToDevice', identifier));
   }
 
   /// Disconnect from the current Polar device.
