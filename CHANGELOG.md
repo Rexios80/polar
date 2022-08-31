@@ -1,3 +1,6 @@
+## 2.2.0
+- `connectToDevice` now returns a future
+
 ## 2.1.0
 - Fixes issues deserializing `OhrDataType` and `PolarOhrPpiSample`
 

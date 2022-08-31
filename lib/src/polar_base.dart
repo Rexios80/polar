@@ -241,7 +241,7 @@ class Polar {
   /// - Throws: InvalidArgument if identifier is invalid polar device id or invalid uuid
   ///
   /// Will request the necessary permissions
-  void connectToDevice(String identifier) async {
+  Future<void> connectToDevice(String identifier) async {
     if (Platform.isAndroid) {
       final androidDeviceInfo = await DeviceInfoPlugin().androidInfo;
       final sdkInt = androidDeviceInfo.version.sdkInt;
