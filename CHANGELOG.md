@@ -1,3 +1,7 @@
+## 3.0.0
+- Android minimum SDK is lifted from 21 to 24
+- Updated Polar SDK to 3.3.3
+
 ## 2.2.0
 - `connectToDevice` now returns a future
 - Requesting permissions in `connectToDevice` is now optional
