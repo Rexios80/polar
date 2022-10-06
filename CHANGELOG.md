@@ -1,3 +1,6 @@
+## 3.1.0
+- Updated Polar SDK to 3.3.4
+
 ## 3.0.0
 - Android minimum SDK is lifted from 21 to 24
 - Updated Polar SDK to 3.3.3
