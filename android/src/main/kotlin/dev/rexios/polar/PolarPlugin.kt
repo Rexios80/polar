@@ -54,13 +54,17 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
         shutdown()
     }
 
-    private var searchSubscription: Disposable? = null
+
     private val searchHandler = object : EventChannel.StreamHandler {
-        override fun onListen(arguments: Any?, sink: EventChannel.EventSink) {
+        private var searchSubscription: Disposable? = null
+
+        override fun onListen(arguments: Any?, events: EventChannel.EventSink) {
             searchSubscription = api.searchForDevice().subscribe({
-                sink.success(gson.toJson(it))
+                events.success(gson.toJson(it))
             }, {
-                sink.error(it.localizedMessage ?: "Unknown error searching for device", null, null)
+                events.error(it.localizedMessage ?: "Unknown error searching for device", null, null)
+            }, {
+                events.endOfStream()
             })
         }
 
