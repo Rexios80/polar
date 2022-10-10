@@ -245,7 +245,6 @@ class Polar {
   /// - Returns: Observable stream
   ///  - onNext: for every new polar device found
   Stream<PolarDeviceInfo> searchForDevice() {
-    _channel.invokeMethod('searchForDevice');
     return _searchChannel.receiveBroadcastStream().map(
           (event) => PolarDeviceInfo.fromJson(jsonDecode(event)),
         );

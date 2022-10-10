@@ -23,6 +23,7 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
 
+    polar.searchForDevice().listen((e) => print('searchForDevice: $e'));
     polar.heartRateStream.listen((e) => log('Heart rate: ${e.data.hr}'));
     polar.batteryLevelStream.listen((e) => log('Battery: ${e.level}'));
     polar.streamingFeaturesReadyStream.listen((e) {

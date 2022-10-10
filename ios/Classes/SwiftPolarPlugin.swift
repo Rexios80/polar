@@ -13,24 +13,24 @@ public class SwiftPolarPlugin:
     PolarBleApiDeviceHrObserver,
     PolarBleApiDeviceInfoObserver
 {
-    static var api: PolarBleApi!
+    var api: PolarBleApi!
     let channel: FlutterMethodChannel
-    static let encoder = JSONEncoder()
+    let encoder = JSONEncoder()
     let decoder = JSONDecoder()
     
     init(channel: FlutterMethodChannel) {
         self.channel = channel
     }
     
-    private func initialize() {
-        guard Self.api == nil else { return }
-        Self.api = PolarBleApiDefaultImpl.polarImplementation(DispatchQueue.main, features: Features.allFeatures.rawValue)
+    private func initApi() {
+        guard api == nil else { return }
+        api = PolarBleApiDefaultImpl.polarImplementation(DispatchQueue.main, features: Features.allFeatures.rawValue)
         
-        Self.api.observer = self
-        Self.api.deviceHrObserver = self
-        Self.api.powerStateObserver = self
-        Self.api.deviceFeaturesObserver = self
-        Self.api.deviceInfoObserver = self
+        api.observer = self
+        api.deviceHrObserver = self
+        api.powerStateObserver = self
+        api.deviceFeaturesObserver = self
+        api.deviceInfoObserver = self
     }
 
     public static func register(with registrar: FlutterPluginRegistrar) {
@@ -39,44 +39,41 @@ public class SwiftPolarPlugin:
         let instance = SwiftPolarPlugin(channel: channel)
         registrar.addMethodCallDelegate(instance, channel: channel)
         
-        searchChannel.setStreamHandler(SearchHandler())
+        searchChannel.setStreamHandler(instance.searchHandler)
     }
     
-    class SearchHandler: NSObject, FlutterStreamHandler {
-        var sub: Disposable?
+    var searchSubscription: Disposable?
+    lazy var searchHandler = StreamHandler(onListen: { _, events in
+        self.initApi()
         
-        func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
-            sub = api.searchForDevice().subscribe(onNext: { data in
-                guard let data = try? encoder.encode(PolarDeviceInfoCodable(data)),
-                      let arguments = String(data: data, encoding: .utf8)
-                else { return }
-                events(arguments)
-            }, onError: { error in
-                events((FlutterError(code: "Error in searchForDevice", message: error.localizedDescription, details: nil)))
-            }, onCompleted: {
-                events(FlutterEndOfEventStream)
-            }, onDisposed: {
-                events(FlutterEndOfEventStream)
-            })
-            return nil
-        }
-        
-        func onCancel(withArguments arguments: Any?) -> FlutterError? {
-            sub?.dispose()
-            return nil
-        }
-    }
+        self.searchSubscription = self.api.searchForDevice().subscribe(onNext: { data in
+            guard let data = try? self.encoder.encode(PolarDeviceInfoCodable(data)),
+                  let arguments = String(data: data, encoding: .utf8)
+            else { return }
+            events(arguments)
+        }, onError: { error in
+            events(FlutterError(code: "Error in searchForDevice", message: error.localizedDescription, details: nil))
+        }, onCompleted: {
+            events(FlutterEndOfEventStream)
+        }, onDisposed: {
+            events(FlutterEndOfEventStream)
+        })
+        return nil
+    }, onCancel: { _ in
+        self.searchSubscription?.dispose()
+        return nil
+    })
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        initialize()
+        initApi()
         
         do {
             switch call.method {
             case "connectToDevice":
-                try Self.api.connectToDevice(call.arguments as! String)
+                try api.connectToDevice(call.arguments as! String)
                 result(nil)
             case "disconnectFromDevice":
-                try Self.api.disconnectFromDevice(call.arguments as! String)
+                try api.disconnectFromDevice(call.arguments as! String)
                 result(nil)
             case "requestStreamSettings":
                 let arguments = call.arguments as! [Any]
@@ -136,8 +133,8 @@ public class SwiftPolarPlugin:
     }
     
     func requestStreamSettings(_ identifier: String, _ feature: DeviceStreamingFeature, _ result: @escaping FlutterResult) throws {
-        _ = Self.api.requestStreamSettings(identifier, feature: feature).subscribe(onSuccess: { data in
-            guard let data = try? Self.encoder.encode(PolarSensorSettingCodable(data)),
+        _ = api.requestStreamSettings(identifier, feature: feature).subscribe(onSuccess: { data in
+            guard let data = try? self.encoder.encode(PolarSensorSettingCodable(data)),
                   let arguments = String(data: data, encoding: .utf8)
             else { return }
             result(arguments)
@@ -145,8 +142,8 @@ public class SwiftPolarPlugin:
     }
     
     func startEcgStreaming(_ identifier: String, _ settings: PolarSensorSetting) throws {
-        _ = Self.api.startEcgStreaming(identifier, settings: settings).subscribe(onNext: { data in
-            guard let data = try? Self.encoder.encode(PolarEcgDataCodable(data)),
+        _ = api.startEcgStreaming(identifier, settings: settings).subscribe(onNext: { data in
+            guard let data = try? self.encoder.encode(PolarEcgDataCodable(data)),
                   let arguments = String(data: data, encoding: .utf8)
             else { return }
             self.channel.invokeMethod("ecgDataReceived", arguments: [identifier, arguments])
@@ -154,8 +151,8 @@ public class SwiftPolarPlugin:
     }
     
     func startAccStreaming(_ identifier: String, _ settings: PolarSensorSetting) throws {
-        _ = Self.api.startAccStreaming(identifier, settings: settings).subscribe(onNext: { data in
-            guard let data = try? Self.encoder.encode(PolarAccDataCodable(data)),
+        _ = api.startAccStreaming(identifier, settings: settings).subscribe(onNext: { data in
+            guard let data = try? self.encoder.encode(PolarAccDataCodable(data)),
                   let arguments = String(data: data, encoding: .utf8)
             else { return }
             self.channel.invokeMethod("accDataReceived", arguments: [identifier, arguments])
@@ -163,8 +160,8 @@ public class SwiftPolarPlugin:
     }
     
     func startGyroStreaming(_ identifier: String, _ settings: PolarSensorSetting) throws {
-        _ = Self.api.startGyroStreaming(identifier, settings: settings).subscribe(onNext: { data in
-            guard let data = try? Self.encoder.encode(PolarGyroDataCodable(data)),
+        _ = api.startGyroStreaming(identifier, settings: settings).subscribe(onNext: { data in
+            guard let data = try? self.encoder.encode(PolarGyroDataCodable(data)),
                   let arguments = String(data: data, encoding: .utf8)
             else { return }
             self.channel.invokeMethod("gyroDataReceived", arguments: [identifier, arguments])
@@ -172,8 +169,8 @@ public class SwiftPolarPlugin:
     }
     
     func startMagnetometerStreaming(_ identifier: String, _ settings: PolarSensorSetting) throws {
-        _ = Self.api.startMagnetometerStreaming(identifier, settings: settings).subscribe(onNext: { data in
-            guard let data = try? Self.encoder.encode(PolarMagnetometerDataCodable(data)),
+        _ = api.startMagnetometerStreaming(identifier, settings: settings).subscribe(onNext: { data in
+            guard let data = try? self.encoder.encode(PolarMagnetometerDataCodable(data)),
                   let arguments = String(data: data, encoding: .utf8)
             else { return }
             self.channel.invokeMethod("magnetometerDataReceived", arguments: [identifier, arguments])
@@ -181,8 +178,8 @@ public class SwiftPolarPlugin:
     }
     
     func startOhrStreaming(_ identifier: String, _ settings: PolarSensorSetting) throws {
-        _ = Self.api.startOhrStreaming(identifier, settings: settings).subscribe(onNext: { data in
-            guard let data = try? Self.encoder.encode(PolarOhrDataCodable(data)),
+        _ = api.startOhrStreaming(identifier, settings: settings).subscribe(onNext: { data in
+            guard let data = try? self.encoder.encode(PolarOhrDataCodable(data)),
                   let arguments = String(data: data, encoding: .utf8)
             else { return }
             self.channel.invokeMethod("ohrDataReceived", arguments: [identifier, arguments])
@@ -190,8 +187,8 @@ public class SwiftPolarPlugin:
     }
     
     func startOhrPPIStreaming(_ identifier: String) throws {
-        _ = Self.api.startOhrPPIStreaming(identifier).subscribe(onNext: { data in
-            guard let data = try? Self.encoder.encode(PolarPpiDataCodable(data)),
+        _ = api.startOhrPPIStreaming(identifier).subscribe(onNext: { data in
+            guard let data = try? self.encoder.encode(PolarPpiDataCodable(data)),
                   let arguments = String(data: data, encoding: .utf8)
             else { return }
             self.channel.invokeMethod("ohrPPIReceived", arguments: [identifier, arguments])
@@ -199,7 +196,7 @@ public class SwiftPolarPlugin:
     }
     
     public func deviceConnecting(_ polarDeviceInfo: PolarDeviceInfo) {
-        guard let data = try? Self.encoder.encode(PolarDeviceInfoCodable(polarDeviceInfo)),
+        guard let data = try? encoder.encode(PolarDeviceInfoCodable(polarDeviceInfo)),
               let arguments = String(data: data, encoding: .utf8)
         else {
             return
@@ -208,7 +205,7 @@ public class SwiftPolarPlugin:
     }
     
     public func deviceConnected(_ polarDeviceInfo: PolarDeviceInfo) {
-        guard let data = try? Self.encoder.encode(PolarDeviceInfoCodable(polarDeviceInfo)),
+        guard let data = try? encoder.encode(PolarDeviceInfoCodable(polarDeviceInfo)),
               let arguments = String(data: data, encoding: .utf8)
         else {
             return
@@ -217,7 +214,7 @@ public class SwiftPolarPlugin:
     }
     
     public func deviceDisconnected(_ polarDeviceInfo: PolarDeviceInfo) {
-        guard let data = try? Self.encoder.encode(PolarDeviceInfoCodable(polarDeviceInfo)),
+        guard let data = try? encoder.encode(PolarDeviceInfoCodable(polarDeviceInfo)),
               let arguments = String(data: data, encoding: .utf8)
         else {
             return
@@ -230,7 +227,7 @@ public class SwiftPolarPlugin:
     }
     
     public func hrValueReceived(_ identifier: String, data: PolarHrData) {
-        guard let data = try? Self.encoder.encode(PolarHrDataCodable(data)),
+        guard let data = try? encoder.encode(PolarHrDataCodable(data)),
               let arguments = String(data: data, encoding: .utf8)
         else {
             return
@@ -243,7 +240,7 @@ public class SwiftPolarPlugin:
     }
     
     public func streamingFeaturesReady(_ identifier: String, streamingFeatures: Set<DeviceStreamingFeature>) {
-        guard let data = try? Self.encoder.encode(streamingFeatures.map { $0.rawValue }),
+        guard let data = try? encoder.encode(streamingFeatures.map { $0.rawValue }),
               let encodedFeatures = String(data: data, encoding: .utf8)
         else {
             return
@@ -268,5 +265,23 @@ public class SwiftPolarPlugin:
     
     public func disInformationReceived(_ identifier: String, uuid: CBUUID, value: String) {
         channel.invokeMethod("disInformationReceived", arguments: [identifier, uuid.uuidString, value])
+    }
+}
+
+class StreamHandler: NSObject, FlutterStreamHandler {
+    final let onListen: (Any?, @escaping FlutterEventSink) -> FlutterError?
+    final let onCancel: (Any?) -> FlutterError?
+    
+    init(onListen: @escaping (Any?, @escaping FlutterEventSink) -> FlutterError?, onCancel: @escaping (Any?) -> FlutterError?) {
+        self.onListen = onListen
+        self.onCancel = onCancel
+    }
+    
+    func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
+        return onListen(arguments, events)
+    }
+    
+    func onCancel(withArguments arguments: Any?) -> FlutterError? {
+        return onCancel(arguments)
     }
 }
