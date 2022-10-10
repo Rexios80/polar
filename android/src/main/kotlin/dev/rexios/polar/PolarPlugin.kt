@@ -16,10 +16,12 @@ import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.embedding.engine.plugins.lifecycle.FlutterLifecycleAdapter
+import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+import io.reactivex.rxjava3.disposables.Disposable
 import java.util.*
 
 fun Any?.discard() = Unit
@@ -28,6 +30,7 @@ fun Any?.discard() = Unit
 class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvider, ActivityAware {
     private val tag = "Polar"
     private lateinit var channel: MethodChannel
+    private lateinit var searchChannel: EventChannel
     private lateinit var api: PolarBleApi
 
     private val gson = Gson()
@@ -35,6 +38,9 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "polar")
         channel.setMethodCallHandler(this)
+
+        searchChannel = EventChannel(flutterPluginBinding.binaryMessenger, "polar/search")
+        searchChannel.setStreamHandler(searchHandler)
 
         api = PolarBleApiDefaultImpl.defaultImplementation(
             flutterPluginBinding.applicationContext,
@@ -48,16 +54,33 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
         shutdown()
     }
 
+    private var searchSubscription: Disposable? = null
+    private val searchHandler = object : EventChannel.StreamHandler {
+        override fun onListen(arguments: Any?, sink: EventChannel.EventSink) {
+            searchSubscription = api.searchForDevice().subscribe({
+                sink.success(gson.toJson(it))
+            }, {
+                sink.error(it.localizedMessage ?: "Unknown error searching for device", null, null)
+            })
+        }
+
+        override fun onCancel(arguments: Any) {
+            searchSubscription?.dispose()
+        }
+    }
+
     override fun onMethodCall(call: MethodCall, result: Result) {
         when (call.method) {
             "connectToDevice" -> {
                 api.connectToDevice(call.arguments as String)
                 result.success(null)
             }
+
             "disconnectFromDevice" -> {
                 api.disconnectFromDevice(call.arguments as String)
                 result.success(null)
             }
+
             "requestStreamSettings" -> {
                 val arguments = call.arguments as List<*>
                 requestStreamSettings(
@@ -69,6 +92,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
                     result
                 )
             }
+
             "startEcgStreaming" -> {
                 val arguments = call.arguments as List<*>
                 startEcgStreaming(
@@ -77,6 +101,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
                 )
                 result.success(null)
             }
+
             "startAccStreaming" -> {
                 val arguments = call.arguments as List<*>
                 startAccStreaming(
@@ -85,6 +110,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
                 )
                 result.success(null)
             }
+
             "startGyroStreaming" -> {
                 val arguments = call.arguments as List<*>
                 startGyroStreaming(
@@ -93,6 +119,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
                 )
                 result.success(null)
             }
+
             "startMagnetometerStreaming" -> {
                 val arguments = call.arguments as List<*>
                 startMagnetometerStreaming(
@@ -101,6 +128,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
                 )
                 result.success(null)
             }
+
             "startOhrStreaming" -> {
                 val arguments = call.arguments as List<*>
                 startOhrStreaming(
@@ -109,10 +137,12 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
                 )
                 result.success(null)
             }
+
             "startOhrPPIStreaming" -> {
                 startOhrPPIStreaming(call.arguments as String)
                 result.success(null)
             }
+
             else -> result.notImplemented()
         }
     }
@@ -159,7 +189,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
         }, {
             runOnUiThread {
                 result.error(
-                    it.localizedMessage ?: "Unknown  error requesting streaming settings",
+                    it.localizedMessage ?: "Unknown error requesting streaming settings",
                     null,
                     null,
                 )

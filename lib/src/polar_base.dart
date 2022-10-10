@@ -14,7 +14,8 @@ import 'package:polar/src/events.dart';
 
 /// Flutter implementation of the [PolarBleSdk]
 class Polar {
-  static const MethodChannel _channel = MethodChannel('polar');
+  static const _channel = MethodChannel('polar');
+  static const _searchChannel = EventChannel('polar/search');
 
   // Streaming
   final _ecgStreamController = StreamController<PolarEcgData>.broadcast();
@@ -121,119 +122,133 @@ class Polar {
   ///
   /// The plugin will request location permission on Android S+ if [bluetoothScanNeverForLocation] is false
   Polar({this.bluetoothScanNeverForLocation = true}) {
-    _channel.setMethodCallHandler((call) async {
-      switch (call.method) {
-        case 'ecgDataReceived':
-          _ecgStreamController.add(
-            PolarEcgData.fromJson(
-              call.arguments[0],
-              jsonDecode(call.arguments[1]),
-            ),
-          );
-          return;
-        case 'accDataReceived':
-          _accStreamController.add(
-            PolarAccData.fromJson(
-              call.arguments[0],
-              jsonDecode(call.arguments[1]),
-            ),
-          );
-          return;
-        case 'gyroDataReceived':
-          _gyroStreamController.add(
-            PolarGyroData.fromJson(
-              call.arguments[0],
-              jsonDecode(call.arguments[1]),
-            ),
-          );
-          return;
-        case 'magnetometerDataReceived':
-          _magnetometerStreamController.add(
-            PolarMagnetometerData.fromJson(
-              call.arguments[0],
-              jsonDecode(call.arguments[1]),
-            ),
-          );
-          return;
-        case 'ohrDataReceived':
-          _ohrStreamController.add(
-            PolarOhrData.fromJson(
-              call.arguments[0],
-              jsonDecode(call.arguments[1]),
-            ),
-          );
-          return;
-        case 'ohrPPIReceived':
-          _ohrPPIStreamController.add(
-            PolarPpiData.fromJson(
-              call.arguments[0],
-              jsonDecode(call.arguments[1]),
-            ),
-          );
-          return;
-        case 'blePowerStateChanged':
-          _blePowerStateStreamController.add(call.arguments);
-          return;
-        case 'deviceConnected':
-          _deviceConnectedStreamController
-              .add(PolarDeviceInfo.fromJson(jsonDecode(call.arguments)));
-          return;
-        case 'deviceConnecting':
-          _deviceConnectingStreamController
-              .add(PolarDeviceInfo.fromJson(jsonDecode(call.arguments)));
-          return;
-        case 'deviceDisconnected':
-          _deviceDisconnectedStreamController
-              .add(PolarDeviceInfo.fromJson(jsonDecode(call.arguments)));
-          return;
-        case 'streamingFeaturesReady':
-          _streamingFeaturesReadyStreamController.add(
-            PolarStreamingFeaturesReadyEvent(
-              call.arguments[0],
-              (jsonDecode(call.arguments[1]) as List)
-                  .map((e) => DeviceStreamingFeatureExtension.fromJson(e))
-                  .toList(),
-            ),
-          );
-          return;
-        case 'sdkModeFeatureAvailable':
-          _sdkModeFeatureAvailableStreamController.add(call.arguments);
-          return;
-        case 'hrFeatureReady':
-          _hrFeatureReadyStreamController.add(call.arguments);
-          return;
-        case 'disInformationReceived':
-          _disInformationStreamController.add(
-            PolarDisInformationEvent(
-              call.arguments[0],
-              call.arguments[1],
-              call.arguments[2],
-            ),
-          );
-          return;
-        case 'batteryLevelReceived':
-          _batteryLevelStreamController.add(
-            PolarBatteryLevelEvent(
-              call.arguments[0],
-              call.arguments[1],
-            ),
-          );
-          return;
-        case 'hrNotificationReceived':
-          _heartRateStreamController.add(
-            PolarHeartRateEvent(
-              call.arguments[0],
-              PolarHrData.fromJson(jsonDecode(call.arguments[1])),
-            ),
-          );
-          return;
-        case 'polarFtpFeatureReady':
-          _ftpFeatureReadyStreamController.add(call.arguments);
-          return;
-        default:
-          throw UnimplementedError(call.method);
-      }
-    });
+    _channel.setMethodCallHandler(_handleMethodCall);
+  }
+
+  Future<void> _handleMethodCall(MethodCall call) async {
+    switch (call.method) {
+      case 'ecgDataReceived':
+        _ecgStreamController.add(
+          PolarEcgData.fromJson(
+            call.arguments[0],
+            jsonDecode(call.arguments[1]),
+          ),
+        );
+        return;
+      case 'accDataReceived':
+        _accStreamController.add(
+          PolarAccData.fromJson(
+            call.arguments[0],
+            jsonDecode(call.arguments[1]),
+          ),
+        );
+        return;
+      case 'gyroDataReceived':
+        _gyroStreamController.add(
+          PolarGyroData.fromJson(
+            call.arguments[0],
+            jsonDecode(call.arguments[1]),
+          ),
+        );
+        return;
+      case 'magnetometerDataReceived':
+        _magnetometerStreamController.add(
+          PolarMagnetometerData.fromJson(
+            call.arguments[0],
+            jsonDecode(call.arguments[1]),
+          ),
+        );
+        return;
+      case 'ohrDataReceived':
+        _ohrStreamController.add(
+          PolarOhrData.fromJson(
+            call.arguments[0],
+            jsonDecode(call.arguments[1]),
+          ),
+        );
+        return;
+      case 'ohrPPIReceived':
+        _ohrPPIStreamController.add(
+          PolarPpiData.fromJson(
+            call.arguments[0],
+            jsonDecode(call.arguments[1]),
+          ),
+        );
+        return;
+      case 'blePowerStateChanged':
+        _blePowerStateStreamController.add(call.arguments);
+        return;
+      case 'deviceConnected':
+        _deviceConnectedStreamController
+            .add(PolarDeviceInfo.fromJson(jsonDecode(call.arguments)));
+        return;
+      case 'deviceConnecting':
+        _deviceConnectingStreamController
+            .add(PolarDeviceInfo.fromJson(jsonDecode(call.arguments)));
+        return;
+      case 'deviceDisconnected':
+        _deviceDisconnectedStreamController
+            .add(PolarDeviceInfo.fromJson(jsonDecode(call.arguments)));
+        return;
+      case 'streamingFeaturesReady':
+        _streamingFeaturesReadyStreamController.add(
+          PolarStreamingFeaturesReadyEvent(
+            call.arguments[0],
+            (jsonDecode(call.arguments[1]) as List)
+                .map((e) => DeviceStreamingFeatureExtension.fromJson(e))
+                .toList(),
+          ),
+        );
+        return;
+      case 'sdkModeFeatureAvailable':
+        _sdkModeFeatureAvailableStreamController.add(call.arguments);
+        return;
+      case 'hrFeatureReady':
+        _hrFeatureReadyStreamController.add(call.arguments);
+        return;
+      case 'disInformationReceived':
+        _disInformationStreamController.add(
+          PolarDisInformationEvent(
+            call.arguments[0],
+            call.arguments[1],
+            call.arguments[2],
+          ),
+        );
+        return;
+      case 'batteryLevelReceived':
+        _batteryLevelStreamController.add(
+          PolarBatteryLevelEvent(
+            call.arguments[0],
+            call.arguments[1],
+          ),
+        );
+        return;
+      case 'hrNotificationReceived':
+        _heartRateStreamController.add(
+          PolarHeartRateEvent(
+            call.arguments[0],
+            PolarHrData.fromJson(jsonDecode(call.arguments[1])),
+          ),
+        );
+        return;
+      case 'polarFtpFeatureReady':
+        _ftpFeatureReadyStreamController.add(call.arguments);
+        return;
+      default:
+        throw UnimplementedError(call.method);
+    }
+  }
+
+  /// Start searching for Polar device(s)
+  ///
+  /// - Parameter onNext: Invoked once for each device
+  /// - Returns: Observable stream
+  ///  - onNext: for every new polar device found
+  Stream<PolarDeviceInfo> searchForDevice() {
+    _channel.invokeMethod('searchForDevice');
+    return _searchChannel.receiveBroadcastStream().map(
+          (event) => PolarDeviceInfo.fromJson(jsonDecode(event)),
+        );
   }
 
   /// Request a connection to a Polar device. Invokes `PolarBleApiObservers` polarDeviceConnected.
