@@ -72,6 +72,10 @@ public class SwiftPolarPlugin:
                 try requestStreamSettings(call, result)
             case "startRecording":
                 startRecording(call, result)
+            case "stopRecording":
+                stopRecording(call, result)
+            case "requestRecordingStatus":
+                requestRecordingStatus(call, result)
             default: result(FlutterMethodNotImplemented)
             }
         } catch {
@@ -204,6 +208,28 @@ public class SwiftPolarPlugin:
             result(FlutterError(code: "Error starting recording", message: error.localizedDescription, details: nil))
         }, onDisposed: {
             result(FlutterError(code: "Error starting recording", message: nil, details: nil))
+        })
+    }
+
+    func stopRecording(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        let identifier = call.arguments as! String
+
+        _ = api.stopRecording(identifier).subscribe(onCompleted: {
+            result(nil)
+        }, onError: { error in
+            result(FlutterError(code: "Error stopping recording", message: error.localizedDescription, details: nil))
+        }, onDisposed: {
+            result(FlutterError(code: "Error stopping recording", message: nil, details: nil))
+        })
+    }
+
+    func requestRecordingStatus(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        let identifier = call.arguments as! String
+
+        _ = api.requestRecordingStatus(identifier).subscribe(onSuccess: { data in
+            result([data.ongoing, data.entryId])
+        }, onFailure: { error in
+            result(FlutterError(code: "Error stopping recording", message: error.localizedDescription, details: nil))
         })
     }
 

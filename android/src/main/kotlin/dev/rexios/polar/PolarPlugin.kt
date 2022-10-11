@@ -23,7 +23,7 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.reactivex.rxjava3.disposables.Disposable
-import java.util.*
+import java.util.UUID
 
 fun Any?.discard() = Unit
 
@@ -72,9 +72,9 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
             }
 
             "requestStreamSettings" -> requestStreamSettings(call, result)
-
             "startRecording" -> startRecording(call, result)
-
+            "stopRecording" -> stopRecording(call, result)
+            "requestRecordingStatus" -> requestRecordingStatus(call, result)
             else -> result.notImplemented()
         }
     }
@@ -198,6 +198,59 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
             runOnUiThread {
                 result.error(
                     it.localizedMessage ?: "Unknown error requesting streaming settings",
+                    null,
+                    null,
+                )
+            }
+        }).discard()
+    }
+
+    private fun startRecording(call: MethodCall, result: Result) {
+        val arguments = call.arguments as List<*>
+        val identifier = arguments[0] as String
+        val exerciseId = arguments[1] as String
+        val interval =
+            gson.fromJson(arguments[2] as String, PolarBleApi.RecordingInterval::class.java)
+        val sampleType = gson.fromJson(arguments[3] as String, PolarBleApi.SampleType::class.java)
+
+        api.startRecording(identifier, exerciseId, interval, sampleType).subscribe({
+            runOnUiThread { result.success(null) }
+        }, {
+            runOnUiThread {
+                result.error(
+                    it.localizedMessage ?: "Unknown error starting recording",
+                    null,
+                    null,
+                )
+            }
+        }).discard()
+    }
+
+    private fun stopRecording(call: MethodCall, result: Result) {
+        val identifier = call.arguments as String
+
+        api.stopRecording(identifier).subscribe({
+            runOnUiThread { result.success(null) }
+        }, {
+            runOnUiThread {
+                result.error(
+                    it.localizedMessage ?: "Unknown error stopping recording",
+                    null,
+                    null,
+                )
+            }
+        }).discard()
+    }
+
+    private fun requestRecordingStatus(call: MethodCall, result: Result) {
+        val identifier = call.arguments as String
+
+        api.requestRecordingStatus(identifier).subscribe({
+            runOnUiThread { result.success(listOf(it.first, it.second)) }
+        }, {
+            runOnUiThread {
+                result.error(
+                    it.localizedMessage ?: "Unknown error requesting recording status",
                     null,
                     null,
                 )

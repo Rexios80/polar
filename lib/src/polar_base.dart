@@ -405,4 +405,29 @@ class Polar {
       [identifier, exerciseId, interval.toJson(), sampleType.toJson()],
     );
   }
+
+  /// Request stop for current recording. Supported only by Polar H10. Requires `polarFileTransfer` feature.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or UUID
+  /// - Returns: Completable stream
+  ///   - success: recording stopped
+  ///   - onError: see `PolarErrors` for possible errors invoked
+  Future<void> stopRecording(String identifier) {
+    return _channel.invokeMethod('stopRecording', identifier);
+  }
+
+  /// Request current recording status. Supported only by Polar H10. Requires `polarFileTransfer` feature.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id
+  /// - Returns: Single stream
+  ///   - success: see `PolarRecordingStatus`
+  ///   - onError: see `PolarErrors` for possible errors invoked
+  Future<PolarRecordingStatus> requestRecordingStatus(String identifier) async {
+    final result =
+        await _channel.invokeListMethod('requestRecordingStatus', identifier);
+
+    return PolarRecordingStatus(ongoing: result![0], entryId: result[1]);
+  }
 }
