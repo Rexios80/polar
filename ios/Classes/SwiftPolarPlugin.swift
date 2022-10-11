@@ -80,6 +80,8 @@ public class SwiftPolarPlugin:
                 listExercises(call, result)
             case "fetchExercise":
                 fetchExercise(call, result)
+            case "removeExercise":
+                removeExercise(call, result)
             default: result(FlutterMethodNotImplemented)
             }
         } catch {
@@ -264,6 +266,19 @@ public class SwiftPolarPlugin:
             result(data)
         }, onFailure: { error in
             result(FlutterError(code: "Error  fetching exercise", message: error.localizedDescription, details: nil))
+        })
+    }
+
+    func removeExercise(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        let arguments = call.arguments as! [Any]
+        let identifier = arguments[0] as! String
+        let entry = try! decoder.decode(PolarExerciseEntryCodable.self, from: (arguments[1] as! String)
+            .data(using: .utf8)!).data
+
+        _ = api.removeExercise(identifier, entry: entry).subscribe(onCompleted: {
+            result(nil)
+        }, onError: { error in
+            result(FlutterError(code: "Error removing exercise", message: error.localizedDescription, details: nil))
         })
     }
 

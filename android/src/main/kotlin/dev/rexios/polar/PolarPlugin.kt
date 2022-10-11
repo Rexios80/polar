@@ -78,6 +78,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
             "requestRecordingStatus" -> requestRecordingStatus(call, result)
             "listExercises" -> listExercises(call, result)
             "fetchExercise" -> fetchExercise(call, result)
+            "removeExercise" -> removeExercise(call, result)
             else -> result.notImplemented()
         }
     }
@@ -291,6 +292,24 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
             runOnUiThread {
                 result.error(
                     it.localizedMessage ?: "Unknown error fetching exercise",
+                    null,
+                    null,
+                )
+            }
+        }).discard()
+    }
+
+    private fun removeExercise(call: MethodCall, result: Result) {
+        val arguments = call.arguments as List<*>
+        val identifier = arguments[0] as String
+        val entry = gson.fromJson(arguments[1] as String, PolarExerciseEntry::class.java)
+
+        api.removeExercise(identifier, entry).subscribe({
+            runOnUiThread { result.success(null) }
+        }, {
+            runOnUiThread {
+                result.error(
+                    it.localizedMessage ?: "Unknown error removing exercise",
                     null,
                     null,
                 )

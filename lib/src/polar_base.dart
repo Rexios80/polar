@@ -253,8 +253,7 @@ class Polar {
       'requestStreamSettings',
       [identifier, feature.toJson()],
     );
-    final json = jsonDecode(response);
-    return PolarSensorSetting.fromJson(json);
+    return PolarSensorSetting.fromJson(jsonDecode(response));
   }
 
   Stream _startStreaming(
@@ -438,8 +437,8 @@ class Polar {
   /// - Returns: Observable stream
   ///   - onNext: see `PolarExerciseEntry`
   ///   - onError: see `PolarErrors` for possible errors invoked
-  Future<List<PolarExerciseEntry>> listExercises() async {
-    final result = await _channel.invokeListMethod('listExercises');
+  Future<List<PolarExerciseEntry>> listExercises(String identifier) async {
+    final result = await _channel.invokeListMethod('listExercises', identifier);
     if (result == null) {
       return [];
     }
@@ -447,5 +446,35 @@ class Polar {
         .cast<String>()
         .map((e) => PolarExerciseEntry.fromJson(jsonDecode(e)))
         .toList();
+  }
+
+  /// Api for fetching a single exercise from Polar H10 device. Requires `polarFileTransfer` feature. This API is working for Polar OH1 and Polar Verity Sense devices too, however in those devices recording of exercise requires that sensor is registered to Polar Flow account.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or device address
+  ///   - entry: single exercise entry to be fetched
+  /// - Returns: Single stream
+  ///   - success: invoked after exercise data has been fetched from the device. see `PolarExerciseEntry`
+  ///   - onError: see `PolarErrors` for possible errors invoked
+  Future<PolarExerciseData> fetchExercise(
+    String identifier,
+    PolarExerciseEntry entry,
+  ) async {
+    final result = await _channel
+        .invokeMethod('fetchExercise', [identifier, entry.toJson()]);
+    return PolarExerciseData.fromJson(identifier, jsonDecode(result));
+  }
+
+  /// Api for removing single exercise from Polar H10 device. Requires `polarFileTransfer` feature. This API is working for Polar OH1 and Polar Verity Sense devices too, however in those devices recording of exercise requires that sensor is registered to Polar Flow account.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or device address
+  ///   - entry: single exercise entry to be removed
+  /// - Returns: Completable stream
+  ///   - complete: entry successfully removed
+  ///   - onError: see `PolarErrors` for possible errors invoked
+  Future<void> removeExercise(String identifier, PolarExerciseEntry entry) {
+    return _channel
+        .invokeMethod('removeExercise', [identifier, entry.toJson()]);
   }
 }
