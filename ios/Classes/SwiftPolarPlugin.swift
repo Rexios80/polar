@@ -76,6 +76,8 @@ public class SwiftPolarPlugin:
                 stopRecording(call, result)
             case "requestRecordingStatus":
                 requestRecordingStatus(call, result)
+            case "listExercises":
+                listExercises(call, result)
             default: result(FlutterMethodNotImplemented)
             }
         } catch {
@@ -96,8 +98,6 @@ public class SwiftPolarPlugin:
             events(FlutterError(code: "Error in searchForDevice", message: error.localizedDescription, details: nil))
         }, onCompleted: {
             events(FlutterEndOfEventStream)
-        }, onDisposed: {
-            events(FlutterEndOfEventStream)
         })
         return nil
     }, onCancel: { _ in
@@ -113,7 +113,7 @@ public class SwiftPolarPlugin:
         let identifier = arguments[1] as! String
         // Will be null for ppi feature
         let settings = try? self.decoder.decode(PolarSensorSettingCodable.self, from: (arguments[2] as! String)
-            .data(using: .utf8)!).polarSensorSetting
+            .data(using: .utf8)!).data
 
         let stream: AnyObservable
         switch feature {
@@ -155,8 +155,6 @@ public class SwiftPolarPlugin:
         }, onError: { error in
             events(FlutterError(code: "Error while streaming", message: error.localizedDescription, details: nil))
         }, onCompleted: {
-            events(FlutterEndOfEventStream)
-        }, onDisposed: {
             events(FlutterEndOfEventStream)
         })
 
@@ -206,8 +204,6 @@ public class SwiftPolarPlugin:
             result(nil)
         }, onError: { error in
             result(FlutterError(code: "Error starting recording", message: error.localizedDescription, details: nil))
-        }, onDisposed: {
-            result(FlutterError(code: "Error starting recording", message: nil, details: nil))
         })
     }
 
@@ -218,8 +214,6 @@ public class SwiftPolarPlugin:
             result(nil)
         }, onError: { error in
             result(FlutterError(code: "Error stopping recording", message: error.localizedDescription, details: nil))
-        }, onDisposed: {
-            result(FlutterError(code: "Error stopping recording", message: nil, details: nil))
         })
     }
 
@@ -231,6 +225,25 @@ public class SwiftPolarPlugin:
         }, onFailure: { error in
             result(FlutterError(code: "Error stopping recording", message: error.localizedDescription, details: nil))
         })
+    }
+
+    func listExercises(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        let identifier = call.arguments as! String
+
+        var exercises = [String]()
+        _ = api.fetchStoredExerciseList(identifier).subscribe(
+            onNext: { data in
+                guard let data = try? self.encoder.encode(PolarExerciseEntryCodable(data)),
+                      let arguments = String(data: data, encoding: .utf8) else {
+                    return
+                }
+                exercises.append(arguments)
+            }, onError: { error in
+                result(FlutterError(code: "Error listing exercises", message: error.localizedDescription, details: nil))
+            }, onCompleted: {
+                result(exercises)
+            }
+        )
     }
 
     public func deviceConnecting(_ polarDeviceInfo: PolarDeviceInfo) {
@@ -328,8 +341,7 @@ protocol AnyObservable {
     func anySubscribe(
         onNext: ((Any) -> Void)?,
         onError: ((Swift.Error) -> Void)?,
-        onCompleted: (() -> Void)?,
-        onDisposed: (() -> Void)?
+        onCompleted: (() -> Void)?
     ) -> Disposable
 }
 
@@ -337,9 +349,8 @@ extension Observable: AnyObservable {
     public func anySubscribe(
         onNext: ((Any) -> Void)? = nil,
         onError: ((Swift.Error) -> Void)? = nil,
-        onCompleted: (() -> Void)? = nil,
-        onDisposed: (() -> Void)? = nil
+        onCompleted: (() -> Void)? = nil
     ) -> Disposable {
-        subscribe(onNext: onNext, onError: onError, onCompleted: onCompleted, onDisposed: onDisposed)
+        subscribe(onNext: onNext, onError: onError, onCompleted: onCompleted)
     }
 }

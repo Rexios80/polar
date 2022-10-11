@@ -430,4 +430,22 @@ class Polar {
 
     return PolarRecordingStatus(ongoing: result![0], entryId: result[1]);
   }
+
+  /// Api for fetching stored exercises list from Polar H10 device. Requires `polarFileTransfer` feature. This API is working for Polar OH1 and Polar Verity Sense devices too, however in those devices recording of exercise requires that sensor is registered to Polar Flow account.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or device address
+  /// - Returns: Observable stream
+  ///   - onNext: see `PolarExerciseEntry`
+  ///   - onError: see `PolarErrors` for possible errors invoked
+  Future<List<PolarExerciseEntry>> listExercises() async {
+    final result = await _channel.invokeListMethod('listExercises');
+    if (result == null) {
+      return [];
+    }
+    return result
+        .cast<String>()
+        .map((e) => PolarExerciseEntry.fromJson(jsonDecode(e)))
+        .toList();
+  }
 }

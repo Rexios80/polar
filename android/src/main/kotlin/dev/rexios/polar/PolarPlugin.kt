@@ -10,6 +10,7 @@ import com.polar.sdk.api.PolarBleApi.DeviceStreamingFeature
 import com.polar.sdk.api.PolarBleApiCallbackProvider
 import com.polar.sdk.api.PolarBleApiDefaultImpl
 import com.polar.sdk.api.model.PolarDeviceInfo
+import com.polar.sdk.api.model.PolarExerciseEntry
 import com.polar.sdk.api.model.PolarHrData
 import com.polar.sdk.api.model.PolarSensorSetting
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -75,6 +76,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
             "startRecording" -> startRecording(call, result)
             "stopRecording" -> stopRecording(call, result)
             "requestRecordingStatus" -> requestRecordingStatus(call, result)
+            "listExercises" -> listExercises(call, result)
             else -> result.notImplemented()
         }
     }
@@ -255,6 +257,25 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
                     null,
                 )
             }
+        }).discard()
+    }
+
+    private fun listExercises(call: MethodCall, result: Result) {
+        val identifier = call.arguments as String
+
+        val exercises = mutableListOf<String>()
+        api.listExercises(identifier).subscribe({
+            exercises.add(gson.toJson(it))
+        }, {
+            runOnUiThread {
+                result.error(
+                    it.localizedMessage ?: "Unknown error listing exercises",
+                    null,
+                    null,
+                )
+            }
+        }, {
+            result.success(exercises)
         }).discard()
     }
 
