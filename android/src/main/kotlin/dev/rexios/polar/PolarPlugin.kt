@@ -77,6 +77,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
             "stopRecording" -> stopRecording(call, result)
             "requestRecordingStatus" -> requestRecordingStatus(call, result)
             "listExercises" -> listExercises(call, result)
+            "fetchExercise" -> fetchExercise(call, result)
             else -> result.notImplemented()
         }
     }
@@ -276,6 +277,24 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
             }
         }, {
             result.success(exercises)
+        }).discard()
+    }
+
+    private fun fetchExercise(call: MethodCall, result: Result) {
+        val arguments = call.arguments as List<*>
+        val identifier = arguments[0] as String
+        val entry = gson.fromJson(arguments[1] as String, PolarExerciseEntry::class.java)
+
+        api.fetchExercise(identifier, entry).subscribe({
+            result.success(gson.toJson(it))
+        }, {
+            runOnUiThread {
+                result.error(
+                    it.localizedMessage ?: "Unknown error fetching exercise",
+                    null,
+                    null,
+                )
+            }
         }).discard()
     }
 

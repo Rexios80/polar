@@ -234,7 +234,7 @@ class PolarSensorSettingCodable: Codable {
     required init(from decoder: Decoder) {
         let container = try? decoder.container(keyedBy: CodingKeys.self)
 
-        // Flutter can only send [String: UInt32]
+        // Flutter can only send maps keyed by strings
         let dict: [String: UInt32] = (try? container?.decode([String: UInt32].self, forKey: .settings)) ?? [:]
         let newDict = Dictionary(
             uniqueKeysWithValues:
@@ -262,11 +262,24 @@ class PolarSensorSettingCodable: Codable {
     }
 }
 
-class PolarExerciseEntryCodable: Encodable {
+class PolarExerciseEntryCodable: Codable {
     let data: PolarExerciseEntry
 
     required init(_ data: PolarExerciseEntry) {
         self.data = data
+    }
+
+    required init(from decoder: Decoder) {
+        guard let container = try? decoder.container(keyedBy: CodingKeys.self),
+              let path = try? container.decode(String.self, forKey: .path),
+              let date = try? container.decode(Date.self, forKey: .date),
+              let entryId = try? container.decode(String.self, forKey: .entryId)
+        else {
+            data = PolarExerciseEntry(path: "", date: Date(), entryId: "")
+            return
+        }
+
+        data = PolarExerciseEntry(path: path, date: date, entryId: entryId)
     }
 
     enum CodingKeys: String, CodingKey {

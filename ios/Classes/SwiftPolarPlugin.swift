@@ -78,6 +78,8 @@ public class SwiftPolarPlugin:
                 requestRecordingStatus(call, result)
             case "listExercises":
                 listExercises(call, result)
+            case "fetchExercise":
+                fetchExercise(call, result)
             default: result(FlutterMethodNotImplemented)
             }
         } catch {
@@ -91,9 +93,9 @@ public class SwiftPolarPlugin:
 
         self.searchSubscription = self.api.searchForDevice().subscribe(onNext: { data in
             guard let data = try? self.encoder.encode(PolarDeviceInfoCodable(data)),
-                  let arguments = String(data: data, encoding: .utf8)
+                  let data = String(data: data, encoding: .utf8)
             else { return }
-            events(arguments)
+            events(data)
         }, onError: { error in
             events(FlutterError(code: "Error in searchForDevice", message: error.localizedDescription, details: nil))
         }, onCompleted: {
@@ -148,10 +150,10 @@ public class SwiftPolarPlugin:
                 encodedData = try? self.encoder.encode(PolarPpiDataCodable(data as! PolarPpiData))
             }
 
-            guard let data = encodedData as? Data, let arguments = String(data: data, encoding: .utf8) else {
+            guard let data = encodedData as? Data, let data = String(data: data, encoding: .utf8) else {
                 return
             }
-            events(arguments)
+            events(data)
         }, onError: { error in
             events(FlutterError(code: "Error while streaming", message: error.localizedDescription, details: nil))
         }, onCompleted: {
@@ -182,9 +184,9 @@ public class SwiftPolarPlugin:
 
         _ = api.requestStreamSettings(identifier, feature: feature).subscribe(onSuccess: { data in
             guard let data = try? self.encoder.encode(PolarSensorSettingCodable(data)),
-                  let arguments = String(data: data, encoding: .utf8)
+                  let data = String(data: data, encoding: .utf8)
             else { return }
-            result(arguments)
+            result(data)
         }, onFailure: { result(FlutterError(code: "Unable to request stream settings", message: $0.localizedDescription, details: nil)) })
     }
 
@@ -234,10 +236,11 @@ public class SwiftPolarPlugin:
         _ = api.fetchStoredExerciseList(identifier).subscribe(
             onNext: { data in
                 guard let data = try? self.encoder.encode(PolarExerciseEntryCodable(data)),
-                      let arguments = String(data: data, encoding: .utf8) else {
+                      let data = String(data: data, encoding: .utf8)
+                else {
                     return
                 }
-                exercises.append(arguments)
+                exercises.append(data)
             }, onError: { error in
                 result(FlutterError(code: "Error listing exercises", message: error.localizedDescription, details: nil))
             }, onCompleted: {
@@ -246,31 +249,49 @@ public class SwiftPolarPlugin:
         )
     }
 
+    func fetchExercise(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        let arguments = call.arguments as! [Any]
+        let identifier = arguments[0] as! String
+        let entry = try! decoder.decode(PolarExerciseEntryCodable.self, from: (arguments[1] as! String)
+            .data(using: .utf8)!).data
+
+        _ = api.fetchExercise(identifier, entry: entry).subscribe(onSuccess: { data in
+            guard let data = try? self.encoder.encode(PolarExerciseDataCodable(data)),
+                  let data = String(data: data, encoding: .utf8)
+            else {
+                return
+            }
+            result(data)
+        }, onFailure: { error in
+            result(FlutterError(code: "Error  fetching exercise", message: error.localizedDescription, details: nil))
+        })
+    }
+
     public func deviceConnecting(_ polarDeviceInfo: PolarDeviceInfo) {
         guard let data = try? encoder.encode(PolarDeviceInfoCodable(polarDeviceInfo)),
-              let arguments = String(data: data, encoding: .utf8)
+              let data = String(data: data, encoding: .utf8)
         else {
             return
         }
-        channel.invokeMethod("deviceConnecting", arguments: arguments)
+        channel.invokeMethod("deviceConnecting", arguments: data)
     }
 
     public func deviceConnected(_ polarDeviceInfo: PolarDeviceInfo) {
         guard let data = try? encoder.encode(PolarDeviceInfoCodable(polarDeviceInfo)),
-              let arguments = String(data: data, encoding: .utf8)
+              let data = String(data: data, encoding: .utf8)
         else {
             return
         }
-        channel.invokeMethod("deviceConnected", arguments: arguments)
+        channel.invokeMethod("deviceConnected", arguments: data)
     }
 
     public func deviceDisconnected(_ polarDeviceInfo: PolarDeviceInfo) {
         guard let data = try? encoder.encode(PolarDeviceInfoCodable(polarDeviceInfo)),
-              let arguments = String(data: data, encoding: .utf8)
+              let data = String(data: data, encoding: .utf8)
         else {
             return
         }
-        channel.invokeMethod("deviceDisconnected", arguments: arguments)
+        channel.invokeMethod("deviceDisconnected", arguments: data)
     }
 
     public func batteryLevelReceived(_ identifier: String, batteryLevel: UInt) {
@@ -279,11 +300,11 @@ public class SwiftPolarPlugin:
 
     public func hrValueReceived(_ identifier: String, data: PolarHrData) {
         guard let data = try? encoder.encode(PolarHrDataCodable(data)),
-              let arguments = String(data: data, encoding: .utf8)
+              let data = String(data: data, encoding: .utf8)
         else {
             return
         }
-        channel.invokeMethod("hrNotificationReceived", arguments: [identifier, arguments])
+        channel.invokeMethod("hrNotificationReceived", arguments: [identifier, data])
     }
 
     public func hrFeatureReady(_ identifier: String) {
@@ -292,13 +313,13 @@ public class SwiftPolarPlugin:
 
     public func streamingFeaturesReady(_ identifier: String, streamingFeatures: Set<DeviceStreamingFeature>) {
         guard let data = try? encoder.encode(streamingFeatures.map(\.rawValue)),
-              let encodedFeatures = String(data: data, encoding: .utf8)
+              let data = String(data: data, encoding: .utf8)
         else {
             return
         }
         channel.invokeMethod("streamingFeaturesReady", arguments: [
             identifier,
-            encodedFeatures,
+            data,
         ])
     }
 

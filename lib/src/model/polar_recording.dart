@@ -93,4 +93,11 @@ class PolarExerciseEntry {
       : path = json['path'],
         date = DateTime.fromMillisecondsSinceEpoch(json['date']),
         entryId = json['entryId'];
+  
+  /// Convert a [PolarExerciseEntry] to json
+  Map<String, dynamic> toJson() => {
+        'path': path,
+        'date': date.millisecondsSinceEpoch,
+        'entryId': entryId,
+      };
 }
