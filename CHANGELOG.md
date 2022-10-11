@@ -1,3 +1,6 @@
+## NEXT
+- Adds `scanForDevice`
+
 ## 3.1.0
 - Updated Polar SDK to 3.3.4
 
