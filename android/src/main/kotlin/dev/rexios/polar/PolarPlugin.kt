@@ -93,15 +93,17 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
 
         override fun onListen(arguments: Any?, events: EventSink) {
             searchSubscription = api.searchForDevice().subscribe({
-                events.success(gson.toJson(it))
+                runOnUiThread { events.success(gson.toJson(it)) }
             }, {
-                events.error(
-                    it.localizedMessage ?: "Unknown error searching for device",
-                    null,
-                    null
-                )
+                runOnUiThread {
+                    events.error(
+                        it.localizedMessage ?: "Unknown error searching for device",
+                        null,
+                        null
+                    )
+                }
             }, {
-                events.endOfStream()
+                runOnUiThread { events.endOfStream() }
             })
         }
 
@@ -122,10 +124,6 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
             // Will be null for ppi feature
             val settings = gson.fromJson(arguments[2] as String, PolarSensorSetting::class.java)
 
-            if (streamingSubscriptions[feature] == null) {
-                streamingSubscriptions[feature] = mutableMapOf()
-            }
-
             val stream = when (feature) {
                 DeviceStreamingFeature.ECG -> api.startEcgStreaming(identifier, settings)
                 DeviceStreamingFeature.ACC -> api.startAccStreaming(identifier, settings)
@@ -134,22 +132,29 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
                     identifier,
                     settings
                 )
+
                 DeviceStreamingFeature.PPG -> api.startOhrStreaming(identifier, settings)
                 DeviceStreamingFeature.PPI -> api.startOhrPPIStreaming(identifier)
                 else -> throw Exception("Unknown streaming feature $feature")
             }
 
             val sub = stream.subscribe({
-                events.success(gson.toJson(it))
+                runOnUiThread { events.success(gson.toJson(it)) }
             }, {
-                events.error(
-                    it.localizedMessage ?: "Unknown error while streaming",
-                    null,
-                    null
-                )
+                runOnUiThread {
+                    events.error(
+                        it.localizedMessage ?: "Unknown error while streaming",
+                        null,
+                        null
+                    )
+                }
             }, {
-                events.endOfStream()
+                runOnUiThread { events.endOfStream() }
             })
+
+            if (streamingSubscriptions[feature] == null) {
+                streamingSubscriptions[feature] = mutableMapOf()
+            }
 
             streamingSubscriptions[feature]!![identifier] = sub
         }

@@ -15,11 +15,19 @@ public class SwiftPolarPlugin:
 {
     var api: PolarBleApi!
     let channel: FlutterMethodChannel
+    let searchChannel: FlutterEventChannel
+    let streamingChannel: FlutterEventChannel
     let encoder = JSONEncoder()
     let decoder = JSONDecoder()
     
-    init(channel: FlutterMethodChannel) {
+    init(
+        channel: FlutterMethodChannel,
+        searchChannel: FlutterEventChannel,
+        streamingChannel: FlutterEventChannel
+    ) {
         self.channel = channel
+        self.searchChannel = searchChannel
+        self.streamingChannel = streamingChannel
     }
     
     private func initApi() {
@@ -38,7 +46,11 @@ public class SwiftPolarPlugin:
         let searchChannel = FlutterEventChannel(name: "polar/search", binaryMessenger: registrar.messenger())
         let streamingChannel = FlutterEventChannel(name: "polar/streaming", binaryMessenger: registrar.messenger())
         
-        let instance = SwiftPolarPlugin(channel: channel)
+        let instance = SwiftPolarPlugin(
+            channel: channel,
+            searchChannel: searchChannel,
+            streamingChannel: streamingChannel
+        )
         
         registrar.addMethodCallDelegate(instance, channel: channel)
         searchChannel.setStreamHandler(instance.searchHandler)
@@ -142,14 +154,59 @@ public class SwiftPolarPlugin:
         let feature = DeviceStreamingFeature(rawValue: arguments[0] as! Int)!
         let identifier = arguments[1] as! String
         // Will be null for ppi feature
-        let settingsJson = arguments[2] as? String
-        let settings: PolarSensorSetting?
-        if settingsJson != nil {
-            settings = try? self.decoder.decode(PolarSensorSettingCodable.self, from: settingsJson!
-                .data(using: .utf8)!).polarSensorSetting
-        } else {
-            settings = nil
+        let settings = try? self.decoder.decode(PolarSensorSettingCodable.self, from: (arguments[2] as! String)
+            .data(using: .utf8)!).polarSensorSetting
+        
+        let stream: AnyObservable
+        switch feature {
+        case .ecg:
+            stream = self.api.startEcgStreaming(identifier, settings: settings!)
+        case .acc:
+            stream = self.api.startAccStreaming(identifier, settings: settings!)
+        case .gyro:
+            stream = self.api.startGyroStreaming(identifier, settings: settings!)
+        case .magnetometer:
+            stream = self.api.startMagnetometerStreaming(identifier, settings: settings!)
+        case .ppg:
+            stream = self.api.startOhrStreaming(identifier, settings: settings!)
+        case .ppi:
+            stream = self.api.startOhrPPIStreaming(identifier)
         }
+        
+        let sub = stream.anySubscribe(onNext: { data in
+            let encodedData: Any?
+            switch feature {
+            case .ecg:
+                encodedData = try? self.encoder.encode(PolarEcgDataCodable(data as! PolarEcgData))
+            case .acc:
+                encodedData = try? self.encoder.encode(PolarAccDataCodable(data as! PolarAccData))
+            case .gyro:
+                encodedData = try? self.encoder.encode(PolarGyroDataCodable(data as! PolarGyroData))
+            case .magnetometer:
+                encodedData = try? self.encoder.encode(PolarMagnetometerDataCodable(data as! PolarMagnetometerData))
+            case .ppg:
+                encodedData = try? self.encoder.encode(PolarOhrDataCodable(data as! PolarOhrData))
+            case .ppi:
+                encodedData = try? self.encoder.encode(PolarPpiDataCodable(data as! PolarPpiData))
+            }
+            
+            guard let data = encodedData as? Data, let arguments = String(data: data, encoding: .utf8) else {
+                return
+            }
+        }, onError: { error in
+            events(FlutterError(code: "Error while streaming", message: error.localizedDescription, details: nil))
+        }, onCompleted: {
+            events(FlutterEndOfEventStream)
+        }, onDisposed: {
+            events(FlutterEndOfEventStream)
+        })
+        
+        if self.streamingSubscriptions[feature] == nil {
+            self.streamingSubscriptions[feature] = [:]
+        }
+        
+        self.streamingSubscriptions[feature]![identifier] = sub
+        
         return nil
     }, onCancel: { arguments in
         let arguments = arguments as! [Any?]
@@ -312,5 +369,25 @@ class StreamHandler: NSObject, FlutterStreamHandler {
     
     func onCancel(withArguments arguments: Any?) -> FlutterError? {
         return onCancel(arguments)
+    }
+}
+
+protocol AnyObservable {
+    func anySubscribe(
+        onNext: ((Any) -> Void)?,
+        onError: ((Swift.Error) -> Void)?,
+        onCompleted: (() -> Void)?,
+        onDisposed: (() -> Void)?
+    ) -> Disposable
+}
+
+extension Observable: AnyObservable {
+    public func anySubscribe(
+        onNext: ((Any) -> Void)? = nil,
+        onError: ((Swift.Error) -> Void)? = nil,
+        onCompleted: (() -> Void)? = nil,
+        onDisposed: (() -> Void)? = nil
+    ) -> Disposable {
+        return subscribe(onNext: onNext, onError: onError, onCompleted: onCompleted, onDisposed: onDisposed)
     }
 }
