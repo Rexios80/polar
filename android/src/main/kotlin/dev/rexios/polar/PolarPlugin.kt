@@ -47,8 +47,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
         streamingChannel.setStreamHandler(streamingHandler)
 
         api = PolarBleApiDefaultImpl.defaultImplementation(
-            flutterPluginBinding.applicationContext,
-            PolarBleApi.ALL_FEATURES
+            flutterPluginBinding.applicationContext, PolarBleApi.ALL_FEATURES
         )
         api.setApiCallback(this)
     }
@@ -72,17 +71,9 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
                 result.success(null)
             }
 
-            "requestStreamSettings" -> {
-                val arguments = call.arguments as List<*>
-                requestStreamSettings(
-                    arguments[0] as String,
-                    gson.fromJson(
-                        arguments[1] as String,
-                        DeviceStreamingFeature::class.java
-                    ),
-                    result
-                )
-            }
+            "requestStreamSettings" -> requestStreamSettings(call, result)
+
+            "startRecording" -> startRecording(call, result)
 
             else -> result.notImplemented()
         }
@@ -97,9 +88,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
             }, {
                 runOnUiThread {
                     events.error(
-                        it.localizedMessage ?: "Unknown error searching for device",
-                        null,
-                        null
+                        it.localizedMessage ?: "Unknown error searching for device", null, null
                     )
                 }
             }, {
@@ -129,8 +118,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
                 DeviceStreamingFeature.ACC -> api.startAccStreaming(identifier, settings)
                 DeviceStreamingFeature.GYRO -> api.startGyroStreaming(identifier, settings)
                 DeviceStreamingFeature.MAGNETOMETER -> api.startMagnetometerStreaming(
-                    identifier,
-                    settings
+                    identifier, settings
                 )
 
                 DeviceStreamingFeature.PPG -> api.startOhrStreaming(identifier, settings)
@@ -143,9 +131,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
             }, {
                 runOnUiThread {
                     events.error(
-                        it.localizedMessage ?: "Unknown error while streaming",
-                        null,
-                        null
+                        it.localizedMessage ?: "Unknown error while streaming", null, null
                     )
                 }
             }, {
@@ -201,11 +187,11 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
         }
     }
 
-    private fun requestStreamSettings(
-        identifier: String,
-        feature: DeviceStreamingFeature,
-        result: Result
-    ) {
+    private fun requestStreamSettings(call: MethodCall, result: Result) {
+        val arguments = call.arguments as List<*>
+        val identifier = arguments[0] as String
+        val feature = gson.fromJson(arguments[1] as String, DeviceStreamingFeature::class.java)
+
         api.requestStreamSettings(identifier, feature).subscribe({
             runOnUiThread { result.success(gson.toJson(it)) }
         }, {
@@ -236,8 +222,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
     }
 
     override fun streamingFeaturesReady(
-        identifier: String,
-        features: MutableSet<DeviceStreamingFeature>
+        identifier: String, features: MutableSet<DeviceStreamingFeature>
     ) {
         invokeOnUiThread("streamingFeaturesReady", listOf(identifier, gson.toJson(features)))
     }

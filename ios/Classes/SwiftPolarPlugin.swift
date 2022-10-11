@@ -69,12 +69,9 @@ public class SwiftPolarPlugin:
                 try api.disconnectFromDevice(call.arguments as! String)
                 result(nil)
             case "requestStreamSettings":
-                let arguments = call.arguments as! [Any]
-                try requestStreamSettings(
-                    arguments[0] as! String,
-                    DeviceStreamingFeature(rawValue: arguments[1] as! Int)!,
-                    result
-                )
+                try requestStreamSettings(call, result)
+            case "startRecording":
+                startRecording(call, result)
             default: result(FlutterMethodNotImplemented)
             }
         } catch {
@@ -176,13 +173,38 @@ public class SwiftPolarPlugin:
         return nil
     })
 
-    func requestStreamSettings(_ identifier: String, _ feature: DeviceStreamingFeature, _ result: @escaping FlutterResult) throws {
+    func requestStreamSettings(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) throws {
+        let arguments = call.arguments as! [Any]
+        let identifier = arguments[0] as! String
+        let feature = DeviceStreamingFeature(rawValue: arguments[1] as! Int)!
+
         _ = api.requestStreamSettings(identifier, feature: feature).subscribe(onSuccess: { data in
             guard let data = try? self.encoder.encode(PolarSensorSettingCodable(data)),
                   let arguments = String(data: data, encoding: .utf8)
             else { return }
             result(arguments)
         }, onFailure: { result(FlutterError(code: "Unable to request stream settings", message: $0.localizedDescription, details: nil)) })
+    }
+
+    func startRecording(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        let arguments = call.arguments as! [Any]
+        let identifier = arguments[0] as! String
+        let exerciseId = arguments[1] as! String
+        let interval = RecordingInterval(rawValue: arguments[2] as! Int)!
+        let sampleType = SampleType(rawValue: arguments[3] as! Int)!
+
+        _ = api.startRecording(
+            identifier,
+            exerciseId: exerciseId,
+            interval: interval,
+            sampleType: sampleType
+        ).subscribe(onCompleted: {
+            result(nil)
+        }, onError: { error in
+            result(FlutterError(code: "Error starting recording", message: error.localizedDescription, details: nil))
+        }, onDisposed: {
+            result(FlutterError(code: "Error starting recording", message: nil, details: nil))
+        })
     }
 
     public func deviceConnecting(_ polarDeviceInfo: PolarDeviceInfo) {

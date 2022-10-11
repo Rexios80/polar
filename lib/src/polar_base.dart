@@ -230,8 +230,8 @@ class Polar {
   ///
   /// - Parameter identifier: Polar device id
   /// - Throws: InvalidArgument if identifier is invalid polar device id or invalid uuid
-  void disconnectFromDevice(String identifier) {
-    _channel.invokeMethod('disconnectFromDevice', identifier);
+  Future<void> disconnectFromDevice(String identifier) {
+    return _channel.invokeMethod('disconnectFromDevice', identifier);
   }
 
   ///  Request the stream settings available in current operation mode. This request shall be used before the stream is started
@@ -382,5 +382,27 @@ class Polar {
   Stream<PolarPpiData> startOhrPPIStreaming(String identifier) {
     return _startStreaming(DeviceStreamingFeature.ecg, identifier)
         .map((event) => PolarPpiData.fromJson(identifier, jsonDecode(event)));
+  }
+
+  /// Request start recording. Supported only by Polar H10. Requires `polarFileTransfer` feature.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or UUID
+  ///   - exerciseId: unique identifier for for exercise entry length from 1-64 bytes
+  ///   - interval: recording interval to be used. Has no effect if `sampleType` is `SampleType.rr`
+  ///   - sampleType: sample type to be used.
+  /// - Returns: Completable stream
+  ///   - success: recording started
+  ///   - onError: see `PolarErrors` for possible errors invoked
+  Future<void> startRecording(
+    String identifier,
+    String exerciseId,
+    RecordingInterval interval,
+    SampleType sampleType,
+  ) {
+    return _channel.invokeMethod(
+      'startRecording',
+      [identifier, exerciseId, interval.toJson(), sampleType.toJson()],
+    );
   }
 }

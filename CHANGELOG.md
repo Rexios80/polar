@@ -2,6 +2,8 @@
 - Adds `scanForDevice`
 - Refactors streaming to use `EventChannel`s internally
 - Downgrades Polar CocoaPod to `3.3.0` to fix `streamingFeaturesReady` not getting called
+- Adds recording features
+- `disconnectFromDevice` now returns a `Future`
 
 ## 3.1.0
 - Updated Polar SDK to 3.3.4

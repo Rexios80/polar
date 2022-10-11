@@ -31,8 +31,7 @@ enum DeviceStreamingFeature {
       return DeviceStreamingFeature.values[json as int];
     } else {
       // This is android
-      return DeviceStreamingFeature.values
-          .byName(ReCase(json as String).camelCase);
+      return DeviceStreamingFeature.values.byName((json as String).camelCase);
     }
   }
 
@@ -42,7 +41,7 @@ enum DeviceStreamingFeature {
       return DeviceStreamingFeature.values.indexOf(this);
     } else {
       // This is Android
-      return ReCase(name).snakeCase.toUpperCase();
+      return name.snakeCase.toUpperCase();
     }
   }
 }

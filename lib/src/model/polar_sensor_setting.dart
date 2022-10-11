@@ -26,7 +26,7 @@ class PolarSensorSetting {
       return {
         'settings': {
           for (var e in settings.entries)
-            ReCase(e.key.name).snakeCase.toUpperCase(): e.value
+            e.key.name.snakeCase.toUpperCase(): e.value
         },
       };
     }
@@ -67,7 +67,7 @@ enum PolarSettingType {
       return PolarSettingType.values[int.parse(json as String)];
     } else {
       // This is android
-      return PolarSettingType.values.byName(ReCase(json as String).camelCase);
+      return PolarSettingType.values.byName((json as String).camelCase);
     }
   }
 }
