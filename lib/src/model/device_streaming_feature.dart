@@ -23,11 +23,8 @@ enum DeviceStreamingFeature {
   magnetometer,
 
   /// Unknown feature
-  error,
-}
+  error;
 
-/// Extension on [DeviceStreamingFeature]
-extension DeviceStreamingFeatureExtension on DeviceStreamingFeature {
   /// Create a [DeviceStreamingFeature] from json
   static DeviceStreamingFeature fromJson(dynamic json) {
     if (Platform.isIOS) {

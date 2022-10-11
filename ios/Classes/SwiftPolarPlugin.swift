@@ -19,7 +19,7 @@ public class SwiftPolarPlugin:
     let streamingChannel: FlutterEventChannel
     let encoder = JSONEncoder()
     let decoder = JSONDecoder()
-    
+
     init(
         channel: FlutterMethodChannel,
         searchChannel: FlutterEventChannel,
@@ -29,11 +29,11 @@ public class SwiftPolarPlugin:
         self.searchChannel = searchChannel
         self.streamingChannel = streamingChannel
     }
-    
+
     private func initApi() {
         guard api == nil else { return }
         api = PolarBleApiDefaultImpl.polarImplementation(DispatchQueue.main, features: Features.allFeatures.rawValue)
-        
+
         api.observer = self
         api.deviceHrObserver = self
         api.powerStateObserver = self
@@ -45,21 +45,21 @@ public class SwiftPolarPlugin:
         let channel = FlutterMethodChannel(name: "polar", binaryMessenger: registrar.messenger())
         let searchChannel = FlutterEventChannel(name: "polar/search", binaryMessenger: registrar.messenger())
         let streamingChannel = FlutterEventChannel(name: "polar/streaming", binaryMessenger: registrar.messenger())
-        
+
         let instance = SwiftPolarPlugin(
             channel: channel,
             searchChannel: searchChannel,
             streamingChannel: streamingChannel
         )
-        
+
         registrar.addMethodCallDelegate(instance, channel: channel)
         searchChannel.setStreamHandler(instance.searchHandler)
         streamingChannel.setStreamHandler(instance.streamingHandler)
     }
-    
+
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         initApi()
-        
+
         do {
             switch call.method {
             case "connectToDevice":
@@ -81,11 +81,11 @@ public class SwiftPolarPlugin:
             result(FlutterError(code: "Error in Polar plugin", message: error.localizedDescription, details: nil))
         }
     }
-    
+
     var searchSubscription: Disposable?
     lazy var searchHandler = StreamHandler(onListen: { _, events in
         self.initApi()
-        
+
         self.searchSubscription = self.api.searchForDevice().subscribe(onNext: { data in
             guard let data = try? self.encoder.encode(PolarDeviceInfoCodable(data)),
                   let arguments = String(data: data, encoding: .utf8)
@@ -103,7 +103,7 @@ public class SwiftPolarPlugin:
         self.searchSubscription?.dispose()
         return nil
     })
-    
+
     // Map of <feature, <identifier, subscription>>
     var streamingSubscriptions = [DeviceStreamingFeature: [String: Disposable]]()
     lazy var streamingHandler = StreamHandler(onListen: { arguments, events in
@@ -113,7 +113,7 @@ public class SwiftPolarPlugin:
         // Will be null for ppi feature
         let settings = try? self.decoder.decode(PolarSensorSettingCodable.self, from: (arguments[2] as! String)
             .data(using: .utf8)!).polarSensorSetting
-        
+
         let stream: AnyObservable
         switch feature {
         case .ecg:
@@ -129,7 +129,7 @@ public class SwiftPolarPlugin:
         case .ppi:
             stream = self.api.startOhrPPIStreaming(identifier)
         }
-        
+
         let sub = stream.anySubscribe(onNext: { data in
             let encodedData: Any?
             switch feature {
@@ -146,7 +146,7 @@ public class SwiftPolarPlugin:
             case .ppi:
                 encodedData = try? self.encoder.encode(PolarPpiDataCodable(data as! PolarPpiData))
             }
-            
+
             guard let data = encodedData as? Data, let arguments = String(data: data, encoding: .utf8) else {
                 return
             }
@@ -158,24 +158,24 @@ public class SwiftPolarPlugin:
         }, onDisposed: {
             events(FlutterEndOfEventStream)
         })
-        
+
         if self.streamingSubscriptions[feature] == nil {
             self.streamingSubscriptions[feature] = [:]
         }
-        
+
         self.streamingSubscriptions[feature]![identifier] = sub
-        
+
         return nil
     }, onCancel: { arguments in
         let arguments = arguments as! [Any?]
         let feature = DeviceStreamingFeature(rawValue: arguments[0] as! Int)!
         let identifier = arguments[1] as! String
-        
+
         self.streamingSubscriptions[feature]?[identifier]?.dispose()
-        
+
         return nil
     })
-    
+
     func requestStreamSettings(_ identifier: String, _ feature: DeviceStreamingFeature, _ result: @escaping FlutterResult) throws {
         _ = api.requestStreamSettings(identifier, feature: feature).subscribe(onSuccess: { data in
             guard let data = try? self.encoder.encode(PolarSensorSettingCodable(data)),
@@ -184,7 +184,7 @@ public class SwiftPolarPlugin:
             result(arguments)
         }, onFailure: { result(FlutterError(code: "Unable to request stream settings", message: $0.localizedDescription, details: nil)) })
     }
-    
+
     public func deviceConnecting(_ polarDeviceInfo: PolarDeviceInfo) {
         guard let data = try? encoder.encode(PolarDeviceInfoCodable(polarDeviceInfo)),
               let arguments = String(data: data, encoding: .utf8)
@@ -193,7 +193,7 @@ public class SwiftPolarPlugin:
         }
         channel.invokeMethod("deviceConnecting", arguments: arguments)
     }
-    
+
     public func deviceConnected(_ polarDeviceInfo: PolarDeviceInfo) {
         guard let data = try? encoder.encode(PolarDeviceInfoCodable(polarDeviceInfo)),
               let arguments = String(data: data, encoding: .utf8)
@@ -202,7 +202,7 @@ public class SwiftPolarPlugin:
         }
         channel.invokeMethod("deviceConnected", arguments: arguments)
     }
-    
+
     public func deviceDisconnected(_ polarDeviceInfo: PolarDeviceInfo) {
         guard let data = try? encoder.encode(PolarDeviceInfoCodable(polarDeviceInfo)),
               let arguments = String(data: data, encoding: .utf8)
@@ -211,11 +211,11 @@ public class SwiftPolarPlugin:
         }
         channel.invokeMethod("deviceDisconnected", arguments: arguments)
     }
-    
+
     public func batteryLevelReceived(_ identifier: String, batteryLevel: UInt) {
         channel.invokeMethod("batteryLevelReceived", arguments: [identifier, batteryLevel])
     }
-    
+
     public func hrValueReceived(_ identifier: String, data: PolarHrData) {
         guard let data = try? encoder.encode(PolarHrDataCodable(data)),
               let arguments = String(data: data, encoding: .utf8)
@@ -224,35 +224,35 @@ public class SwiftPolarPlugin:
         }
         channel.invokeMethod("hrNotificationReceived", arguments: [identifier, arguments])
     }
-    
+
     public func hrFeatureReady(_ identifier: String) {
         channel.invokeMethod("hrFeatureReady", arguments: identifier)
     }
-    
+
     public func streamingFeaturesReady(_ identifier: String, streamingFeatures: Set<DeviceStreamingFeature>) {
-        guard let data = try? encoder.encode(streamingFeatures.map { $0.rawValue }),
+        guard let data = try? encoder.encode(streamingFeatures.map(\.rawValue)),
               let encodedFeatures = String(data: data, encoding: .utf8)
         else {
             return
         }
         channel.invokeMethod("streamingFeaturesReady", arguments: [
             identifier,
-            encodedFeatures
+            encodedFeatures,
         ])
     }
-    
+
     public func blePowerOn() {
         channel.invokeMethod("blePowerStateChanged", arguments: true)
     }
-    
+
     public func blePowerOff() {
         channel.invokeMethod("blePowerStateChanged", arguments: false)
     }
-        
+
     public func ftpFeatureReady(_ identifier: String) {
         channel.invokeMethod("ftpFeatureReady", arguments: identifier)
     }
-    
+
     public func disInformationReceived(_ identifier: String, uuid: CBUUID, value: String) {
         channel.invokeMethod("disInformationReceived", arguments: [identifier, uuid.uuidString, value])
     }
@@ -261,18 +261,18 @@ public class SwiftPolarPlugin:
 class StreamHandler: NSObject, FlutterStreamHandler {
     final let onListen: (Any?, @escaping FlutterEventSink) -> FlutterError?
     final let onCancel: (Any?) -> FlutterError?
-    
+
     init(onListen: @escaping (Any?, @escaping FlutterEventSink) -> FlutterError?, onCancel: @escaping (Any?) -> FlutterError?) {
         self.onListen = onListen
         self.onCancel = onCancel
     }
-    
+
     func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
-        return onListen(arguments, events)
+        onListen(arguments, events)
     }
-    
+
     func onCancel(withArguments arguments: Any?) -> FlutterError? {
-        return onCancel(arguments)
+        onCancel(arguments)
     }
 }
 
@@ -292,6 +292,6 @@ extension Observable: AnyObservable {
         onCompleted: (() -> Void)? = nil,
         onDisposed: (() -> Void)? = nil
     ) -> Disposable {
-        return subscribe(onNext: onNext, onError: onError, onCompleted: onCompleted, onDisposed: onDisposed)
+        subscribe(onNext: onNext, onError: onError, onCompleted: onCompleted, onDisposed: onDisposed)
     }
 }

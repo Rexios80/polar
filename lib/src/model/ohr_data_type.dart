@@ -7,11 +7,8 @@ enum OhrDataType {
   ppg3_ambient1,
 
   /// An unknown [OhrDataType]
-  unknown,
-}
+  unknown;
 
-/// Extension on [OhrDataType]
-extension OhrDataTypeExtension on OhrDataType {
   /// Create an [OhrDataType] from json
   static OhrDataType fromJson(dynamic json) {
     if (Platform.isIOS) {

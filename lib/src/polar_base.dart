@@ -6,12 +6,6 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:polar/polar.dart';
-import 'package:polar/src/model/device_streaming_feature.dart';
-import 'package:polar/src/model/polar_device_info.dart';
-import 'package:polar/src/model/polar_hr_data.dart';
-import 'package:polar/src/model/polar_sensor_setting.dart';
-import 'package:polar/src/model/polar_streaming.dart';
-import 'package:polar/src/events.dart';
 
 /// Flutter implementation of the [PolarBleSdk]
 class Polar {
@@ -140,7 +134,7 @@ class Polar {
           PolarStreamingFeaturesReadyEvent(
             call.arguments[0],
             (jsonDecode(call.arguments[1]) as List)
-                .map((e) => DeviceStreamingFeatureExtension.fromJson(e))
+                .map((e) => DeviceStreamingFeature.fromJson(e))
                 .toList(),
           ),
         );

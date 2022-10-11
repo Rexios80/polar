@@ -36,7 +36,7 @@ class PolarSensorSetting {
   PolarSensorSetting.fromJson(Map<String, dynamic> json)
       : settings = {
           for (var e in (json['settings'] as Map<String, dynamic>).entries)
-            PolarSettingTypeExtension.fromJson(e.key):
+            PolarSettingType.fromJson(e.key):
                 (e.value as List).map((e) => e as int).toList()
         };
 }
@@ -59,11 +59,8 @@ enum PolarSettingType {
   channels,
 
   /// type is unknown
-  unknown,
-}
+  unknown;
 
-/// Extension on [PolarSettingType]
-extension PolarSettingTypeExtension on PolarSettingType {
   /// Convert a [PolarSettingType] to json
   static PolarSettingType fromJson(dynamic json) {
     if (Platform.isIOS) {

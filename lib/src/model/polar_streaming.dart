@@ -109,7 +109,7 @@ class PolarOhrData {
   /// Create a [PolarOhrData] from json
   PolarOhrData.fromJson(this.identifier, Map<String, dynamic> json)
       : timeStamp = json['timeStamp'],
-        type = OhrDataTypeExtension.fromJson(json['type']),
+        type = OhrDataType.fromJson(json['type']),
         samples = Platform.isIOS
             ? (json['samples'] as List)
                 .map((e) => (e as List).map((e) => e as int).toList())

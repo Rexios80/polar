@@ -11,4 +11,6 @@ export 'src/model/polar_ohr_ppi_sample.dart';
 export 'src/model/polar_sensor_setting.dart'
     show PolarSensorSetting, PolarSettingType;
 export 'src/model/polar_streaming.dart';
+export 'src/model/recording_interval.dart';
+export 'src/model/sample_type.dart';
 export 'src/model/xyz.dart';
