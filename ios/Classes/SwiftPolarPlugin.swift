@@ -36,33 +36,14 @@ public class SwiftPolarPlugin:
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "polar", binaryMessenger: registrar.messenger())
         let searchChannel = FlutterEventChannel(name: "polar/search", binaryMessenger: registrar.messenger())
+        let streamingChannel = FlutterEventChannel(name: "polar/streaming", binaryMessenger: registrar.messenger())
+        
         let instance = SwiftPolarPlugin(channel: channel)
+        
         registrar.addMethodCallDelegate(instance, channel: channel)
-        
         searchChannel.setStreamHandler(instance.searchHandler)
+        streamingChannel.setStreamHandler(instance.streamingHandler)
     }
-    
-    var searchSubscription: Disposable?
-    lazy var searchHandler = StreamHandler(onListen: { _, events in
-        self.initApi()
-        
-        self.searchSubscription = self.api.searchForDevice().subscribe(onNext: { data in
-            guard let data = try? self.encoder.encode(PolarDeviceInfoCodable(data)),
-                  let arguments = String(data: data, encoding: .utf8)
-            else { return }
-            events(arguments)
-        }, onError: { error in
-            events(FlutterError(code: "Error in searchForDevice", message: error.localizedDescription, details: nil))
-        }, onCompleted: {
-            events(FlutterEndOfEventStream)
-        }, onDisposed: {
-            events(FlutterEndOfEventStream)
-        })
-        return nil
-    }, onCancel: { _ in
-        self.searchSubscription?.dispose()
-        return nil
-    })
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         initApi()
@@ -131,6 +112,54 @@ public class SwiftPolarPlugin:
             result(FlutterError(code: "Error in Polar plugin", message: error.localizedDescription, details: nil))
         }
     }
+    
+    var searchSubscription: Disposable?
+    lazy var searchHandler = StreamHandler(onListen: { _, events in
+        self.initApi()
+        
+        self.searchSubscription = self.api.searchForDevice().subscribe(onNext: { data in
+            guard let data = try? self.encoder.encode(PolarDeviceInfoCodable(data)),
+                  let arguments = String(data: data, encoding: .utf8)
+            else { return }
+            events(arguments)
+        }, onError: { error in
+            events(FlutterError(code: "Error in searchForDevice", message: error.localizedDescription, details: nil))
+        }, onCompleted: {
+            events(FlutterEndOfEventStream)
+        }, onDisposed: {
+            events(FlutterEndOfEventStream)
+        })
+        return nil
+    }, onCancel: { _ in
+        self.searchSubscription?.dispose()
+        return nil
+    })
+    
+    // Map of <feature, <identifier, subscription>>
+    var streamingSubscriptions = [DeviceStreamingFeature: [String: Disposable]]()
+    lazy var streamingHandler = StreamHandler(onListen: { arguments, events in
+        let arguments = arguments as! [Any?]
+        let feature = DeviceStreamingFeature(rawValue: arguments[0] as! Int)!
+        let identifier = arguments[1] as! String
+        // Will be null for ppi feature
+        let settingsJson = arguments[2] as? String
+        let settings: PolarSensorSetting?
+        if settingsJson != nil {
+            settings = try? self.decoder.decode(PolarSensorSettingCodable.self, from: settingsJson!
+                .data(using: .utf8)!).polarSensorSetting
+        } else {
+            settings = nil
+        }
+        return nil
+    }, onCancel: { arguments in
+        let arguments = arguments as! [Any?]
+        let feature = DeviceStreamingFeature(rawValue: arguments[0] as! Int)!
+        let identifier = arguments[1] as! String
+        
+        self.streamingSubscriptions[feature]?[identifier]?.dispose()
+        
+        return nil
+    })
     
     func requestStreamSettings(_ identifier: String, _ feature: DeviceStreamingFeature, _ result: @escaping FlutterResult) throws {
         _ = api.requestStreamSettings(identifier, feature: feature).subscribe(onSuccess: { data in
