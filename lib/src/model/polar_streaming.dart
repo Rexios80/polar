@@ -39,23 +39,6 @@ class PolarAccData {
             (json['samples'] as List).map((e) => Xyz.fromJson(e)).toList();
 }
 
-/// Polar Exercise Data
-class PolarExerciseData {
-  /// Polar device id
-  final String identifier;
-
-  /// in seconds
-  final int interval;
-
-  /// List of HR or RR samples in BPM
-  final List<int> samples;
-
-  /// Create a [PolarExerciseData] from json
-  PolarExerciseData.fromJson(this.identifier, Map<String, dynamic> json)
-      : interval = json['interval'],
-        samples = (json['samples'] as List).map((e) => e as int).toList();
-}
-
 /// Polar gyro data
 class PolarGyroData {
   /// Polar device id

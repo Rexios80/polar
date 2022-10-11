@@ -3,26 +3,18 @@ import 'dart:io';
 ///  Recoding intervals for H10 recording start
 enum RecordingInterval {
   /// 1 second interval
-  interval1s,
+  interval_1s,
 
   /// 5 second interval
-  interval5s;
-
-  /// Create an [RecordingInterval] from json
-  static RecordingInterval fromJson(dynamic json) {
-    switch (json as int) {
-      case 1:
-        return RecordingInterval.interval1s;
-      case 5:
-        return RecordingInterval.interval5s;
-      default:
-        throw Exception('Unknown RecordingInterval: $json');
-    }
-  }
+  interval_5s;
 
   /// Convert a [RecordingInterval] to json
   dynamic toJson() {
-    return RecordingInterval.values.indexOf(this);
+    if (Platform.isIOS) {
+      return RecordingInterval.values.indexOf(this);
+    } else {
+      return name.toUpperCase();
+    }
   }
 }
 
@@ -33,16 +25,6 @@ enum SampleType {
 
   /// recording type to use is rr interval
   rr;
-
-  /// Create a [SampleType] from json
-  static SampleType fromJson(dynamic json) {
-    if (Platform.isIOS) {
-      return SampleType.values[json as int];
-    } else {
-      // This is android
-      return SampleType.values.byName((json as String).toLowerCase());
-    }
-  }
 
   /// Convert a [SampleType] to json
   dynamic toJson() {
@@ -93,11 +75,28 @@ class PolarExerciseEntry {
       : path = json['path'],
         date = DateTime.fromMillisecondsSinceEpoch(json['date']),
         entryId = json['entryId'];
-  
+
   /// Convert a [PolarExerciseEntry] to json
   Map<String, dynamic> toJson() => {
         'path': path,
         'date': date.millisecondsSinceEpoch,
         'entryId': entryId,
       };
+}
+
+/// Polar Exercise Data
+class PolarExerciseData {
+  /// Polar device id
+  final String identifier;
+
+  /// in seconds
+  final int interval;
+
+  /// List of HR or RR samples in BPM
+  final List<int> samples;
+
+  /// Create a [PolarExerciseData] from json
+  PolarExerciseData.fromJson(this.identifier, Map<String, dynamic> json)
+      : interval = json['interval'],
+        samples = (json['samples'] as List).map((e) => e as int).toList();
 }
