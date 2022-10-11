@@ -150,6 +150,7 @@ public class SwiftPolarPlugin:
             guard let data = encodedData as? Data, let arguments = String(data: data, encoding: .utf8) else {
                 return
             }
+            events(arguments)
         }, onError: { error in
             events(FlutterError(code: "Error while streaming", message: error.localizedDescription, details: nil))
         }, onCompleted: {
