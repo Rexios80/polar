@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:polar/polar.dart';
 import 'package:polar/src/model/device_streaming_feature.dart';
 import 'package:polar/src/model/polar_device_info.dart';
 import 'package:polar/src/model/polar_hr_data.dart';
@@ -16,15 +17,7 @@ import 'package:polar/src/events.dart';
 class Polar {
   static const _channel = MethodChannel('polar');
   static const _searchChannel = EventChannel('polar/search');
-
-  // Streaming
-  final _ecgStreamController = StreamController<PolarEcgData>.broadcast();
-  final _accStreamController = StreamController<PolarAccData>.broadcast();
-  final _gyroStreamController = StreamController<PolarGyroData>.broadcast();
-  final _magnetometerStreamController =
-      StreamController<PolarMagnetometerData>.broadcast();
-  final _ohrStreamController = StreamController<PolarOhrData>.broadcast();
-  final _ohrPPIStreamController = StreamController<PolarPpiData>.broadcast();
+  static const _streamingChannel = EventChannel('polar/streaming');
 
   // Other data
   final _blePowerStateStreamController = StreamController<bool>.broadcast();
@@ -127,54 +120,6 @@ class Polar {
 
   Future<void> _handleMethodCall(MethodCall call) async {
     switch (call.method) {
-      case 'ecgDataReceived':
-        _ecgStreamController.add(
-          PolarEcgData.fromJson(
-            call.arguments[0],
-            jsonDecode(call.arguments[1]),
-          ),
-        );
-        return;
-      case 'accDataReceived':
-        _accStreamController.add(
-          PolarAccData.fromJson(
-            call.arguments[0],
-            jsonDecode(call.arguments[1]),
-          ),
-        );
-        return;
-      case 'gyroDataReceived':
-        _gyroStreamController.add(
-          PolarGyroData.fromJson(
-            call.arguments[0],
-            jsonDecode(call.arguments[1]),
-          ),
-        );
-        return;
-      case 'magnetometerDataReceived':
-        _magnetometerStreamController.add(
-          PolarMagnetometerData.fromJson(
-            call.arguments[0],
-            jsonDecode(call.arguments[1]),
-          ),
-        );
-        return;
-      case 'ohrDataReceived':
-        _ohrStreamController.add(
-          PolarOhrData.fromJson(
-            call.arguments[0],
-            jsonDecode(call.arguments[1]),
-          ),
-        );
-        return;
-      case 'ohrPPIReceived':
-        _ohrPPIStreamController.add(
-          PolarPpiData.fromJson(
-            call.arguments[0],
-            jsonDecode(call.arguments[1]),
-          ),
-        );
-        return;
       case 'blePowerStateChanged':
         _blePowerStateStreamController.add(call.arguments);
         return;
@@ -318,6 +263,23 @@ class Polar {
     return PolarSensorSetting.fromJson(json);
   }
 
+  Stream _startStreaming(
+    DeviceStreamingFeature feature,
+    String identifier, {
+    PolarSensorSetting? settings,
+  }) async* {
+    if (feature != DeviceStreamingFeature.ppi) {
+      settings ??= await requestStreamSettings(
+        identifier,
+        feature,
+      );
+    }
+
+    yield* _streamingChannel.receiveBroadcastStream(
+      [feature.toJson(), identifier, jsonEncode(settings)],
+    );
+  }
+
   /// Start the ECG (Electrocardiography) stream. ECG stream is stopped if the connection is closed, error occurs or stream is disposed.
   /// Requires `polarSensorStreaming` feature. Before starting the stream it is recommended to query the available settings using `requestStreamSettings`
   ///
@@ -331,25 +293,11 @@ class Polar {
     String identifier, {
     PolarSensorSetting? settings,
   }) {
-    _startEcgStreamingInternal(identifier, settings);
-    return _ecgStreamController.stream.where((e) => e.identifier == identifier);
-  }
-
-  void _startEcgStreamingInternal(
-    String identifier,
-    PolarSensorSetting? settings,
-  ) async {
-    settings ??= await requestStreamSettings(
-      identifier,
+    return _startStreaming(
       DeviceStreamingFeature.ecg,
-    );
-
-    unawaited(
-      _channel.invokeMethod('startEcgStreaming', [
-        identifier,
-        jsonEncode(settings),
-      ]),
-    );
+      identifier,
+      settings: settings,
+    ).map((event) => PolarEcgData.fromJson(identifier, jsonDecode(event)));
   }
 
   ///  Start ACC (Accelerometer) stream. ACC stream is stopped if the connection is closed, error occurs or stream is disposed.
@@ -365,25 +313,11 @@ class Polar {
     String identifier, {
     PolarSensorSetting? settings,
   }) {
-    _startAccStreamingInternal(identifier);
-    return _accStreamController.stream.where((e) => e.identifier == identifier);
-  }
-
-  void _startAccStreamingInternal(
-    String identifier, {
-    PolarSensorSetting? settings,
-  }) async {
-    settings ??= await requestStreamSettings(
-      identifier,
+    return _startStreaming(
       DeviceStreamingFeature.acc,
-    );
-
-    unawaited(
-      _channel.invokeMethod('startAccStreaming', [
-        identifier,
-        jsonEncode(settings),
-      ]),
-    );
+      identifier,
+      settings: settings,
+    ).map((event) => PolarAccData.fromJson(identifier, jsonDecode(event)));
   }
 
   /// Start Gyro stream. Gyro stream is stopped if the connection is closed, error occurs during start or stream is disposed.
@@ -396,26 +330,11 @@ class Polar {
     String identifier, {
     PolarSensorSetting? settings,
   }) {
-    _startGyroStreamingInternal(identifier, settings);
-    return _gyroStreamController.stream
-        .where((e) => e.identifier == identifier);
-  }
-
-  void _startGyroStreamingInternal(
-    String identifier,
-    PolarSensorSetting? settings,
-  ) async {
-    settings ??= await requestStreamSettings(
-      identifier,
+    return _startStreaming(
       DeviceStreamingFeature.gyro,
-    );
-
-    unawaited(
-      _channel.invokeMethod('startGyroStreaming', [
-        identifier,
-        jsonEncode(settings),
-      ]),
-    );
+      identifier,
+      settings: settings,
+    ).map((event) => PolarGyroData.fromJson(identifier, jsonDecode(event)));
   }
 
   /// Start magnetometer stream. Magnetometer stream is stopped if the connection is closed, error occurs or stream is disposed.
@@ -428,25 +347,12 @@ class Polar {
     String identifier, {
     PolarSensorSetting? settings,
   }) {
-    _startMagnetometerStreamingInternal(identifier, settings);
-    return _magnetometerStreamController.stream
-        .where((e) => e.identifier == identifier);
-  }
-
-  void _startMagnetometerStreamingInternal(
-    String identifier,
-    PolarSensorSetting? settings,
-  ) async {
-    settings ??= await requestStreamSettings(
-      identifier,
+    return _startStreaming(
       DeviceStreamingFeature.magnetometer,
-    );
-
-    unawaited(
-      _channel.invokeMethod('startMagnetometerStreaming', [
-        identifier,
-        jsonEncode(settings),
-      ]),
+      identifier,
+      settings: settings,
+    ).map(
+      (event) => PolarMagnetometerData.fromJson(identifier, jsonDecode(event)),
     );
   }
 
@@ -463,25 +369,11 @@ class Polar {
     String identifier, {
     PolarSensorSetting? settings,
   }) {
-    _startOhrStreamingInternal(identifier, settings);
-    return _ohrStreamController.stream.where((e) => e.identifier == identifier);
-  }
-
-  void _startOhrStreamingInternal(
-    String identifier,
-    PolarSensorSetting? settings,
-  ) async {
-    settings ??= await requestStreamSettings(
-      identifier,
+    return _startStreaming(
       DeviceStreamingFeature.ppg,
-    );
-
-    unawaited(
-      _channel.invokeMethod('startOhrStreaming', [
-        identifier,
-        jsonEncode(settings),
-      ]),
-    );
+      identifier,
+      settings: settings,
+    ).map((event) => PolarOhrData.fromJson(identifier, jsonDecode(event)));
   }
 
   /// Start OHR (Optical heart rate) PPI (Pulse to Pulse interval) stream.
@@ -494,8 +386,7 @@ class Polar {
   ///   - onNext: for every air packet received. see `PolarPpiData`
   ///   - onError: see `PolarErrors` for possible errors invoked
   Stream<PolarPpiData> startOhrPPIStreaming(String identifier) {
-    _channel.invokeMethod('startOhrPPIStreaming', identifier);
-    return _ohrPPIStreamController.stream
-        .where((e) => e.identifier == identifier);
+    return _startStreaming(DeviceStreamingFeature.ecg, identifier)
+        .map((event) => PolarPpiData.fromJson(identifier, jsonDecode(event)));
   }
 }

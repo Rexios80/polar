@@ -1,5 +1,6 @@
 ## NEXT
 - Adds `scanForDevice`
+- Refactors streaming to use `EventChannel`s internally
 
 ## 3.1.0
 - Updated Polar SDK to 3.3.4
