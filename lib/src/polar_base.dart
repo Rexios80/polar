@@ -251,7 +251,7 @@ class Polar {
   ) async {
     final response = await _channel.invokeMethod(
       'requestStreamSettings',
-      [identifier, feature.toJson()],
+      [identifier, jsonEncode(feature)],
     );
     return PolarSensorSetting.fromJson(jsonDecode(response));
   }
@@ -269,7 +269,7 @@ class Polar {
     }
 
     yield* _streamingChannel.receiveBroadcastStream(
-      [feature.toJson(), identifier, jsonEncode(settings)],
+      [jsonEncode(feature), identifier, jsonEncode(settings)],
     );
   }
 
@@ -394,14 +394,14 @@ class Polar {
   ///   - success: recording started
   ///   - onError: see `PolarErrors` for possible errors invoked
   Future<void> startRecording(
-    String identifier,
-    String exerciseId,
-    RecordingInterval interval,
-    SampleType sampleType,
-  ) {
+    String identifier, {
+    required String exerciseId,
+    required RecordingInterval interval,
+    required SampleType sampleType,
+  }) {
     return _channel.invokeMethod(
       'startRecording',
-      [identifier, exerciseId, interval.toJson(), sampleType.toJson()],
+      [identifier, exerciseId, jsonEncode(interval), jsonEncode(sampleType)],
     );
   }
 
@@ -461,7 +461,7 @@ class Polar {
     PolarExerciseEntry entry,
   ) async {
     final result = await _channel
-        .invokeMethod('fetchExercise', [identifier, entry.toJson()]);
+        .invokeMethod('fetchExercise', [identifier, jsonEncode(entry)]);
     return PolarExerciseData.fromJson(identifier, jsonDecode(result));
   }
 
@@ -475,6 +475,6 @@ class Polar {
   ///   - onError: see `PolarErrors` for possible errors invoked
   Future<void> removeExercise(String identifier, PolarExerciseEntry entry) {
     return _channel
-        .invokeMethod('removeExercise', [identifier, entry.toJson()]);
+        .invokeMethod('removeExercise', [identifier, jsonEncode(entry)]);
   }
 }

@@ -50,6 +50,11 @@ class PolarRecordingStatus {
     required this.ongoing,
     required this.entryId,
   });
+
+  @override
+  String toString() {
+    return 'PolarRecordingStatus(ongoing: $ongoing, entryId: $entryId)';
+  }
 }
 
 /// Polar exercise entry
@@ -82,6 +87,11 @@ class PolarExerciseEntry {
         'date': date.millisecondsSinceEpoch,
         (Platform.isIOS ? 'entryId' : 'identifier'): entryId,
       };
+
+  @override
+  String toString() {
+    return 'PolarExerciseEntry(path: $path, date: $date, entryId: $entryId)';
+  }
 }
 
 /// Polar Exercise Data

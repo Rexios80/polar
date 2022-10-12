@@ -19,6 +19,8 @@ class _MyAppState extends State<MyApp> {
   final polar = Polar();
   final logs = ['Service started'];
 
+  PolarExerciseEntry? exerciseEntry;
+
   @override
   void initState() {
     super.initState();
@@ -29,11 +31,11 @@ class _MyAppState extends State<MyApp> {
     polar.heartRateStream.listen((e) => log('Heart rate: ${e.data.hr}'));
     polar.batteryLevelStream.listen((e) => log('Battery: ${e.level}'));
     polar.streamingFeaturesReadyStream.listen((e) {
-      debugPrint('streamingFeaturesReady: ${e.features}');
+      log('streamingFeaturesReady: ${e.features}');
       if (e.features.contains(DeviceStreamingFeature.ecg)) {
         polar
             .startEcgStreaming(e.identifier)
-            .listen((e) => log('ECG data: ${e.samples}'));
+            .listen((e) => log('ECG data received'));
       }
     });
     polar.deviceConnectingStream.listen((_) => log('Device connecting'));
@@ -48,6 +50,17 @@ class _MyAppState extends State<MyApp> {
         appBar: AppBar(
           title: const Text('Polar example app'),
           actions: [
+            PopupMenuButton(
+              itemBuilder: (context) => RecordingAction.values
+                  .map((e) => PopupMenuItem(value: e, child: Text(e.name)))
+                  .toList(),
+              onSelected: handleRecordingAction,
+              child: const IconButton(
+                icon: Icon(Icons.fiber_manual_record),
+                disabledColor: Colors.white,
+                onPressed: null,
+              ),
+            ),
             IconButton(
               icon: const Icon(Icons.stop),
               onPressed: () {
@@ -80,4 +93,61 @@ class _MyAppState extends State<MyApp> {
       logs.add(log);
     });
   }
+
+  Future<void> handleRecordingAction(RecordingAction action) async {
+    switch (action) {
+      case RecordingAction.start:
+        log('Starting recording');
+        await polar.startRecording(
+          identifier,
+          exerciseId: 'test',
+          interval: RecordingInterval.interval_1s,
+          sampleType: SampleType.rr,
+        );
+        log('Started recording');
+        break;
+      case RecordingAction.stop:
+        log('Stopping recording');
+        await polar.stopRecording(identifier);
+        log('Stopped recording');
+        break;
+      case RecordingAction.status:
+        log('Getting recording status');
+        final status = await polar.requestRecordingStatus(identifier);
+        log('Recording status: $status');
+        break;
+      case RecordingAction.list:
+        log('Listing recordings');
+        final entries = await polar.listExercises(identifier);
+        log('Recordings: $entries');
+        exerciseEntry = entries.first;
+        break;
+      case RecordingAction.fetch:
+        log('Fetching recording');
+        if (exerciseEntry == null) {
+          log('Exercises not yet listed');
+          await handleRecordingAction(RecordingAction.list);
+        }
+        final entry = await polar.fetchExercise(identifier, exerciseEntry!);
+        log('Fetched recording: $entry');
+        break;
+      case RecordingAction.remove:
+        log('Removing recording');
+        if (exerciseEntry == null) {
+          log('No exercise to remove. Try calling list first.');
+          return;
+        }
+        await polar.removeExercise(identifier, exerciseEntry!);
+        break;
+    }
+  }
+}
+
+enum RecordingAction {
+  start,
+  stop,
+  status,
+  list,
+  fetch,
+  remove,
 }
