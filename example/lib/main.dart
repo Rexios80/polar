@@ -27,7 +27,7 @@ class _MyAppState extends State<MyApp> {
 
     polar
         .searchForDevice()
-        .listen((e) => debugPrint('searchForDevice: ${e.deviceId}'));
+        .listen((e) => log('Found device in scan: ${e.deviceId}'));
     polar.heartRateStream.listen((e) => log('Heart rate: ${e.data.hr}'));
     polar.batteryLevelStream.listen((e) => log('Battery: ${e.level}'));
     polar.streamingFeaturesReadyStream.listen((e) {
@@ -138,6 +138,7 @@ class _MyAppState extends State<MyApp> {
           return;
         }
         await polar.removeExercise(identifier, exerciseEntry!);
+        log('Removed recording');
         break;
     }
   }

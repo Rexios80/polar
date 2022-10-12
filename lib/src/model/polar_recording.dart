@@ -11,7 +11,12 @@ enum RecordingInterval {
   /// Convert a [RecordingInterval] to json
   dynamic toJson() {
     if (Platform.isIOS) {
-      return RecordingInterval.values.indexOf(this);
+      switch (this) {
+        case RecordingInterval.interval_1s:
+          return 1;
+        case RecordingInterval.interval_5s:
+          return 5;
+      }
     } else {
       return name.toUpperCase();
     }
