@@ -19,8 +19,8 @@ class PolarHrData {
   /// Create a [PolarHrData] from json
   PolarHrData.fromJson(Map<String, dynamic> json)
       : hr = json['hr'],
-        rrs = (json['rrs'] as List).map((e) => e as int).toList(),
-        rrsMs = (json['rrsMs'] as List).map((e) => e as int).toList(),
+        rrs = (json['rrs'] as List).cast<int>().toList(),
+        rrsMs = (json['rrsMs'] as List).cast<int>().toList(),
         contactStatus = json['contactStatus'] ?? json['contact'],
         contactStatusSupported =
             json['contactStatusSupported'] ?? json['contactSupported'];

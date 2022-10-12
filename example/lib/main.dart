@@ -80,7 +80,7 @@ class _MyAppState extends State<MyApp> {
         body: ListView(
           padding: const EdgeInsets.all(10),
           shrinkWrap: true,
-          children: logs.reversed.map((e) => Text(e)).toList(),
+          children: logs.reversed.map(Text.new).toList(),
         ),
       ),
     );

@@ -107,6 +107,10 @@ class PolarExerciseData {
 
   /// Create a [PolarExerciseData] from json
   PolarExerciseData.fromJson(this.identifier, Map<String, dynamic> json)
-      : interval = json['interval'],
-        samples = (json['samples'] as List).map((e) => e as int).toList();
+      : interval =
+            Platform.isIOS ? json['interval'] : json['recordingInterval'],
+        samples =
+            ((Platform.isIOS ? json['samples'] : json['hrSamples']) as List)
+                .cast<int>()
+                .toList();
 }

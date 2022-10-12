@@ -37,7 +37,7 @@ class PolarSensorSetting {
       : settings = {
           for (var e in (json['settings'] as Map<String, dynamic>).entries)
             PolarSettingType.fromJson(e.key):
-                (e.value as List).map((e) => e as int).toList()
+                (e.value as List).cast<int>().toList()
         };
 }
 

@@ -18,7 +18,7 @@ class PolarEcgData {
   /// Create a [PolarEcgData] from json
   PolarEcgData.fromJson(this.identifier, Map<String, dynamic> json)
       : timeStamp = json['timeStamp'],
-        samples = (json['samples'] as List).map((e) => e as int).toList();
+        samples = (json['samples'] as List).cast<int>().toList();
 }
 
 /// Polar acc data
@@ -95,13 +95,11 @@ class PolarOhrData {
         type = OhrDataType.fromJson(json['type']),
         samples = Platform.isIOS
             ? (json['samples'] as List)
-                .map((e) => (e as List).map((e) => e as int).toList())
+                .map((e) => (e as List).cast<int>().toList())
                 .toList()
             : (json['samples'] as List)
                 .map(
-                  (e) => (e['channelSamples'] as List)
-                      .map((e) => e as int)
-                      .toList(),
+                  (e) => (e['channelSamples'] as List).cast<int>().toList(),
                 )
                 .toList();
 }
