@@ -4,7 +4,13 @@ import android.os.Handler
 import android.os.Looper
 import androidx.lifecycle.Lifecycle.Event
 import androidx.lifecycle.LifecycleEventObserver
-import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonDeserializationContext
+import com.google.gson.JsonDeserializer
+import com.google.gson.JsonElement
+import com.google.gson.JsonPrimitive
+import com.google.gson.JsonSerializationContext
+import com.google.gson.JsonSerializer
 import com.polar.sdk.api.PolarBleApi
 import com.polar.sdk.api.PolarBleApi.DeviceStreamingFeature
 import com.polar.sdk.api.PolarBleApiCallbackProvider
@@ -24,9 +30,25 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.reactivex.rxjava3.disposables.Disposable
+import java.lang.reflect.Type
+import java.util.Date
 import java.util.UUID
 
 fun Any?.discard() = Unit
+
+object DateSerializer : JsonDeserializer<Date>, JsonSerializer<Date> {
+    override fun deserialize(
+        json: JsonElement?, typeOfT: Type?, context: JsonDeserializationContext?
+    ): Date {
+        return Date(json?.asJsonPrimitive?.asLong ?: 0)
+    }
+
+    override fun serialize(
+        src: Date?, typeOfSrc: Type?, context: JsonSerializationContext?
+    ): JsonElement {
+        return JsonPrimitive(src?.time)
+    }
+}
 
 /** PolarPlugin */
 class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvider, ActivityAware {
@@ -35,7 +57,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
     private lateinit var streamingChannel: EventChannel
     private lateinit var api: PolarBleApi
 
-    private val gson = Gson()
+    private val gson = GsonBuilder().registerTypeAdapter(Date::class.java, DateSerializer).create()
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "polar")

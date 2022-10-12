@@ -121,8 +121,6 @@ class PolarExerciseDataCodable: Encodable {
     }
 }
 
-// class PolarExerciseEntryCodable TODO
-
 class PolarGyroDataCodable: Encodable {
     let data: PolarGyroData
 
@@ -147,8 +145,6 @@ class PolarGyroDataCodable: Encodable {
         }, forKey: .samples)
     }
 }
-
-// class PolarHrBroadcastDataCodable TODO
 
 class PolarMagnetometerDataCodable: Encodable {
     let data: PolarMagnetometerData
@@ -272,14 +268,14 @@ class PolarExerciseEntryCodable: Codable {
     required init(from decoder: Decoder) {
         guard let container = try? decoder.container(keyedBy: CodingKeys.self),
               let path = try? container.decode(String.self, forKey: .path),
-              let date = try? container.decode(Date.self, forKey: .date),
+              let millis = try? container.decode(Int64.self, forKey: .date),
               let entryId = try? container.decode(String.self, forKey: .entryId)
         else {
             data = PolarExerciseEntry(path: "", date: Date(), entryId: "")
             return
         }
 
-        data = PolarExerciseEntry(path: path, date: date, entryId: entryId)
+        data = PolarExerciseEntry(path: path, date: Date(milliseconds: millis), entryId: entryId)
     }
 
     enum CodingKeys: String, CodingKey {
@@ -291,7 +287,17 @@ class PolarExerciseEntryCodable: Codable {
     func encode(to encoder: Encoder) {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try? container.encode(data.path, forKey: .path)
-        try? container.encode(data.date, forKey: .date)
+        try? container.encode(data.date.millisecondsSince1970, forKey: .date)
         try? container.encode(data.entryId, forKey: .entryId)
+    }
+}
+
+extension Date {
+    var millisecondsSince1970: Int64 {
+        Int64((timeIntervalSince1970 * 1000).rounded())
+    }
+
+    init(milliseconds: Int64) {
+        self = Date(timeIntervalSince1970: TimeInterval(milliseconds) / 1000)
     }
 }
