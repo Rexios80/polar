@@ -113,4 +113,9 @@ class PolarExerciseData {
             ((Platform.isIOS ? json['samples'] : json['hrSamples']) as List)
                 .cast<int>()
                 .toList();
+
+  @override
+  String toString() {
+    return 'PolarExerciseData(identifier: $identifier, interval: $interval, samples: $samples)';
+  }
 }
