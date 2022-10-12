@@ -251,7 +251,7 @@ class Polar {
   ) async {
     final response = await _channel.invokeMethod(
       'requestStreamSettings',
-      [identifier, jsonEncode(feature)],
+      [identifier, feature.toJson()],
     );
     return PolarSensorSetting.fromJson(jsonDecode(response));
   }
@@ -269,7 +269,7 @@ class Polar {
     }
 
     yield* _streamingChannel.receiveBroadcastStream(
-      [jsonEncode(feature), identifier, jsonEncode(settings)],
+      [feature.toJson(), identifier, jsonEncode(settings)],
     );
   }
 
@@ -401,7 +401,7 @@ class Polar {
   }) {
     return _channel.invokeMethod(
       'startRecording',
-      [identifier, exerciseId, jsonEncode(interval), jsonEncode(sampleType)],
+      [identifier, exerciseId, interval.toJson(), sampleType.toJson()],
     );
   }
 

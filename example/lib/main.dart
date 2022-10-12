@@ -25,22 +25,22 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
 
-    polar
-        .searchForDevice()
-        .listen((e) => debugPrint('searchForDevice: ${e.deviceId}'));
-    polar.heartRateStream.listen((e) => log('Heart rate: ${e.data.hr}'));
-    polar.batteryLevelStream.listen((e) => log('Battery: ${e.level}'));
-    polar.streamingFeaturesReadyStream.listen((e) {
-      log('streamingFeaturesReady: ${e.features}');
-      if (e.features.contains(DeviceStreamingFeature.ecg)) {
-        polar
-            .startEcgStreaming(e.identifier)
-            .listen((e) => log('ECG data received'));
-      }
-    });
-    polar.deviceConnectingStream.listen((_) => log('Device connecting'));
-    polar.deviceConnectedStream.listen((_) => log('Device connected'));
-    polar.deviceDisconnectedStream.listen((_) => log('Device disconnected'));
+    // polar
+    //     .searchForDevice()
+    //     .listen((e) => debugPrint('searchForDevice: ${e.deviceId}'));
+    // polar.heartRateStream.listen((e) => log('Heart rate: ${e.data.hr}'));
+    // polar.batteryLevelStream.listen((e) => log('Battery: ${e.level}'));
+    // polar.streamingFeaturesReadyStream.listen((e) {
+    //   log('streamingFeaturesReady: ${e.features}');
+    //   if (e.features.contains(DeviceStreamingFeature.ecg)) {
+    //     polar
+    //         .startEcgStreaming(e.identifier)
+    //         .listen((e) => log('ECG data received'));
+    //   }
+    // });
+    // polar.deviceConnectingStream.listen((_) => log('Device connecting'));
+    // polar.deviceConnectedStream.listen((_) => log('Device connected'));
+    // polar.deviceDisconnectedStream.listen((_) => log('Device disconnected'));
   }
 
   @override
