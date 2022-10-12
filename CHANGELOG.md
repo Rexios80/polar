@@ -1,9 +1,9 @@
-## NEXT
+## 3.2.0
+- Adds recording features
 - Adds `scanForDevice`
 - Refactors streaming to use `EventChannel`s internally
-- Adds recording features
 - `disconnectFromDevice` now returns a `Future`
-- Updated Polar SDK to 3.3.6
+- Updated Polar SDK to 3.3.6 (fixes `streamingFeaturesReady` not being called)
 
 ## 3.1.0
 - Updated Polar SDK to 3.3.4
