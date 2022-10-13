@@ -356,8 +356,8 @@ public class SwiftPolarPlugin:
 }
 
 class StreamHandler: NSObject, FlutterStreamHandler {
-    final let onListen: (Any?, @escaping FlutterEventSink) -> FlutterError?
-    final let onCancel: (Any?) -> FlutterError?
+    let onListen: (Any?, @escaping FlutterEventSink) -> FlutterError?
+    let onCancel: (Any?) -> FlutterError?
 
     init(onListen: @escaping (Any?, @escaping FlutterEventSink) -> FlutterError?, onCancel: @escaping (Any?) -> FlutterError?) {
         self.onListen = onListen
