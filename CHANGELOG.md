@@ -1,3 +1,6 @@
+## 3.3.0
+- Upgrades dependencies
+
 ## 3.2.0
 - Adds recording features
 - Adds `scanForDevice`
