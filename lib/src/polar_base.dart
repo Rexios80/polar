@@ -212,7 +212,7 @@ class Polar {
       final sdkInt = androidDeviceInfo.version.sdkInt;
 
       // If we are on Android M+
-      if (sdkInt != null && sdkInt >= 23) {
+      if (sdkInt >= 23) {
         // If we are on an Android version before S or bluetooth scan is used to derive location
         if (sdkInt < 31 || !bluetoothScanNeverForLocation) {
           await Permission.location.request();
