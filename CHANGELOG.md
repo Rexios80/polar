@@ -1,3 +1,7 @@
+## 3.4.0
+- Upgrades dependencies
+- Adds `toString` override for `Xyz` class
+
 ## 3.3.0
 - Upgrades dependencies
 
