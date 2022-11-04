@@ -15,7 +15,7 @@ class Xyz {
       : x = json['x'] / 1,
         y = json['y'] / 1,
         z = json['z'] / 1;
-  
+
   @override
   String toString() => 'Xyz(x: $x, y: $y, z: $z)';
 }
