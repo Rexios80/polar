@@ -42,8 +42,6 @@ class Polar {
       StreamController<PolarHeartRateEvent>.broadcast();
   final _ftpFeatureReadyStreamController = StreamController<String>.broadcast();
 
-  final _sensorSettingCache = <DeviceStreamingFeature, PolarSensorSetting>{};
-
   /// helper to ask ble power state
   Stream<bool> get blePowerStateStream => _blePowerStateStreamController.stream;
 
@@ -272,8 +270,10 @@ class Polar {
     PolarSensorSetting? settings,
   }) async* {
     if (feature != DeviceStreamingFeature.ppi) {
-      settings ??= _sensorSettingCache[feature] ??=
-          await requestStreamSettings(identifier, feature);
+      settings ??= await requestStreamSettings(
+        identifier,
+        feature,
+      );
     }
 
     yield* _streamingChannels[feature]!
