@@ -78,7 +78,7 @@ public class SwiftPolarPlugin:
                 result(nil)
             case "requestStreamSettings":
                 try requestStreamSettings(call, result)
-            case "createStreamingChannel"
+            case "createStreamingChannel":
                 createStreamingChannel(call, result)
             case "startRecording":
                 startRecording(call, result)
@@ -360,10 +360,8 @@ class StreamingChannel: NSObject, FlutterStreamHandler {
     }
 
     func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
-        let arguments = arguments as! [Any?]
-        let identifier = arguments[0] as! String
         // Will be null for ppi feature
-        let settings = try? decoder.decode(PolarSensorSettingCodable.self, from: (arguments[1] as! String)
+        let settings = try? decoder.decode(PolarSensorSettingCodable.self, from: (arguments as! String)
             .data(using: .utf8)!).data
 
         let stream: AnyObservable

@@ -276,7 +276,7 @@ class Polar {
     }
 
     yield* EventChannel(channelName)
-        .receiveBroadcastStream([identifier, jsonEncode(settings)]);
+        .receiveBroadcastStream(jsonEncode(settings));
   }
 
   /// Start the ECG (Electrocardiography) stream. ECG stream is stopped if the connection is closed, error occurs or stream is disposed.

@@ -341,9 +341,8 @@ class StreamingChannel(
     }
 
     override fun onListen(arguments: Any?, events: EventSink) {
-        arguments as List<*>
         // Will be null for ppi feature
-        val settings = gson.fromJson(arguments[0] as String, PolarSensorSetting::class.java)
+        val settings = gson.fromJson(arguments as String, PolarSensorSetting::class.java)
 
         val stream = when (feature) {
             DeviceStreamingFeature.ECG -> api.startEcgStreaming(identifier, settings)
