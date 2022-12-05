@@ -11,7 +11,15 @@ import 'package:polar/polar.dart';
 class Polar {
   static const _channel = MethodChannel('polar');
   static const _searchChannel = EventChannel('polar/search');
-  static const _streamingChannel = EventChannel('polar/streaming');
+  static const _streamingChannels = {
+    DeviceStreamingFeature.ecg: EventChannel('polar/streaming/ecg'),
+    DeviceStreamingFeature.acc: EventChannel('polar/streaming/ecg'),
+    DeviceStreamingFeature.gyro: EventChannel('polar/streaming/gyro'),
+    DeviceStreamingFeature.magnetometer:
+        EventChannel('polar/streaming/magnetometer'),
+    DeviceStreamingFeature.ppg: EventChannel('polar/streaming/ppg'),
+    DeviceStreamingFeature.ppi: EventChannel('polar/streaming/ppi'),
+  };
 
   // Other data
   final _blePowerStateStreamController = StreamController<bool>.broadcast();
@@ -268,9 +276,8 @@ class Polar {
           await requestStreamSettings(identifier, feature);
     }
 
-    yield* _streamingChannel.receiveBroadcastStream(
-      [feature.toJson(), identifier, jsonEncode(settings)],
-    );
+    yield* _streamingChannels[feature]!
+        .receiveBroadcastStream([identifier, jsonEncode(settings)]);
   }
 
   /// Start the ECG (Electrocardiography) stream. ECG stream is stopped if the connection is closed, error occurs or stream is disposed.

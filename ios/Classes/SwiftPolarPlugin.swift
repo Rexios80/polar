@@ -170,6 +170,10 @@ public class SwiftPolarPlugin:
 
         return nil
     }, onCancel: { arguments in
+        guard let arguments = arguments else {
+            return
+        }
+
         let arguments = arguments as! [Any?]
         let feature = DeviceStreamingFeature(rawValue: arguments[0] as! Int)!
         let identifier = arguments[1] as! String
