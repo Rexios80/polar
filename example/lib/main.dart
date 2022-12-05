@@ -36,6 +36,8 @@ class _MyAppState extends State<MyApp> {
         polar
             .startEcgStreaming(e.identifier)
             .listen((e) => log('ECG data: ${e.samples}'));
+      }
+      if (e.features.contains(DeviceStreamingFeature.acc)) {
         polar
             .startAccStreaming(e.identifier)
             .listen((e) => log('ACC data: ${e.samples}'));
