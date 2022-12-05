@@ -1,3 +1,6 @@
+## 3.6.0
+- Dynamically register streaming channels
+
 ## 3.5.0
 - Fixes issues with EventChannels
 - Better error reporting to Flutter from Android
