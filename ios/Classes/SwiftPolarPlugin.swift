@@ -14,20 +14,42 @@ public class SwiftPolarPlugin:
     PolarBleApiDeviceInfoObserver
 {
     var api: PolarBleApi!
+
+    /// Method channel
     let channel: FlutterMethodChannel
+
+    /// Search channel
     let searchChannel: FlutterEventChannel
-    let streamingChannel: FlutterEventChannel
+
+    /// Streaming channels
+    let ecgChannel: FlutterEventChannel
+    let accChannel: FlutterEventChannel
+    let gyroChannel: FlutterEventChannel
+    let magnetometerChannel: FlutterEventChannel
+    let ppgChannel: FlutterEventChannel
+    let ppiChannel: FlutterEventChannel
+
     let encoder = JSONEncoder()
     let decoder = JSONDecoder()
 
     init(
         channel: FlutterMethodChannel,
         searchChannel: FlutterEventChannel,
-        streamingChannel: FlutterEventChannel
+        ecgChannel: FlutterEventChannel,
+        accChannel: FlutterEventChannel,
+        gyroChannel: FlutterEventChannel,
+        magnetometerChannel: FlutterEventChannel,
+        ppgChannel: FlutterEventChannel,
+        ppiChannel: FlutterEventChannel
     ) {
         self.channel = channel
         self.searchChannel = searchChannel
-        self.streamingChannel = streamingChannel
+        self.ecgChannel = ecgChannel
+        self.accChannel = accChannel
+        self.gyroChannel = gyroChannel
+        self.magnetometerChannel = magnetometerChannel
+        self.ppgChannel = ppgChannel
+        self.ppiChannel = ppiChannel
     }
 
     private func initApi() {
@@ -44,17 +66,32 @@ public class SwiftPolarPlugin:
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "polar", binaryMessenger: registrar.messenger())
         let searchChannel = FlutterEventChannel(name: "polar/search", binaryMessenger: registrar.messenger())
-        let streamingChannel = FlutterEventChannel(name: "polar/streaming", binaryMessenger: registrar.messenger())
+        let ecgChannel = FlutterEventChannel(name: "polar/streaming/ecg", binaryMessenger: registrar.messenger())
+        let accChannel = FlutterEventChannel(name: "polar/streaming/acc", binaryMessenger: registrar.messenger())
+        let gyroChannel = FlutterEventChannel(name: "polar/streaming/gyro", binaryMessenger: registrar.messenger())
+        let magnetometerChannel = FlutterEventChannel(name: "polar/streaming/magnetometer", binaryMessenger: registrar.messenger())
+        let ppgChannel = FlutterEventChannel(name: "polar/streaming/ppg", binaryMessenger: registrar.messenger())
+        let ppiChannel = FlutterEventChannel(name: "polar/streaming/ppi", binaryMessenger: registrar.messenger())
 
         let instance = SwiftPolarPlugin(
             channel: channel,
             searchChannel: searchChannel,
-            streamingChannel: streamingChannel
+            ecgChannel: ecgChannel,
+            accChannel: accChannel,
+            gyroChannel: gyroChannel,
+            magnetometerChannel: magnetometerChannel,
+            ppgChannel: ppgChannel,
+            ppiChannel: ppiChannel
         )
 
         registrar.addMethodCallDelegate(instance, channel: channel)
         searchChannel.setStreamHandler(instance.searchHandler)
-        streamingChannel.setStreamHandler(instance.streamingHandler)
+        ecgChannel.setStreamHandler(instance.createStreamingHandler(DeviceStreamingFeature.ecg))
+        accChannel.setStreamHandler(instance.createStreamingHandler(DeviceStreamingFeature.acc))
+        gyroChannel.setStreamHandler(instance.createStreamingHandler(DeviceStreamingFeature.gyro))
+        magnetometerChannel.setStreamHandler(instance.createStreamingHandler(DeviceStreamingFeature.magnetometer))
+        ppgChannel.setStreamHandler(instance.createStreamingHandler(DeviceStreamingFeature.ppg))
+        ppiChannel.setStreamHandler(instance.createStreamingHandler(DeviceStreamingFeature.ppi))
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -111,77 +148,74 @@ public class SwiftPolarPlugin:
 
     // Map of <feature, <identifier, subscription>>
     var streamingSubscriptions = [DeviceStreamingFeature: [String: Disposable]]()
-    lazy var streamingHandler = StreamHandler(onListen: { arguments, events in
-        let arguments = arguments as! [Any?]
-        let feature = DeviceStreamingFeature(rawValue: arguments[0] as! Int)!
-        let identifier = arguments[1] as! String
-        // Will be null for ppi feature
-        let settings = try? self.decoder.decode(PolarSensorSettingCodable.self, from: (arguments[2] as! String)
-            .data(using: .utf8)!).data
+    func createStreamingHandler(_ feature: DeviceStreamingFeature) -> StreamHandler {
+        StreamHandler(onListen: { arguments, events in
+            let arguments = arguments as! [Any?]
+            let identifier = arguments[0] as! String
+            // Will be null for ppi feature
+            let settings = try? self.decoder.decode(PolarSensorSettingCodable.self, from: (arguments[1] as! String)
+                .data(using: .utf8)!).data
 
-        let stream: AnyObservable
-        switch feature {
-        case .ecg:
-            stream = self.api.startEcgStreaming(identifier, settings: settings!)
-        case .acc:
-            stream = self.api.startAccStreaming(identifier, settings: settings!)
-        case .gyro:
-            stream = self.api.startGyroStreaming(identifier, settings: settings!)
-        case .magnetometer:
-            stream = self.api.startMagnetometerStreaming(identifier, settings: settings!)
-        case .ppg:
-            stream = self.api.startOhrStreaming(identifier, settings: settings!)
-        case .ppi:
-            stream = self.api.startOhrPPIStreaming(identifier)
-        }
-
-        let sub = stream.anySubscribe(onNext: { data in
-            let encodedData: Any?
+            let stream: AnyObservable
             switch feature {
             case .ecg:
-                encodedData = try? self.encoder.encode(PolarEcgDataCodable(data as! PolarEcgData))
+                stream = self.api.startEcgStreaming(identifier, settings: settings!)
             case .acc:
-                encodedData = try? self.encoder.encode(PolarAccDataCodable(data as! PolarAccData))
+                stream = self.api.startAccStreaming(identifier, settings: settings!)
             case .gyro:
-                encodedData = try? self.encoder.encode(PolarGyroDataCodable(data as! PolarGyroData))
+                stream = self.api.startGyroStreaming(identifier, settings: settings!)
             case .magnetometer:
-                encodedData = try? self.encoder.encode(PolarMagnetometerDataCodable(data as! PolarMagnetometerData))
+                stream = self.api.startMagnetometerStreaming(identifier, settings: settings!)
             case .ppg:
-                encodedData = try? self.encoder.encode(PolarOhrDataCodable(data as! PolarOhrData))
+                stream = self.api.startOhrStreaming(identifier, settings: settings!)
             case .ppi:
-                encodedData = try? self.encoder.encode(PolarPpiDataCodable(data as! PolarPpiData))
+                stream = self.api.startOhrPPIStreaming(identifier)
             }
 
-            guard let data = encodedData as? Data, let data = String(data: data, encoding: .utf8) else {
-                return
+            let sub = stream.anySubscribe(onNext: { data in
+                let encodedData: Any?
+                switch feature {
+                case .ecg:
+                    encodedData = try? self.encoder.encode(PolarEcgDataCodable(data as! PolarEcgData))
+                case .acc:
+                    encodedData = try? self.encoder.encode(PolarAccDataCodable(data as! PolarAccData))
+                case .gyro:
+                    encodedData = try? self.encoder.encode(PolarGyroDataCodable(data as! PolarGyroData))
+                case .magnetometer:
+                    encodedData = try? self.encoder.encode(PolarMagnetometerDataCodable(data as! PolarMagnetometerData))
+                case .ppg:
+                    encodedData = try? self.encoder.encode(PolarOhrDataCodable(data as! PolarOhrData))
+                case .ppi:
+                    encodedData = try? self.encoder.encode(PolarPpiDataCodable(data as! PolarPpiData))
+                }
+
+                guard let data = encodedData as? Data, let data = String(data: data, encoding: .utf8) else {
+                    return
+                }
+                events(data)
+            }, onError: { error in
+                events(FlutterError(code: "Error while streaming", message: error.localizedDescription, details: nil))
+            }, onCompleted: {
+                events(FlutterEndOfEventStream)
+            })
+
+            if self.streamingSubscriptions[feature] == nil {
+                self.streamingSubscriptions[feature] = [:]
             }
-            events(data)
-        }, onError: { error in
-            events(FlutterError(code: "Error while streaming", message: error.localizedDescription, details: nil))
-        }, onCompleted: {
-            events(FlutterEndOfEventStream)
+
+            self.streamingSubscriptions[feature]![identifier] = sub
+
+            return nil
+        }, onCancel: { arguments in
+            guard let arguments = arguments as? [Any?] else {
+                return nil
+            }
+
+            let identifier = arguments[0] as! String
+            self.streamingSubscriptions[feature]?[identifier]?.dispose()
+            return nil
         })
-
-        if self.streamingSubscriptions[feature] == nil {
-            self.streamingSubscriptions[feature] = [:]
-        }
-
-        self.streamingSubscriptions[feature]![identifier] = sub
-
-        return nil
-    }, onCancel: { arguments in
-        guard let arguments = arguments else {
-            return
-        }
-
-        let arguments = arguments as! [Any?]
-        let feature = DeviceStreamingFeature(rawValue: arguments[0] as! Int)!
-        let identifier = arguments[1] as! String
-
-        self.streamingSubscriptions[feature]?[identifier]?.dispose()
-
-        return nil
-    })
+    }
 
     func requestStreamSettings(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) throws {
         let arguments = call.arguments as! [Any]
