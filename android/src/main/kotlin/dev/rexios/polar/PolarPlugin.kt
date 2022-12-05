@@ -113,9 +113,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
                 runOnUiThread { events.success(gson.toJson(it)) }
             }, {
                 runOnUiThread {
-                    events.error(
-                        it.localizedMessage ?: "Unknown error searching for device", null, null
-                    )
+                    events.error(it.toString(), it.message, null)
                 }
             }, {
                 runOnUiThread { events.endOfStream() }
@@ -156,9 +154,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
                 runOnUiThread { events.success(gson.toJson(it)) }
             }, {
                 runOnUiThread {
-                    events.error(
-                        it.localizedMessage ?: "Unknown error while streaming", null, null
-                    )
+                    events.error(it.toString(), it.message, null)
                 }
             }, {
                 runOnUiThread { events.endOfStream() }
@@ -222,11 +218,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
             runOnUiThread { result.success(gson.toJson(it)) }
         }, {
             runOnUiThread {
-                result.error(
-                    it.localizedMessage ?: "Unknown error requesting streaming settings",
-                    null,
-                    null,
-                )
+                result.error(it.toString(), it.message, null)
             }
         }).discard()
     }
@@ -243,11 +235,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
             runOnUiThread { result.success(null) }
         }, {
             runOnUiThread {
-                result.error(
-                    it.localizedMessage ?: "Unknown error starting recording",
-                    null,
-                    null,
-                )
+                result.error(it.toString(), it.message, null)
             }
         }).discard()
     }
@@ -259,11 +247,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
             runOnUiThread { result.success(null) }
         }, {
             runOnUiThread {
-                result.error(
-                    it.localizedMessage ?: "Unknown error stopping recording",
-                    null,
-                    null,
-                )
+                result.error(it.toString(), it.message, null)
             }
         }).discard()
     }
@@ -275,11 +259,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
             runOnUiThread { result.success(listOf(it.first, it.second)) }
         }, {
             runOnUiThread {
-                result.error(
-                    it.localizedMessage ?: "Unknown error requesting recording status",
-                    null,
-                    null,
-                )
+                result.error(it.toString(), it.message, null)
             }
         }).discard()
     }
@@ -292,11 +272,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
             exercises.add(gson.toJson(it))
         }, {
             runOnUiThread {
-                result.error(
-                    it.localizedMessage ?: "Unknown error listing exercises",
-                    null,
-                    null,
-                )
+                result.error(it.toString(), it.message, null)
             }
         }, {
             result.success(exercises)
@@ -312,11 +288,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
             result.success(gson.toJson(it))
         }, {
             runOnUiThread {
-                result.error(
-                    it.localizedMessage ?: "Unknown error fetching exercise",
-                    null,
-                    null,
-                )
+                result.error(it.toString(), it.message, null)
             }
         }).discard()
     }
@@ -330,11 +302,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
             runOnUiThread { result.success(null) }
         }, {
             runOnUiThread {
-                result.error(
-                    it.localizedMessage ?: "Unknown error removing exercise",
-                    null,
-                    null,
-                )
+                result.error(it.toString(), it.message, null)
             }
         }).discard()
     }

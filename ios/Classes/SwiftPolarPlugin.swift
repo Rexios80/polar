@@ -365,11 +365,11 @@ class StreamHandler: NSObject, FlutterStreamHandler {
     }
 
     func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
-        onListen(arguments, events)
+        return onListen(arguments, events)
     }
 
     func onCancel(withArguments arguments: Any?) -> FlutterError? {
-        onCancel(arguments)
+        return onCancel(arguments)
     }
 }
 
