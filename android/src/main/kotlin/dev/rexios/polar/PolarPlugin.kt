@@ -384,7 +384,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
     }
 
     override fun polarFtpFeatureReady(identifier: String) {
-        invokeOnUiThread("polarFtpFeatureReady", identifier)
+        invokeOnUiThread("ftpFeatureReady", identifier)
     }
 }
 
