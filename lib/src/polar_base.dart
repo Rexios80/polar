@@ -11,15 +11,6 @@ import 'package:polar/polar.dart';
 class Polar {
   static const _channel = MethodChannel('polar');
   static const _searchChannel = EventChannel('polar/search');
-  static const _streamingChannels = {
-    DeviceStreamingFeature.ecg: EventChannel('polar/streaming/ecg'),
-    DeviceStreamingFeature.acc: EventChannel('polar/streaming/acc'),
-    DeviceStreamingFeature.gyro: EventChannel('polar/streaming/gyro'),
-    DeviceStreamingFeature.magnetometer:
-        EventChannel('polar/streaming/magnetometer'),
-    DeviceStreamingFeature.ppg: EventChannel('polar/streaming/ppg'),
-    DeviceStreamingFeature.ppi: EventChannel('polar/streaming/ppi'),
-  };
 
   // Other data
   final _blePowerStateStreamController = StreamController<bool>.broadcast();
@@ -269,6 +260,14 @@ class Polar {
     String identifier, {
     PolarSensorSetting? settings,
   }) async* {
+    final channelName = 'polar/streaming/$identifier/${feature.name}';
+
+    await _channel.invokeMethod('createStreamingChannel', [
+      channelName,
+      identifier,
+      feature.toJson(),
+    ]);
+
     if (feature != DeviceStreamingFeature.ppi) {
       settings ??= await requestStreamSettings(
         identifier,
@@ -276,7 +275,7 @@ class Polar {
       );
     }
 
-    yield* _streamingChannels[feature]!
+    yield* EventChannel(channelName)
         .receiveBroadcastStream([identifier, jsonEncode(settings)]);
   }
 

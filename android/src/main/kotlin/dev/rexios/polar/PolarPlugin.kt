@@ -23,6 +23,7 @@ import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.embedding.engine.plugins.lifecycle.FlutterLifecycleAdapter
+import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.EventChannel.EventSink
 import io.flutter.plugin.common.MethodCall
@@ -50,8 +51,17 @@ object DateSerializer : JsonDeserializer<Date>, JsonSerializer<Date> {
     }
 }
 
+private fun runOnUiThread(runnable: () -> Unit) {
+    Handler(Looper.getMainLooper()).post { runnable() }
+}
+
+private val gson = GsonBuilder().registerTypeAdapter(Date::class.java, DateSerializer).create()
+
 /** PolarPlugin */
 class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvider, ActivityAware {
+    /// Binary messenger for dynamic EventChannel registration
+    private lateinit var messenger: BinaryMessenger
+
     /// Method channel
     private lateinit var channel: MethodChannel
 
@@ -59,42 +69,18 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
     private lateinit var searchChannel: EventChannel
 
     /// Streaming channels
-    private lateinit var ecgChannel: EventChannel
-    private lateinit var accChannel: EventChannel
-    private lateinit var gyroChannel: EventChannel
-    private lateinit var magnetometerChannel: EventChannel
-    private lateinit var ppgChannel: EventChannel
-    private lateinit var ppiChannel: EventChannel
+    private val streamingChannels = mutableMapOf<String, StreamingChannel>()
 
     private lateinit var api: PolarBleApi
 
-    private val gson = GsonBuilder().registerTypeAdapter(Date::class.java, DateSerializer).create()
-
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+        messenger = flutterPluginBinding.binaryMessenger
+
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "polar")
         channel.setMethodCallHandler(this)
 
         searchChannel = EventChannel(flutterPluginBinding.binaryMessenger, "polar/search")
         searchChannel.setStreamHandler(searchHandler)
-
-        ecgChannel = EventChannel(flutterPluginBinding.binaryMessenger, "polar/streaming/ecg")
-        ecgChannel.setStreamHandler(createStreamingHandler(DeviceStreamingFeature.ECG))
-
-        accChannel = EventChannel(flutterPluginBinding.binaryMessenger, "polar/streaming/acc")
-        accChannel.setStreamHandler(createStreamingHandler(DeviceStreamingFeature.ACC))
-
-        gyroChannel = EventChannel(flutterPluginBinding.binaryMessenger, "polar/streaming/gyro")
-        gyroChannel.setStreamHandler(createStreamingHandler(DeviceStreamingFeature.GYRO))
-
-        magnetometerChannel =
-            EventChannel(flutterPluginBinding.binaryMessenger, "polar/streaming/magnetometer")
-        magnetometerChannel.setStreamHandler(createStreamingHandler(DeviceStreamingFeature.MAGNETOMETER))
-
-        ppgChannel = EventChannel(flutterPluginBinding.binaryMessenger, "polar/streaming/ppg")
-        ppgChannel.setStreamHandler(createStreamingHandler(DeviceStreamingFeature.PPG))
-
-        ppiChannel = EventChannel(flutterPluginBinding.binaryMessenger, "polar/streaming/ohr/ppi")
-        ppiChannel.setStreamHandler(createStreamingHandler(DeviceStreamingFeature.PPI))
 
         api = PolarBleApiDefaultImpl.defaultImplementation(
             flutterPluginBinding.applicationContext, PolarBleApi.ALL_FEATURES
@@ -105,12 +91,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
         searchChannel.setStreamHandler(null)
-        ecgChannel.setStreamHandler(null)
-        accChannel.setStreamHandler(null)
-        gyroChannel.setStreamHandler(null)
-        magnetometerChannel.setStreamHandler(null)
-        ppgChannel.setStreamHandler(null)
-        ppiChannel.setStreamHandler(null)
+        streamingChannels.values.forEach { it.dispose() }
         shutdown()
     }
 
@@ -127,6 +108,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
             }
 
             "requestStreamSettings" -> requestStreamSettings(call, result)
+            "createStreamingChannel" -> createStreamingChannel(call, result)
             "startRecording" -> startRecording(call, result)
             "stopRecording" -> stopRecording(call, result)
             "requestRecordingStatus" -> requestRecordingStatus(call, result)
@@ -157,57 +139,17 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
         }
     }
 
-    private fun createStreamingHandler(feature: DeviceStreamingFeature): EventChannel.StreamHandler {
-        return object : EventChannel.StreamHandler {
-            // Map of <feature, <identifier, subscription>>
-            private val streamingSubscriptions =
-                mutableMapOf<DeviceStreamingFeature, MutableMap<String, Disposable>>()
+    private fun createStreamingChannel(call: MethodCall, result: Result) {
+        val arguments = call.arguments as List<*>
+        val name = arguments[0] as String
+        val identifier = arguments[1] as String
+        val feature = gson.fromJson(arguments[2] as String, DeviceStreamingFeature::class.java)
 
-            override fun onListen(arguments: Any?, events: EventSink) {
-                arguments as List<*>
-                val identifier = arguments[0] as String
-                // Will be null for ppi feature
-                val settings = gson.fromJson(arguments[1] as String, PolarSensorSetting::class.java)
-
-                val stream = when (feature) {
-                    DeviceStreamingFeature.ECG -> api.startEcgStreaming(identifier, settings)
-                    DeviceStreamingFeature.ACC -> api.startAccStreaming(identifier, settings)
-                    DeviceStreamingFeature.GYRO -> api.startGyroStreaming(identifier, settings)
-                    DeviceStreamingFeature.MAGNETOMETER -> api.startMagnetometerStreaming(
-                        identifier, settings
-                    )
-
-                    DeviceStreamingFeature.PPG -> api.startOhrStreaming(identifier, settings)
-                    DeviceStreamingFeature.PPI -> api.startOhrPPIStreaming(identifier)
-                    else -> throw Exception("Unknown streaming feature $feature")
-                }
-
-                val sub = stream.subscribe({
-                    runOnUiThread { events.success(gson.toJson(it)) }
-                }, {
-                    runOnUiThread {
-                        events.error(it.toString(), it.message, null)
-                    }
-                }, {
-                    runOnUiThread { events.endOfStream() }
-                })
-
-                if (streamingSubscriptions[feature] == null) {
-                    streamingSubscriptions[feature] = mutableMapOf()
-                }
-
-                streamingSubscriptions[feature]!![identifier] = sub
-            }
-
-            override fun onCancel(arguments: Any?) {
-                if (arguments == null) return
-
-                arguments as List<*>
-                val identifier = arguments[0] as String
-
-                streamingSubscriptions[feature]?.get(identifier)?.dispose()
-            }
+        if (streamingChannels[name] == null) {
+            streamingChannels[name] = StreamingChannel(messenger, name, api, identifier, feature)
         }
+
+        result.success(null)
     }
 
 
@@ -229,10 +171,6 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
     // Apparently you have to call invokeMethod on the UI thread
     private fun invokeOnUiThread(method: String, arguments: Any?, callback: Result? = null) {
         runOnUiThread { channel.invokeMethod(method, arguments, callback) }
-    }
-
-    private fun runOnUiThread(runnable: () -> Unit) {
-        Handler(Looper.getMainLooper()).post { runnable() }
     }
 
     private fun shutdown() {
@@ -388,3 +326,55 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
     }
 }
 
+class StreamingChannel(
+    messenger: BinaryMessenger,
+    name: String,
+    private val api: PolarBleApi,
+    private val identifier: String,
+    private val feature: DeviceStreamingFeature,
+    private val channel: EventChannel = EventChannel(messenger, name)
+) : EventChannel.StreamHandler {
+    private var subscription: Disposable? = null
+
+    init {
+        channel.setStreamHandler(this)
+    }
+
+    override fun onListen(arguments: Any?, events: EventSink) {
+        arguments as List<*>
+        // Will be null for ppi feature
+        val settings = gson.fromJson(arguments[0] as String, PolarSensorSetting::class.java)
+
+        val stream = when (feature) {
+            DeviceStreamingFeature.ECG -> api.startEcgStreaming(identifier, settings)
+            DeviceStreamingFeature.ACC -> api.startAccStreaming(identifier, settings)
+            DeviceStreamingFeature.GYRO -> api.startGyroStreaming(identifier, settings)
+            DeviceStreamingFeature.MAGNETOMETER -> api.startMagnetometerStreaming(
+                identifier, settings
+            )
+
+            DeviceStreamingFeature.PPG -> api.startOhrStreaming(identifier, settings)
+            DeviceStreamingFeature.PPI -> api.startOhrPPIStreaming(identifier)
+            else -> throw Exception("Unknown streaming feature $feature")
+        }
+
+        subscription = stream.subscribe({
+            runOnUiThread { events.success(gson.toJson(it)) }
+        }, {
+            runOnUiThread {
+                events.error(it.toString(), it.message, null)
+            }
+        }, {
+            runOnUiThread { events.endOfStream() }
+        })
+    }
+
+    override fun onCancel(arguments: Any?) {
+        subscription?.dispose()
+    }
+
+    fun dispose() {
+        subscription?.dispose()
+        channel.setStreamHandler(null)
+    }
+}
