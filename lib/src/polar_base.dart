@@ -13,7 +13,7 @@ class Polar {
   static const _searchChannel = EventChannel('polar/search');
   static const _streamingChannels = {
     DeviceStreamingFeature.ecg: EventChannel('polar/streaming/ecg'),
-    DeviceStreamingFeature.acc: EventChannel('polar/streaming/ecg'),
+    DeviceStreamingFeature.acc: EventChannel('polar/streaming/acc'),
     DeviceStreamingFeature.gyro: EventChannel('polar/streaming/gyro'),
     DeviceStreamingFeature.magnetometer:
         EventChannel('polar/streaming/magnetometer'),
