@@ -1,3 +1,9 @@
+## 3.5.0
+- Fixes issues with EventChannels
+- Better error reporting to Flutter from Android
+- Fixes `ftpFeatureReady` method string mismatch
+- Upgrades Android Gradle Plugin
+
 ## 3.4.1
 - Fixes formatting
 
