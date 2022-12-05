@@ -30,14 +30,24 @@ class _MyAppState extends State<MyApp> {
         .listen((e) => log('Found device in scan: ${e.deviceId}'));
     polar.heartRateStream.listen((e) => log('Heart rate: ${e.data.hr}'));
     polar.batteryLevelStream.listen((e) => log('Battery: ${e.level}'));
-    polar.streamingFeaturesReadyStream.listen((e) {
+    polar.streamingFeaturesReadyStream.listen((e) async {
       debugPrint('streamingFeaturesReady: ${e.features}');
       if (e.features.contains(DeviceStreamingFeature.ecg)) {
+        final settings = await polar.requestStreamSettings(
+          identifier,
+          DeviceStreamingFeature.ecg,
+        );
         polar
-            .startEcgStreaming(e.identifier)
+            .startEcgStreaming(e.identifier, settings: settings)
             .listen((e) => log('ECG data: ${e.samples}'));
+      }
+      if (e.features.contains(DeviceStreamingFeature.acc)) {
+        final settings = await polar.requestStreamSettings(
+          identifier,
+          DeviceStreamingFeature.acc,
+        );
         polar
-            .startAccStreaming(e.identifier)
+            .startAccStreaming(e.identifier, settings: settings)
             .listen((e) => log('ACC data: ${e.samples}'));
       }
     });

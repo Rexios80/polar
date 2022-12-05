@@ -20,10 +20,7 @@ enum DeviceStreamingFeature {
   gyro,
 
   /// Magnetometer
-  magnetometer,
-
-  /// Unknown feature
-  error;
+  magnetometer;
 
   /// Create a [DeviceStreamingFeature] from json
   static DeviceStreamingFeature fromJson(dynamic json) {

@@ -57,10 +57,14 @@ final polar = Polar();
 
 void example() {
   polar.heartRateStream.listen((e) => debugPrint('Heart rate: ${e.data.hr}'));
-  polar.streamingFeaturesReadyStream.listen((e) {
+  polar.streamingFeaturesReadyStream.listen((e) async {
     if (e.features.contains(DeviceStreamingFeature.ecg)) {
+      final settings = await polar.requestStreamSettings(
+        identifier,
+        DeviceStreamingFeature.ecg,
+      );
       polar
-          .startEcgStreaming(e.identifier)
+          .startEcgStreaming(e.identifier, settings: settings)
           .listen((e) => debugPrint('ECG data: ${e.samples}'));
     }
   });
