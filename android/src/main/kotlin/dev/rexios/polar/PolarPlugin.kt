@@ -158,7 +158,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
     }
 
     private fun createStreamingHandler(feature: DeviceStreamingFeature): EventChannel.StreamHandler {
-        object : EventChannel.StreamHandler {
+        return object : EventChannel.StreamHandler {
             // Map of <feature, <identifier, subscription>>
             private val streamingSubscriptions =
                 mutableMapOf<DeviceStreamingFeature, MutableMap<String, Disposable>>()

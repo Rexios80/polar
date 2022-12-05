@@ -36,6 +36,9 @@ class _MyAppState extends State<MyApp> {
         polar
             .startEcgStreaming(e.identifier)
             .listen((e) => log('ECG data: ${e.samples}'));
+        polar
+            .startAccStreaming(e.identifier)
+            .listen((e) => log('ACC data: ${e.samples}'));
       }
     });
     polar.deviceConnectingStream.listen((_) => log('Device connecting'));
