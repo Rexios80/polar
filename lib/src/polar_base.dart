@@ -42,6 +42,8 @@ class Polar {
       StreamController<PolarHeartRateEvent>.broadcast();
   final _ftpFeatureReadyStreamController = StreamController<String>.broadcast();
 
+  final _sensorSettingCache = <DeviceStreamingFeature, PolarSensorSetting>{};
+
   /// helper to ask ble power state
   Stream<bool> get blePowerStateStream => _blePowerStateStreamController.stream;
 
@@ -267,10 +269,16 @@ class Polar {
   Stream _startStreaming(
     DeviceStreamingFeature feature,
     String identifier, {
-    required PolarSensorSetting? settings,
-  }) =>
-      _streamingChannels[feature]!
-          .receiveBroadcastStream([identifier, jsonEncode(settings)]);
+    PolarSensorSetting? settings,
+  }) async* {
+    if (feature != DeviceStreamingFeature.ppi) {
+      settings ??= _sensorSettingCache[feature] ??=
+          await requestStreamSettings(identifier, feature);
+    }
+
+    yield* _streamingChannels[feature]!
+        .receiveBroadcastStream([identifier, jsonEncode(settings)]);
+  }
 
   /// Start the ECG (Electrocardiography) stream. ECG stream is stopped if the connection is closed, error occurs or stream is disposed.
   /// Requires `polarSensorStreaming` feature. Before starting the stream it is recommended to query the available settings using `requestStreamSettings`
@@ -283,7 +291,7 @@ class Polar {
   ///   - onError: see `PolarErrors` for possible errors invoked
   Stream<PolarEcgData> startEcgStreaming(
     String identifier, {
-    required PolarSensorSetting settings,
+    PolarSensorSetting? settings,
   }) {
     return _startStreaming(
       DeviceStreamingFeature.ecg,
@@ -303,7 +311,7 @@ class Polar {
   ///   - onError: see `PolarErrors` for possible errors invoked
   Stream<PolarAccData> startAccStreaming(
     String identifier, {
-    required PolarSensorSetting settings,
+    PolarSensorSetting? settings,
   }) {
     return _startStreaming(
       DeviceStreamingFeature.acc,
@@ -320,7 +328,7 @@ class Polar {
   ///   - settings: selected settings to start the stream
   Stream<PolarGyroData> startGyroStreaming(
     String identifier, {
-    required PolarSensorSetting settings,
+    PolarSensorSetting? settings,
   }) {
     return _startStreaming(
       DeviceStreamingFeature.gyro,
@@ -337,7 +345,7 @@ class Polar {
   ///   - settings: selected settings to start the stream
   Stream<PolarMagnetometerData> startMagnetometerStreaming(
     String identifier, {
-    required PolarSensorSetting settings,
+    PolarSensorSetting? settings,
   }) {
     return _startStreaming(
       DeviceStreamingFeature.magnetometer,
@@ -359,7 +367,7 @@ class Polar {
   ///   - onError: see `PolarErrors` for possible errors invoked
   Stream<PolarOhrData> startOhrStreaming(
     String identifier, {
-    required PolarSensorSetting settings,
+    PolarSensorSetting? settings,
   }) {
     return _startStreaming(
       DeviceStreamingFeature.ppg,
@@ -378,11 +386,8 @@ class Polar {
   ///   - onNext: for every air packet received. see `PolarPpiData`
   ///   - onError: see `PolarErrors` for possible errors invoked
   Stream<PolarPpiData> startOhrPPIStreaming(String identifier) {
-    return _startStreaming(
-      DeviceStreamingFeature.ecg,
-      identifier,
-      settings: null,
-    ).map((event) => PolarPpiData.fromJson(identifier, jsonDecode(event)));
+    return _startStreaming(DeviceStreamingFeature.ecg, identifier)
+        .map((event) => PolarPpiData.fromJson(identifier, jsonDecode(event)));
   }
 
   /// Request start recording. Supported only by Polar H10. Requires `polarFileTransfer` feature.
