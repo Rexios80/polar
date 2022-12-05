@@ -357,6 +357,10 @@ class StreamingChannel: NSObject, FlutterStreamHandler {
         self.identifier = identifier
         self.feature = feature
         self.channel = FlutterEventChannel(name: name, binaryMessenger: messenger)
+
+        super.init()
+
+        channel.setStreamHandler(self)
     }
 
     func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
