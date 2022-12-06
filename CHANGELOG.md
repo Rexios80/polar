@@ -1,3 +1,6 @@
+## 3.7.0
+- Fixes issue with PPI streaming
+
 ## 3.6.0
 - Dynamically register streaming channels
 

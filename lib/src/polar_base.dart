@@ -385,7 +385,7 @@ class Polar {
   ///   - onNext: for every air packet received. see `PolarPpiData`
   ///   - onError: see `PolarErrors` for possible errors invoked
   Stream<PolarPpiData> startOhrPPIStreaming(String identifier) {
-    return _startStreaming(DeviceStreamingFeature.ecg, identifier)
+    return _startStreaming(DeviceStreamingFeature.ppi, identifier)
         .map((event) => PolarPpiData.fromJson(identifier, jsonDecode(event)));
   }
 
