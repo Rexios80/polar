@@ -58,6 +58,25 @@ class PolarHrDataCodable: Encodable {
     }
 }
 
+class PolarEcgSample: Encodable {
+    let data: (timeStamp: UInt64, voltage: Int32)
+
+    init(_ data: (timeStamp: UInt64, voltage: Int32)) {
+        self.data = data
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case timeStamp
+        case voltage
+    }
+
+    func encode(to encoder: Encoder) {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try? container.encode(data.timeStamp, forKey: .timeStamp)
+        try? container.encode(data.voltage, forKey: .voltage)
+    }
+}
+
 class PolarEcgDataCodable: Encodable {
     let data: PolarEcgData
 
@@ -66,14 +85,35 @@ class PolarEcgDataCodable: Encodable {
     }
 
     enum CodingKeys: String, CodingKey {
-        case timeStamp
         case samples
     }
 
     func encode(to encoder: Encoder) {
         var container = encoder.container(keyedBy: CodingKeys.self)
+        try? container.encode(data.samples.map { PolarEcgSample($0) }, forKey: .samples)
+    }
+}
+
+class PolarAccSample: Encodable {
+    let data: (timeStamp: UInt64, x: Int32, y: Int32, z: Int32)
+
+    init(_ data: (timeStamp: UInt64, x: Int32, y: Int32, z: Int32)) {
+        self.data = data
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case timeStamp
+        case x
+        case y
+        case z
+    }
+
+    func encode(to encoder: Encoder) {
+        var container = encoder.container(keyedBy: CodingKeys.self)
         try? container.encode(data.timeStamp, forKey: .timeStamp)
-        try? container.encode(data.samples, forKey: .samples)
+        try? container.encode(data.x, forKey: .x)
+        try? container.encode(data.y, forKey: .y)
+        try? container.encode(data.z, forKey: .z)
     }
 }
 
@@ -85,20 +125,12 @@ class PolarAccDataCodable: Encodable {
     }
 
     enum CodingKeys: String, CodingKey {
-        case timeStamp
         case samples
     }
 
     func encode(to encoder: Encoder) {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try? container.encode(data.timeStamp, forKey: .timeStamp)
-        try? container.encode(data.samples.map {
-            [
-                "x": $0.x,
-                "y": $0.y,
-                "z": $0.z,
-            ]
-        }, forKey: .samples)
+        try? container.encode(data.samples.map { PolarAccSample($0) }, forKey: .samples)
     }
 }
 
@@ -121,6 +153,29 @@ class PolarExerciseDataCodable: Encodable {
     }
 }
 
+class PolarGyroSample: Encodable {
+    let data: (timeStamp: UInt64, x: Float, y: Float, z: Float)
+
+    init(_ data: (timeStamp: UInt64, x: Float, y: Float, z: Float)) {
+        self.data = data
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case timeStamp
+        case x
+        case y
+        case z
+    }
+
+    func encode(to encoder: Encoder) {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try? container.encode(data.timeStamp, forKey: .timeStamp)
+        try? container.encode(data.x, forKey: .x)
+        try? container.encode(data.y, forKey: .y)
+        try? container.encode(data.z, forKey: .z)
+    }
+}
+
 class PolarGyroDataCodable: Encodable {
     let data: PolarGyroData
 
@@ -129,20 +184,35 @@ class PolarGyroDataCodable: Encodable {
     }
 
     enum CodingKeys: String, CodingKey {
-        case timeStamp
         case samples
     }
 
     func encode(to encoder: Encoder) {
         var container = encoder.container(keyedBy: CodingKeys.self)
+        try? container.encode(data.samples.map { PolarGyroSample($0) }, forKey: .samples)
+    }
+}
+
+class PolarMagnetometerSample: Encodable {
+    let data: (timeStamp: UInt64, x: Float, y: Float, z: Float)
+
+    init(_ data: (timeStamp: UInt64, x: Float, y: Float, z: Float)) {
+        self.data = data
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case timeStamp
+        case x
+        case y
+        case z
+    }
+
+    func encode(to encoder: Encoder) {
+        var container = encoder.container(keyedBy: CodingKeys.self)
         try? container.encode(data.timeStamp, forKey: .timeStamp)
-        try? container.encode(data.samples.map {
-            [
-                "x": $0.x,
-                "y": $0.y,
-                "z": $0.z,
-            ]
-        }, forKey: .samples)
+        try? container.encode(data.x, forKey: .x)
+        try? container.encode(data.y, forKey: .y)
+        try? container.encode(data.z, forKey: .z)
     }
 }
 
@@ -154,20 +224,31 @@ class PolarMagnetometerDataCodable: Encodable {
     }
 
     enum CodingKeys: String, CodingKey {
-        case timeStamp
         case samples
     }
 
     func encode(to encoder: Encoder) {
         var container = encoder.container(keyedBy: CodingKeys.self)
+        try? container.encode(data.samples.map { PolarMagnetometerSample($0) }, forKey: .samples)
+    }
+}
+
+class PolarOhrSample: Encodable {
+    let data: (timeStamp: UInt64, channelSamples: [Int32])
+
+    init(_ data: (timeStamp: UInt64, channelSamples: [Int32])) {
+        self.data = data
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case timeStamp
+        case channelSamples
+    }
+
+    func encode(to encoder: Encoder) {
+        var container = encoder.container(keyedBy: CodingKeys.self)
         try? container.encode(data.timeStamp, forKey: .timeStamp)
-        try? container.encode(data.samples.map {
-            [
-                "x": $0.x,
-                "y": $0.y,
-                "z": $0.z,
-            ]
-        }, forKey: .samples)
+        try? container.encode(data.channelSamples, forKey: .channelSamples)
     }
 }
 
@@ -179,16 +260,41 @@ class PolarOhrDataCodable: Encodable {
     }
 
     enum CodingKeys: String, CodingKey {
-        case timeStamp
         case type
         case samples
     }
 
     func encode(to encoder: Encoder) {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try? container.encode(data.timeStamp, forKey: .timeStamp)
         try? container.encode(data.type.rawValue, forKey: .type)
-        try? container.encode(data.samples, forKey: .samples)
+        try? container.encode(data.samples.map { PolarOhrSample($0) }, forKey: .samples)
+    }
+}
+
+class PolarPpiSample: Encodable {
+    let data: (hr: Int, ppInMs: UInt16, ppErrorEstimate: UInt16, blockerBit: Int, skinContactStatus: Int, skinContactSupported: Int)
+
+    init(_ data: (hr: Int, ppInMs: UInt16, ppErrorEstimate: UInt16, blockerBit: Int, skinContactStatus: Int, skinContactSupported: Int)) {
+        self.data = data
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case hr
+        case ppInMs
+        case ppErrorEstimate
+        case blockerBit
+        case skinContactStatus
+        case skinContactSupported
+    }
+
+    func encode(to encoder: Encoder) {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try? container.encode(data.hr, forKey: .hr)
+        try? container.encode(data.ppInMs, forKey: .ppInMs)
+        try? container.encode(data.ppErrorEstimate, forKey: .ppErrorEstimate)
+        try? container.encode(data.blockerBit, forKey: .blockerBit)
+        try? container.encode(data.skinContactStatus, forKey: .skinContactStatus)
+        try? container.encode(data.skinContactSupported, forKey: .skinContactSupported)
     }
 }
 
@@ -200,23 +306,12 @@ class PolarPpiDataCodable: Encodable {
     }
 
     enum CodingKeys: String, CodingKey {
-        case timeStamp
         case samples
     }
 
     func encode(to encoder: Encoder) {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try? container.encode(data.timeStamp, forKey: .timeStamp)
-        try? container.encode(data.samples.map {
-            [
-                "hr": $0.hr,
-                "ppi": Int($0.ppInMs),
-                "errorEstimate": Int($0.ppErrorEstimate),
-                "blockerBit": $0.blockerBit,
-                "skinContactStatus": $0.skinContactStatus,
-                "skinContactSupported": $0.skinContactSupported,
-            ]
-        }, forKey: .samples)
+        try? container.encode(data.samples.map { PolarPpiSample($0) }, forKey: .samples)
     }
 }
 
