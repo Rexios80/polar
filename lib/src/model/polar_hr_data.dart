@@ -5,11 +5,11 @@ part 'polar_hr_data.g.dart';
 /// Polar hr data
 @JsonSerializable(createToJson: false)
 class PolarHrData {
-  static String _readContactStatus(Map map, String key) =>
-      map['contactStatus'] ?? map['contact'];
+  static dynamic _readContactStatus(Map json, String key) =>
+      json['contactStatus'] ?? json['contact'];
 
-  static String _readContactStatusSupported(Map map, String key) =>
-      map['contactStatusSupported'] ?? map['contactSupported'];
+  static dynamic _readContactStatusSupported(Map json, String key) =>
+      json['contactStatusSupported'] ?? json['contactSupported'];
 
   /// hr in BPM
   final int hr;

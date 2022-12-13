@@ -52,3 +52,15 @@ class OhrDataTypeConverter extends JsonConverter<OhrDataType, dynamic> {
   @override
   toJson(OhrDataType object) => throw UnimplementedError();
 }
+
+/// Unix time converter
+class UnixTimeConverter extends JsonConverter<DateTime, int> {
+  /// Constructor
+  const UnixTimeConverter();
+
+  @override
+  DateTime fromJson(int json) => DateTime.fromMillisecondsSinceEpoch(json);
+
+  @override
+  int toJson(DateTime object) => object.millisecondsSinceEpoch;
+}

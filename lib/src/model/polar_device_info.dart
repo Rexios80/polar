@@ -5,8 +5,8 @@ part 'polar_device_info.g.dart';
 /// Polar device info
 @JsonSerializable(createToJson: false)
 class PolarDeviceInfo {
-  static String _readConnectable(Map map, String key) =>
-      map['isConnectable'] ?? map['connectable'];
+  static dynamic _readConnectable(Map json, String key) =>
+      json['isConnectable'] ?? json['connectable'];
 
   /// polar device id or UUID for 3rd party sensors
   final String deviceId;

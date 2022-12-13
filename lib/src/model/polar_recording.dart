@@ -1,5 +1,10 @@
 import 'dart:io';
 
+import 'package:json_annotation/json_annotation.dart';
+import 'package:polar/src/model/converters.dart';
+
+part 'polar_recording.g.dart';
+
 ///  Recoding intervals for H10 recording start
 enum RecordingInterval {
   /// 1 second interval
@@ -63,14 +68,20 @@ class PolarRecordingStatus {
 }
 
 /// Polar exercise entry
+@JsonSerializable(createToJson: false)
 class PolarExerciseEntry {
+  static dynamic _readEntryId(Map json, String key) =>
+      json['entryId'] ?? json['identifier'];
+
   /// Resource location in the device
   final String path;
 
   /// Entry date and time. Only OH1 and Polar Verity Sense supports date and time
+  @UnixTimeConverter()
   final DateTime date;
 
   /// unique identifier
+  @JsonKey(readValue: _readEntryId)
   final String entryId;
 
   /// Constructor
@@ -80,18 +91,9 @@ class PolarExerciseEntry {
     required this.entryId,
   });
 
-  /// Create a [PolarExerciseEntry] from json
-  PolarExerciseEntry.fromJson(Map<String, dynamic> json)
-      : path = json['path'],
-        date = DateTime.fromMillisecondsSinceEpoch(json['date']),
-        entryId = Platform.isIOS ? json['entryId'] : json['identifier'];
-
-  /// Convert a [PolarExerciseEntry] to json
-  Map<String, dynamic> toJson() => {
-        'path': path,
-        'date': date.millisecondsSinceEpoch,
-        (Platform.isIOS ? 'entryId' : 'identifier'): entryId,
-      };
+  /// From json
+  factory PolarExerciseEntry.fromJson(Map<String, dynamic> json) =>
+      _$PolarExerciseEntryFromJson(json);
 
   @override
   String toString() {
@@ -100,27 +102,34 @@ class PolarExerciseEntry {
 }
 
 /// Polar Exercise Data
+@JsonSerializable(createToJson: false)
 class PolarExerciseData {
-  /// Polar device id
-  final String identifier;
+  static dynamic _readInterval(Map json, String key) =>
+      json['interval'] ?? json['recordingInterval'];
+
+  static dynamic _readSamples(Map json, String key) =>
+      json['samples'] ?? json['hrSamples'];
 
   /// in seconds
+  @JsonKey(readValue: _readInterval)
   final int interval;
 
   /// List of HR or RR samples in BPM
+  @JsonKey(readValue: _readSamples)
   final List<int> samples;
 
-  /// Create a [PolarExerciseData] from json
-  PolarExerciseData.fromJson(this.identifier, Map<String, dynamic> json)
-      : interval =
-            Platform.isIOS ? json['interval'] : json['recordingInterval'],
-        samples =
-            ((Platform.isIOS ? json['samples'] : json['hrSamples']) as List)
-                .cast<int>()
-                .toList();
+  /// Constructor
+  PolarExerciseData({
+    required this.interval,
+    required this.samples,
+  });
+
+  /// From json
+  factory PolarExerciseData.fromJson(Map<String, dynamic> json) =>
+      _$PolarExerciseDataFromJson(json);
 
   @override
   String toString() {
-    return 'PolarExerciseData(identifier: $identifier, interval: $interval, samples: $samples)';
+    return 'PolarExerciseData(interval: $interval, samples: $samples)';
   }
 }

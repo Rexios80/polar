@@ -467,7 +467,7 @@ class Polar {
   ) async {
     final result = await _channel
         .invokeMethod('fetchExercise', [identifier, jsonEncode(entry)]);
-    return PolarExerciseData.fromJson(identifier, jsonDecode(result));
+    return PolarExerciseData.fromJson(jsonDecode(result));
   }
 
   /// Api for removing single exercise from Polar H10 device. Requires `polarFileTransfer` feature. This API is working for Polar OH1 and Polar Verity Sense devices too, however in those devices recording of exercise requires that sensor is registered to Polar Flow account.
