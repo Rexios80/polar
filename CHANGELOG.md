@@ -4,7 +4,7 @@
 - BREAKING: Renames `PolarOhrPpiSample` to `PolarPpiSample`
 - BREAKING: `PolarEcgData`, `PolarAccData`, `PolarGyroData`, `PolarMagnetometerData`, `PolarOhrData`, `PolarPpiData`, and `PolarExerciseData`,  no longer contain `identifier` fields
 - BREAKING: Removes `DeviceStreamingFeature.error`
-- Working on conversion to json_serializable
+- Uses `json_serializable` for internal serialization instead of manual serialization
 
 ## 3.7.0
 - Fixes issue with PPI streaming
