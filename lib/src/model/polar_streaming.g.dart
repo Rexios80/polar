@@ -74,16 +74,11 @@ PolarOhrSample _$PolarOhrSampleFromJson(Map<String, dynamic> json) =>
     );
 
 PolarOhrData _$PolarOhrDataFromJson(Map<String, dynamic> json) => PolarOhrData(
-      type: $enumDecode(_$OhrDataTypeEnumMap, json['type']),
+      type: const OhrDataTypeConverter().fromJson(json['type']),
       samples: (json['samples'] as List<dynamic>)
           .map((e) => PolarOhrSample.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
-
-const _$OhrDataTypeEnumMap = {
-  OhrDataType.ppg3_ambient1: 'ppg3_ambient1',
-  OhrDataType.unknown: 'unknown',
-};
 
 PolarPpiSample _$PolarPpiSampleFromJson(Map<String, dynamic> json) =>
     PolarPpiSample(

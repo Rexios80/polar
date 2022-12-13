@@ -199,6 +199,7 @@ class PolarOhrSample {
 class PolarOhrData {
   /// Type of data, which varies based on what is type of optical sensor used
   /// in the device
+  @OhrDataTypeConverter()
   final OhrDataType type;
 
   /// Photoplethysmography samples

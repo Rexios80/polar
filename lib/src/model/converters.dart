@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:json_annotation/json_annotation.dart';
+import 'package:polar/polar.dart';
 
 /// Converts platform values to booleans
 /// - The iOS SDK uses `0` and `1` for booleans
@@ -26,4 +27,28 @@ class PlatformBooleanConverter extends JsonConverter<bool, dynamic> {
       return object;
     }
   }
+}
+
+/// Converter for [OhrDataType]
+class OhrDataTypeConverter extends JsonConverter<OhrDataType, dynamic> {
+  /// Constructor
+  const OhrDataTypeConverter();
+
+  @override
+  OhrDataType fromJson(dynamic json) {
+    if (Platform.isIOS) {
+      switch (json as int) {
+        case 4:
+          return OhrDataType.ppg3_ambient1;
+        default: // 18
+          return OhrDataType.unknown;
+      }
+    } else {
+      // This is android
+      return OhrDataType.values.byName((json as String).toLowerCase());
+    }
+  }
+
+  @override
+  toJson(OhrDataType object) => throw UnimplementedError();
 }

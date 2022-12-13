@@ -1,5 +1,13 @@
+import 'package:json_annotation/json_annotation.dart';
+
+part 'polar_device_info.g.dart';
+
 /// Polar device info
+@JsonSerializable(createToJson: false)
 class PolarDeviceInfo {
+  static String _readConnectable(Map map, String key) =>
+      map['isConnectable'] ?? map['connectable'];
+
   /// polar device id or UUID for 3rd party sensors
   final String deviceId;
 
@@ -15,13 +23,19 @@ class PolarDeviceInfo {
   final String name;
 
   /// true adv type is connectable
+  @JsonKey(readValue: _readConnectable)
   final bool isConnectable;
 
-  /// Create a [PolarDeviceInfo] from json
-  PolarDeviceInfo.fromJson(Map<String, dynamic> json)
-      : deviceId = json['deviceId'],
-        address = json['address'],
-        rssi = json['rssi'],
-        name = json['name'],
-        isConnectable = json['isConnectable'] ?? json['connectable'];
+  /// Constructor
+  PolarDeviceInfo({
+    required this.deviceId,
+    required this.address,
+    required this.rssi,
+    required this.name,
+    required this.isConnectable,
+  });
+
+  /// From json
+  factory PolarDeviceInfo.fromJson(Map<String, dynamic> json) =>
+      _$PolarDeviceInfoFromJson(json);
 }
