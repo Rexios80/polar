@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:json_annotation/json_annotation.dart';
 import 'package:polar/polar.dart';
+import 'package:recase/recase.dart';
 
 /// Converts platform values to booleans
 /// - The iOS SDK uses `0` and `1` for booleans
@@ -53,7 +54,7 @@ class OhrDataTypeConverter extends JsonConverter<OhrDataType, dynamic> {
   toJson(OhrDataType object) => throw UnimplementedError();
 }
 
-/// Unix time converter
+/// Converter for unix time
 class UnixTimeConverter extends JsonConverter<DateTime, int> {
   /// Constructor
   const UnixTimeConverter();
@@ -63,4 +64,24 @@ class UnixTimeConverter extends JsonConverter<DateTime, int> {
 
   @override
   int toJson(DateTime object) => object.millisecondsSinceEpoch;
+}
+
+/// Converter for [PolarSettingType]
+class PolarSettingTypeConverter
+    extends JsonConverter<PolarSettingType, String> {
+  /// Constructor
+  const PolarSettingTypeConverter();
+
+  @override
+  PolarSettingType fromJson(String json) {
+    if (Platform.isIOS) {
+      return PolarSettingType.values[int.parse(json)];
+    } else {
+      // This is android
+      return PolarSettingType.values.byName(json.camelCase);
+    }
+  }
+
+  @override
+  String toJson(PolarSettingType object) => throw UnimplementedError();
 }

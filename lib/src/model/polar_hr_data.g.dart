@@ -1,5 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
+// ignore_for_file: unnecessary_cast, require_trailing_commas
+
 part of 'polar_hr_data.dart';
 
 // **************************************************************************

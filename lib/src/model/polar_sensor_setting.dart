@@ -1,44 +1,23 @@
-import 'dart:io';
+import 'package:json_annotation/json_annotation.dart';
+import 'package:polar/src/model/converters.dart';
 
-import 'package:recase/recase.dart';
+part 'polar_sensor_setting.g.dart';
 
 /// polar sensor settings class
+@JsonSerializable(createToJson: false)
 class PolarSensorSetting {
   /// current settings available / set
+  @PolarSettingTypeConverter()
   final Map<PolarSettingType, List<int>> settings;
 
-  /// constructor with desired settings
-  ///
-  /// - Parameter settings: single key value pairs to start stream
-  PolarSensorSetting(this.settings);
+  /// Constructor
+  PolarSensorSetting({
+    required this.settings,
+  });
 
-  /// Convert a [PolarSensorSetting] to json
-  Map<String, dynamic> toJson() {
-    if (Platform.isIOS) {
-      return {
-        'settings': {
-          for (var e in settings.entries)
-            PolarSettingType.values.indexOf(e.key).toString(): e.value.first
-        },
-      };
-    } else {
-      // This is Android
-      return {
-        'settings': {
-          for (var e in settings.entries)
-            e.key.name.snakeCase.toUpperCase(): e.value
-        },
-      };
-    }
-  }
-
-  /// Create a [PolarSensorSetting] from json
-  PolarSensorSetting.fromJson(Map<String, dynamic> json)
-      : settings = {
-          for (var e in (json['settings'] as Map<String, dynamic>).entries)
-            PolarSettingType.fromJson(e.key):
-                (e.value as List).cast<int>().toList()
-        };
+  /// From json
+  factory PolarSensorSetting.fromJson(Map<String, dynamic> json) =>
+      _$PolarSensorSettingFromJson(json);
 }
 
 /// settings type
@@ -60,14 +39,4 @@ enum PolarSettingType {
 
   /// type is unknown
   unknown;
-
-  /// Convert a [PolarSettingType] to json
-  static PolarSettingType fromJson(dynamic json) {
-    if (Platform.isIOS) {
-      return PolarSettingType.values[int.parse(json as String)];
-    } else {
-      // This is android
-      return PolarSettingType.values.byName((json as String).camelCase);
-    }
-  }
 }
