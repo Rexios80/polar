@@ -295,9 +295,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
         invokeOnUiThread("deviceDisconnected", gson.toJson(info))
     }
 
-    override fun streamingFeaturesReady(
-        identifier: String, features: MutableSet<DeviceStreamingFeature>
-    ) {
+    override fun streamingFeaturesReady(identifier: String, features: Set<DeviceStreamingFeature>) {
         invokeOnUiThread("streamingFeaturesReady", listOf(identifier, gson.toJson(features)))
     }
 
