@@ -3,6 +3,7 @@
 - BREAKING: Moves `timeStamp` field from streaming data into individual samples
 - BREAKING: Renames `PolarOhrPpiSample` to `PolarPpiSample`
 - BREAKING: Streaming data no longer contains `identifier` fields
+- Working on conversion to json_serializable
 
 ## 3.7.0
 - Fixes issue with PPI streaming
