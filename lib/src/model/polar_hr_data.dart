@@ -1,5 +1,16 @@
+import 'package:json_annotation/json_annotation.dart';
+
+part 'polar_hr_data.g.dart';
+
 /// Polar hr data
+@JsonSerializable(createToJson: false)
 class PolarHrData {
+  static String _readContactStatus(Map map, String key) =>
+      map['contactStatus'] ?? map['contact'];
+
+  static String _readContactStatusSupported(Map map, String key) =>
+      map['contactStatusSupported'] ?? map['contactSupported'];
+
   /// hr in BPM
   final int hr;
 
@@ -11,17 +22,23 @@ class PolarHrData {
   final List<int> rrsMs;
 
   /// contact status between the device and the users skin
+  @JsonKey(readValue: _readContactStatus)
   final bool contactStatus;
 
   /// contactSupported if contact is supported
+  @JsonKey(readValue: _readContactStatusSupported)
   final bool contactStatusSupported;
 
-  /// Create a [PolarHrData] from json
-  PolarHrData.fromJson(Map<String, dynamic> json)
-      : hr = json['hr'],
-        rrs = (json['rrs'] as List).cast<int>().toList(),
-        rrsMs = (json['rrsMs'] as List).cast<int>().toList(),
-        contactStatus = json['contactStatus'] ?? json['contact'],
-        contactStatusSupported =
-            json['contactStatusSupported'] ?? json['contactSupported'];
+  /// Constructor
+  PolarHrData({
+    required this.hr,
+    required this.rrs,
+    required this.rrsMs,
+    required this.contactStatus,
+    required this.contactStatusSupported,
+  });
+
+  /// From json
+  factory PolarHrData.fromJson(Map<String, dynamic> json) =>
+      _$PolarHrDataFromJson(json);
 }
