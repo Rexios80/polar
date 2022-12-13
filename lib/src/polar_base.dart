@@ -255,7 +255,7 @@ class Polar {
     return PolarSensorSetting.fromJson(jsonDecode(response));
   }
 
-  Stream _startStreaming(
+  Stream<Map<String, dynamic>> _startStreaming(
     DeviceStreamingFeature feature,
     String identifier, {
     PolarSensorSetting? settings,
@@ -276,7 +276,8 @@ class Polar {
     }
 
     yield* EventChannel(channelName)
-        .receiveBroadcastStream(jsonEncode(settings));
+        .receiveBroadcastStream(jsonEncode(settings))
+        .map((e) => jsonDecode(e));
   }
 
   /// Start the ECG (Electrocardiography) stream. ECG stream is stopped if the connection is closed, error occurs or stream is disposed.
@@ -296,7 +297,7 @@ class Polar {
       DeviceStreamingFeature.ecg,
       identifier,
       settings: settings,
-    ).map((event) => PolarEcgData.fromJson(identifier, jsonDecode(event)));
+    ).map(PolarEcgData.fromJson);
   }
 
   ///  Start ACC (Accelerometer) stream. ACC stream is stopped if the connection is closed, error occurs or stream is disposed.
@@ -316,7 +317,7 @@ class Polar {
       DeviceStreamingFeature.acc,
       identifier,
       settings: settings,
-    ).map((event) => PolarAccData.fromJson(identifier, jsonDecode(event)));
+    ).map(PolarAccData.fromJson);
   }
 
   /// Start Gyro stream. Gyro stream is stopped if the connection is closed, error occurs during start or stream is disposed.
@@ -333,7 +334,7 @@ class Polar {
       DeviceStreamingFeature.gyro,
       identifier,
       settings: settings,
-    ).map((event) => PolarGyroData.fromJson(identifier, jsonDecode(event)));
+    ).map(PolarGyroData.fromJson);
   }
 
   /// Start magnetometer stream. Magnetometer stream is stopped if the connection is closed, error occurs or stream is disposed.
@@ -350,9 +351,7 @@ class Polar {
       DeviceStreamingFeature.magnetometer,
       identifier,
       settings: settings,
-    ).map(
-      (event) => PolarMagnetometerData.fromJson(identifier, jsonDecode(event)),
-    );
+    ).map(PolarMagnetometerData.fromJson);
   }
 
   /// Start OHR (Optical heart rate) PPG (Photoplethysmography) stream. PPG stream is stopped if the connection is closed, error occurs or stream is disposed.
@@ -372,7 +371,7 @@ class Polar {
       DeviceStreamingFeature.ppg,
       identifier,
       settings: settings,
-    ).map((event) => PolarOhrData.fromJson(identifier, jsonDecode(event)));
+    ).map(PolarOhrData.fromJson);
   }
 
   /// Start OHR (Optical heart rate) PPI (Pulse to Pulse interval) stream.
@@ -386,7 +385,7 @@ class Polar {
   ///   - onError: see `PolarErrors` for possible errors invoked
   Stream<PolarPpiData> startOhrPPIStreaming(String identifier) {
     return _startStreaming(DeviceStreamingFeature.ppi, identifier)
-        .map((event) => PolarPpiData.fromJson(identifier, jsonDecode(event)));
+        .map(PolarPpiData.fromJson);
   }
 
   /// Request start recording. Supported only by Polar H10. Requires `polarFileTransfer` feature.

@@ -10,17 +10,20 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  
+
   flutter_plugin_android_lifecycle: ^2.0.5
   permission_handler: ^10.0.0
   device_info_plus: ^8.0.0
   recase: ^4.0.0
+  json_annotation: ^4.7.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  
+
   rexios_lints: ^4.0.0
+  build_runner: ^2.3.2
+  json_serializable: ^6.5.4
 
 flutter:
   plugin:
