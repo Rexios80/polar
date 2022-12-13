@@ -1,7 +1,7 @@
 ## 4.0.0-beta0
 - Updates Polar SDK to 4.0.0-beta0
 - BREAKING: Moves `timeStamp` field from streaming data into individual samples
-- BREAKING: Renames PolarOhrPpiSample to PolarPpiSample
+- BREAKING: Renames `PolarOhrPpiSample` to `PolarPpiSample`
 - BREAKING: Streaming data no longer contains `identifier` fields
 
 ## 3.7.0
