@@ -31,14 +31,26 @@ void testConnection(String identifier) {
   });
 }
 
+/// Ensure device connects
+Future<void> connect(String identifier) async {
+  await polar.connectToDevice(identifier);
+  await polar.deviceConnectedStream.first;
+}
+
+/// Ensure device disconnects
+Future<void> disconnect(String identifier) async {
+  await polar.disconnectFromDevice(identifier);
+  await polar.deviceDisconnectedStream.first;
+}
+
 void testBasicData(String identifier, {bool sdkModeFeature = true}) {
   group('basic data', () {
     setUp(() async {
-      await polar.connectToDevice(identifier);
+      await connect(identifier);
     });
 
     tearDown(() async {
-      await polar.disconnectFromDevice(identifier);
+      await disconnect(identifier);
     });
 
     test(
@@ -84,7 +96,7 @@ void testStreaming(
 }) {
   group('streaming', () {
     setUpAll(() async {
-      await polar.connectToDevice(identifier);
+      await connect(identifier);
       final streamingFeatures = await polar.streamingFeaturesReadyStream.first;
       expect(
         setEquals(streamingFeatures.features.toSet(), features.toSet()),
@@ -93,7 +105,7 @@ void testStreaming(
     });
 
     tearDownAll(() async {
-      await polar.disconnectFromDevice(identifier);
+      await disconnect(identifier);
     });
 
     test(
@@ -157,8 +169,7 @@ final exerciseId = const Uuid().v4();
 
 void testRecording(String identifier) {
   test('recording', () async {
-    await polar.connectToDevice(identifier);
-    await polar.deviceConnectedStream.first;
+    await connect(identifier);
     await polar.ftpFeatureReadyStream.first;
 
     //! Remove existing recordings (THIS IS DESTRUCTIVE)
@@ -200,6 +211,6 @@ void testRecording(String identifier) {
     final entries3 = await polar.listExercises(identifier);
     expect(entries3.any((e) => e.entryId == exerciseId), false);
 
-    await polar.disconnectFromDevice(identifier);
+    await disconnect(identifier);
   });
 }
