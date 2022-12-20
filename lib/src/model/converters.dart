@@ -83,5 +83,12 @@ class PolarSettingTypeConverter
   }
 
   @override
-  String toJson(PolarSettingType object) => throw UnimplementedError();
+  String toJson(PolarSettingType object) {
+    if (Platform.isIOS) {
+      return object.index.toString();
+    } else {
+      // This is android
+      return object.name.snakeCase.toUpperCase();
+    }
+  }
 }

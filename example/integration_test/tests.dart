@@ -4,6 +4,13 @@ import 'package:polar/polar.dart';
 
 final polar = Polar();
 
+void testBlePowerState() {
+  test('blePowerState', () async {
+    final blePowerState = await polar.blePowerStateStream.first;
+    expect(blePowerState, true);
+  });
+}
+
 void testSearch(String identifier) {
   test('search', () async {
     await polar.searchForDevice().any((e) => e.deviceId == identifier);
@@ -28,7 +35,7 @@ void testConnection(String identifier) {
   });
 }
 
-void testBasicData(String identifier) {
+void testBasicData(String identifier, {bool sdkModeFeature = true}) {
   group('basic data', () {
     setUp(() async {
       await polar.connectToDevice(identifier);
@@ -38,16 +45,13 @@ void testBasicData(String identifier) {
       await polar.disconnectFromDevice(identifier);
     });
 
-    test('blePowerState', () async {
-      final blePowerState = await polar.blePowerStateStream.first;
-      expect(blePowerState, true);
-    });
-
-    test('sdkModeFeatureAvailable', () async {
-      final sdkModeFeatureIdentifier =
-          await polar.sdkModeFeatureAvailableStream.first;
-      expect(sdkModeFeatureIdentifier, identifier);
-    });
+    if (sdkModeFeature) {
+      test('sdkModeFeatureAvailable', () async {
+        final sdkModeFeatureIdentifier =
+            await polar.sdkModeFeatureAvailableStream.first;
+        expect(sdkModeFeatureIdentifier, identifier);
+      });
+    }
 
     test('hrFeatureReady', () async {
       final hrFeatureIdentifier = await polar.hrFeatureReadyStream.first;
@@ -61,19 +65,18 @@ void testBasicData(String identifier) {
 
     test('batteryLevel', () async {
       final batteryLevel = await polar.batteryLevelStream.first;
-      expect(batteryLevel, greaterThan(0));
+      expect(batteryLevel.level, greaterThan(0));
     });
 
     test('heartRate', () async {
       // TODO: Will probably fail
-      final heartRate = await polar.heartRateStream.first;
-      // .map((e) => e.data.hr)
+      final heartRate = await polar.heartRateStream.map((e) => e.data.hr).first;
       // .firstWhere((e) => e > 0);
       expect(heartRate, greaterThan(0));
     });
 
-    test('ftpFeatureReady', () {
-      final ftpFeatureIdentifier = polar.ftpFeatureReadyStream.first;
+    test('ftpFeatureReady', () async {
+      final ftpFeatureIdentifier = await polar.ftpFeatureReadyStream.first;
       expect(ftpFeatureIdentifier, identifier);
     });
   });

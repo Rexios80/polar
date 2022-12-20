@@ -8,9 +8,13 @@ const identifier = '1C709B20';
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
+  testBlePowerState();
   testSearch(identifier);
   testConnection(identifier);
-  testBasicData(identifier);
+  testBasicData(
+    identifier,
+    sdkModeFeature: false,
+  );
   testStreaming(
     identifier,
     features: [

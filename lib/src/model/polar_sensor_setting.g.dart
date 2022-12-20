@@ -16,3 +16,9 @@ PolarSensorSetting _$PolarSensorSettingFromJson(Map<String, dynamic> json) =>
             (e as List<dynamic>).map((e) => e as int).toList()),
       ),
     );
+
+Map<String, dynamic> _$PolarSensorSettingToJson(PolarSensorSetting instance) =>
+    <String, dynamic>{
+      'settings': instance.settings.map(
+          (k, e) => MapEntry(const PolarSettingTypeConverter().toJson(k), e)),
+    };

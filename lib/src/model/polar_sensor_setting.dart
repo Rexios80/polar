@@ -4,7 +4,7 @@ import 'package:polar/src/model/converters.dart';
 part 'polar_sensor_setting.g.dart';
 
 /// polar sensor settings class
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 class PolarSensorSetting {
   /// current settings available / set
   @PolarSettingTypeConverter()
@@ -18,6 +18,9 @@ class PolarSensorSetting {
   /// From json
   factory PolarSensorSetting.fromJson(Map<String, dynamic> json) =>
       _$PolarSensorSettingFromJson(json);
+
+  /// To json
+  Map<String, dynamic> toJson() => _$PolarSensorSettingToJson(this);
 }
 
 /// settings type
