@@ -218,7 +218,7 @@ class PolarOhrData {
 
 /// Polar ppi sample
 @JsonSerializable(createToJson: false)
-class PolarPpiSample {
+class PolarOhrPpiSample {
   /// ppInMs Pulse to Pulse interval in milliseconds.
   /// The value indicates the quality of PP-intervals.
   /// When error estimate is below 10ms the PP-intervals are probably very accurate.
@@ -244,7 +244,7 @@ class PolarPpiSample {
   final bool skinContactSupported;
 
   /// Constructor
-  PolarPpiSample({
+  PolarOhrPpiSample({
     required this.ppi,
     required this.errorEstimate,
     required this.hr,
@@ -254,22 +254,22 @@ class PolarPpiSample {
   });
 
   /// From json
-  factory PolarPpiSample.fromJson(Map<String, dynamic> json) =>
+  factory PolarOhrPpiSample.fromJson(Map<String, dynamic> json) =>
       _$PolarPpiSampleFromJson(json);
 }
 
 /// Polar ppi data
 @JsonSerializable(createToJson: false)
-class PolarPpiData {
+class PolarOhrPpiData {
   /// PPI samples
-  final List<PolarPpiSample> samples;
+  final List<PolarOhrPpiSample> samples;
 
   /// Constructor
-  PolarPpiData({
+  PolarOhrPpiData({
     required this.samples,
   });
 
   /// From json
-  factory PolarPpiData.fromJson(Map<String, dynamic> json) =>
+  factory PolarOhrPpiData.fromJson(Map<String, dynamic> json) =>
       _$PolarPpiDataFromJson(json);
 }

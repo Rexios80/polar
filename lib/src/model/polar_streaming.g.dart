@@ -94,7 +94,8 @@ PolarPpiSample _$PolarPpiSampleFromJson(Map<String, dynamic> json) =>
           .fromJson(json['skinContactSupported']),
     );
 
-PolarPpiData _$PolarPpiDataFromJson(Map<String, dynamic> json) => PolarPpiData(
+PolarOhrPpiData _$PolarPpiDataFromJson(Map<String, dynamic> json) =>
+    PolarOhrPpiData(
       samples: (json['samples'] as List<dynamic>)
           .map((e) => PolarPpiSample.fromJson(e as Map<String, dynamic>))
           .toList(),

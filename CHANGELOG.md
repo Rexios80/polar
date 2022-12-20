@@ -1,7 +1,7 @@
 ## 4.0.0-beta0
 - Updates Polar SDK to 4.0.0-beta0
 - BREAKING: Moves `timeStamp` field from streaming data into individual samples
-- BREAKING: Renames `PolarOhrPpiSample` to `PolarPpiSample`
+- BREAKING: Renames `startOhrPPIStreaming` to `startOhrPpiStreaming`
 - BREAKING: `PolarEcgData`, `PolarAccData`, `PolarGyroData`, `PolarMagnetometerData`, `PolarOhrData`, `PolarPpiData`, and `PolarExerciseData`,  no longer contain `identifier` fields
 - BREAKING: Removes `DeviceStreamingFeature.error`
 - Uses `json_serializable` for internal serialization instead of manual serialization

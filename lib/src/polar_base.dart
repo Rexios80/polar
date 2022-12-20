@@ -383,9 +383,9 @@ class Polar {
   /// - Returns: Observable stream
   ///   - onNext: for every air packet received. see `PolarPpiData`
   ///   - onError: see `PolarErrors` for possible errors invoked
-  Stream<PolarPpiData> startOhrPPIStreaming(String identifier) {
+  Stream<PolarOhrPpiData> startOhrPpiStreaming(String identifier) {
     return _startStreaming(DeviceStreamingFeature.ppi, identifier)
-        .map(PolarPpiData.fromJson);
+        .map(PolarOhrPpiData.fromJson);
   }
 
   /// Request start recording. Supported only by Polar H10. Requires `polarFileTransfer` feature.

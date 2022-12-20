@@ -127,7 +127,7 @@ void testStreaming(
 
     if (features.contains(DeviceStreamingFeature.ppi)) {
       test('ppi', () async {
-        final ppiData = await polar.startOhrPPIStreaming(identifier).first;
+        final ppiData = await polar.startOhrPpiStreaming(identifier).first;
         expect(ppiData.samples.length, greaterThan(0));
       });
     }
