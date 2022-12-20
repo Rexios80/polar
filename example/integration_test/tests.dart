@@ -32,49 +32,24 @@ void testConnection(String identifier) {
 }
 
 void testBasicData(String identifier, {bool sdkModeFeature = true}) {
-  group('basic data', () {
-    setUp(() async {
-      await polar.connectToDevice(identifier);
-    });
+  test('basic data', () async {
+    await polar.connectToDevice(identifier);
 
-    tearDown(() async {
-      await polar.disconnectFromDevice(identifier);
-    });
+    await Future.wait([
+      if (sdkModeFeature)
+        polar.sdkModeFeatureAvailableStream.first
+            .then((e) => expect(e, identifier)),
+      polar.hrFeatureReadyStream.first.then((e) => expect(e, identifier)),
+      polar.disInformationStream.first
+          .then((e) => expect(e.identifier, identifier)),
+      polar.batteryLevelStream.first
+          .then((e) => expect(e.level, greaterThan(0))),
+      polar.heartRateStream.first
+          .then((e) => expect(e.data.hr, greaterThan(0))),
+      polar.ftpFeatureReadyStream.first.then((e) => expect(e, identifier)),
+    ]);
 
-    test(
-      'sdkModeFeatureAvailable',
-      () async {
-        final sdkModeFeatureIdentifier =
-            await polar.sdkModeFeatureAvailableStream.first;
-        expect(sdkModeFeatureIdentifier, identifier);
-      },
-      skip: !sdkModeFeature,
-    );
-
-    test('hrFeatureReady', () async {
-      final hrFeatureIdentifier = await polar.hrFeatureReadyStream.first;
-      expect(hrFeatureIdentifier, identifier);
-    });
-
-    test('disInformation', () async {
-      final disInformation = await polar.disInformationStream.first;
-      expect(disInformation.identifier, identifier);
-    });
-
-    test('batteryLevel', () async {
-      final batteryEvent = await polar.batteryLevelStream.first;
-      expect(batteryEvent.level, greaterThan(0));
-    });
-
-    test('heartRate', () async {
-      final hrEvent = await polar.heartRateStream.first;
-      expect(hrEvent.data.hr, greaterThan(0));
-    });
-
-    test('ftpFeatureReady', () async {
-      final ftpFeatureIdentifier = await polar.ftpFeatureReadyStream.first;
-      expect(ftpFeatureIdentifier, identifier);
-    });
+    await polar.disconnectFromDevice(identifier);
   });
 }
 
