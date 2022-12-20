@@ -189,7 +189,7 @@ void testRecording(String identifier) {
     expect(status3.ongoing, false);
 
     final entries2 = await polar.listExercises(identifier);
-    final entry = entries1.firstWhere((e) => e.entryId == exerciseId);
+    final entry = entries2.firstWhere((e) => e.entryId == exerciseId);
     expect(entry.entryId, exerciseId);
 
     final exercise = await polar.fetchExercise(identifier, entry);
@@ -198,7 +198,7 @@ void testRecording(String identifier) {
     await polar.removeExercise(identifier, entry);
 
     final entries3 = await polar.listExercises(identifier);
-    expect(entries2.any((e) => e.entryId == exerciseId), false);
+    expect(entries3.any((e) => e.entryId == exerciseId), false);
 
     await polar.disconnectFromDevice(identifier);
   });
