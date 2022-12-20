@@ -3,7 +3,7 @@ import 'package:polar/polar.dart';
 
 import 'tests.dart';
 
-const identifier = '2021DJ1605';
+const identifier = 'AE0F8E27';
 
 void main() async {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
