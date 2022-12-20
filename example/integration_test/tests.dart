@@ -14,28 +14,13 @@ void testSearch(String identifier) {
   });
 }
 
-void testConnection(String identifier) {
-  test('connection', () async {
-    await polar.connectToDevice(identifier);
-
-    final connecting = await polar.deviceConnectingStream.first;
-    expect(connecting.deviceId, identifier);
-
-    final connected = await polar.deviceConnectedStream.first;
-    expect(connected.deviceId, identifier);
-
-    await polar.disconnectFromDevice(identifier);
-
-    final disconnected = await polar.deviceDisconnectedStream.first;
-    expect(disconnected.deviceId, identifier);
-  });
-}
-
 void testBasicData(String identifier, {bool sdkModeFeature = true}) {
   test('basic data', () async {
     await polar.connectToDevice(identifier);
 
     await Future.wait([
+      polar.deviceConnectingStream.first.then((e) => expect(e, identifier)),
+      polar.deviceConnectedStream.first.then((e) => expect(e, identifier)),
       if (sdkModeFeature)
         polar.sdkModeFeatureAvailableStream.first
             .then((e) => expect(e, identifier)),
@@ -50,6 +35,9 @@ void testBasicData(String identifier, {bool sdkModeFeature = true}) {
     ]);
 
     await polar.disconnectFromDevice(identifier);
+
+    final disconnected = await polar.deviceDisconnectedStream.first;
+    expect(disconnected.deviceId, identifier);
   });
 }
 
@@ -136,6 +124,13 @@ void testRecording(String identifier) {
     await polar.deviceConnectedStream.first;
     await polar.ftpFeatureReadyStream.first;
 
+    //! Remove existing recordings (THIS IS DESTRUCTIVE)
+    // Polar H10 can only store one recording at a time
+    final entries1 = await polar.listExercises(identifier);
+    for (final entry in entries1) {
+      await polar.removeExercise(identifier, entry);
+    }
+
     final status1 = await polar.requestRecordingStatus(identifier);
     expect(status1.ongoing, false);
 
@@ -156,7 +151,7 @@ void testRecording(String identifier) {
     final status3 = await polar.requestRecordingStatus(identifier);
     expect(status3.ongoing, false);
 
-    final entries1 = await polar.listExercises(identifier);
+    final entries2 = await polar.listExercises(identifier);
     final entry = entries1.firstWhere((e) => e.entryId == exerciseId);
     expect(entry.entryId, exerciseId);
 
@@ -165,7 +160,7 @@ void testRecording(String identifier) {
 
     await polar.removeExercise(identifier, entry);
 
-    final entries2 = await polar.listExercises(identifier);
+    final entries3 = await polar.listExercises(identifier);
     expect(entries2.any((e) => e.entryId == exerciseId), false);
 
     await polar.disconnectFromDevice(identifier);

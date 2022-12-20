@@ -16,7 +16,6 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   static const identifier = '1C709B20';
-  static final exerciseId = const Uuid().v4();
 
   final polar = Polar();
   final logs = ['Service started'];
@@ -107,7 +106,7 @@ class _MyAppState extends State<MyApp> {
         log('Starting recording');
         await polar.startRecording(
           identifier,
-          exerciseId: exerciseId,
+          exerciseId: const Uuid().v4(),
           interval: RecordingInterval.interval_1s,
           sampleType: SampleType.rr,
         );
@@ -127,7 +126,8 @@ class _MyAppState extends State<MyApp> {
         log('Listing recordings');
         final entries = await polar.listExercises(identifier);
         log('Recordings: $entries');
-        exerciseEntry = entries.firstWhere((e) => e.entryId == exerciseId);
+        // H10 can only store one recording at a time
+        exerciseEntry = entries.first;
         break;
       case RecordingAction.fetch:
         log('Fetching recording');
