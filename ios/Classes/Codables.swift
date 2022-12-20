@@ -326,11 +326,11 @@ class PolarSensorSettingCodable: Codable {
         let container = try? decoder.container(keyedBy: CodingKeys.self)
 
         // Flutter can only send maps keyed by strings
-        let dict: [String: UInt32] = (try? container?.decode([String: UInt32].self, forKey: .settings)) ?? [:]
+        let dict: [String: Set<UInt32>] = (try? container?.decode([String: Set<UInt32>].self, forKey: .settings)) ?? [:]
         let newDict = Dictionary(
             uniqueKeysWithValues:
             dict.map { key, value in
-                (PolarSensorSetting.SettingType(rawValue: Int(key) ?? -1) ?? PolarSensorSetting.SettingType.unknown, value)
+                (PolarSensorSetting.SettingType(rawValue: Int(key) ?? -1) ?? PolarSensorSetting.SettingType.unknown, value.first ?? 0)
             }
         )
 

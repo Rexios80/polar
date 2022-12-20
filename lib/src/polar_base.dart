@@ -260,6 +260,8 @@ class Polar {
     String identifier, {
     PolarSensorSetting? settings,
   }) async* {
+    assert(settings == null || settings.isSelection);
+
     final channelName = 'polar/streaming/$identifier/${feature.name}';
 
     await _channel.invokeMethod('createStreamingChannel', [
@@ -268,11 +270,12 @@ class Polar {
       feature.toJson(),
     ]);
 
-    if (feature != DeviceStreamingFeature.ppi) {
-      settings ??= await requestStreamSettings(
+    if (settings == null && feature != DeviceStreamingFeature.ppi) {
+      final availableSettings = await requestStreamSettings(
         identifier,
         feature,
       );
+      settings = availableSettings.maxSettings();
     }
 
     yield* EventChannel(channelName)

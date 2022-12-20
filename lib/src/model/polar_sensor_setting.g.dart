@@ -9,7 +9,7 @@ part of 'polar_sensor_setting.dart';
 // **************************************************************************
 
 PolarSensorSetting _$PolarSensorSettingFromJson(Map<String, dynamic> json) =>
-    PolarSensorSetting(
+    PolarSensorSetting._(
       settings: (json['settings'] as Map<String, dynamic>).map(
         (k, e) => MapEntry(
             const PolarSettingTypeConverter().fromJson(k as String),
