@@ -82,8 +82,8 @@ PolarOhrData _$PolarOhrDataFromJson(Map<String, dynamic> json) => PolarOhrData(
           .toList(),
     );
 
-PolarPpiSample _$PolarPpiSampleFromJson(Map<String, dynamic> json) =>
-    PolarPpiSample(
+PolarOhrPpiSample _$PolarOhrPpiSampleFromJson(Map<String, dynamic> json) =>
+    PolarOhrPpiSample(
       ppi: json['ppi'] as int,
       errorEstimate: json['errorEstimate'] as int,
       hr: json['hr'] as int,
@@ -94,9 +94,9 @@ PolarPpiSample _$PolarPpiSampleFromJson(Map<String, dynamic> json) =>
           .fromJson(json['skinContactSupported']),
     );
 
-PolarOhrPpiData _$PolarPpiDataFromJson(Map<String, dynamic> json) =>
+PolarOhrPpiData _$PolarOhrPpiDataFromJson(Map<String, dynamic> json) =>
     PolarOhrPpiData(
       samples: (json['samples'] as List<dynamic>)
-          .map((e) => PolarPpiSample.fromJson(e as Map<String, dynamic>))
+          .map((e) => PolarOhrPpiSample.fromJson(e as Map<String, dynamic>))
           .toList(),
     );

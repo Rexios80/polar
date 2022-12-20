@@ -255,7 +255,7 @@ class PolarOhrPpiSample {
 
   /// From json
   factory PolarOhrPpiSample.fromJson(Map<String, dynamic> json) =>
-      _$PolarPpiSampleFromJson(json);
+      _$PolarOhrPpiSampleFromJson(json);
 }
 
 /// Polar ppi data
@@ -271,5 +271,5 @@ class PolarOhrPpiData {
 
   /// From json
   factory PolarOhrPpiData.fromJson(Map<String, dynamic> json) =>
-      _$PolarPpiDataFromJson(json);
+      _$PolarOhrPpiDataFromJson(json);
 }
