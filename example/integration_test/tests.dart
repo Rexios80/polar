@@ -41,13 +41,15 @@ void testBasicData(String identifier, {bool sdkModeFeature = true}) {
       await polar.disconnectFromDevice(identifier);
     });
 
-    if (sdkModeFeature) {
-      test('sdkModeFeatureAvailable', () async {
+    test(
+      'sdkModeFeatureAvailable',
+      () async {
         final sdkModeFeatureIdentifier =
             await polar.sdkModeFeatureAvailableStream.first;
         expect(sdkModeFeatureIdentifier, identifier);
-      });
-    }
+      },
+      skip: !sdkModeFeature,
+    );
 
     test('hrFeatureReady', () async {
       final hrFeatureIdentifier = await polar.hrFeatureReadyStream.first;
@@ -94,48 +96,60 @@ void testStreaming(
       await polar.disconnectFromDevice(identifier);
     });
 
-    if (features.contains(DeviceStreamingFeature.ecg)) {
-      test('ecg', () async {
+    test(
+      'ecg',
+      () async {
         final ecgData = await polar.startEcgStreaming(identifier).first;
         expect(ecgData.samples.length, greaterThan(0));
-      });
-    }
+      },
+      skip: !features.contains(DeviceStreamingFeature.ecg),
+    );
 
-    if (features.contains(DeviceStreamingFeature.acc)) {
-      test('acc', () async {
+    test(
+      'acc',
+      () async {
         final accData = await polar.startAccStreaming(identifier).first;
         expect(accData.samples.length, greaterThan(0));
-      });
-    }
+      },
+      skip: !features.contains(DeviceStreamingFeature.acc),
+    );
 
-    if (features.contains(DeviceStreamingFeature.ppg)) {
-      test('ppg', () async {
+    test(
+      'ppg',
+      () async {
         final ppgData = await polar.startOhrStreaming(identifier).first;
         expect(ppgData.samples.length, greaterThan(0));
-      });
-    }
+      },
+      skip: !features.contains(DeviceStreamingFeature.ppg),
+    );
 
-    if (features.contains(DeviceStreamingFeature.ppi)) {
-      test('ppi', () async {
+    test(
+      'ppi',
+      () async {
         final ppiData = await polar.startOhrPpiStreaming(identifier).first;
         expect(ppiData.samples.length, greaterThan(0));
-      });
-    }
+      },
+      skip: !features.contains(DeviceStreamingFeature.ppi),
+    );
 
-    if (features.contains(DeviceStreamingFeature.gyro)) {
-      test('gyro', () async {
+    test(
+      'gyro',
+      () async {
         final gyroData = await polar.startGyroStreaming(identifier).first;
         expect(gyroData.samples.length, greaterThan(0));
-      });
-    }
+      },
+      skip: !features.contains(DeviceStreamingFeature.gyro),
+    );
 
-    if (features.contains(DeviceStreamingFeature.magnetometer)) {
-      test('magnetometer', () async {
+    test(
+      'magnetometer',
+      () async {
         final magnetometerData =
             await polar.startMagnetometerStreaming(identifier).first;
         expect(magnetometerData.samples.length, greaterThan(0));
-      });
-    }
+      },
+      skip: !features.contains(DeviceStreamingFeature.magnetometer),
+    );
   });
 }
 
