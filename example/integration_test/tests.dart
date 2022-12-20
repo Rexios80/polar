@@ -131,18 +131,60 @@ void testStreaming(
         expect(ppiData.samples.length, greaterThan(0));
       });
     }
+
+    if (features.contains(DeviceStreamingFeature.gyro)) {
+      test('gyro', () async {
+        final gyroData = await polar.startGyroStreaming(identifier).first;
+        expect(gyroData.samples.length, greaterThan(0));
+      });
+    }
+
+    if (features.contains(DeviceStreamingFeature.magnetometer)) {
+      test('magnetometer', () async {
+        final magnetometerData =
+            await polar.startMagnetometerStreaming(identifier).first;
+        expect(magnetometerData.samples.length, greaterThan(0));
+      });
+    }
   });
 }
 
 void testRecording(String identifier) {
-  group('recording', () {
-    setUpAll(() async {
-      await polar.connectToDevice(identifier);
-      await polar.ftpFeatureReadyStream.first;
-    });
+  test('recording', () async {
+    await polar.connectToDevice(identifier);
+    await polar.ftpFeatureReadyStream.first;
 
-    tearDownAll(() async {
-      await polar.disconnectFromDevice(identifier);
-    });
+    final status1 = await polar.requestRecordingStatus(identifier);
+    expect(status1.ongoing, false);
+
+    await polar.startRecording(
+      identifier,
+      exerciseId: 'test',
+      interval: RecordingInterval.interval_1s,
+      sampleType: SampleType.rr,
+    );
+
+    final status2 = await polar.requestRecordingStatus(identifier);
+    expect(status2.entryId, 'test');
+    expect(status2.ongoing, true);
+
+    await polar.stopRecording(identifier);
+
+    final status3 = await polar.requestRecordingStatus(identifier);
+    expect(status3.ongoing, false);
+
+    final entries1 = await polar.listExercises(identifier);
+    final entry = entries1.firstWhere((e) => e.entryId == 'test');
+    expect(entry.entryId, 'test');
+
+    final exercise = await polar.fetchExercise(identifier, entry);
+    expect(exercise.samples.length, greaterThan(0));
+
+    await polar.removeExercise(identifier, entry);
+
+    final entries2 = await polar.listExercises(identifier);
+    expect(entries2.any((e) => e.entryId == 'test'), false);
+
+    await polar.disconnectFromDevice(identifier);
   });
 }
