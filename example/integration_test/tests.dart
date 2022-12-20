@@ -29,7 +29,7 @@ void testConnection(String identifier) {
 }
 
 void testBasicData(String identifier) {
-  group('basic data', () async {
+  group('basic data', () {
     setUp(() async {
       await polar.connectToDevice(identifier);
     });
@@ -41,17 +41,6 @@ void testBasicData(String identifier) {
     test('blePowerState', () async {
       final blePowerState = await polar.blePowerStateStream.first;
       expect(blePowerState, true);
-    });
-
-    test('streamingFeaturesReady', () async {
-      final streamingFeatures = await polar.streamingFeaturesReadyStream.first;
-      expect(
-        setEquals(streamingFeatures.features.toSet(), {
-          DeviceStreamingFeature.ecg,
-          DeviceStreamingFeature.acc,
-        }),
-        true,
-      );
     });
 
     test('sdkModeFeatureAvailable', () async {
@@ -97,7 +86,11 @@ void testStreaming(
   group('streaming', () {
     setUpAll(() async {
       await polar.connectToDevice(identifier);
-      await polar.streamingFeaturesReadyStream.first;
+      final streamingFeatures = await polar.streamingFeaturesReadyStream.first;
+      expect(
+        setEquals(streamingFeatures.features.toSet(), features.toSet()),
+        true,
+      );
     });
 
     tearDownAll(() async {
