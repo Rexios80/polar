@@ -4,12 +4,7 @@ import 'package:polar/polar.dart';
 
 final polar = Polar();
 
-void testBlePowerState() {
-  test('blePowerState', () async {
-    final blePowerState = await polar.blePowerStateStream.first;
-    expect(blePowerState, true);
-  });
-}
+Future<void> requestPermissions() => polar.requestPermissions();
 
 void testSearch(String identifier) {
   test('search', () async {

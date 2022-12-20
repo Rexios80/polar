@@ -5,10 +5,10 @@ import 'tests.dart';
 
 const identifier = '1C709B20';
 
-void main() {
+void main() async {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  testBlePowerState();
+  await requestPermissions();
   testSearch(identifier);
   testConnection(identifier);
   testBasicData(

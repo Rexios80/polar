@@ -5,9 +5,10 @@ import 'tests.dart';
 
 const identifier = '2021DJ1605';
 
-void main() {
+void main() async {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
+  await requestPermissions();
   testSearch(identifier);
   testConnection(identifier);
   testBasicData(identifier);
