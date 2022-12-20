@@ -10,6 +10,7 @@ void main() async {
 
   await requestPermissions();
   testSearch(identifier);
+  testConnection(identifier);
   testBasicData(identifier);
   testStreaming(
     identifier,
