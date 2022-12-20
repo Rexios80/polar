@@ -96,7 +96,12 @@ class PolarExerciseEntry {
       _$PolarExerciseEntryFromJson(json);
 
   /// To json
-  Map<String, dynamic> toJson() => _$PolarExerciseEntryToJson(this);
+  Map<String, dynamic> toJson() {
+    final json = _$PolarExerciseEntryToJson(this);
+    // TODO: Properly deal with inconsistent keys between Android and iOS
+    json['identifier'] = json['entryId'];
+    return json;
+  }
 
   @override
   String toString() {

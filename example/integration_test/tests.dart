@@ -144,6 +144,7 @@ final exerciseId = const Uuid().v4();
 void testRecording(String identifier) {
   test('recording', () async {
     await polar.connectToDevice(identifier);
+    await polar.deviceConnectedStream.first;
     await polar.ftpFeatureReadyStream.first;
 
     final status1 = await polar.requestRecordingStatus(identifier);
@@ -160,6 +161,7 @@ void testRecording(String identifier) {
     expect(status2.entryId, exerciseId);
     expect(status2.ongoing, true);
 
+    await Future.delayed(const Duration(seconds: 5));
     await polar.stopRecording(identifier);
 
     final status3 = await polar.requestRecordingStatus(identifier);

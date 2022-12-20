@@ -134,7 +134,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
             })
         }
 
-        override fun onCancel(arguments: Any) {
+        override fun onCancel(arguments: Any?) {
             searchSubscription?.dispose()
         }
     }
