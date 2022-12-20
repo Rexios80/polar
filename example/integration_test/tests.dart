@@ -59,15 +59,13 @@ void testBasicData(String identifier, {bool sdkModeFeature = true}) {
     });
 
     test('batteryLevel', () async {
-      final batteryLevel = await polar.batteryLevelStream.first;
-      expect(batteryLevel.level, greaterThan(0));
+      final batteryEvent = await polar.batteryLevelStream.first;
+      expect(batteryEvent.level, greaterThan(0));
     });
 
     test('heartRate', () async {
-      // TODO: Will probably fail
-      final heartRate = await polar.heartRateStream.map((e) => e.data.hr).first;
-      // .firstWhere((e) => e > 0);
-      expect(heartRate, greaterThan(0));
+      final hrEvent = await polar.heartRateStream.first;
+      expect(hrEvent.data.hr, greaterThan(0));
     });
 
     test('ftpFeatureReady', () async {
