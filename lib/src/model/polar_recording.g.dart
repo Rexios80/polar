@@ -15,6 +15,13 @@ PolarExerciseEntry _$PolarExerciseEntryFromJson(Map<String, dynamic> json) =>
       entryId: PolarExerciseEntry._readEntryId(json, 'entryId') as String,
     );
 
+Map<String, dynamic> _$PolarExerciseEntryToJson(PolarExerciseEntry instance) =>
+    <String, dynamic>{
+      'path': instance.path,
+      'date': const UnixTimeConverter().toJson(instance.date),
+      'entryId': instance.entryId,
+    };
+
 PolarExerciseData _$PolarExerciseDataFromJson(Map<String, dynamic> json) =>
     PolarExerciseData(
       interval: PolarExerciseData._readInterval(json, 'interval') as int,

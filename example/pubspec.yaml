@@ -12,6 +12,8 @@ dependencies:
   polar:
     path: ../
 
+  uuid: ^3.0.7
+
 dev_dependencies:
   integration_test:
     sdk: flutter

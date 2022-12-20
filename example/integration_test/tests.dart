@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:polar/polar.dart';
+import 'package:uuid/uuid.dart';
 
 final polar = Polar();
 
@@ -138,6 +139,8 @@ void testStreaming(
   });
 }
 
+final exerciseId = const Uuid().v4();
+
 void testRecording(String identifier) {
   test('recording', () async {
     await polar.connectToDevice(identifier);
@@ -148,13 +151,13 @@ void testRecording(String identifier) {
 
     await polar.startRecording(
       identifier,
-      exerciseId: 'test',
+      exerciseId: exerciseId,
       interval: RecordingInterval.interval_1s,
       sampleType: SampleType.rr,
     );
 
     final status2 = await polar.requestRecordingStatus(identifier);
-    expect(status2.entryId, 'test');
+    expect(status2.entryId, exerciseId);
     expect(status2.ongoing, true);
 
     await polar.stopRecording(identifier);
@@ -163,8 +166,8 @@ void testRecording(String identifier) {
     expect(status3.ongoing, false);
 
     final entries1 = await polar.listExercises(identifier);
-    final entry = entries1.firstWhere((e) => e.entryId == 'test');
-    expect(entry.entryId, 'test');
+    final entry = entries1.firstWhere((e) => e.entryId == exerciseId);
+    expect(entry.entryId, exerciseId);
 
     final exercise = await polar.fetchExercise(identifier, entry);
     expect(exercise.samples.length, greaterThan(0));
@@ -172,7 +175,7 @@ void testRecording(String identifier) {
     await polar.removeExercise(identifier, entry);
 
     final entries2 = await polar.listExercises(identifier);
-    expect(entries2.any((e) => e.entryId == 'test'), false);
+    expect(entries2.any((e) => e.entryId == exerciseId), false);
 
     await polar.disconnectFromDevice(identifier);
   });

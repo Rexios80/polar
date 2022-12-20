@@ -68,7 +68,7 @@ class PolarRecordingStatus {
 }
 
 /// Polar exercise entry
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 class PolarExerciseEntry {
   static dynamic _readEntryId(Map json, String key) =>
       json['entryId'] ?? json['identifier'];
@@ -94,6 +94,9 @@ class PolarExerciseEntry {
   /// From json
   factory PolarExerciseEntry.fromJson(Map<String, dynamic> json) =>
       _$PolarExerciseEntryFromJson(json);
+
+  /// To json
+  Map<String, dynamic> toJson() => _$PolarExerciseEntryToJson(this);
 
   @override
   String toString() {
