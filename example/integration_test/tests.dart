@@ -136,15 +136,6 @@ void testStreaming(
     );
 
     test(
-      'ppi',
-      () async {
-        final ppiData = await polar.startOhrPpiStreaming(identifier).first;
-        expect(ppiData.samples.length, greaterThan(0));
-      },
-      skip: !features.contains(DeviceStreamingFeature.ppi),
-    );
-
-    test(
       'gyro',
       () async {
         final gyroData = await polar.startGyroStreaming(identifier).first;
@@ -161,6 +152,15 @@ void testStreaming(
         expect(magnetometerData.samples.length, greaterThan(0));
       },
       skip: !features.contains(DeviceStreamingFeature.magnetometer),
+    );
+
+    test(
+      'ppi',
+      () async {
+        final ppiData = await polar.startOhrPpiStreaming(identifier).first;
+        expect(ppiData.samples.length, greaterThan(0));
+      },
+      skip: !features.contains(DeviceStreamingFeature.ppi),
     );
   });
 }
