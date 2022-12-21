@@ -14,7 +14,8 @@ public class SwiftPolarPlugin:
     PolarBleApiPowerStateObserver,
     PolarBleApiDeviceFeaturesObserver,
     PolarBleApiDeviceHrObserver,
-    PolarBleApiDeviceInfoObserver
+    PolarBleApiDeviceInfoObserver,
+    PolarBleApiSdkModeFeatureObserver
 {
     /// Binary messenger for dynamic EventChannel registration
     let messenger: FlutterBinaryMessenger
@@ -289,6 +290,10 @@ public class SwiftPolarPlugin:
             identifier,
             data,
         ])
+    }
+
+    public func sdkModeFeatureAvailable(_ identifier: String) {
+        channel.invokeMethod("sdkModeFeatureAvailable", arguments: identifier)
     }
 
     public func blePowerOn() {
