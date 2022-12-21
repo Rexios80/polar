@@ -50,6 +50,7 @@ public class SwiftPolarPlugin:
         api.powerStateObserver = self
         api.deviceFeaturesObserver = self
         api.deviceInfoObserver = self
+        api.sdkModeFeatureObserver = self
     }
 
     public static func register(with registrar: FlutterPluginRegistrar) {
