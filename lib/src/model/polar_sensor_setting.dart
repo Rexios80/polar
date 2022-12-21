@@ -6,10 +6,9 @@ import 'package:polar/src/model/converters.dart';
 part 'polar_sensor_setting.g.dart';
 
 /// polar sensor settings class
-@JsonSerializable(constructor: '_')
+@JsonSerializable(constructor: '_', converters: [PolarSettingTypeConverter()])
 class PolarSensorSetting {
   /// current settings available / set
-  @PolarSettingTypeConverter()
   final Map<PolarSettingType, List<int>> settings;
 
   /// Verify that this is a selection of settings and not a list of available settings

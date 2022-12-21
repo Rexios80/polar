@@ -84,8 +84,9 @@ PolarOhrData _$PolarOhrDataFromJson(Map<String, dynamic> json) => PolarOhrData(
 
 PolarOhrPpiSample _$PolarOhrPpiSampleFromJson(Map<String, dynamic> json) =>
     PolarOhrPpiSample(
-      ppi: json['ppi'] as int,
-      errorEstimate: json['errorEstimate'] as int,
+      ppi: PolarOhrPpiSample._readPpi(json, 'ppi') as int,
+      errorEstimate:
+          PolarOhrPpiSample._readErrorEstimate(json, 'errorEstimate') as int,
       hr: json['hr'] as int,
       blockerBit: const PlatformBooleanConverter().fromJson(json['blockerBit']),
       skinContactStatus:

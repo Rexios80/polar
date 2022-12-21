@@ -219,13 +219,21 @@ class PolarOhrData {
 /// Polar ppi sample
 @JsonSerializable(createToJson: false)
 class PolarOhrPpiSample {
+  static dynamic _readPpi(Map json, String key) =>
+      json['ppi'] ?? json['ppInMs'];
+
+  static dynamic _readErrorEstimate(Map json, String key) =>
+      json['errorEstimate'] ?? json['ppErrorEstimate'];
+
   /// ppInMs Pulse to Pulse interval in milliseconds.
   /// The value indicates the quality of PP-intervals.
   /// When error estimate is below 10ms the PP-intervals are probably very accurate.
   /// Error estimate values over 30ms may be caused by movement artefact or too loose sensor-skin contact.
+  @JsonKey(readValue: _readPpi)
   final int ppi;
 
   /// ppErrorEstimate estimate of the expected absolute error in PP-interval in milliseconds
+  @JsonKey(readValue: _readErrorEstimate)
   final int errorEstimate;
 
   /// hr in BPM
