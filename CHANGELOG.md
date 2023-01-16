@@ -1,3 +1,7 @@
+## 4.0.0
+- Updates Polar SDK to 4.0.0
+- Other version updates
+
 ## 4.0.0-beta0
 - Updates Polar SDK to 4.0.0-beta0
 - BREAKING: Moves `timeStamp` field from streaming data into individual samples
