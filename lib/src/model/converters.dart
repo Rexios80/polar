@@ -51,7 +51,7 @@ class OhrDataTypeConverter extends JsonConverter<OhrDataType, dynamic> {
   }
 
   @override
-  toJson(OhrDataType object) => throw UnimplementedError();
+  dynamic toJson(OhrDataType object) => throw UnimplementedError();
 }
 
 /// Converter for unix time
