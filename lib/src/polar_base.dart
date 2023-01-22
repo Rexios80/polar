@@ -133,7 +133,7 @@ class Polar {
           PolarStreamingFeaturesReadyEvent(
             call.arguments[0],
             (jsonDecode(call.arguments[1]) as List)
-                .map((e) => DeviceStreamingFeature.fromJson(e))
+                .map(DeviceStreamingFeature.fromJson)
                 .toList(),
           ),
         );
@@ -280,7 +280,9 @@ class Polar {
 
     yield* EventChannel(channelName)
         .receiveBroadcastStream(jsonEncode(settings))
-        .map((e) => jsonDecode(e));
+        .cast<String>()
+        .map(jsonDecode)
+        .cast<Map<String, dynamic>>();
   }
 
   /// Start the ECG (Electrocardiography) stream. ECG stream is stopped if the connection is closed, error occurs or stream is disposed.
