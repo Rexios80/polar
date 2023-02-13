@@ -6,7 +6,7 @@ part 'polar_streaming.g.dart';
 
 /// Base class for all streaming data
 @JsonSerializable(createToJson: false, genericArgumentFactories: true)
-abstract class PolarStreamingData<T> {
+class PolarStreamingData<T> {
   /// Samples
   final List<T> samples;
 
@@ -15,9 +15,31 @@ abstract class PolarStreamingData<T> {
     required this.samples,
   });
 
+  static PolarStreamingData<T> _fromJson<T>(
+    Map<String, dynamic> json,
+    dynamic Function(Map<String, dynamic>) fromJsonT,
+  ) =>
+      _$PolarStreamingDataFromJson(json, (dynamic e) => fromJsonT(e));
+
   /// Convert from json
-  factory PolarStreamingData.fromJson(Map<String, dynamic> json) =>
-      _$PolarStreamingDataFromJson(json);
+  factory PolarStreamingData.fromJson(Map<String, dynamic> json) {
+    switch (T) {
+      case PolarHrSample:
+        return _fromJson(json, _$PolarHrSampleFromJson);
+      case PolarEcgSample:
+        return _fromJson(json, _$PolarEcgSampleFromJson);
+      case PolarAccSample:
+        return _fromJson(json, _$PolarAccSampleFromJson);
+      case PolarGyroSample:
+        return _fromJson(json, _$PolarGyroSampleFromJson);
+      case PolarMagnetometerSample:
+        return _fromJson(json, _$PolarMagnetometerSampleFromJson);
+      case PolarPpiSample:
+        return _fromJson(json, _$PolarPpiSampleFromJson);
+      default:
+        throw UnsupportedError('Unsupported type: $T');
+    }
+  }
 }
 
 /// Polar HR sample
@@ -59,10 +81,6 @@ class PolarHrSample {
     required this.contactStatus,
     required this.contactStatusSupported,
   });
-
-  /// From json
-  factory PolarHrSample.fromJson(Map<String, dynamic> json) =>
-      _$PolarHrSampleFromJson(json);
 }
 
 /// Polar HR data
@@ -82,10 +100,6 @@ class PolarEcgSample {
     required this.timeStamp,
     required this.voltage,
   });
-
-  /// From json
-  factory PolarEcgSample.fromJson(Map<String, dynamic> json) =>
-      _$PolarEcgSampleFromJson(json);
 }
 
 /// Polar ecg data
@@ -113,10 +127,6 @@ class PolarAccSample {
     required this.y,
     required this.z,
   });
-
-  /// From json
-  factory PolarAccSample.fromJson(Map<String, dynamic> json) =>
-      _$PolarAccSampleFromJson(json);
 }
 
 /// Polar acc data
@@ -144,10 +154,6 @@ class PolarGyroSample {
     required this.y,
     required this.z,
   });
-
-  /// From json
-  factory PolarGyroSample.fromJson(Map<String, dynamic> json) =>
-      _$PolarGyroSampleFromJson(json);
 }
 
 /// Polar gyro data
@@ -175,10 +181,6 @@ class PolarMagnetometerSample {
     required this.y,
     required this.z,
   });
-
-  /// From json
-  factory PolarMagnetometerSample.fromJson(Map<String, dynamic> json) =>
-      _$PolarMagnetometerSampleFromJson(json);
 }
 
 /// Polar magnetometer data
@@ -269,10 +271,6 @@ class PolarPpiSample {
     required this.skinContactStatus,
     required this.skinContactSupported,
   });
-
-  /// From json
-  factory PolarPpiSample.fromJson(Map<String, dynamic> json) =>
-      _$PolarPpiSampleFromJson(json);
 }
 
 /// Polar ppi data
