@@ -18,7 +18,8 @@ PolarStreamingData<T> _$PolarStreamingDataFromJson<T>(
 
 PolarHrSample _$PolarHrSampleFromJson(Map<String, dynamic> json) =>
     PolarHrSample(
-      timeStamp: json['timeStamp'] as int,
+      timeStamp: const PolarSampleTimestampConverter()
+          .fromJson(json['timeStamp'] as int),
       hr: json['hr'] as int,
       rrs: (json['rrs'] as List<dynamic>).map((e) => e as int).toList(),
       rrsMs: (json['rrsMs'] as List<dynamic>).map((e) => e as int).toList(),
@@ -30,13 +31,15 @@ PolarHrSample _$PolarHrSampleFromJson(Map<String, dynamic> json) =>
 
 PolarEcgSample _$PolarEcgSampleFromJson(Map<String, dynamic> json) =>
     PolarEcgSample(
-      timeStamp: json['timeStamp'] as int,
+      timeStamp: const PolarSampleTimestampConverter()
+          .fromJson(json['timeStamp'] as int),
       voltage: json['voltage'] as int,
     );
 
 PolarAccSample _$PolarAccSampleFromJson(Map<String, dynamic> json) =>
     PolarAccSample(
-      timeStamp: json['timeStamp'] as int,
+      timeStamp: const PolarSampleTimestampConverter()
+          .fromJson(json['timeStamp'] as int),
       x: json['x'] as int,
       y: json['y'] as int,
       z: json['z'] as int,
@@ -44,7 +47,8 @@ PolarAccSample _$PolarAccSampleFromJson(Map<String, dynamic> json) =>
 
 PolarGyroSample _$PolarGyroSampleFromJson(Map<String, dynamic> json) =>
     PolarGyroSample(
-      timeStamp: json['timeStamp'] as int,
+      timeStamp: const PolarSampleTimestampConverter()
+          .fromJson(json['timeStamp'] as int),
       x: (json['x'] as num).toDouble(),
       y: (json['y'] as num).toDouble(),
       z: (json['z'] as num).toDouble(),
@@ -53,7 +57,8 @@ PolarGyroSample _$PolarGyroSampleFromJson(Map<String, dynamic> json) =>
 PolarMagnetometerSample _$PolarMagnetometerSampleFromJson(
         Map<String, dynamic> json) =>
     PolarMagnetometerSample(
-      timeStamp: json['timeStamp'] as int,
+      timeStamp: const PolarSampleTimestampConverter()
+          .fromJson(json['timeStamp'] as int),
       x: (json['x'] as num).toDouble(),
       y: (json['y'] as num).toDouble(),
       z: (json['z'] as num).toDouble(),
@@ -61,7 +66,8 @@ PolarMagnetometerSample _$PolarMagnetometerSampleFromJson(
 
 PolarPpgSample _$PolarPpgSampleFromJson(Map<String, dynamic> json) =>
     PolarPpgSample(
-      timeStamp: json['timeStamp'] as int,
+      timeStamp: const PolarSampleTimestampConverter()
+          .fromJson(json['timeStamp'] as int),
       channelSamples: (json['channelSamples'] as List<dynamic>)
           .map((e) => e as int)
           .toList(),

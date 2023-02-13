@@ -52,7 +52,8 @@ class PolarHrSample {
       json['contactStatusSupported'] ?? json['contactSupported'];
 
   /// Moment sample is taken in nanoseconds. The epoch of timestamp is 1.1.2000
-  final int timeStamp;
+  @PolarSampleTimestampConverter()
+  final DateTime timeStamp;
 
   /// hr in BPM
   final int hr;
@@ -90,7 +91,8 @@ typedef PolarHrData = PolarStreamingData<PolarHrSample>;
 @JsonSerializable(createToJson: false)
 class PolarEcgSample {
   /// Moment sample is taken in nanoseconds. The epoch of timestamp is 1.1.2000
-  final int timeStamp;
+  @PolarSampleTimestampConverter()
+  final DateTime timeStamp;
 
   /// Voltage value in µVolts
   final int voltage;
@@ -109,7 +111,8 @@ typedef PolarEcgData = PolarStreamingData<PolarEcgSample>;
 @JsonSerializable(createToJson: false)
 class PolarAccSample {
   /// Moment sample is taken in nanoseconds. The epoch of timestamp is 1.1.2000
-  final int timeStamp;
+  @PolarSampleTimestampConverter()
+  final DateTime timeStamp;
 
   /// x axis value in millig (including gravity)
   final int x;
@@ -136,7 +139,8 @@ typedef PolarAccData = PolarStreamingData<PolarAccSample>;
 @JsonSerializable(createToJson: false)
 class PolarGyroSample {
   /// Moment sample is taken in nanoseconds. The epoch of timestamp is 1.1.2000
-  final int timeStamp;
+  @PolarSampleTimestampConverter()
+  final DateTime timeStamp;
 
   /// x axis value in deg/sec
   final double x;
@@ -163,7 +167,8 @@ typedef PolarGyroData = PolarStreamingData<PolarGyroSample>;
 @JsonSerializable(createToJson: false)
 class PolarMagnetometerSample {
   /// Moment sample is taken in nanoseconds. The epoch of timestamp is 1.1.2000
-  final int timeStamp;
+  @PolarSampleTimestampConverter()
+  final DateTime timeStamp;
 
   /// x axis value in Gauss
   final double x;
@@ -190,7 +195,8 @@ typedef PolarMagnetometerData = PolarStreamingData<PolarMagnetometerSample>;
 @JsonSerializable(createToJson: false)
 class PolarPpgSample {
   /// Moment sample is taken in nanoseconds. The epoch of timestamp is 1.1.2000
-  final int timeStamp;
+  @PolarSampleTimestampConverter()
+  final DateTime timeStamp;
 
   /// The PPG (Photoplethysmography) raw value received from the optical sensor.
   /// Based on [PpgDataType] the amount of channels varies. Typically ppg(n)

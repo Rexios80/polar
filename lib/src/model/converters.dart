@@ -92,3 +92,22 @@ class PolarSettingTypeConverter
     }
   }
 }
+
+final _polarEpoch = DateTime(2000).millisecondsSinceEpoch;
+
+/// Convert polar sample timestamps to [DateTime]
+///
+/// Moment sample is taken in nanoseconds. The epoch of timestamp is 1.1.2000
+class PolarSampleTimestampConverter extends JsonConverter<DateTime, int> {
+  /// Constructor
+  const PolarSampleTimestampConverter();
+
+  @override
+  DateTime fromJson(int json) {
+    final millis = json ~/ 1000000;
+    return DateTime.fromMillisecondsSinceEpoch(_polarEpoch + millis);
+  }
+
+  @override
+  int toJson(DateTime object) => throw UnimplementedError();
+}
