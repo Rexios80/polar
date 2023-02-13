@@ -24,12 +24,12 @@ If you use location services in your app, remove `android:maxSdkVersion="30"` fr
 
 ### iOS
 
-Change the deployment target in Xcode to iOS 13+
+Change the deployment target in Xcode to iOS 14+
 
 Podfile:
 
 ```ruby
-platform :ios, '13.0'
+platform :ios, '14.0'
 ```
 
 Info.plist:
