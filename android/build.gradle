@@ -2,7 +2,7 @@ group 'dev.rexios.polar'
 version '1.0-SNAPSHOT'
 
 buildscript {
-    ext.kotlin_version = '1.7.21'
+    ext.kotlin_version = '1.7.22'
     repositories {
         google()
         mavenCentral()
@@ -27,7 +27,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
 android {
-    compileSdkVersion 33
+    compileSdk 33
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
@@ -42,9 +42,9 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
     // Dependencies for Polar SDK
-    api 'com.github.polarofficial:polar-ble-sdk:4.0.0'
-    implementation 'io.reactivex.rxjava3:rxjava:3.1.5'
-    implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'
+    api 'com.github.polarofficial:polar-ble-sdk:5.0.0-beta2'
+    implementation 'io.reactivex.rxjava3:rxjava:3.1.6'
+    implementation 'io.reactivex.rxjava3:rxandroid:3.0.2'
 
     implementation 'com.google.code.gson:gson:2.9.1'
 }

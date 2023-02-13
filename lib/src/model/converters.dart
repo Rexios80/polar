@@ -30,28 +30,28 @@ class PlatformBooleanConverter extends JsonConverter<bool, dynamic> {
   }
 }
 
-/// Converter for [OhrDataType]
-class OhrDataTypeConverter extends JsonConverter<OhrDataType, dynamic> {
+/// Converter for [PpgDataType]
+class PpgDataTypeConverter extends JsonConverter<PpgDataType, dynamic> {
   /// Constructor
-  const OhrDataTypeConverter();
+  const PpgDataTypeConverter();
 
   @override
-  OhrDataType fromJson(dynamic json) {
+  PpgDataType fromJson(dynamic json) {
     if (Platform.isIOS) {
       switch (json as int) {
         case 4:
-          return OhrDataType.ppg3_ambient1;
+          return PpgDataType.ppg3_ambient1;
         default: // 18
-          return OhrDataType.unknown;
+          return PpgDataType.unknown;
       }
     } else {
       // This is android
-      return OhrDataType.values.byName((json as String).toLowerCase());
+      return PpgDataType.values.byName((json as String).toLowerCase());
     }
   }
 
   @override
-  dynamic toJson(OhrDataType object) => throw UnimplementedError();
+  dynamic toJson(PpgDataType object) => throw UnimplementedError();
 }
 
 /// Converter for unix time

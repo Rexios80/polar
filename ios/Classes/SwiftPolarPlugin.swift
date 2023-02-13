@@ -125,7 +125,7 @@ public class SwiftPolarPlugin:
         let arguments = call.arguments as! [Any]
         let name = arguments[0] as! String
         let identifier = arguments[1] as! String
-        let feature = DeviceStreamingFeature(rawValue: arguments[2] as! Int)!
+        let feature = PolarBleSdkFeature(rawValue: arguments[2] as! Int)!
 
         if streamingChannels[name] == nil {
             streamingChannels[name] = StreamingChannel(messenger, name, api, identifier, feature)

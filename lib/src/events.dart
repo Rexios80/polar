@@ -1,16 +1,17 @@
-import 'package:polar/src/model/device_streaming_feature.dart';
-import 'package:polar/src/model/polar_hr_data.dart';
+import 'package:polar/src/model/polar_ble_sdk_feature.dart';
 
-/// feature ready callback
-class PolarStreamingFeaturesReadyEvent {
+/// The feature is available in this device and it is ready.
+/// Called only for the features which are specified in [PolarBleApi]
+/// construction.
+class PolarBlsSdkFeatureReadyEvent {
   /// Polar device id
   final String identifier;
 
-  /// List of [DeviceStreamingFeature]s that are ready
-  final List<DeviceStreamingFeature> features;
+  /// List of [PolarBleSdkFeature]s that are ready
+  final List<PolarBleSdkFeature> features;
 
-  /// Construct a [PolarStreamingFeaturesReadyEvent] from an [identifier] and [features]
-  PolarStreamingFeaturesReadyEvent(this.identifier, this.features);
+  /// Construct a [PolarBlsSdkFeatureReadyEvent] from an [identifier] and [features]
+  PolarBlsSdkFeatureReadyEvent(this.identifier, this.features);
 }
 
 /// Received DIS info.
@@ -38,16 +39,4 @@ class PolarBatteryLevelEvent {
 
   /// Construct a [PolarBatteryLevelEvent] from an [identifier] and [level]
   PolarBatteryLevelEvent(this.identifier, this.level);
-}
-
-/// HR notification received.
-class PolarHeartRateEvent {
-  /// Polar device id
-  final String identifier;
-
-  /// The [PolarHrData] received from the sensor
-  final PolarHrData data;
-
-  /// Construct a [PolarHeartRateEvent] from an [identifier] and [data]
-  PolarHeartRateEvent(this.identifier, this.data);
 }

@@ -1,3 +1,14 @@
+## 5.0.0-beta2
+- Updated Polar SDK to `5.0.0-beta2`
+- BREAKING
+  - Minimum iOS version is now `14.0`
+  - All sample timestamps are now converted to `DateTime`
+Name changes
+- `PolarOhrPpiSample` -> `PolarPpiSample`
+- `PolarOhrPpiData` -> `PolarPpiData`
+- `startOhrStreaming` -> `startPpgStreaming`
+- `startOhrPpiStreaming` -> `startPpiStreaming`
+
 ## 4.0.0
 - Updates Polar SDK to 4.0.0
 - Other version updates

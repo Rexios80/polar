@@ -1,9 +1,9 @@
 /// OHR data source enum
-enum OhrDataType {
+enum PpgDataType {
   /// 3 ppg + 1 ambient
   // ignore: constant_identifier_names
   ppg3_ambient1,
 
-  /// An unknown [OhrDataType]
+  /// An unknown [PpgDataType]
   unknown;
 }

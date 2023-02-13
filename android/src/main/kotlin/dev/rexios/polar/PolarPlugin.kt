@@ -12,9 +12,12 @@ import com.google.gson.JsonPrimitive
 import com.google.gson.JsonSerializationContext
 import com.google.gson.JsonSerializer
 import com.polar.sdk.api.PolarBleApi
-import com.polar.sdk.api.PolarBleApi.DeviceStreamingFeature
+import com.polar.sdk.api.PolarBleApi.PolarBleSdkFeature
+import com.polar.sdk.api.PolarBleApi.PolarDeviceDataType
 import com.polar.sdk.api.PolarBleApiCallbackProvider
 import com.polar.sdk.api.PolarBleApiDefaultImpl
+import com.polar.sdk.api.PolarH10OfflineExerciseApi.RecordingInterval
+import com.polar.sdk.api.PolarH10OfflineExerciseApi.SampleType
 import com.polar.sdk.api.model.PolarDeviceInfo
 import com.polar.sdk.api.model.PolarExerciseEntry
 import com.polar.sdk.api.model.PolarHrData
@@ -83,7 +86,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
         searchChannel.setStreamHandler(searchHandler)
 
         api = PolarBleApiDefaultImpl.defaultImplementation(
-            flutterPluginBinding.applicationContext, PolarBleApi.ALL_FEATURES
+            flutterPluginBinding.applicationContext, PolarBleSdkFeature.values().toSet()
         )
         api.setApiCallback(this)
     }
@@ -143,7 +146,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
         val arguments = call.arguments as List<*>
         val name = arguments[0] as String
         val identifier = arguments[1] as String
-        val feature = gson.fromJson(arguments[2] as String, DeviceStreamingFeature::class.java)
+        val feature = gson.fromJson(arguments[2] as String, PolarDeviceDataType::class.java)
 
         if (streamingChannels[name] == null) {
             streamingChannels[name] = StreamingChannel(messenger, name, api, identifier, feature)
@@ -184,7 +187,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
     private fun requestStreamSettings(call: MethodCall, result: Result) {
         val arguments = call.arguments as List<*>
         val identifier = arguments[0] as String
-        val feature = gson.fromJson(arguments[1] as String, DeviceStreamingFeature::class.java)
+        val feature = gson.fromJson(arguments[1] as String, PolarDeviceDataType::class.java)
 
         api.requestStreamSettings(identifier, feature).subscribe({
             runOnUiThread { result.success(gson.toJson(it)) }
@@ -199,9 +202,8 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
         val arguments = call.arguments as List<*>
         val identifier = arguments[0] as String
         val exerciseId = arguments[1] as String
-        val interval =
-            gson.fromJson(arguments[2] as String, PolarBleApi.RecordingInterval::class.java)
-        val sampleType = gson.fromJson(arguments[3] as String, PolarBleApi.SampleType::class.java)
+        val interval = gson.fromJson(arguments[2] as String, RecordingInterval::class.java)
+        val sampleType = gson.fromJson(arguments[3] as String, SampleType::class.java)
 
         api.startRecording(identifier, exerciseId, interval, sampleType).subscribe({
             runOnUiThread { result.success(null) }
@@ -283,28 +285,20 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
         invokeOnUiThread("blePowerStateChanged", powered)
     }
 
-    override fun deviceConnected(info: PolarDeviceInfo) {
-        invokeOnUiThread("deviceConnected", gson.toJson(info))
+    override fun bleSdkFeatureReady(identifier: String, feature: PolarBleSdkFeature) {
+        invokeOnUiThread("bleSdkFeatureReady", listOf(identifier, gson.toJson(feature)))
     }
 
-    override fun deviceConnecting(info: PolarDeviceInfo) {
-        invokeOnUiThread("deviceConnecting", gson.toJson(info))
+    override fun deviceConnected(polarDeviceInfo: PolarDeviceInfo) {
+        invokeOnUiThread("deviceConnected", gson.toJson(polarDeviceInfo))
     }
 
-    override fun deviceDisconnected(info: PolarDeviceInfo) {
-        invokeOnUiThread("deviceDisconnected", gson.toJson(info))
+    override fun deviceConnecting(polarDeviceInfo: PolarDeviceInfo) {
+        invokeOnUiThread("deviceConnecting", gson.toJson(polarDeviceInfo))
     }
 
-    override fun streamingFeaturesReady(identifier: String, features: Set<DeviceStreamingFeature>) {
-        invokeOnUiThread("streamingFeaturesReady", listOf(identifier, gson.toJson(features)))
-    }
-
-    override fun sdkModeFeatureAvailable(identifier: String) {
-        invokeOnUiThread("sdkModeFeatureAvailable", identifier)
-    }
-
-    override fun hrFeatureReady(identifier: String) {
-        invokeOnUiThread("hrFeatureReady", identifier)
+    override fun deviceDisconnected(polarDeviceInfo: PolarDeviceInfo) {
+        invokeOnUiThread("deviceDisconnected", gson.toJson(polarDeviceInfo))
     }
 
     override fun disInformationReceived(identifier: String, uuid: UUID, value: String) {
@@ -315,12 +309,31 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
         invokeOnUiThread("batteryLevelReceived", listOf(identifier, level))
     }
 
-    override fun hrNotificationReceived(identifier: String, data: PolarHrData) {
-        invokeOnUiThread("hrNotificationReceived", listOf(identifier, gson.toJson(data)))
+    @Deprecated("", replaceWith = ReplaceWith(""))
+    override fun hrFeatureReady(identifier: String) {
+        throw UnsupportedOperationException()
     }
 
+    @Deprecated("", replaceWith = ReplaceWith(""))
+    override fun hrNotificationReceived(identifier: String, data: PolarHrData.PolarHrSample) {
+        throw UnsupportedOperationException()
+    }
+
+    @Deprecated("", replaceWith = ReplaceWith(""))
     override fun polarFtpFeatureReady(identifier: String) {
-        invokeOnUiThread("ftpFeatureReady", identifier)
+        throw UnsupportedOperationException()
+    }
+
+    @Deprecated("", replaceWith = ReplaceWith(""))
+    override fun sdkModeFeatureAvailable(identifier: String) {
+        throw UnsupportedOperationException()
+    }
+
+    @Deprecated("", replaceWith = ReplaceWith(""))
+    override fun streamingFeaturesReady(
+        identifier: String, features: Set<PolarBleApi.PolarDeviceDataType>
+    ) {
+        throw UnsupportedOperationException()
     }
 }
 
@@ -329,7 +342,7 @@ class StreamingChannel(
     name: String,
     private val api: PolarBleApi,
     private val identifier: String,
-    private val feature: DeviceStreamingFeature,
+    private val feature: PolarDeviceDataType,
     private val channel: EventChannel = EventChannel(messenger, name)
 ) : EventChannel.StreamHandler {
     private var subscription: Disposable? = null
@@ -339,19 +352,20 @@ class StreamingChannel(
     }
 
     override fun onListen(arguments: Any?, events: EventSink) {
-        // Will be null for ppi feature
+        // Will be null for some features
         val settings = gson.fromJson(arguments as String, PolarSensorSetting::class.java)
 
         val stream = when (feature) {
-            DeviceStreamingFeature.ECG -> api.startEcgStreaming(identifier, settings)
-            DeviceStreamingFeature.ACC -> api.startAccStreaming(identifier, settings)
-            DeviceStreamingFeature.GYRO -> api.startGyroStreaming(identifier, settings)
-            DeviceStreamingFeature.MAGNETOMETER -> api.startMagnetometerStreaming(
+            PolarDeviceDataType.HR -> api.startHrStreaming(identifier)
+            PolarDeviceDataType.ECG -> api.startEcgStreaming(identifier, settings)
+            PolarDeviceDataType.ACC -> api.startAccStreaming(identifier, settings)
+            PolarDeviceDataType.GYRO -> api.startGyroStreaming(identifier, settings)
+            PolarDeviceDataType.MAGNETOMETER -> api.startMagnetometerStreaming(
                 identifier, settings
             )
 
-            DeviceStreamingFeature.PPG -> api.startOhrStreaming(identifier, settings)
-            DeviceStreamingFeature.PPI -> api.startOhrPPIStreaming(identifier)
+            PolarDeviceDataType.PPG -> api.startPpgStreaming(identifier, settings)
+            PolarDeviceDataType.PPI -> api.startOhrPPIStreaming(identifier)
             else -> throw Exception("Unknown streaming feature $feature")
         }
 

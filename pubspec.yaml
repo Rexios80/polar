@@ -15,7 +15,7 @@ dependencies:
   permission_handler: ^10.0.0
   device_info_plus: ^8.0.0
   recase: ^4.0.0
-  json_annotation: ^4.7.0
+  json_annotation: ^4.8.0
 
 dev_dependencies:
   flutter_test:

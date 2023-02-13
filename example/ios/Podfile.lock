@@ -8,8 +8,8 @@ PODS:
     - Flutter
   - polar (0.0.1):
     - Flutter
-    - PolarBleSdk (~> 4.0.0)
-  - PolarBleSdk (4.0.0):
+    - PolarBleSdk (~> 5.0.0-beta2)
+  - PolarBleSdk (5.0.0-beta2):
     - RxSwift (~> 6.5.0)
     - SwiftProtobuf (~> 1.0)
   - RxSwift (6.5.0)
@@ -45,11 +45,11 @@ SPEC CHECKSUMS:
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
   integration_test: a1e7d09bd98eca2fc37aefd79d4f41ad37bdbbe5
   permission_handler_apple: 44366e37eaf29454a1e7b1b7d736c2cceaeb17ce
-  polar: 16586f75956b711a0bcea8a51049dad1089339e4
-  PolarBleSdk: 0611235ce501ae3a51dc0088453850e78b66c92c
+  polar: 7525ab7cd97d2549282a97ec401dd8c6afd1d23c
+  PolarBleSdk: 7862b39973a42512bba4d5e8a436aa4ed41ef1fe
   RxSwift: 5710a9e6b17f3c3d6e40d6e559b9fa1e813b2ef8
   SwiftProtobuf: b02b5075dcf60c9f5f403000b3b0c202a11b6ae1
 
-PODFILE CHECKSUM: d2243213672c3c48aae53c36642ba411a6be7309
+PODFILE CHECKSUM: c24c27344913105c54b95f33f73882923a0bd103
 
 COCOAPODS: 1.11.3

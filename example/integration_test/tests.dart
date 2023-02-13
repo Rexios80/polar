@@ -129,7 +129,7 @@ void testStreaming(
     test(
       'ppg',
       () async {
-        final ppgData = await polar.startOhrStreaming(identifier).first;
+        final ppgData = await polar.startPpgStreaming(identifier).first;
         expect(ppgData.samples.length, greaterThan(0));
       },
       skip: !features.contains(DeviceStreamingFeature.ppg),
@@ -157,7 +157,7 @@ void testStreaming(
     test(
       'ppi',
       () async {
-        final ppiData = await polar.startOhrPpiStreaming(identifier).first;
+        final ppiData = await polar.startPpiStreaming(identifier).first;
         expect(ppiData.samples.length, greaterThan(0));
       },
       skip: !features.contains(DeviceStreamingFeature.ppi),

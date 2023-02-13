@@ -1,8 +1,72 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:polar/src/model/converters.dart';
-import 'package:polar/src/model/ohr_data_type.dart';
+import 'package:polar/src/model/ppg_data_type.dart';
 
 part 'polar_streaming.g.dart';
+
+/// Base class for all streaming data
+@JsonSerializable(createToJson: false, genericArgumentFactories: true)
+abstract class PolarStreamingData<T> {
+  /// Samples
+  final List<T> samples;
+
+  /// Constructor
+  PolarStreamingData({
+    required this.samples,
+  });
+
+  /// Convert from json
+  factory PolarStreamingData.fromJson(Map<String, dynamic> json) =>
+      _$PolarStreamingDataFromJson(json);
+}
+
+/// Polar HR sample
+@JsonSerializable(createToJson: false)
+class PolarHrSample {
+  static dynamic _readContactStatus(Map json, String key) =>
+      json['contactStatus'] ?? json['contact'];
+
+  static dynamic _readContactStatusSupported(Map json, String key) =>
+      json['contactStatusSupported'] ?? json['contactSupported'];
+
+  /// Moment sample is taken in nanoseconds. The epoch of timestamp is 1.1.2000
+  final int timeStamp;
+
+  /// hr in BPM
+  final int hr;
+
+  /// rrs RR interval in 1/1024.
+  /// R is a the top highest peak in the QRS complex of the ECG wave and RR is the interval between successive Rs.
+  final List<int> rrs;
+
+  /// rrs RR interval in ms.
+  final List<int> rrsMs;
+
+  /// contact status between the device and the users skin
+  @JsonKey(readValue: _readContactStatus)
+  final bool contactStatus;
+
+  /// contactSupported if contact is supported
+  @JsonKey(readValue: _readContactStatusSupported)
+  final bool contactStatusSupported;
+
+  /// Constructor
+  PolarHrSample({
+    required this.timeStamp,
+    required this.hr,
+    required this.rrs,
+    required this.rrsMs,
+    required this.contactStatus,
+    required this.contactStatusSupported,
+  });
+
+  /// From json
+  factory PolarHrSample.fromJson(Map<String, dynamic> json) =>
+      _$PolarHrSampleFromJson(json);
+}
+
+/// Polar HR data
+typedef PolarHrData = PolarStreamingData<PolarHrSample>;
 
 /// Polar ecg sample
 @JsonSerializable(createToJson: false)
@@ -25,20 +89,7 @@ class PolarEcgSample {
 }
 
 /// Polar ecg data
-@JsonSerializable(createToJson: false)
-class PolarEcgData {
-  /// Ecg samples
-  final List<PolarEcgSample> samples;
-
-  /// Constructor
-  PolarEcgData({
-    required this.samples,
-  });
-
-  /// From json
-  factory PolarEcgData.fromJson(Map<String, dynamic> json) =>
-      _$PolarEcgDataFromJson(json);
-}
+typedef PolarEcgData = PolarStreamingData<PolarEcgSample>;
 
 /// Polar acc sample
 @JsonSerializable(createToJson: false)
@@ -69,20 +120,7 @@ class PolarAccSample {
 }
 
 /// Polar acc data
-@JsonSerializable(createToJson: false)
-class PolarAccData {
-  /// Acceleration samples list x,y,z in millig signed value
-  final List<PolarAccSample> samples;
-
-  /// Constructor
-  PolarAccData({
-    required this.samples,
-  });
-
-  /// From json
-  factory PolarAccData.fromJson(Map<String, dynamic> json) =>
-      _$PolarAccDataFromJson(json);
-}
+typedef PolarAccData = PolarStreamingData<PolarAccSample>;
 
 /// Polar gyro sample
 @JsonSerializable(createToJson: false)
@@ -113,20 +151,7 @@ class PolarGyroSample {
 }
 
 /// Polar gyro data
-@JsonSerializable(createToJson: false)
-class PolarGyroData {
-  /// Gyroscope samples
-  final List<PolarGyroSample> samples;
-
-  /// Constructor
-  PolarGyroData({
-    required this.samples,
-  });
-
-  /// From json
-  factory PolarGyroData.fromJson(Map<String, dynamic> json) =>
-      _$PolarGyroDataFromJson(json);
-}
+typedef PolarGyroData = PolarStreamingData<PolarGyroSample>;
 
 /// Polar magnetometer sample
 @JsonSerializable(createToJson: false)
@@ -157,68 +182,52 @@ class PolarMagnetometerSample {
 }
 
 /// Polar magnetometer data
-@JsonSerializable(createToJson: false)
-class PolarMagnetometerData {
-  /// Magnetometer samples
-  final List<PolarMagnetometerSample> samples;
-
-  /// Constructor
-  PolarMagnetometerData({
-    required this.samples,
-  });
-
-  /// From json
-  factory PolarMagnetometerData.fromJson(Map<String, dynamic> json) =>
-      _$PolarMagnetometerDataFromJson(json);
-}
+typedef PolarMagnetometerData = PolarStreamingData<PolarMagnetometerSample>;
 
 /// Polar ohr sample
 @JsonSerializable(createToJson: false)
-class PolarOhrSample {
+class PolarPpgSample {
   /// Moment sample is taken in nanoseconds. The epoch of timestamp is 1.1.2000
   final int timeStamp;
 
   /// The PPG (Photoplethysmography) raw value received from the optical sensor.
-  /// Based on [OhrDataType] the amount of channels varies. Typically ppg(n)
+  /// Based on [PpgDataType] the amount of channels varies. Typically ppg(n)
   /// channel + n ambient(s).
   final List<int> channelSamples;
 
   /// Constructor
-  PolarOhrSample({
+  PolarPpgSample({
     required this.timeStamp,
     required this.channelSamples,
   });
 
   /// From json
-  factory PolarOhrSample.fromJson(Map<String, dynamic> json) =>
-      _$PolarOhrSampleFromJson(json);
+  factory PolarPpgSample.fromJson(Map<String, dynamic> json) =>
+      _$PolarPpgSampleFromJson(json);
 }
 
-/// Polar ohr data
+/// Polar ppg data
 @JsonSerializable(createToJson: false)
-class PolarOhrData {
+class PolarPpgData extends PolarStreamingData<PolarPpgSample> {
   /// Type of data, which varies based on what is type of optical sensor used
   /// in the device
-  @OhrDataTypeConverter()
-  final OhrDataType type;
-
-  /// Photoplethysmography samples
-  final List<PolarOhrSample> samples;
+  @PpgDataTypeConverter()
+  final PpgDataType type;
 
   /// Constructor
-  PolarOhrData({
+  PolarPpgData({
     required this.type,
-    required this.samples,
+    required super.samples,
   });
 
   /// From json
-  factory PolarOhrData.fromJson(Map<String, dynamic> json) =>
-      _$PolarOhrDataFromJson(json);
+  factory PolarPpgData.fromJson(Map<String, dynamic> json) =>
+      _$PolarPpgDataFromJson(json);
 }
 
 /// Polar ppi sample
 @JsonSerializable(createToJson: false)
-class PolarOhrPpiSample {
+class PolarPpiSample {
   static dynamic _readPpi(Map json, String key) =>
       json['ppi'] ?? json['ppInMs'];
 
@@ -252,7 +261,7 @@ class PolarOhrPpiSample {
   final bool skinContactSupported;
 
   /// Constructor
-  PolarOhrPpiSample({
+  PolarPpiSample({
     required this.ppi,
     required this.errorEstimate,
     required this.hr,
@@ -262,22 +271,9 @@ class PolarOhrPpiSample {
   });
 
   /// From json
-  factory PolarOhrPpiSample.fromJson(Map<String, dynamic> json) =>
-      _$PolarOhrPpiSampleFromJson(json);
+  factory PolarPpiSample.fromJson(Map<String, dynamic> json) =>
+      _$PolarPpiSampleFromJson(json);
 }
 
 /// Polar ppi data
-@JsonSerializable(createToJson: false)
-class PolarOhrPpiData {
-  /// PPI samples
-  final List<PolarOhrPpiSample> samples;
-
-  /// Constructor
-  PolarOhrPpiData({
-    required this.samples,
-  });
-
-  /// From json
-  factory PolarOhrPpiData.fromJson(Map<String, dynamic> json) =>
-      _$PolarOhrPpiDataFromJson(json);
-}
+typedef PolarPpiData = PolarStreamingData<PolarPpiSample>;

@@ -15,8 +15,8 @@ Plugin wrapper for the Polar SDK
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
-  s.dependency 'PolarBleSdk', '~> 4.0.0'
-  s.platform = :ios, '13.0'
+  s.dependency 'PolarBleSdk', '~> 5.0.0-beta2'
+  s.platform = :ios, '14.0'
 
   # Flutter.framework does not contain a i386 slice.
   s.pod_target_xcconfig = {
