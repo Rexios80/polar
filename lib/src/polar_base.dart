@@ -14,16 +14,14 @@ class Polar {
 
   // Other data
   final _blePowerStateStreamController = StreamController<bool>.broadcast();
+  final _bleSdkFeatureReadyStreamController =
+      StreamController<PolarBleSdkFeatureReadyEvent>.broadcast();
   final _deviceConnectedStreamController =
       StreamController<PolarDeviceInfo>.broadcast();
   final _deviceConnectingStreamController =
       StreamController<PolarDeviceInfo>.broadcast();
   final _deviceDisconnectedStreamController =
       StreamController<PolarDeviceInfo>.broadcast();
-  final _streamingFeaturesReadyStreamController =
-      StreamController<PolarBlsSdkFeatureReadyEvent>.broadcast();
-  final _sdkModeFeatureAvailableStreamController =
-      StreamController<String>.broadcast();
   final _disInformationStreamController =
       StreamController<PolarDisInformationEvent>.broadcast();
   final _batteryLevelStreamController =
@@ -31,6 +29,10 @@ class Polar {
 
   /// helper to ask ble power state
   Stream<bool> get blePowerStateStream => _blePowerStateStreamController.stream;
+
+  /// feature ready callback
+  Stream<PolarBleSdkFeatureReadyEvent> get streamingFeaturesReadyStream =>
+      _bleSdkFeatureReadyStreamController.stream;
 
   /// Device connection has been established.
   ///
@@ -50,14 +52,6 @@ class Polar {
   /// - Parameter identifier: Polar device info
   Stream<PolarDeviceInfo> get deviceDisconnectedStream =>
       _deviceDisconnectedStreamController.stream;
-
-  /// feature ready callback
-  Stream<PolarBlsSdkFeatureReadyEvent> get streamingFeaturesReadyStream =>
-      _streamingFeaturesReadyStreamController.stream;
-
-  /// sdk mode feature available in this device and ready for usage callback
-  Stream<String> get sdkModeFeatureAvailableStream =>
-      _sdkModeFeatureAvailableStreamController.stream;
 
   ///  Received DIS info.
   ///
@@ -92,6 +86,14 @@ class Polar {
       case 'blePowerStateChanged':
         _blePowerStateStreamController.add(call.arguments);
         return;
+      case 'bleSdkFeatureReady':
+        _bleSdkFeatureReadyStreamController.add(
+          PolarBleSdkFeatureReadyEvent(
+            call.arguments[0],
+            PolarBleSdkFeature.fromJson(jsonDecode(call.arguments[1])),
+          ),
+        );
+        return;
       case 'deviceConnected':
         _deviceConnectedStreamController
             .add(PolarDeviceInfo.fromJson(jsonDecode(call.arguments)));
@@ -103,19 +105,6 @@ class Polar {
       case 'deviceDisconnected':
         _deviceDisconnectedStreamController
             .add(PolarDeviceInfo.fromJson(jsonDecode(call.arguments)));
-        return;
-      case 'bleSdkFeatureReady':
-        _streamingFeaturesReadyStreamController.add(
-          PolarBlsSdkFeatureReadyEvent(
-            call.arguments[0],
-            (jsonDecode(call.arguments[1]) as List)
-                .map(PolarBleSdkFeature.fromJson)
-                .toList(),
-          ),
-        );
-        return;
-      case 'sdkModeFeatureAvailable':
-        _sdkModeFeatureAvailableStreamController.add(call.arguments);
         return;
       case 'disInformationReceived':
         _disInformationStreamController.add(

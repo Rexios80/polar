@@ -1,17 +1,16 @@
 import 'package:polar/src/model/polar_ble_sdk_feature.dart';
 
-/// The feature is available in this device and it is ready.
-/// Called only for the features which are specified in [PolarBleApi]
-/// construction.
-class PolarBlsSdkFeatureReadyEvent {
+/// The feature is available in this device and it is ready.  Called only for
+/// the features which are specified in [PolarBleApi] construction.
+class PolarBleSdkFeatureReadyEvent {
   /// Polar device id
   final String identifier;
 
   /// List of [PolarBleSdkFeature]s that are ready
-  final List<PolarBleSdkFeature> features;
+  final PolarBleSdkFeature feature;
 
-  /// Construct a [PolarBlsSdkFeatureReadyEvent] from an [identifier] and [features]
-  PolarBlsSdkFeatureReadyEvent(this.identifier, this.features);
+  /// Constructor
+  PolarBleSdkFeatureReadyEvent(this.identifier, this.feature);
 }
 
 /// Received DIS info.
@@ -25,7 +24,7 @@ class PolarDisInformationEvent {
   /// firmware version in format major.minor.patch
   final String info;
 
-  /// Construct a [PolarDisInformationEvent] from an [identifier], [uuid], and [info]
+  /// Constructor
   PolarDisInformationEvent(this.identifier, this.uuid, this.info);
 }
 
@@ -37,6 +36,6 @@ class PolarBatteryLevelEvent {
   /// battery level in precentage 0-100%
   final int level;
 
-  /// Construct a [PolarBatteryLevelEvent] from an [identifier] and [level]
+  /// Constructor
   PolarBatteryLevelEvent(this.identifier, this.level);
 }

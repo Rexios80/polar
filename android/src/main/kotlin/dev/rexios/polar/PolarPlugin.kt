@@ -359,13 +359,13 @@ class StreamingChannel(
             PolarDeviceDataType.HR -> api.startHrStreaming(identifier)
             PolarDeviceDataType.ECG -> api.startEcgStreaming(identifier, settings)
             PolarDeviceDataType.ACC -> api.startAccStreaming(identifier, settings)
+            PolarDeviceDataType.PPG -> api.startPpgStreaming(identifier, settings)
+            PolarDeviceDataType.PPI -> api.startOhrPPIStreaming(identifier)
             PolarDeviceDataType.GYRO -> api.startGyroStreaming(identifier, settings)
             PolarDeviceDataType.MAGNETOMETER -> api.startMagnetometerStreaming(
                 identifier, settings
             )
 
-            PolarDeviceDataType.PPG -> api.startPpgStreaming(identifier, settings)
-            PolarDeviceDataType.PPI -> api.startOhrPPIStreaming(identifier)
             else -> throw Exception("Unknown streaming feature $feature")
         }
 

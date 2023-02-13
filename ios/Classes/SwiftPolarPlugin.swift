@@ -13,9 +13,7 @@ public class SwiftPolarPlugin:
     PolarBleApiObserver,
     PolarBleApiPowerStateObserver,
     PolarBleApiDeviceFeaturesObserver,
-    PolarBleApiDeviceHrObserver,
-    PolarBleApiDeviceInfoObserver,
-    PolarBleApiSdkModeFeatureObserver
+    PolarBleApiDeviceInfoObserver
 {
     /// Binary messenger for dynamic EventChannel registration
     let messenger: FlutterBinaryMessenger
@@ -43,14 +41,12 @@ public class SwiftPolarPlugin:
 
     private func initApi() {
         guard api == nil else { return }
-        api = PolarBleApiDefaultImpl.polarImplementation(DispatchQueue.main, features: Features.allFeatures.rawValue)
+        api = PolarBleApiDefaultImpl.polarImplementation(DispatchQueue.main, features: Set(PolarBleSdkFeature.allCases))
 
         api.observer = self
-        api.deviceHrObserver = self
         api.powerStateObserver = self
         api.deviceFeaturesObserver = self
         api.deviceInfoObserver = self
-        api.sdkModeFeatureObserver = self
     }
 
     public static func register(with registrar: FlutterPluginRegistrar) {
@@ -125,7 +121,7 @@ public class SwiftPolarPlugin:
         let arguments = call.arguments as! [Any]
         let name = arguments[0] as! String
         let identifier = arguments[1] as! String
-        let feature = PolarBleSdkFeature(rawValue: arguments[2] as! Int)!
+        let feature = PolarDeviceDataType.allCases[arguments[2] as! Int]
 
         if streamingChannels[name] == nil {
             streamingChannels[name] = StreamingChannel(messenger, name, api, identifier, feature)
@@ -137,7 +133,7 @@ public class SwiftPolarPlugin:
     func requestStreamSettings(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) throws {
         let arguments = call.arguments as! [Any]
         let identifier = arguments[0] as! String
-        let feature = DeviceStreamingFeature(rawValue: arguments[1] as! Int)!
+        let feature = PolarDeviceDataType.allCases[arguments[1] as! Int]
 
         _ = api.requestStreamSettings(identifier, feature: feature).subscribe(onSuccess: { data in
             guard let data = try? encoder.encode(PolarSensorSettingCodable(data)),
@@ -268,35 +264,6 @@ public class SwiftPolarPlugin:
         channel.invokeMethod("batteryLevelReceived", arguments: [identifier, batteryLevel])
     }
 
-    public func hrValueReceived(_ identifier: String, data: PolarHrData) {
-        guard let data = try? encoder.encode(PolarHrDataCodable(data)),
-              let data = String(data: data, encoding: .utf8)
-        else {
-            return
-        }
-        channel.invokeMethod("hrNotificationReceived", arguments: [identifier, data])
-    }
-
-    public func hrFeatureReady(_ identifier: String) {
-        channel.invokeMethod("hrFeatureReady", arguments: identifier)
-    }
-
-    public func streamingFeaturesReady(_ identifier: String, streamingFeatures: Set<DeviceStreamingFeature>) {
-        guard let data = try? encoder.encode(streamingFeatures.map(\.rawValue)),
-              let data = String(data: data, encoding: .utf8)
-        else {
-            return
-        }
-        channel.invokeMethod("streamingFeaturesReady", arguments: [
-            identifier,
-            data,
-        ])
-    }
-
-    public func sdkModeFeatureAvailable(_ identifier: String) {
-        channel.invokeMethod("sdkModeFeatureAvailable", arguments: identifier)
-    }
-
     public func blePowerOn() {
         channel.invokeMethod("blePowerStateChanged", arguments: true)
     }
@@ -305,12 +272,29 @@ public class SwiftPolarPlugin:
         channel.invokeMethod("blePowerStateChanged", arguments: false)
     }
 
+    public func bleSdkFeatureReady(_ identifier: String, feature: PolarBleSdkFeature) {
+        channel.invokeMethod("streamingFeaturesReady", arguments: [
+            identifier,
+            PolarBleSdkFeature.allCases.firstIndex(of: feature)!,
+        ])
+    }
+
     public func ftpFeatureReady(_ identifier: String) {
         channel.invokeMethod("ftpFeatureReady", arguments: identifier)
     }
 
     public func disInformationReceived(_ identifier: String, uuid: CBUUID, value: String) {
         channel.invokeMethod("disInformationReceived", arguments: [identifier, uuid.uuidString, value])
+    }
+
+    // MARK: Deprecated functions
+
+    public func streamingFeaturesReady(_ identifier: String, streamingFeatures: Set<PolarBleSdk.PolarDeviceDataType>) {
+        fatalError("streamingFeaturesReady is not implemented")
+    }
+
+    public func hrFeatureReady(_ identifier: String) {
+        fatalError("hrFeatureReady is not implemented")
     }
 }
 
@@ -353,12 +337,12 @@ extension Observable: AnyObservable {
 class StreamingChannel: NSObject, FlutterStreamHandler {
     let api: PolarBleApi
     let identifier: String
-    let feature: DeviceStreamingFeature
+    let feature: PolarDeviceDataType
     let channel: FlutterEventChannel
 
     var subscription: Disposable?
 
-    init(_ messenger: FlutterBinaryMessenger, _ name: String, _ api: PolarBleApi, _ identifier: String, _ feature: DeviceStreamingFeature) {
+    init(_ messenger: FlutterBinaryMessenger, _ name: String, _ api: PolarBleApi, _ identifier: String, _ feature: PolarDeviceDataType) {
         self.api = api
         self.identifier = identifier
         self.feature = feature
@@ -370,7 +354,7 @@ class StreamingChannel: NSObject, FlutterStreamHandler {
     }
 
     func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
-        // Will be null for ppi feature
+        // Will be null for some features
         let settings = try? decoder.decode(PolarSensorSettingCodable.self, from: (arguments as! String)
             .data(using: .utf8)!).data
 
@@ -380,14 +364,16 @@ class StreamingChannel: NSObject, FlutterStreamHandler {
             stream = api.startEcgStreaming(identifier, settings: settings!)
         case .acc:
             stream = api.startAccStreaming(identifier, settings: settings!)
+        case .ppg:
+            stream = api.startPpgStreaming(identifier, settings: settings!)
+        case .ppi:
+            stream = api.startOhrPPIStreaming(identifier)
         case .gyro:
             stream = api.startGyroStreaming(identifier, settings: settings!)
         case .magnetometer:
             stream = api.startMagnetometerStreaming(identifier, settings: settings!)
-        case .ppg:
-            stream = api.startOhrStreaming(identifier, settings: settings!)
-        case .ppi:
-            stream = api.startOhrPPIStreaming(identifier)
+        case .hr:
+            stream = api.startHrStreaming(identifier)
         }
 
         subscription = stream.anySubscribe(onNext: { data in
@@ -397,14 +383,16 @@ class StreamingChannel: NSObject, FlutterStreamHandler {
                 encodedData = try? encoder.encode(PolarEcgDataCodable(data as! PolarEcgData))
             case .acc:
                 encodedData = try? encoder.encode(PolarAccDataCodable(data as! PolarAccData))
+            case .ppg:
+                encodedData = try? encoder.encode(PolarPpgDataCodable(data as! PolarPpgData))
+            case .ppi:
+                encodedData = try? encoder.encode(PolarPpiDataCodable(data as! PolarPpiData))
             case .gyro:
                 encodedData = try? encoder.encode(PolarGyroDataCodable(data as! PolarGyroData))
             case .magnetometer:
                 encodedData = try? encoder.encode(PolarMagnetometerDataCodable(data as! PolarMagnetometerData))
-            case .ppg:
-                encodedData = try? encoder.encode(PolarOhrDataCodable(data as! PolarOhrData))
-            case .ppi:
-                encodedData = try? encoder.encode(PolarPpiDataCodable(data as! PolarPpiData))
+            case .hr:
+                encodedData = try? encoder.encode(PolarHrDataCodable(data as! PolarHrData))
             }
 
             guard let data = encodedData as? Data, let data = String(data: data, encoding: .utf8) else {

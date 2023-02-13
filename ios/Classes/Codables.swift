@@ -34,9 +34,9 @@ class PolarDeviceInfoCodable: Encodable {
 }
 
 class PolarHrDataCodable: Encodable {
-    let data: PolarBleApiDeviceHrObserver.PolarHrData
+    let data: PolarHrData
 
-    required init(_ data: PolarBleApiDeviceHrObserver.PolarHrData) {
+    required init(_ data: PolarHrData) {
         self.data = data
     }
 
@@ -252,10 +252,10 @@ class PolarOhrSample: Encodable {
     }
 }
 
-class PolarOhrDataCodable: Encodable {
-    let data: PolarOhrData
+class PolarPpgDataCodable: Encodable {
+    let data: PolarPpgData
 
-    init(_ data: PolarOhrData) {
+    init(_ data: PolarPpgData) {
         self.data = data
     }
 
