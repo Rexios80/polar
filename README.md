@@ -66,17 +66,22 @@ void streamWhenReady() async {
         e.identifier == identifier &&
         e.feature == PolarSdkFeature.onlineStreaming,
   );
-  final availableFeatures =
+  final availabletypes =
       await polar.getAvailableOnlineStreamDataTypes(identifier);
 
-  debugPrint('available features: $availableFeatures');
+  debugPrint('available types: $availabletypes');
 
-  if (availableFeatures.contains(PolarDataType.ecg)) {
+  if (availabletypes.contains(PolarDataType.hr)) {
+    polar
+        .startHrStreaming(identifier)
+        .listen((e) => debugPrint('HR data received'));
+  }
+  if (availabletypes.contains(PolarDataType.ecg)) {
     polar
         .startEcgStreaming(identifier)
         .listen((e) => debugPrint('ECG data received'));
   }
-  if (availableFeatures.contains(PolarDataType.acc)) {
+  if (availabletypes.contains(PolarDataType.acc)) {
     polar
         .startAccStreaming(identifier)
         .listen((e) => debugPrint('ACC data received'));
