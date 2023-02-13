@@ -93,7 +93,7 @@ class PolarSettingTypeConverter
   }
 }
 
-final _polarEpoch = DateTime(2000).millisecondsSinceEpoch;
+final _polarEpoch = DateTime(2000).microsecondsSinceEpoch;
 
 /// Convert polar sample timestamps to [DateTime]
 ///
@@ -104,8 +104,8 @@ class PolarSampleTimestampConverter extends JsonConverter<DateTime, int> {
 
   @override
   DateTime fromJson(int json) {
-    final millis = json ~/ 1000000;
-    return DateTime.fromMillisecondsSinceEpoch(_polarEpoch + millis);
+    final millis = json ~/ 1000;
+    return DateTime.fromMicrosecondsSinceEpoch(_polarEpoch + millis);
   }
 
   @override
