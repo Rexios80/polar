@@ -1,6 +1,6 @@
 import 'package:polar/src/model/polar_ble_sdk_feature.dart';
 
-/// The feature is available in this device and it is ready.  Called only for
+/// The feature is available in this device and it is ready. Called only for
 /// the features which are specified in [PolarBleApi] construction.
 class PolarBleSdkFeatureReadyEvent {
   /// Polar device id
