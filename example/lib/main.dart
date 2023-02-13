@@ -31,7 +31,7 @@ class _MyAppState extends State<MyApp> {
     //     .listen((e) => log('Found device in scan: ${e.deviceId}'));
     polar.heartRateStream.listen((e) => log('Heart rate: ${e.data.hr}'));
     polar.batteryLevelStream.listen((e) => log('Battery: ${e.level}'));
-    polar.streamingFeaturesReadyStream.listen((e) {
+    polar.bleSdkFeatureReadyStream.listen((e) {
       debugPrint('streamingFeaturesReady: ${e.features}');
       if (e.features.contains(DeviceStreamingFeature.ecg)) {
         polar

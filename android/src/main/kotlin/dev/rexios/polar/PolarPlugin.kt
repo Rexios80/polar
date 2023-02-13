@@ -110,6 +110,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
                 result.success(null)
             }
 
+            "getAvailableOnlineStreamDataTypes" -> getAvailableOnlineStreamDataTypes(call, result)
             "requestStreamSettings" -> requestStreamSettings(call, result)
             "createStreamingChannel" -> createStreamingChannel(call, result)
             "startRecording" -> startRecording(call, result)
@@ -182,6 +183,18 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
         } catch (e: Exception) {
             // This will throw if the api is already shut down
         }
+    }
+
+    private fun getAvailableOnlineStreamDataTypes(call: MethodCall, result: Result) {
+        val identifier = call.arguments as String
+
+        api.getAvailableOnlineStreamDataTypes(identifier).subscribe({
+            runOnUiThread { result.success(gson.toJson(it)) }
+        }, {
+            runOnUiThread {
+                result.error(it.toString(), it.message, null)
+            }
+        }).discard()
     }
 
     private fun requestStreamSettings(call: MethodCall, result: Result) {

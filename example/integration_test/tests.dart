@@ -43,7 +43,7 @@ Future<void> disconnect(String identifier) async {
   await polar.deviceDisconnectedStream.first;
 }
 
-void testBasicData(String identifier, {bool sdkModeFeature = true}) {
+void testBasicData(String identifier) {
   group('basic data', () {
     setUp(() async {
       await connect(identifier);
@@ -51,21 +51,6 @@ void testBasicData(String identifier, {bool sdkModeFeature = true}) {
 
     tearDown(() async {
       await disconnect(identifier);
-    });
-
-    test(
-      'sdkModeFeatureAvailable',
-      () async {
-        final sdkModeFeatureIdentifier =
-            await polar.sdkModeFeatureAvailableStream.first;
-        expect(sdkModeFeatureIdentifier, identifier);
-      },
-      skip: !sdkModeFeature,
-    );
-
-    test('hrFeatureReady', () async {
-      final hrFeatureIdentifier = await polar.hrFeatureReadyStream.first;
-      expect(hrFeatureIdentifier, identifier);
     });
 
     test('disInformation', () async {
@@ -77,29 +62,38 @@ void testBasicData(String identifier, {bool sdkModeFeature = true}) {
       final batteryEvent = await polar.batteryLevelStream.first;
       expect(batteryEvent.level, greaterThan(0));
     });
+  });
+}
 
-    test('heartRate', () async {
-      final hrEvent = await polar.heartRateStream.first;
-      expect(hrEvent.data.hr, greaterThan(0));
-    });
+void testBleSdkFeatures(
+  String identifier, {
+  required Set<PolarBleSdkFeature> features,
+}) {
+  test('Ble sdk features', () async {
+    final futures = features.map(
+      (feature) => polar.bleSdkFeatureReadyStream
+          .firstWhere((event) => event.feature == feature),
+    );
 
-    test('ftpFeatureReady', () async {
-      final ftpFeatureIdentifier = await polar.ftpFeatureReadyStream.first;
-      expect(ftpFeatureIdentifier, identifier);
-    });
+    await connect(identifier);
+    await Future.wait(futures);
+    await disconnect(identifier);
   });
 }
 
 void testStreaming(
   String identifier, {
-  required List<DeviceStreamingFeature> features,
+  required Set<PolarDeviceDataType> features,
 }) {
   group('streaming', () {
     setUpAll(() async {
       await connect(identifier);
-      final streamingFeatures = await polar.streamingFeaturesReadyStream.first;
+      await polar.bleSdkFeatureReadyStream
+          .firstWhere((e) => e.feature == PolarBleSdkFeature.onlineStreaming);
+      final streamingFeatures =
+          await polar.getAvailableOnlineStreamDataTypes(identifier);
       expect(
-        setEquals(streamingFeatures.features.toSet(), features.toSet()),
+        setEquals(streamingFeatures, features),
         true,
       );
     });
@@ -109,12 +103,21 @@ void testStreaming(
     });
 
     test(
+      'hr',
+      () async {
+        final ecgData = await polar.startHrStreaming(identifier).first;
+        expect(ecgData.samples.length, greaterThan(0));
+      },
+      skip: !features.contains(PolarDeviceDataType.ecg),
+    );
+
+    test(
       'ecg',
       () async {
         final ecgData = await polar.startEcgStreaming(identifier).first;
         expect(ecgData.samples.length, greaterThan(0));
       },
-      skip: !features.contains(DeviceStreamingFeature.ecg),
+      skip: !features.contains(PolarDeviceDataType.ecg),
     );
 
     test(
@@ -123,7 +126,7 @@ void testStreaming(
         final accData = await polar.startAccStreaming(identifier).first;
         expect(accData.samples.length, greaterThan(0));
       },
-      skip: !features.contains(DeviceStreamingFeature.acc),
+      skip: !features.contains(PolarDeviceDataType.acc),
     );
 
     test(
@@ -132,7 +135,7 @@ void testStreaming(
         final ppgData = await polar.startPpgStreaming(identifier).first;
         expect(ppgData.samples.length, greaterThan(0));
       },
-      skip: !features.contains(DeviceStreamingFeature.ppg),
+      skip: !features.contains(PolarDeviceDataType.ppg),
     );
 
     test(
@@ -141,7 +144,7 @@ void testStreaming(
         final gyroData = await polar.startGyroStreaming(identifier).first;
         expect(gyroData.samples.length, greaterThan(0));
       },
-      skip: !features.contains(DeviceStreamingFeature.gyro),
+      skip: !features.contains(PolarDeviceDataType.gyro),
     );
 
     test(
@@ -151,7 +154,7 @@ void testStreaming(
             await polar.startMagnetometerStreaming(identifier).first;
         expect(magnetometerData.samples.length, greaterThan(0));
       },
-      skip: !features.contains(DeviceStreamingFeature.magnetometer),
+      skip: !features.contains(PolarDeviceDataType.magnetometer),
     );
 
     test(
@@ -160,7 +163,7 @@ void testStreaming(
         final ppiData = await polar.startPpiStreaming(identifier).first;
         expect(ppiData.samples.length, greaterThan(0));
       },
-      skip: !features.contains(DeviceStreamingFeature.ppi),
+      skip: !features.contains(PolarDeviceDataType.ppi),
     );
   });
 }
@@ -170,7 +173,9 @@ final exerciseId = const Uuid().v4();
 void testRecording(String identifier) {
   test('recording', () async {
     await connect(identifier);
-    await polar.ftpFeatureReadyStream.first;
+    await polar.bleSdkFeatureReadyStream.firstWhere(
+      (e) => e.feature == PolarBleSdkFeature.h10ExerciseRecording,
+    );
 
     //! Remove existing recordings (THIS IS DESTRUCTIVE)
     // Polar H10 can only store one recording at a time

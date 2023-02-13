@@ -11,16 +11,18 @@ void main() async {
   await requestPermissions();
   testSearch(identifier);
   testConnection(identifier);
-  testBasicData(
+  testBasicData(identifier);
+  testBleSdkFeatures(
     identifier,
-    sdkModeFeature: false,
+    features: PolarBleSdkFeature.values.toSet(),
   );
   testStreaming(
     identifier,
-    features: [
-      DeviceStreamingFeature.acc,
-      DeviceStreamingFeature.ecg,
-    ],
+    features: {
+      PolarDeviceDataType.hr,
+      PolarDeviceDataType.acc,
+      PolarDeviceDataType.ecg,
+    },
   );
   testRecording(identifier);
 }

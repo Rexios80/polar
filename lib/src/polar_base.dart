@@ -31,7 +31,7 @@ class Polar {
   Stream<bool> get blePowerStateStream => _blePowerStateStreamController.stream;
 
   /// feature ready callback
-  Stream<PolarBleSdkFeatureReadyEvent> get streamingFeaturesReadyStream =>
+  Stream<PolarBleSdkFeatureReadyEvent> get bleSdkFeatureReadyStream =>
       _bleSdkFeatureReadyStreamController.stream;
 
   /// Device connection has been established.
@@ -182,6 +182,24 @@ class Polar {
   /// - Throws: InvalidArgument if identifier is invalid polar device id or invalid uuid
   Future<void> disconnectFromDevice(String identifier) {
     return _channel.invokeMethod('disconnectFromDevice', identifier);
+  }
+
+  ///  Get the data types available in this device for online streaming
+  ///
+  /// - Parameters:
+  ///   - identifier: polar device id
+  /// - Returns: Single stream
+  ///   - success: set of available online streaming data types in this device
+  ///   - onError: see `PolarErrors` for possible errors invoked
+  Future<Set<PolarDeviceDataType>> getAvailableOnlineStreamDataTypes(
+    String identifier,
+  ) async {
+    final response = await _channel.invokeListMethod(
+      'getAvailableOnlineStreamDataTypes',
+      identifier,
+    );
+    if (response == null) return {};
+    return response.map(PolarDeviceDataType.fromJson).toSet();
   }
 
   ///  Request the stream settings available in current operation mode. This request shall be used before the stream is started

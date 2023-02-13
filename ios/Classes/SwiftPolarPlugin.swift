@@ -74,6 +74,8 @@ public class SwiftPolarPlugin:
             case "disconnectFromDevice":
                 try api.disconnectFromDevice(call.arguments as! String)
                 result(nil)
+            case "getAvailableOnlineStreamDataTypes":
+                getAvailableOnlineStreamDataTypes(call, result)
             case "requestStreamSettings":
                 try requestStreamSettings(call, result)
             case "createStreamingChannel":
@@ -128,6 +130,20 @@ public class SwiftPolarPlugin:
         }
 
         result(nil)
+    }
+
+    func getAvailableOnlineStreamDataTypes(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        let identifier = call.arguments as! String
+
+        _ = api.getAvailableOnlineStreamDataTypes(identifier).subscribe(onSuccess: { data in
+            guard let data = try? encoder.encode(data.map { PolarDeviceDataType.allCases.firstIndex(of: $0)! }),
+                  let data = String(data: data, encoding: .utf8)
+            else {
+                result(result(FlutterError(code: "Unable to get available online stream data types", message: nil, details: nil)))
+                return
+            }
+            result(data)
+        }, onFailure: { result(FlutterError(code: "Unable to get available online stream data types", message: $0.localizedDescription, details: nil)) })
     }
 
     func requestStreamSettings(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) throws {
@@ -279,10 +295,6 @@ public class SwiftPolarPlugin:
         ])
     }
 
-    public func ftpFeatureReady(_ identifier: String) {
-        channel.invokeMethod("ftpFeatureReady", arguments: identifier)
-    }
-
     public func disInformationReceived(_ identifier: String, uuid: CBUUID, value: String) {
         channel.invokeMethod("disInformationReceived", arguments: [identifier, uuid.uuidString, value])
     }
@@ -295,6 +307,10 @@ public class SwiftPolarPlugin:
 
     public func hrFeatureReady(_ identifier: String) {
         fatalError("hrFeatureReady is not implemented")
+    }
+
+    public func ftpFeatureReady(_ identifier: String) {
+        fatalError("ftpFeatureReady is not implemented")
     }
 }
 

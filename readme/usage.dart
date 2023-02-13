@@ -6,7 +6,7 @@ final polar = Polar();
 
 void example() {
   polar.heartRateStream.listen((e) => debugPrint('Heart rate: ${e.data.hr}'));
-  polar.streamingFeaturesReadyStream.listen((e) {
+  polar.bleSdkFeatureReadyStream.listen((e) {
     if (e.features.contains(DeviceStreamingFeature.ecg)) {
       polar
           .startEcgStreaming(e.identifier)
