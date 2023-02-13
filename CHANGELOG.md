@@ -8,10 +8,11 @@
   - `PolarOhrPpiData` -> `PolarPpiData`
   - `startOhrStreaming` -> `startPpgStreaming`
   - `startOhrPpiStreaming` -> `startPpiStreaming`
-  - `DeviceStreamingFeature` -> `PolarDeviceDataType`
-  - `streamingFeaturesReady` -> `bleSdkFeatureReady`
+  - `DeviceStreamingFeature` -> `PolarDataType`
+  - `streamingFeaturesReady` -> `sdkFeatureReady`
+  - Removes `Stream` suffix from all stream fields
 - Removals
-  - The following are now handled with `bleSdkFeatureReady`
+  - The following are now handled with `sdkFeatureReady`
     - `ftpFeatureReady`
     - `hrFeatureReady`
     - `sdkModeFeatureAvailable`

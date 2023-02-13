@@ -56,15 +56,31 @@ const identifier = '1C709B20';
 final polar = Polar();
 
 void example() {
-  polar.heartRateStream.listen((e) => debugPrint('Heart rate: ${e.data.hr}'));
-  polar.streamingFeaturesReadyStream.listen((e) {
-    if (e.features.contains(DeviceStreamingFeature.ecg)) {
-      polar
-          .startEcgStreaming(e.identifier)
-          .listen((e) => debugPrint('ECG data: ${e.samples}'));
-    }
-  });
   polar.connectToDevice(identifier);
+  streamWhenReady();
+}
+
+void streamWhenReady() async {
+  await polar.sdkFeatureReady.firstWhere(
+    (e) =>
+        e.identifier == identifier &&
+        e.feature == PolarSdkFeature.onlineStreaming,
+  );
+  final availableFeatures =
+      await polar.getAvailableOnlineStreamDataTypes(identifier);
+
+  debugPrint('available features: $availableFeatures');
+
+  if (availableFeatures.contains(PolarDataType.ecg)) {
+    polar
+        .startEcgStreaming(identifier)
+        .listen((e) => debugPrint('ECG data received'));
+  }
+  if (availableFeatures.contains(PolarDataType.acc)) {
+    polar
+        .startAccStreaming(identifier)
+        .listen((e) => debugPrint('ACC data received'));
+  }
 }
 
 ```

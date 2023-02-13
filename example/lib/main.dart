@@ -29,24 +29,10 @@ class _MyAppState extends State<MyApp> {
     // polar
     //     .searchForDevice()
     //     .listen((e) => log('Found device in scan: ${e.deviceId}'));
-    polar.heartRateStream.listen((e) => log('Heart rate: ${e.data.hr}'));
-    polar.batteryLevelStream.listen((e) => log('Battery: ${e.level}'));
-    polar.bleSdkFeatureReadyStream.listen((e) {
-      debugPrint('streamingFeaturesReady: ${e.features}');
-      if (e.features.contains(DeviceStreamingFeature.ecg)) {
-        polar
-            .startEcgStreaming(e.identifier)
-            .listen((e) => log('ECG data received'));
-      }
-      if (e.features.contains(DeviceStreamingFeature.acc)) {
-        polar
-            .startAccStreaming(e.identifier)
-            .listen((e) => log('ACC data received'));
-      }
-    });
-    polar.deviceConnectingStream.listen((_) => log('Device connecting'));
-    polar.deviceConnectedStream.listen((_) => log('Device connected'));
-    polar.deviceDisconnectedStream.listen((_) => log('Device disconnected'));
+    polar.batteryLevel.listen((e) => log('Battery: ${e.level}'));
+    polar.deviceConnecting.listen((_) => log('Device connecting'));
+    polar.deviceConnected.listen((_) => log('Device connected'));
+    polar.deviceDisconnected.listen((_) => log('Device disconnected'));
   }
 
   @override
@@ -79,6 +65,7 @@ class _MyAppState extends State<MyApp> {
               onPressed: () {
                 log('Connecting to device: $identifier');
                 polar.connectToDevice(identifier);
+                streamWhenReady();
               },
             ),
           ],
@@ -90,6 +77,34 @@ class _MyAppState extends State<MyApp> {
         ),
       ),
     );
+  }
+
+  void streamWhenReady() async {
+    await polar.sdkFeatureReady.firstWhere(
+      (e) =>
+          e.identifier == identifier &&
+          e.feature == PolarSdkFeature.onlineStreaming,
+    );
+    final availabletypes =
+        await polar.getAvailableOnlineStreamDataTypes(identifier);
+
+    debugPrint('available types: $availabletypes');
+
+    if (availabletypes.contains(PolarDataType.hr)) {
+      polar
+          .startHrStreaming(identifier)
+          .listen((e) => log('Heart rate: ${e.samples.map((e) => e.hr)}'));
+    }
+    if (availabletypes.contains(PolarDataType.ecg)) {
+      polar
+          .startEcgStreaming(identifier)
+          .listen((e) => log('ECG data received'));
+    }
+    if (availabletypes.contains(PolarDataType.acc)) {
+      polar
+          .startAccStreaming(identifier)
+          .listen((e) => log('ACC data received'));
+    }
   }
 
   void log(String log) {

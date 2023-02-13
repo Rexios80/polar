@@ -1,7 +1,7 @@
 import 'dart:io';
 
 /// Features available in Polar BLE SDK library
-enum PolarBleSdkFeature {
+enum PolarSdkFeature {
   /// Hr feature to receive hr and rr data from Polar or any other BLE device
   /// via standard HR BLE service
   hr,
@@ -46,20 +46,20 @@ enum PolarBleSdkFeature {
   static final _stringFeatureMap =
       _featureStringMap.map((k, v) => MapEntry(v, k));
 
-  /// Create a [PolarBleSdkFeature] from json
-  static PolarBleSdkFeature fromJson(dynamic json) {
+  /// Create a [PolarSdkFeature] from json
+  static PolarSdkFeature fromJson(dynamic json) {
     if (Platform.isIOS) {
-      return PolarBleSdkFeature.values[json as int];
+      return PolarSdkFeature.values[json as int];
     } else {
       // This is android
       return _stringFeatureMap[json as String]!;
     }
   }
 
-  /// Convert a [PolarBleSdkFeature] to json
+  /// Convert a [PolarSdkFeature] to json
   dynamic toJson() {
     if (Platform.isIOS) {
-      return PolarBleSdkFeature.values.indexOf(this);
+      return PolarSdkFeature.values.indexOf(this);
     } else {
       // This is Android
       return _featureStringMap[this]!;

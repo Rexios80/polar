@@ -14,14 +14,14 @@ void main() async {
   testBasicData(identifier);
   testBleSdkFeatures(
     identifier,
-    features: PolarBleSdkFeature.values.toSet(),
+    features: PolarSdkFeature.values.toSet(),
   );
   testStreaming(
     identifier,
     features: {
-      PolarDeviceDataType.hr,
-      PolarDeviceDataType.acc,
-      PolarDeviceDataType.ecg,
+      PolarDataType.hr,
+      PolarDataType.acc,
+      PolarDataType.ecg,
     },
   );
   testRecording(identifier);

@@ -13,61 +13,52 @@ class Polar {
   static const _searchChannel = EventChannel('polar/search');
 
   // Other data
-  final _blePowerStateStreamController = StreamController<bool>.broadcast();
-  final _bleSdkFeatureReadyStreamController =
-      StreamController<PolarBleSdkFeatureReadyEvent>.broadcast();
-  final _deviceConnectedStreamController =
-      StreamController<PolarDeviceInfo>.broadcast();
-  final _deviceConnectingStreamController =
-      StreamController<PolarDeviceInfo>.broadcast();
-  final _deviceDisconnectedStreamController =
-      StreamController<PolarDeviceInfo>.broadcast();
-  final _disInformationStreamController =
+  final _blePowerState = StreamController<bool>.broadcast();
+  final _sdkFeatureReady =
+      StreamController<PolarSdkFeatureReadyEvent>.broadcast();
+  final _deviceConnected = StreamController<PolarDeviceInfo>.broadcast();
+  final _deviceConnecting = StreamController<PolarDeviceInfo>.broadcast();
+  final _deviceDisconnected = StreamController<PolarDeviceInfo>.broadcast();
+  final _disInformation =
       StreamController<PolarDisInformationEvent>.broadcast();
-  final _batteryLevelStreamController =
-      StreamController<PolarBatteryLevelEvent>.broadcast();
+  final _batteryLevel = StreamController<PolarBatteryLevelEvent>.broadcast();
 
   /// helper to ask ble power state
-  Stream<bool> get blePowerStateStream => _blePowerStateStreamController.stream;
+  Stream<bool> get blePowerState => _blePowerState.stream;
 
   /// feature ready callback
-  Stream<PolarBleSdkFeatureReadyEvent> get bleSdkFeatureReadyStream =>
-      _bleSdkFeatureReadyStreamController.stream;
+  Stream<PolarSdkFeatureReadyEvent> get sdkFeatureReady =>
+      _sdkFeatureReady.stream;
 
   /// Device connection has been established.
   ///
   /// - Parameter identifier: Polar device info
-  Stream<PolarDeviceInfo> get deviceConnectedStream =>
-      _deviceConnectedStreamController.stream;
+  Stream<PolarDeviceInfo> get deviceConnected => _deviceConnected.stream;
 
   /// Callback when connection attempt is started to device
   ///
   /// - Parameter identifier: Polar device info
-  Stream<PolarDeviceInfo> get deviceConnectingStream =>
-      _deviceConnectingStreamController.stream;
+  Stream<PolarDeviceInfo> get deviceConnecting => _deviceConnecting.stream;
 
   /// Connection lost to device.
   /// If PolarBleApi#disconnectFromPolarDevice is not called, a new connection attempt is dispatched automatically.
   ///
   /// - Parameter identifier: Polar device info
-  Stream<PolarDeviceInfo> get deviceDisconnectedStream =>
-      _deviceDisconnectedStreamController.stream;
+  Stream<PolarDeviceInfo> get deviceDisconnected => _deviceDisconnected.stream;
 
   ///  Received DIS info.
   ///
   /// - Parameters:
   ///   - identifier: Polar device id
   ///   - fwVersion: firmware version in format major.minor.patch
-  Stream<PolarDisInformationEvent> get disInformationStream =>
-      _disInformationStreamController.stream;
+  Stream<PolarDisInformationEvent> get disInformation => _disInformation.stream;
 
   /// Battery level received from device.
   ///
   /// - Parameters:
   ///   - identifier: Polar device id
   ///   - batteryLevel: battery level in precentage 0-100%
-  Stream<PolarBatteryLevelEvent> get batteryLevelStream =>
-      _batteryLevelStreamController.stream;
+  Stream<PolarBatteryLevelEvent> get batteryLevel => _batteryLevel.stream;
 
   /// Will request location permission on Android S+ if false
   final bool bluetoothScanNeverForLocation;
@@ -84,30 +75,30 @@ class Polar {
   Future<void> _handleMethodCall(MethodCall call) async {
     switch (call.method) {
       case 'blePowerStateChanged':
-        _blePowerStateStreamController.add(call.arguments);
+        _blePowerState.add(call.arguments);
         return;
-      case 'bleSdkFeatureReady':
-        _bleSdkFeatureReadyStreamController.add(
-          PolarBleSdkFeatureReadyEvent(
+      case 'sdkFeatureReady':
+        _sdkFeatureReady.add(
+          PolarSdkFeatureReadyEvent(
             call.arguments[0],
-            PolarBleSdkFeature.fromJson(jsonDecode(call.arguments[1])),
+            PolarSdkFeature.fromJson(jsonDecode(call.arguments[1])),
           ),
         );
         return;
       case 'deviceConnected':
-        _deviceConnectedStreamController
+        _deviceConnected
             .add(PolarDeviceInfo.fromJson(jsonDecode(call.arguments)));
         return;
       case 'deviceConnecting':
-        _deviceConnectingStreamController
+        _deviceConnecting
             .add(PolarDeviceInfo.fromJson(jsonDecode(call.arguments)));
         return;
       case 'deviceDisconnected':
-        _deviceDisconnectedStreamController
+        _deviceDisconnected
             .add(PolarDeviceInfo.fromJson(jsonDecode(call.arguments)));
         return;
       case 'disInformationReceived':
-        _disInformationStreamController.add(
+        _disInformation.add(
           PolarDisInformationEvent(
             call.arguments[0],
             call.arguments[1],
@@ -116,7 +107,7 @@ class Polar {
         );
         return;
       case 'batteryLevelReceived':
-        _batteryLevelStreamController.add(
+        _batteryLevel.add(
           PolarBatteryLevelEvent(
             call.arguments[0],
             call.arguments[1],
@@ -191,7 +182,7 @@ class Polar {
   /// - Returns: Single stream
   ///   - success: set of available online streaming data types in this device
   ///   - onError: see `PolarErrors` for possible errors invoked
-  Future<Set<PolarDeviceDataType>> getAvailableOnlineStreamDataTypes(
+  Future<Set<PolarDataType>> getAvailableOnlineStreamDataTypes(
     String identifier,
   ) async {
     final response = await _channel.invokeListMethod(
@@ -199,7 +190,7 @@ class Polar {
       identifier,
     );
     if (response == null) return {};
-    return response.map(PolarDeviceDataType.fromJson).toSet();
+    return response.map(PolarDataType.fromJson).toSet();
   }
 
   ///  Request the stream settings available in current operation mode. This request shall be used before the stream is started
@@ -209,13 +200,13 @@ class Polar {
   ///
   /// - Parameters:
   ///   - identifier: polar device id
-  ///   - feature: selected feature from`DeviceStreamingFeature`
+  ///   - feature: selected feature from`PolarDeviceDataType`
   /// - Returns: Single stream
   ///   - success: once after settings received from device
   ///   - onError: see `PolarErrors` for possible errors invoked
   Future<PolarSensorSetting> requestStreamSettings(
     String identifier,
-    PolarDeviceDataType feature,
+    PolarDataType feature,
   ) async {
     final response = await _channel.invokeMethod(
       'requestStreamSettings',
@@ -225,7 +216,7 @@ class Polar {
   }
 
   Stream<Map<String, dynamic>> _startStreaming(
-    PolarDeviceDataType feature,
+    PolarDataType feature,
     String identifier, {
     PolarSensorSetting? settings,
   }) async* {
@@ -239,7 +230,7 @@ class Polar {
       feature.toJson(),
     ]);
 
-    if (settings == null && feature != PolarDeviceDataType.ppi) {
+    if (settings == null && feature != PolarDataType.ppi) {
       final availableSettings = await requestStreamSettings(
         identifier,
         feature,
@@ -263,12 +254,11 @@ class Polar {
   ///   - onNext: for every air packet received. see `PolarHrData`
   ///   - onError: see `PolarErrors` for possible errors invoked
   Stream<PolarHrData> startHrStreaming(String identifier) {
-    return _startStreaming(PolarDeviceDataType.hr, identifier)
+    return _startStreaming(PolarDataType.hr, identifier)
         .map(PolarHrData.fromJson);
   }
 
   /// Start the ECG (Electrocardiography) stream. ECG stream is stopped if the connection is closed, error occurs or stream is disposed.
-  /// Requires `polarSensorStreaming` feature. Before starting the stream it is recommended to query the available settings using `requestStreamSettings`
   ///
   /// - Parameters:
   ///   - identifier: Polar device id or device address
@@ -281,15 +271,13 @@ class Polar {
     PolarSensorSetting? settings,
   }) {
     return _startStreaming(
-      PolarDeviceDataType.ecg,
+      PolarDataType.ecg,
       identifier,
       settings: settings,
     ).map(PolarEcgData.fromJson);
   }
 
   ///  Start ACC (Accelerometer) stream. ACC stream is stopped if the connection is closed, error occurs or stream is disposed.
-  ///  Requires `polarSensorStreaming` feature. Before starting the stream it is recommended to query the available settings using `requestStreamSettings`
-  ///
   /// - Parameters:
   ///   - identifier: Polar device id or device address
   ///   - settings: selected settings to start the stream
@@ -301,14 +289,13 @@ class Polar {
     PolarSensorSetting? settings,
   }) {
     return _startStreaming(
-      PolarDeviceDataType.acc,
+      PolarDataType.acc,
       identifier,
       settings: settings,
     ).map(PolarAccData.fromJson);
   }
 
   /// Start Gyro stream. Gyro stream is stopped if the connection is closed, error occurs during start or stream is disposed.
-  /// Requires `polarSensorStreaming` feature. Before starting the stream it is recommended to query the available settings using `requestStreamSettings`
   ///
   /// - Parameters:
   ///   - identifier: Polar device id or device address
@@ -318,14 +305,13 @@ class Polar {
     PolarSensorSetting? settings,
   }) {
     return _startStreaming(
-      PolarDeviceDataType.gyro,
+      PolarDataType.gyro,
       identifier,
       settings: settings,
     ).map(PolarGyroData.fromJson);
   }
 
   /// Start magnetometer stream. Magnetometer stream is stopped if the connection is closed, error occurs or stream is disposed.
-  /// Requires `polarSensorStreaming` feature. Before starting the stream it is recommended to query the available settings using `requestStreamSettings`
   ///
   /// - Parameters:
   ///   - identifier: Polar device id or device address
@@ -335,7 +321,7 @@ class Polar {
     PolarSensorSetting? settings,
   }) {
     return _startStreaming(
-      PolarDeviceDataType.magnetometer,
+      PolarDataType.magnetometer,
       identifier,
       settings: settings,
     ).map(PolarMagnetometerData.fromJson);
@@ -347,22 +333,22 @@ class Polar {
   ///   - identifier: Polar device id or device address
   ///   - settings: selected settings to start the stream
   /// - Returns: Observable stream
-  ///   - onNext: for every air packet received. see `PolarOhrData`
+  ///   - onNext: for every air packet received. see `PolarPpgData`
   ///   - onError: see `PolarErrors` for possible errors invoked
   Stream<PolarPpgData> startPpgStreaming(
     String identifier, {
     PolarSensorSetting? settings,
   }) {
     return _startStreaming(
-      PolarDeviceDataType.ppg,
+      PolarDataType.ppg,
       identifier,
       settings: settings,
     ).map(PolarPpgData.fromJson);
   }
 
-  /// Start OHR (Optical heart rate) PPI (Pulse to Pulse interval) stream.
+  /// Start PPI (Pulse to Pulse interval) stream.
   /// PPI stream is stopped if the connection is closed, error occurs or stream is disposed.
-  /// Notice that there is a delay before PPI data stream starts. Requires `polarSensorStreaming` feature.
+  /// Notice that there is a delay before PPI data stream starts.
   ///
   /// - Parameters:
   ///   - identifier: Polar device id or device address
@@ -370,7 +356,7 @@ class Polar {
   ///   - onNext: for every air packet received. see `PolarPpiData`
   ///   - onError: see `PolarErrors` for possible errors invoked
   Stream<PolarPpiData> startPpiStreaming(String identifier) {
-    return _startStreaming(PolarDeviceDataType.ppi, identifier)
+    return _startStreaming(PolarDataType.ppi, identifier)
         .map(PolarPpiData.fromJson);
   }
 

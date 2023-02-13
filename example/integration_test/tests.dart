@@ -18,15 +18,15 @@ void testConnection(String identifier) {
   test('connection', () async {
     await polar.connectToDevice(identifier);
 
-    final connecting = await polar.deviceConnectingStream.first;
+    final connecting = await polar.deviceConnecting.first;
     expect(connecting.deviceId, identifier);
 
-    final connected = await polar.deviceConnectedStream.first;
+    final connected = await polar.deviceConnected.first;
     expect(connected.deviceId, identifier);
 
     await polar.disconnectFromDevice(identifier);
 
-    final disconnected = await polar.deviceDisconnectedStream.first;
+    final disconnected = await polar.deviceDisconnected.first;
     expect(disconnected.deviceId, identifier);
   });
 }
@@ -34,13 +34,13 @@ void testConnection(String identifier) {
 /// Ensure device connects
 Future<void> connect(String identifier) async {
   await polar.connectToDevice(identifier);
-  await polar.deviceConnectedStream.first;
+  await polar.deviceConnected.first;
 }
 
 /// Ensure device disconnects
 Future<void> disconnect(String identifier) async {
   await polar.disconnectFromDevice(identifier);
-  await polar.deviceDisconnectedStream.first;
+  await polar.deviceDisconnected.first;
 }
 
 void testBasicData(String identifier) {
@@ -54,12 +54,12 @@ void testBasicData(String identifier) {
     });
 
     test('disInformation', () async {
-      final disInformation = await polar.disInformationStream.first;
+      final disInformation = await polar.disInformation.first;
       expect(disInformation.identifier, identifier);
     });
 
     test('batteryLevel', () async {
-      final batteryEvent = await polar.batteryLevelStream.first;
+      final batteryEvent = await polar.batteryLevel.first;
       expect(batteryEvent.level, greaterThan(0));
     });
   });
@@ -67,12 +67,12 @@ void testBasicData(String identifier) {
 
 void testBleSdkFeatures(
   String identifier, {
-  required Set<PolarBleSdkFeature> features,
+  required Set<PolarSdkFeature> features,
 }) {
   test('Ble sdk features', () async {
     final futures = features.map(
-      (feature) => polar.bleSdkFeatureReadyStream
-          .firstWhere((event) => event.feature == feature),
+      (feature) =>
+          polar.sdkFeatureReady.firstWhere((event) => event.feature == feature),
     );
 
     await connect(identifier);
@@ -83,13 +83,13 @@ void testBleSdkFeatures(
 
 void testStreaming(
   String identifier, {
-  required Set<PolarDeviceDataType> features,
+  required Set<PolarDataType> features,
 }) {
   group('streaming', () {
     setUpAll(() async {
       await connect(identifier);
-      await polar.bleSdkFeatureReadyStream
-          .firstWhere((e) => e.feature == PolarBleSdkFeature.onlineStreaming);
+      await polar.sdkFeatureReady
+          .firstWhere((e) => e.feature == PolarSdkFeature.onlineStreaming);
       final streamingFeatures =
           await polar.getAvailableOnlineStreamDataTypes(identifier);
       expect(
@@ -108,7 +108,7 @@ void testStreaming(
         final ecgData = await polar.startHrStreaming(identifier).first;
         expect(ecgData.samples.length, greaterThan(0));
       },
-      skip: !features.contains(PolarDeviceDataType.ecg),
+      skip: !features.contains(PolarDataType.ecg),
     );
 
     test(
@@ -117,7 +117,7 @@ void testStreaming(
         final ecgData = await polar.startEcgStreaming(identifier).first;
         expect(ecgData.samples.length, greaterThan(0));
       },
-      skip: !features.contains(PolarDeviceDataType.ecg),
+      skip: !features.contains(PolarDataType.ecg),
     );
 
     test(
@@ -126,7 +126,7 @@ void testStreaming(
         final accData = await polar.startAccStreaming(identifier).first;
         expect(accData.samples.length, greaterThan(0));
       },
-      skip: !features.contains(PolarDeviceDataType.acc),
+      skip: !features.contains(PolarDataType.acc),
     );
 
     test(
@@ -135,7 +135,7 @@ void testStreaming(
         final ppgData = await polar.startPpgStreaming(identifier).first;
         expect(ppgData.samples.length, greaterThan(0));
       },
-      skip: !features.contains(PolarDeviceDataType.ppg),
+      skip: !features.contains(PolarDataType.ppg),
     );
 
     test(
@@ -144,7 +144,7 @@ void testStreaming(
         final gyroData = await polar.startGyroStreaming(identifier).first;
         expect(gyroData.samples.length, greaterThan(0));
       },
-      skip: !features.contains(PolarDeviceDataType.gyro),
+      skip: !features.contains(PolarDataType.gyro),
     );
 
     test(
@@ -154,7 +154,7 @@ void testStreaming(
             await polar.startMagnetometerStreaming(identifier).first;
         expect(magnetometerData.samples.length, greaterThan(0));
       },
-      skip: !features.contains(PolarDeviceDataType.magnetometer),
+      skip: !features.contains(PolarDataType.magnetometer),
     );
 
     test(
@@ -163,7 +163,7 @@ void testStreaming(
         final ppiData = await polar.startPpiStreaming(identifier).first;
         expect(ppiData.samples.length, greaterThan(0));
       },
-      skip: !features.contains(PolarDeviceDataType.ppi),
+      skip: !features.contains(PolarDataType.ppi),
     );
   });
 }
@@ -173,8 +173,8 @@ final exerciseId = const Uuid().v4();
 void testRecording(String identifier) {
   test('recording', () async {
     await connect(identifier);
-    await polar.bleSdkFeatureReadyStream.firstWhere(
-      (e) => e.feature == PolarBleSdkFeature.h10ExerciseRecording,
+    await polar.sdkFeatureReady.firstWhere(
+      (e) => e.feature == PolarSdkFeature.h10ExerciseRecording,
     );
 
     //! Remove existing recordings (THIS IS DESTRUCTIVE)

@@ -4,7 +4,7 @@ import 'package:recase/recase.dart';
 
 /// Data types available in Polar devices for online streaming or offline
 /// recording.
-enum PolarDeviceDataType {
+enum PolarDataType {
   /// ECG
   ecg,
 
@@ -26,20 +26,20 @@ enum PolarDeviceDataType {
   /// HR
   hr;
 
-  /// Create a [PolarDeviceDataType] from json
-  static PolarDeviceDataType fromJson(dynamic json) {
+  /// Create a [PolarDataType] from json
+  static PolarDataType fromJson(dynamic json) {
     if (Platform.isIOS) {
-      return PolarDeviceDataType.values[json as int];
+      return PolarDataType.values[json as int];
     } else {
       // This is android
-      return PolarDeviceDataType.values.byName((json as String).camelCase);
+      return PolarDataType.values.byName((json as String).camelCase);
     }
   }
 
-  /// Convert a [PolarDeviceDataType] to json
+  /// Convert a [PolarDataType] to json
   dynamic toJson() {
     if (Platform.isIOS) {
-      return PolarDeviceDataType.values.indexOf(this);
+      return PolarDataType.values.indexOf(this);
     } else {
       // This is Android
       return name.snakeCase.toUpperCase();

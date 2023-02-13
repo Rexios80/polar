@@ -289,7 +289,7 @@ public class SwiftPolarPlugin:
     }
 
     public func bleSdkFeatureReady(_ identifier: String, feature: PolarBleSdkFeature) {
-        channel.invokeMethod("streamingFeaturesReady", arguments: [
+        channel.invokeMethod("sdkFeatureReady", arguments: [
             identifier,
             PolarBleSdkFeature.allCases.firstIndex(of: feature)!,
         ])

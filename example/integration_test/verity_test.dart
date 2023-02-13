@@ -14,20 +14,20 @@ void main() async {
   testBasicData(identifier);
   testBleSdkFeatures(
     identifier,
-    features: PolarBleSdkFeature.values.toSet().difference({
-      PolarBleSdkFeature.h10ExerciseRecording,
-      PolarBleSdkFeature.sdkMode,
+    features: PolarSdkFeature.values.toSet().difference({
+      PolarSdkFeature.h10ExerciseRecording,
+      PolarSdkFeature.sdkMode,
     }),
   );
   testStreaming(
     identifier,
     features: {
-      PolarDeviceDataType.hr,
-      PolarDeviceDataType.acc,
-      PolarDeviceDataType.ppg,
-      PolarDeviceDataType.ppi,
-      PolarDeviceDataType.gyro,
-      PolarDeviceDataType.magnetometer,
+      PolarDataType.hr,
+      PolarDataType.acc,
+      PolarDataType.ppg,
+      PolarDataType.ppi,
+      PolarDataType.gyro,
+      PolarDataType.magnetometer,
     },
   );
 }

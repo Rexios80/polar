@@ -2,15 +2,15 @@ import 'package:polar/src/model/polar_ble_sdk_feature.dart';
 
 /// The feature is available in this device and it is ready. Called only for
 /// the features which are specified in [PolarBleApi] construction.
-class PolarBleSdkFeatureReadyEvent {
+class PolarSdkFeatureReadyEvent {
   /// Polar device id
   final String identifier;
 
-  /// List of [PolarBleSdkFeature]s that are ready
-  final PolarBleSdkFeature feature;
+  /// The [PolarSdkFeature] that is ready
+  final PolarSdkFeature feature;
 
   /// Constructor
-  PolarBleSdkFeatureReadyEvent(this.identifier, this.feature);
+  PolarSdkFeatureReadyEvent(this.identifier, this.feature);
 }
 
 /// Received DIS info.
