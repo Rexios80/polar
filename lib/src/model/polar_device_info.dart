@@ -1,13 +1,12 @@
+import 'package:flutter/foundation.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:polar/src/model/convert.dart';
 
 part 'polar_device_info.g.dart';
 
 /// Polar device info
 @JsonSerializable(createToJson: false)
 class PolarDeviceInfo {
-  static dynamic _readConnectable(Map json, String key) =>
-      json['isConnectable'] ?? json['connectable'];
-
   /// polar device id or UUID for 3rd party sensors
   final String deviceId;
 
@@ -21,6 +20,14 @@ class PolarDeviceInfo {
 
   /// local name from advertisement
   final String name;
+
+  static Object? _readConnectable(Map json, String key) => readPlatformValue(
+        json,
+        {
+          TargetPlatform.iOS: 'connectable',
+          TargetPlatform.android: 'isConnectable',
+        },
+      );
 
   /// true adv type is connectable
   @JsonKey(readValue: _readConnectable)

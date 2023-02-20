@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:json_annotation/json_annotation.dart';
-import 'package:polar/src/model/converters.dart';
+import 'package:polar/src/model/convert.dart';
 
 part 'polar_sensor_setting.g.dart';
 

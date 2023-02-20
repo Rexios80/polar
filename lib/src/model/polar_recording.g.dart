@@ -19,7 +19,6 @@ Map<String, dynamic> _$PolarExerciseEntryToJson(PolarExerciseEntry instance) =>
     <String, dynamic>{
       'path': instance.path,
       'date': const UnixTimeConverter().toJson(instance.date),
-      'entryId': instance.entryId,
     };
 
 PolarExerciseData _$PolarExerciseDataFromJson(Map<String, dynamic> json) =>

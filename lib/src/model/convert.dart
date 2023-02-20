@@ -1,8 +1,18 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:polar/polar.dart';
 import 'package:recase/recase.dart';
+
+/// Read a value from a JSON object keyed based on the platform
+Object? readPlatformValue(Map json, Map<TargetPlatform, String> keys) {
+  final key = keys[defaultTargetPlatform];
+  if (key == null) {
+    throw UnsupportedError('Unsupported platform: $defaultTargetPlatform');
+  }
+  return json[key];
+}
 
 /// Converts platform values to booleans
 /// - The iOS SDK uses `0` and `1` for booleans

@@ -1,5 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:polar/src/model/converters.dart';
+import 'package:polar/src/model/convert.dart';
 import 'package:polar/src/model/ppg_data_type.dart';
 
 part 'polar_streaming.g.dart';
@@ -45,12 +46,6 @@ class PolarStreamingData<T> {
 /// Polar HR sample
 @JsonSerializable(createToJson: false)
 class PolarHrSample {
-  static dynamic _readContactStatus(Map json, String key) =>
-      json['contactStatus'] ?? json['contact'];
-
-  static dynamic _readContactStatusSupported(Map json, String key) =>
-      json['contactStatusSupported'] ?? json['contactSupported'];
-
   /// Moment sample is taken in nanoseconds. The epoch of timestamp is 1.1.2000
   @PolarSampleTimestampConverter()
   final DateTime timeStamp;
@@ -65,9 +60,26 @@ class PolarHrSample {
   /// rrs RR interval in ms.
   final List<int> rrsMs;
 
+  static Object? _readContactStatus(Map json, String key) => readPlatformValue(
+        json,
+        {
+          TargetPlatform.iOS: 'contact',
+          TargetPlatform.android: 'contactStatus',
+        },
+      );
+
   /// contact status between the device and the users skin
   @JsonKey(readValue: _readContactStatus)
   final bool contactStatus;
+
+  static Object? _readContactStatusSupported(Map json, String key) =>
+      readPlatformValue(
+        json,
+        {
+          TargetPlatform.iOS: 'contactSupported',
+          TargetPlatform.android: 'contactStatusSupported',
+        },
+      );
 
   /// contactSupported if contact is supported
   @JsonKey(readValue: _readContactStatusSupported)
@@ -236,11 +248,13 @@ class PolarPpgData extends PolarStreamingData<PolarPpgSample> {
 /// Polar ppi sample
 @JsonSerializable(createToJson: false)
 class PolarPpiSample {
-  static dynamic _readPpi(Map json, String key) =>
-      json['ppi'] ?? json['ppInMs'];
-
-  static dynamic _readErrorEstimate(Map json, String key) =>
-      json['errorEstimate'] ?? json['ppErrorEstimate'];
+  static Object? _readPpi(Map json, String key) => readPlatformValue(
+        json,
+        {
+          TargetPlatform.iOS: 'ppInMs',
+          TargetPlatform.android: 'ppi',
+        },
+      );
 
   /// ppInMs Pulse to Pulse interval in milliseconds.
   /// The value indicates the quality of PP-intervals.
@@ -248,6 +262,14 @@ class PolarPpiSample {
   /// Error estimate values over 30ms may be caused by movement artefact or too loose sensor-skin contact.
   @JsonKey(readValue: _readPpi)
   final int ppi;
+
+  static Object? _readErrorEstimate(Map json, String key) => readPlatformValue(
+        json,
+        {
+          TargetPlatform.iOS: 'ppErrorEstimate',
+          TargetPlatform.android: 'errorEstimate',
+        },
+      );
 
   /// ppErrorEstimate estimate of the expected absolute error in PP-interval in milliseconds
   @JsonKey(readValue: _readErrorEstimate)

@@ -1,7 +1,8 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:polar/src/model/converters.dart';
+import 'package:polar/src/model/convert.dart';
 
 part 'polar_recording.g.dart';
 
@@ -70,9 +71,6 @@ class PolarRecordingStatus {
 /// Polar exercise entry
 @JsonSerializable()
 class PolarExerciseEntry {
-  static dynamic _readEntryId(Map json, String key) =>
-      json['entryId'] ?? json['identifier'];
-
   /// Resource location in the device
   final String path;
 
@@ -80,8 +78,16 @@ class PolarExerciseEntry {
   @UnixTimeConverter()
   final DateTime date;
 
+  static const _entryIdKeys = {
+    TargetPlatform.iOS: 'entryId',
+    TargetPlatform.android: 'identifier',
+  };
+
+  static Object? _readEntryId(Map json, String key) =>
+      readPlatformValue(json, _entryIdKeys);
+
   /// unique identifier
-  @JsonKey(readValue: _readEntryId)
+  @JsonKey(readValue: _readEntryId, includeToJson: false)
   final String entryId;
 
   /// Constructor
@@ -96,12 +102,10 @@ class PolarExerciseEntry {
       _$PolarExerciseEntryFromJson(json);
 
   /// To json
-  Map<String, dynamic> toJson() {
-    final json = _$PolarExerciseEntryToJson(this);
-    // TODO: Properly deal with inconsistent keys between Android and iOS
-    json['identifier'] = json['entryId'];
-    return json;
-  }
+  Map<String, dynamic> toJson() => {
+        ..._$PolarExerciseEntryToJson(this),
+        _entryIdKeys[defaultTargetPlatform]!: entryId
+      };
 
   @override
   String toString() {
@@ -112,15 +116,22 @@ class PolarExerciseEntry {
 /// Polar Exercise Data
 @JsonSerializable(createToJson: false)
 class PolarExerciseData {
-  static dynamic _readInterval(Map json, String key) =>
-      json['interval'] ?? json['recordingInterval'];
 
-  static dynamic _readSamples(Map json, String key) =>
-      json['samples'] ?? json['hrSamples'];
+  static Object? _readInterval(Map json, String key) =>
+      readPlatformValue(json, {
+        TargetPlatform.iOS: 'interval',
+        TargetPlatform.android: 'recordingInterval',
+      });
 
   /// in seconds
   @JsonKey(readValue: _readInterval)
   final int interval;
+
+  static Object? _readSamples(Map json, String key) =>
+      readPlatformValue(json, {
+        TargetPlatform.iOS: 'samples',
+        TargetPlatform.android: 'hrSamples',
+      });
 
   /// List of HR or RR samples in BPM
   @JsonKey(readValue: _readSamples)
