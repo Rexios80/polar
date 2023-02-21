@@ -4,8 +4,18 @@ import PolarBleSdk
 import RxSwift
 import UIKit
 
-let encoder = JSONEncoder()
-let decoder = JSONDecoder()
+private let encoder = JSONEncoder()
+private let decoder = JSONDecoder()
+
+private func jsonEncode(_ value: Encodable) -> String? {
+    guard let data = try? encoder.encode(value),
+          let data = String(data: data, encoding: .utf8)
+    else {
+        return nil
+    }
+
+    return data
+}
 
 public class SwiftPolarPlugin:
     NSObject,
@@ -104,8 +114,7 @@ public class SwiftPolarPlugin:
         self.initApi()
 
         self.searchSubscription = self.api.searchForDevice().subscribe(onNext: { data in
-            guard let data = try? encoder.encode(PolarDeviceInfoCodable(data)),
-                  let data = String(data: data, encoding: .utf8)
+            guard let data = jsonEncode(PolarDeviceInfoCodable(data))
             else { return }
             events(data)
         }, onError: { error in
@@ -136,8 +145,7 @@ public class SwiftPolarPlugin:
         let identifier = call.arguments as! String
 
         _ = api.getAvailableOnlineStreamDataTypes(identifier).subscribe(onSuccess: { data in
-            guard let data = try? encoder.encode(data.map { PolarDeviceDataType.allCases.firstIndex(of: $0)! }),
-                  let data = String(data: data, encoding: .utf8)
+            guard let data = jsonEncode(data.map { PolarDeviceDataType.allCases.firstIndex(of: $0)! })
             else {
                 result(result(FlutterError(code: "Unable to get available online stream data types", message: nil, details: nil)))
                 return
@@ -152,8 +160,7 @@ public class SwiftPolarPlugin:
         let feature = PolarDeviceDataType.allCases[arguments[1] as! Int]
 
         _ = api.requestStreamSettings(identifier, feature: feature).subscribe(onSuccess: { data in
-            guard let data = try? encoder.encode(PolarSensorSettingCodable(data)),
-                  let data = String(data: data, encoding: .utf8)
+            guard let data = jsonEncode(PolarSensorSettingCodable(data))
             else { return }
             result(data)
         }, onFailure: { result(FlutterError(code: "Unable to request stream settings", message: $0.localizedDescription, details: nil)) })
@@ -204,8 +211,7 @@ public class SwiftPolarPlugin:
         var exercises = [String]()
         _ = api.fetchStoredExerciseList(identifier).subscribe(
             onNext: { data in
-                guard let data = try? encoder.encode(PolarExerciseEntryCodable(data)),
-                      let data = String(data: data, encoding: .utf8)
+                guard let data = jsonEncode(PolarExerciseEntryCodable(data))
                 else {
                     return
                 }
@@ -225,8 +231,7 @@ public class SwiftPolarPlugin:
             .data(using: .utf8)!).data
 
         _ = api.fetchExercise(identifier, entry: entry).subscribe(onSuccess: { data in
-            guard let data = try? encoder.encode(PolarExerciseDataCodable(data)),
-                  let data = String(data: data, encoding: .utf8)
+            guard let data = jsonEncode(PolarExerciseDataCodable(data))
             else {
                 return
             }
@@ -250,8 +255,7 @@ public class SwiftPolarPlugin:
     }
 
     public func deviceConnecting(_ polarDeviceInfo: PolarDeviceInfo) {
-        guard let data = try? encoder.encode(PolarDeviceInfoCodable(polarDeviceInfo)),
-              let data = String(data: data, encoding: .utf8)
+        guard let data = jsonEncode(PolarDeviceInfoCodable(polarDeviceInfo))
         else {
             return
         }
@@ -259,8 +263,7 @@ public class SwiftPolarPlugin:
     }
 
     public func deviceConnected(_ polarDeviceInfo: PolarDeviceInfo) {
-        guard let data = try? encoder.encode(PolarDeviceInfoCodable(polarDeviceInfo)),
-              let data = String(data: data, encoding: .utf8)
+        guard let data = jsonEncode(PolarDeviceInfoCodable(polarDeviceInfo))
         else {
             return
         }
@@ -268,8 +271,7 @@ public class SwiftPolarPlugin:
     }
 
     public func deviceDisconnected(_ polarDeviceInfo: PolarDeviceInfo) {
-        guard let data = try? encoder.encode(PolarDeviceInfoCodable(polarDeviceInfo)),
-              let data = String(data: data, encoding: .utf8)
+        guard let data = jsonEncode(PolarDeviceInfoCodable(polarDeviceInfo))
         else {
             return
         }
@@ -396,22 +398,22 @@ class StreamingChannel: NSObject, FlutterStreamHandler {
             let encodedData: Any?
             switch self.feature {
             case .ecg:
-                encodedData = try? encoder.encode(PolarEcgDataCodable(data as! PolarEcgData))
+                encodedData = jsonEncode(PolarEcgDataCodable(data as! PolarEcgData))
             case .acc:
-                encodedData = try? encoder.encode(PolarAccDataCodable(data as! PolarAccData))
+                encodedData = jsonEncode(PolarAccDataCodable(data as! PolarAccData))
             case .ppg:
-                encodedData = try? encoder.encode(PolarPpgDataCodable(data as! PolarPpgData))
+                encodedData = jsonEncode(PolarPpgDataCodable(data as! PolarPpgData))
             case .ppi:
-                encodedData = try? encoder.encode(PolarPpiDataCodable(data as! PolarPpiData))
+                encodedData = jsonEncode(PolarPpiDataCodable(data as! PolarPpiData))
             case .gyro:
-                encodedData = try? encoder.encode(PolarGyroDataCodable(data as! PolarGyroData))
+                encodedData = jsonEncode(PolarGyroDataCodable(data as! PolarGyroData))
             case .magnetometer:
-                encodedData = try? encoder.encode(PolarMagnetometerDataCodable(data as! PolarMagnetometerData))
+                encodedData = jsonEncode(PolarMagnetometerDataCodable(data as! PolarMagnetometerData))
             case .hr:
-                encodedData = try? encoder.encode(PolarHrDataCodable(data as! PolarHrData))
+                encodedData = jsonEncode(PolarHrDataCodable(data as! PolarHrData))
             }
 
-            guard let data = encodedData as? Data, let data = String(data: data, encoding: .utf8) else {
+            guard let data = encodedData else {
                 return
             }
             events(data)
