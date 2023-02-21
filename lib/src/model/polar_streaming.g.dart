@@ -23,10 +23,9 @@ PolarHrSample _$PolarHrSampleFromJson(Map<String, dynamic> json) =>
       hr: json['hr'] as int,
       rrs: (json['rrs'] as List<dynamic>).map((e) => e as int).toList(),
       rrsMs: (json['rrsMs'] as List<dynamic>).map((e) => e as int).toList(),
-      contactStatus:
-          PolarHrSample._readContactStatus(json, 'contactStatus') as bool,
-      contactStatusSupported: PolarHrSample._readContactStatusSupported(
-          json, 'contactStatusSupported') as bool,
+      contactStatus: _readContactStatus(json, 'contactStatus') as bool,
+      contactStatusSupported:
+          _readContactStatusSupported(json, 'contactStatusSupported') as bool,
     );
 
 PolarEcgSample _$PolarEcgSampleFromJson(Map<String, dynamic> json) =>
@@ -82,9 +81,8 @@ PolarPpgData _$PolarPpgDataFromJson(Map<String, dynamic> json) => PolarPpgData(
 
 PolarPpiSample _$PolarPpiSampleFromJson(Map<String, dynamic> json) =>
     PolarPpiSample(
-      ppi: PolarPpiSample._readPpi(json, 'ppi') as int,
-      errorEstimate:
-          PolarPpiSample._readErrorEstimate(json, 'errorEstimate') as int,
+      ppi: _readPpi(json, 'ppi') as int,
+      errorEstimate: _readErrorEstimate(json, 'errorEstimate') as int,
       hr: json['hr'] as int,
       blockerBit: const PlatformBooleanConverter().fromJson(json['blockerBit']),
       skinContactStatus:

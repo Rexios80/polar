@@ -78,14 +78,6 @@ class PolarExerciseEntry {
   @UnixTimeConverter()
   final DateTime date;
 
-  static const _entryIdKeys = {
-    TargetPlatform.iOS: 'entryId',
-    TargetPlatform.android: 'identifier',
-  };
-
-  static Object? _readEntryId(Map json, String key) =>
-      readPlatformValue(json, _entryIdKeys);
-
   /// unique identifier
   @JsonKey(readValue: _readEntryId, includeToJson: false)
   final String entryId;
@@ -113,25 +105,20 @@ class PolarExerciseEntry {
   }
 }
 
+const _entryIdKeys = {
+  TargetPlatform.iOS: 'entryId',
+  TargetPlatform.android: 'identifier',
+};
+
+Object? _readEntryId(Map json, String key) =>
+    readPlatformValue(json, _entryIdKeys);
+
 /// Polar Exercise Data
 @JsonSerializable(createToJson: false)
 class PolarExerciseData {
-
-  static Object? _readInterval(Map json, String key) =>
-      readPlatformValue(json, {
-        TargetPlatform.iOS: 'interval',
-        TargetPlatform.android: 'recordingInterval',
-      });
-
   /// in seconds
   @JsonKey(readValue: _readInterval)
   final int interval;
-
-  static Object? _readSamples(Map json, String key) =>
-      readPlatformValue(json, {
-        TargetPlatform.iOS: 'samples',
-        TargetPlatform.android: 'hrSamples',
-      });
 
   /// List of HR or RR samples in BPM
   @JsonKey(readValue: _readSamples)
@@ -152,3 +139,13 @@ class PolarExerciseData {
     return 'PolarExerciseData(interval: $interval, samples: $samples)';
   }
 }
+
+Object? _readInterval(Map json, String key) => readPlatformValue(json, {
+      TargetPlatform.iOS: 'interval',
+      TargetPlatform.android: 'recordingInterval',
+    });
+
+Object? _readSamples(Map json, String key) => readPlatformValue(json, {
+      TargetPlatform.iOS: 'samples',
+      TargetPlatform.android: 'hrSamples',
+    });

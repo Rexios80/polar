@@ -60,26 +60,9 @@ class PolarHrSample {
   /// rrs RR interval in ms.
   final List<int> rrsMs;
 
-  static Object? _readContactStatus(Map json, String key) => readPlatformValue(
-        json,
-        {
-          TargetPlatform.iOS: 'contact',
-          TargetPlatform.android: 'contactStatus',
-        },
-      );
-
   /// contact status between the device and the users skin
   @JsonKey(readValue: _readContactStatus)
   final bool contactStatus;
-
-  static Object? _readContactStatusSupported(Map json, String key) =>
-      readPlatformValue(
-        json,
-        {
-          TargetPlatform.iOS: 'contactSupported',
-          TargetPlatform.android: 'contactStatusSupported',
-        },
-      );
 
   /// contactSupported if contact is supported
   @JsonKey(readValue: _readContactStatusSupported)
@@ -95,6 +78,22 @@ class PolarHrSample {
     required this.contactStatusSupported,
   });
 }
+
+Object? _readContactStatus(Map json, String key) => readPlatformValue(
+      json,
+      {
+        TargetPlatform.iOS: 'contact',
+        TargetPlatform.android: 'contactStatus',
+      },
+    );
+
+Object? _readContactStatusSupported(Map json, String key) => readPlatformValue(
+      json,
+      {
+        TargetPlatform.iOS: 'contactSupported',
+        TargetPlatform.android: 'contactStatusSupported',
+      },
+    );
 
 /// Polar HR data
 typedef PolarHrData = PolarStreamingData<PolarHrSample>;
@@ -248,28 +247,12 @@ class PolarPpgData extends PolarStreamingData<PolarPpgSample> {
 /// Polar ppi sample
 @JsonSerializable(createToJson: false)
 class PolarPpiSample {
-  static Object? _readPpi(Map json, String key) => readPlatformValue(
-        json,
-        {
-          TargetPlatform.iOS: 'ppInMs',
-          TargetPlatform.android: 'ppi',
-        },
-      );
-
   /// ppInMs Pulse to Pulse interval in milliseconds.
   /// The value indicates the quality of PP-intervals.
   /// When error estimate is below 10ms the PP-intervals are probably very accurate.
   /// Error estimate values over 30ms may be caused by movement artefact or too loose sensor-skin contact.
   @JsonKey(readValue: _readPpi)
   final int ppi;
-
-  static Object? _readErrorEstimate(Map json, String key) => readPlatformValue(
-        json,
-        {
-          TargetPlatform.iOS: 'ppErrorEstimate',
-          TargetPlatform.android: 'errorEstimate',
-        },
-      );
 
   /// ppErrorEstimate estimate of the expected absolute error in PP-interval in milliseconds
   @JsonKey(readValue: _readErrorEstimate)
@@ -300,6 +283,22 @@ class PolarPpiSample {
     required this.skinContactSupported,
   });
 }
+
+Object? _readErrorEstimate(Map json, String key) => readPlatformValue(
+      json,
+      {
+        TargetPlatform.iOS: 'ppErrorEstimate',
+        TargetPlatform.android: 'errorEstimate',
+      },
+    );
+
+Object? _readPpi(Map json, String key) => readPlatformValue(
+      json,
+      {
+        TargetPlatform.iOS: 'ppInMs',
+        TargetPlatform.android: 'ppi',
+      },
+    );
 
 /// Polar ppi data
 typedef PolarPpiData = PolarStreamingData<PolarPpiSample>;

@@ -21,14 +21,6 @@ class PolarDeviceInfo {
   /// local name from advertisement
   final String name;
 
-  static Object? _readConnectable(Map json, String key) => readPlatformValue(
-        json,
-        {
-          TargetPlatform.iOS: 'connectable',
-          TargetPlatform.android: 'isConnectable',
-        },
-      );
-
   /// true adv type is connectable
   @JsonKey(readValue: _readConnectable)
   final bool isConnectable;
@@ -46,3 +38,11 @@ class PolarDeviceInfo {
   factory PolarDeviceInfo.fromJson(Map<String, dynamic> json) =>
       _$PolarDeviceInfoFromJson(json);
 }
+
+Object? _readConnectable(Map json, String key) => readPlatformValue(
+      json,
+      {
+        TargetPlatform.iOS: 'connectable',
+        TargetPlatform.android: 'isConnectable',
+      },
+    );
