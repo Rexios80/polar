@@ -1,3 +1,6 @@
+## 4.1.0
+- The `Polar` initializer now returns a singleton
+
 ## 4.0.0
 - Updates Polar SDK to 4.0.0
 - Other version updates
