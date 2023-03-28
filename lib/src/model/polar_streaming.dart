@@ -46,54 +46,26 @@ class PolarStreamingData<T> {
 /// Polar HR sample
 @JsonSerializable(createToJson: false)
 class PolarHrSample {
-  /// Moment sample is taken in nanoseconds. The epoch of timestamp is 1.1.2000
-  @PolarSampleTimestampConverter()
-  final DateTime timeStamp;
-
   /// hr in BPM
   final int hr;
-
-  /// rrs RR interval in 1/1024.
-  /// R is a the top highest peak in the QRS complex of the ECG wave and RR is the interval between successive Rs.
-  final List<int> rrs;
 
   /// rrs RR interval in ms.
   final List<int> rrsMs;
 
   /// contact status between the device and the users skin
-  @JsonKey(readValue: _readContactStatus)
   final bool contactStatus;
 
   /// contactSupported if contact is supported
-  @JsonKey(readValue: _readContactStatusSupported)
   final bool contactStatusSupported;
 
   /// Constructor
   PolarHrSample({
-    required this.timeStamp,
     required this.hr,
-    required this.rrs,
     required this.rrsMs,
     required this.contactStatus,
     required this.contactStatusSupported,
   });
 }
-
-Object? _readContactStatus(Map json, String key) => readPlatformValue(
-      json,
-      {
-        TargetPlatform.iOS: 'contact',
-        TargetPlatform.android: 'contactStatus',
-      },
-    );
-
-Object? _readContactStatusSupported(Map json, String key) => readPlatformValue(
-      json,
-      {
-        TargetPlatform.iOS: 'contactSupported',
-        TargetPlatform.android: 'contactStatusSupported',
-      },
-    );
 
 /// Polar HR data
 typedef PolarHrData = PolarStreamingData<PolarHrSample>;

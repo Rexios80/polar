@@ -18,14 +18,10 @@ PolarStreamingData<T> _$PolarStreamingDataFromJson<T>(
 
 PolarHrSample _$PolarHrSampleFromJson(Map<String, dynamic> json) =>
     PolarHrSample(
-      timeStamp: const PolarSampleTimestampConverter()
-          .fromJson(json['timeStamp'] as int),
       hr: json['hr'] as int,
-      rrs: (json['rrs'] as List<dynamic>).map((e) => e as int).toList(),
       rrsMs: (json['rrsMs'] as List<dynamic>).map((e) => e as int).toList(),
-      contactStatus: _readContactStatus(json, 'contactStatus') as bool,
-      contactStatusSupported:
-          _readContactStatusSupported(json, 'contactStatusSupported') as bool,
+      contactStatus: json['contactStatus'] as bool,
+      contactStatusSupported: json['contactStatusSupported'] as bool,
     );
 
 PolarEcgSample _$PolarEcgSampleFromJson(Map<String, dynamic> json) =>
