@@ -19,6 +19,9 @@
   - `hrNotificationReceived` functionality has been moved to streaming
 - See [the migration guide](https://github.com/polarofficial/polar-ble-sdk/blob/polar-ble-sdk-5.0.0/documentation/MigrationGuide5.0.0.md) and example for more details
 
+## 4.1.0
+- The `Polar` initializer now returns a singleton
+
 ## 4.0.0
 - Updates Polar SDK to 4.0.0
 - Other version updates

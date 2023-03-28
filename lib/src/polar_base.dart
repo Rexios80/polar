@@ -12,6 +12,8 @@ class Polar {
   static const _channel = MethodChannel('polar');
   static const _searchChannel = EventChannel('polar/search');
 
+  static Polar? _instance;
+
   // Other data
   final _blePowerState = StreamController<bool>.broadcast();
   final _sdkFeatureReady =
@@ -61,16 +63,19 @@ class Polar {
   Stream<PolarBatteryLevelEvent> get batteryLevel => _batteryLevel.stream;
 
   /// Will request location permission on Android S+ if false
-  final bool bluetoothScanNeverForLocation;
+  final bool _bluetoothScanNeverForLocation;
 
-  /// Initialize the Polar API
+  Polar._(this._bluetoothScanNeverForLocation) {
+    _channel.setMethodCallHandler(_handleMethodCall);
+  }
+
+  /// Initialize the Polar API. Returns a singleton.
   ///
   /// DartDocs are copied from the iOS version of the SDK and are only included for reference
   ///
   /// The plugin will request location permission on Android S+ if [bluetoothScanNeverForLocation] is false
-  Polar({this.bluetoothScanNeverForLocation = true}) {
-    _channel.setMethodCallHandler(_handleMethodCall);
-  }
+  factory Polar({bool bluetoothScanNeverForLocation = true}) =>
+      _instance ??= Polar._(bluetoothScanNeverForLocation);
 
   Future<void> _handleMethodCall(MethodCall call) async {
     switch (call.method) {
@@ -155,7 +160,7 @@ class Polar {
       // If we are on Android M+
       if (sdkInt >= 23) {
         // If we are on an Android version before S or bluetooth scan is used to derive location
-        if (sdkInt < 31 || !bluetoothScanNeverForLocation) {
+        if (sdkInt < 31 || !_bluetoothScanNeverForLocation) {
           await Permission.location.request();
         }
         // If we are on Android S+

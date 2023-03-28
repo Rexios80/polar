@@ -119,10 +119,10 @@ packages:
     dependency: transitive
     description:
       name: flutter_plugin_android_lifecycle
-      sha256: "60fc7b78455b94e6de2333d2f95196d32cf5c22f4b0b0520a628804cb463503b"
+      sha256: "4bef634684b2c7f3468c77c766c831229af829a0cd2d4ee6c1b99558bd14e5d2"
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.7"
+    version: "2.0.8"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -251,17 +251,17 @@ packages:
     dependency: transitive
     description:
       name: plugin_platform_interface
-      sha256: dbf0f707c78beedc9200146ad3cb0ab4d5da13c246336987be6940f026500d3a
+      sha256: "6a2128648c854906c53fa8e33986fc0247a1116122f9534dd20e3ab9e16a32bc"
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.3"
+    version: "2.1.4"
   polar:
     dependency: "direct main"
     description:
       path: ".."
       relative: true
     source: path
-    version: "5.0.0-beta2"
+    version: "4.1.0"
   process:
     dependency: transitive
     description:
@@ -397,4 +397,4 @@ packages:
     version: "4.1.1"
 sdks:
   dart: ">=2.18.0 <3.0.0"
-  flutter: ">=2.11.0"
+  flutter: ">=3.0.0"
