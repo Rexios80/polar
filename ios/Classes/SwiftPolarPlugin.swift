@@ -385,7 +385,7 @@ class StreamingChannel: NSObject, FlutterStreamHandler {
         case .ppg:
             stream = api.startPpgStreaming(identifier, settings: settings!)
         case .ppi:
-            stream = api.startOhrPPIStreaming(identifier)
+            stream = api.startPpiStreaming(identifier)
         case .gyro:
             stream = api.startGyroStreaming(identifier, settings: settings!)
         case .magnetometer:
@@ -395,25 +395,7 @@ class StreamingChannel: NSObject, FlutterStreamHandler {
         }
 
         subscription = stream.anySubscribe(onNext: { data in
-            let encodedData: Any?
-            switch self.feature {
-            case .ecg:
-                encodedData = jsonEncode(PolarEcgDataCodable(data as! PolarEcgData))
-            case .acc:
-                encodedData = jsonEncode(PolarAccDataCodable(data as! PolarAccData))
-            case .ppg:
-                encodedData = jsonEncode(PolarPpgDataCodable(data as! PolarPpgData))
-            case .ppi:
-                encodedData = jsonEncode(PolarPpiDataCodable(data as! PolarPpiData))
-            case .gyro:
-                encodedData = jsonEncode(PolarGyroDataCodable(data as! PolarGyroData))
-            case .magnetometer:
-                encodedData = jsonEncode(PolarMagnetometerDataCodable(data as! PolarMagnetometerData))
-            case .hr:
-                encodedData = jsonEncode(PolarHrDataCodable(data as! PolarHrData))
-            }
-
-            guard let data = encodedData else {
+            guard let data = jsonEncode(PolarDataCodable(data)) else {
                 return
             }
             events(data)

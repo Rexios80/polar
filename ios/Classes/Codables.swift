@@ -33,35 +33,75 @@ class PolarDeviceInfoCodable: Encodable {
     }
 }
 
-class PolarHrDataCodable: Encodable {
-    let data: PolarHrData
+class PolarDataCodable<T>: Encodable {
+    let data: T
+    
+    required init(_ data: T) {
+        self.data = data
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case samples
+    }
+    
+    func encode(to encoder: Encoder) {
+        let codables: [Encodable]
+        if let data = data as? PolarHrData {
+            codables = data.map(PolarHrSampleCodable.init)
+        } else if let data = data as? PolarEcgData {
+            codables = data.samples.map(PolarEcgSampleCodable.init)
+        } else if let data = data as? PolarAccData {
+            codables = data.samples.map(PolarAccSampleCodable.init)
+        } else if let data = data as? PolarPpgData {
+            codables = data.samples.map(PolarPpgSampleCodable.init)
+        } else if let data = data as? PolarPpiData {
+            codables = data.samples.map(PolarPpiSampleCodable.init)
+        } else if let data = data as? PolarGyroData {
+            codables = data.samples.map(PolarGyroSampleCodable.init)
+        } else if let data = data as? PolarMagnetometerData {
+            codables = data.samples.map(PolarMagnetometerSampleCodable.init)
+        } else {
+            codables = []
+        }
+        
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try? container.encode(codables.wrap(), forKey: .samples)
+    }
+}
 
-    required init(_ data: PolarHrData) {
+typealias PolarHrSample = (hr: UInt8, rrsMs: [Int], rrAvailable: Bool, contactStatus: Bool, contactStatusSupported: Bool)
+
+class PolarHrSampleCodable: Encodable {
+    let data: PolarHrSample
+
+    required init(_ data: PolarHrSample) {
         self.data = data
     }
 
     enum CodingKeys: String, CodingKey {
         case hr
-        case rrs
         case rrsMs
-        case contact
-        case contactSupported
+        case rrAvailable
+        case contactStatus
+        case contactStatusSupported
     }
 
     func encode(to encoder: Encoder) {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try? container.encode(data.hr, forKey: .hr)
-        try? container.encode(data.rrs, forKey: .rrs)
         try? container.encode(data.rrsMs, forKey: .rrsMs)
-        try? container.encode(data.contact, forKey: .contact)
-        try? container.encode(data.contactSupported, forKey: .contactSupported)
+        try? container.encode(data.rrAvailable, forKey: .rrAvailable)
+        try? container.encode(data.contactStatus, forKey: .contactStatus)
+        try? container.encode(data.contactStatusSupported, forKey: .contactStatusSupported)
     }
 }
 
-class PolarEcgSample: Encodable {
-    let data: (timeStamp: UInt64, voltage: Int32)
+typealias PolarEcgSample = (timeStamp: UInt64, voltage: Int32)
 
-    init(_ data: (timeStamp: UInt64, voltage: Int32)) {
+class PolarEcgSampleCodable: Encodable {
+    let data: PolarEcgSample
+
+    init(_ data: PolarEcgSample) {
         self.data = data
     }
 
@@ -77,27 +117,12 @@ class PolarEcgSample: Encodable {
     }
 }
 
-class PolarEcgDataCodable: Encodable {
-    let data: PolarEcgData
+typealias PolarAccSample = (timeStamp: UInt64, x: Int32, y: Int32, z: Int32)
 
-    init(_ data: PolarEcgData) {
-        self.data = data
-    }
+class PolarAccSampleCodable: Encodable {
+    let data: PolarAccSample
 
-    enum CodingKeys: String, CodingKey {
-        case samples
-    }
-
-    func encode(to encoder: Encoder) {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try? container.encode(data.samples.map { PolarEcgSample($0) }, forKey: .samples)
-    }
-}
-
-class PolarAccSample: Encodable {
-    let data: (timeStamp: UInt64, x: Int32, y: Int32, z: Int32)
-
-    init(_ data: (timeStamp: UInt64, x: Int32, y: Int32, z: Int32)) {
+    init(_ data: PolarAccSample) {
         self.data = data
     }
 
@@ -114,23 +139,6 @@ class PolarAccSample: Encodable {
         try? container.encode(data.x, forKey: .x)
         try? container.encode(data.y, forKey: .y)
         try? container.encode(data.z, forKey: .z)
-    }
-}
-
-class PolarAccDataCodable: Encodable {
-    let data: PolarAccData
-
-    init(_ data: PolarAccData) {
-        self.data = data
-    }
-
-    enum CodingKeys: String, CodingKey {
-        case samples
-    }
-
-    func encode(to encoder: Encoder) {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try? container.encode(data.samples.map { PolarAccSample($0) }, forKey: .samples)
     }
 }
 
@@ -153,10 +161,12 @@ class PolarExerciseDataCodable: Encodable {
     }
 }
 
-class PolarGyroSample: Encodable {
-    let data: (timeStamp: UInt64, x: Float, y: Float, z: Float)
+typealias PolarGyroSample = (timeStamp: UInt64, x: Float, y: Float, z: Float)
 
-    init(_ data: (timeStamp: UInt64, x: Float, y: Float, z: Float)) {
+class PolarGyroSampleCodable: Encodable {
+    let data: PolarGyroSample
+
+    init(_ data: PolarGyroSample) {
         self.data = data
     }
 
@@ -176,27 +186,12 @@ class PolarGyroSample: Encodable {
     }
 }
 
-class PolarGyroDataCodable: Encodable {
-    let data: PolarGyroData
+typealias PolarMagnetometerSample = (timeStamp: UInt64, x: Float, y: Float, z: Float)
 
-    init(_ data: PolarGyroData) {
-        self.data = data
-    }
+class PolarMagnetometerSampleCodable: Encodable {
+    let data: PolarMagnetometerSample
 
-    enum CodingKeys: String, CodingKey {
-        case samples
-    }
-
-    func encode(to encoder: Encoder) {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try? container.encode(data.samples.map { PolarGyroSample($0) }, forKey: .samples)
-    }
-}
-
-class PolarMagnetometerSample: Encodable {
-    let data: (timeStamp: UInt64, x: Float, y: Float, z: Float)
-
-    init(_ data: (timeStamp: UInt64, x: Float, y: Float, z: Float)) {
+    init(_ data: PolarMagnetometerSample) {
         self.data = data
     }
 
@@ -216,27 +211,12 @@ class PolarMagnetometerSample: Encodable {
     }
 }
 
-class PolarMagnetometerDataCodable: Encodable {
-    let data: PolarMagnetometerData
+typealias PolarPpgSample = (timeStamp: UInt64, channelSamples: [Int32])
 
-    init(_ data: PolarMagnetometerData) {
-        self.data = data
-    }
+class PolarPpgSampleCodable: Encodable {
+    let data: PolarPpgSample
 
-    enum CodingKeys: String, CodingKey {
-        case samples
-    }
-
-    func encode(to encoder: Encoder) {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try? container.encode(data.samples.map { PolarMagnetometerSample($0) }, forKey: .samples)
-    }
-}
-
-class PolarOhrSample: Encodable {
-    let data: (timeStamp: UInt64, channelSamples: [Int32])
-
-    init(_ data: (timeStamp: UInt64, channelSamples: [Int32])) {
+    init(_ data: PolarPpgSample) {
         self.data = data
     }
 
@@ -252,29 +232,12 @@ class PolarOhrSample: Encodable {
     }
 }
 
-class PolarPpgDataCodable: Encodable {
-    let data: PolarPpgData
+typealias PolarPpiSample = (hr: Int, ppInMs: UInt16, ppErrorEstimate: UInt16, blockerBit: Int, skinContactStatus: Int, skinContactSupported: Int)
 
-    init(_ data: PolarPpgData) {
-        self.data = data
-    }
+class PolarPpiSampleCodable: Encodable {
+    let data: PolarPpiSample
 
-    enum CodingKeys: String, CodingKey {
-        case type
-        case samples
-    }
-
-    func encode(to encoder: Encoder) {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try? container.encode(data.type.rawValue, forKey: .type)
-        try? container.encode(data.samples.map { PolarOhrSample($0) }, forKey: .samples)
-    }
-}
-
-class PolarPpiSample: Encodable {
-    let data: (hr: Int, ppInMs: UInt16, ppErrorEstimate: UInt16, blockerBit: Int, skinContactStatus: Int, skinContactSupported: Int)
-
-    init(_ data: (hr: Int, ppInMs: UInt16, ppErrorEstimate: UInt16, blockerBit: Int, skinContactStatus: Int, skinContactSupported: Int)) {
+    init(_ data: PolarPpiSample) {
         self.data = data
     }
 
@@ -295,23 +258,6 @@ class PolarPpiSample: Encodable {
         try? container.encode(data.blockerBit, forKey: .blockerBit)
         try? container.encode(data.skinContactStatus, forKey: .skinContactStatus)
         try? container.encode(data.skinContactSupported, forKey: .skinContactSupported)
-    }
-}
-
-class PolarPpiDataCodable: Encodable {
-    let data: PolarPpiData
-
-    init(_ data: PolarPpiData) {
-        self.data = data
-    }
-
-    enum CodingKeys: String, CodingKey {
-        case samples
-    }
-
-    func encode(to encoder: Encoder) {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try? container.encode(data.samples.map { PolarPpiSample($0) }, forKey: .samples)
     }
 }
 

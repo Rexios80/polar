@@ -344,7 +344,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
 
     @Deprecated("", replaceWith = ReplaceWith(""))
     override fun streamingFeaturesReady(
-        identifier: String, features: Set<PolarBleApi.PolarDeviceDataType>
+        identifier: String, features: Set<PolarDeviceDataType>
     ) {
         throw UnsupportedOperationException()
     }
@@ -373,7 +373,7 @@ class StreamingChannel(
             PolarDeviceDataType.ECG -> api.startEcgStreaming(identifier, settings)
             PolarDeviceDataType.ACC -> api.startAccStreaming(identifier, settings)
             PolarDeviceDataType.PPG -> api.startPpgStreaming(identifier, settings)
-            PolarDeviceDataType.PPI -> api.startOhrPPIStreaming(identifier)
+            PolarDeviceDataType.PPI -> api.startPpiStreaming(identifier)
             PolarDeviceDataType.GYRO -> api.startGyroStreaming(identifier, settings)
             PolarDeviceDataType.MAGNETOMETER -> api.startMagnetometerStreaming(
                 identifier, settings
