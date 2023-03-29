@@ -15,8 +15,8 @@ void main() async {
   testBleSdkFeatures(
     identifier,
     features: PolarSdkFeature.values.toSet().difference({
+      PolarSdkFeature.offlineRecording,
       PolarSdkFeature.h10ExerciseRecording,
-      PolarSdkFeature.sdkMode,
     }),
   );
   testStreaming(

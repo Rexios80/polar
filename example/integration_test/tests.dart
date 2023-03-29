@@ -76,13 +76,12 @@ void testBleSdkFeatures(
   required Set<PolarSdkFeature> features,
 }) {
   test('Ble sdk features', () async {
-    final futures = features.map(
-      (feature) =>
-          polar.sdkFeatureReady.firstWhere((event) => event.feature == feature),
-    );
-
     await connect(identifier);
-    await Future.wait(futures);
+    final available = await polar.sdkFeatureReady
+        .take(features.length)
+        .map((e) => e.feature)
+        .toSet();
+    expect(setEquals(available, features), true);
     await disconnect(identifier);
   });
 }
@@ -96,9 +95,9 @@ void testStreaming(
       await connect(identifier);
       await polar.sdkFeatureReady
           .firstWhere((e) => e.feature == PolarSdkFeature.onlineStreaming);
-      final streamingFeatures =
+      final available =
           await polar.getAvailableOnlineStreamDataTypes(identifier);
-      expect(setEquals(streamingFeatures, features), true);
+      expect(setEquals(available, features), true);
     });
 
     tearDownAll(() async {
