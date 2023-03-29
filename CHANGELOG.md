@@ -1,5 +1,5 @@
-## 5.0.0-beta2
-- Updates Polar SDK to `5.0.0-beta2`
+## 5.0.0
+- Updates Polar SDK to `5.0.0`
 - BREAKING
   - Minimum iOS version is now `14.0`
   - All sample timestamps are now converted to `DateTime`
@@ -17,6 +17,7 @@
     - `hrFeatureReady`
     - `sdkModeFeatureAvailable`
   - `hrNotificationReceived` functionality has been moved to streaming
+  - `PolarHrData.rrs` has been removed in favor of `PolarHrData.rrsMs`
 - See [the migration guide](https://github.com/polarofficial/polar-ble-sdk/blob/polar-ble-sdk-5.0.0/documentation/MigrationGuide5.0.0.md) and example for more details
 
 ## 4.1.0
