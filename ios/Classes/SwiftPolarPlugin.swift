@@ -304,15 +304,15 @@ public class SwiftPolarPlugin:
     // MARK: Deprecated functions
 
     public func streamingFeaturesReady(_ identifier: String, streamingFeatures: Set<PolarBleSdk.PolarDeviceDataType>) {
-        fatalError("streamingFeaturesReady is not implemented")
+        // Do nothing
     }
 
     public func hrFeatureReady(_ identifier: String) {
-        fatalError("hrFeatureReady is not implemented")
+        // Do nothing
     }
 
     public func ftpFeatureReady(_ identifier: String) {
-        fatalError("ftpFeatureReady is not implemented")
+        // Do nothing
     }
 }
 

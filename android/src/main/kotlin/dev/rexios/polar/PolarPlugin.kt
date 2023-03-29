@@ -324,29 +324,29 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
 
     @Deprecated("", replaceWith = ReplaceWith(""))
     override fun hrFeatureReady(identifier: String) {
-        throw UnsupportedOperationException()
+        // Do nothing
     }
 
     @Deprecated("", replaceWith = ReplaceWith(""))
     override fun hrNotificationReceived(identifier: String, data: PolarHrData.PolarHrSample) {
-        throw UnsupportedOperationException()
+        // Do nothing
     }
 
     @Deprecated("", replaceWith = ReplaceWith(""))
     override fun polarFtpFeatureReady(identifier: String) {
-        throw UnsupportedOperationException()
+        // Do nothing
     }
 
     @Deprecated("", replaceWith = ReplaceWith(""))
     override fun sdkModeFeatureAvailable(identifier: String) {
-        throw UnsupportedOperationException()
+        // Do nothing
     }
 
     @Deprecated("", replaceWith = ReplaceWith(""))
     override fun streamingFeaturesReady(
         identifier: String, features: Set<PolarDeviceDataType>
     ) {
-        throw UnsupportedOperationException()
+        // Do nothing
     }
 }
 
