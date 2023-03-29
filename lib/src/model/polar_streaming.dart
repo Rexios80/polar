@@ -6,7 +6,7 @@ import 'package:polar/src/model/ppg_data_type.dart';
 part 'polar_streaming.g.dart';
 
 /// Base class for all streaming data
-@JsonSerializable(createToJson: false, genericArgumentFactories: true)
+@JsonSerializable(genericArgumentFactories: true)
 class PolarStreamingData<T> {
   /// Samples
   final List<T> samples;
@@ -41,10 +41,33 @@ class PolarStreamingData<T> {
         throw UnsupportedError('Unsupported type: $T');
     }
   }
+
+  Map<String, dynamic> _toJson(Function toJsonT) =>
+      _$PolarStreamingDataToJson(this, (dynamic e) => toJsonT(e));
+
+  /// Convert to json
+  Map<String, dynamic> toJson() {
+    switch (T) {
+      case PolarHrSample:
+        return _toJson(_$PolarHrSampleToJson);
+      case PolarEcgSample:
+        return _toJson(_$PolarEcgSampleToJson);
+      case PolarAccSample:
+        return _toJson(_$PolarAccSampleToJson);
+      case PolarGyroSample:
+        return _toJson(_$PolarGyroSampleToJson);
+      case PolarMagnetometerSample:
+        return _toJson(_$PolarMagnetometerSampleToJson);
+      case PolarPpiSample:
+        return _toJson(_$PolarPpiSampleToJson);
+      default:
+        throw UnsupportedError('Unsupported type: $T');
+    }
+  }
 }
 
 /// Polar HR sample
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 class PolarHrSample {
   /// hr in BPM
   final int hr;
@@ -71,7 +94,7 @@ class PolarHrSample {
 typedef PolarHrData = PolarStreamingData<PolarHrSample>;
 
 /// Polar ecg sample
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 class PolarEcgSample {
   /// Moment sample is taken in nanoseconds. The epoch of timestamp is 1.1.2000
   @PolarSampleTimestampConverter()
@@ -91,7 +114,7 @@ class PolarEcgSample {
 typedef PolarEcgData = PolarStreamingData<PolarEcgSample>;
 
 /// Polar acc sample
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 class PolarAccSample {
   /// Moment sample is taken in nanoseconds. The epoch of timestamp is 1.1.2000
   @PolarSampleTimestampConverter()
@@ -119,7 +142,7 @@ class PolarAccSample {
 typedef PolarAccData = PolarStreamingData<PolarAccSample>;
 
 /// Polar gyro sample
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 class PolarGyroSample {
   /// Moment sample is taken in nanoseconds. The epoch of timestamp is 1.1.2000
   @PolarSampleTimestampConverter()
@@ -147,7 +170,7 @@ class PolarGyroSample {
 typedef PolarGyroData = PolarStreamingData<PolarGyroSample>;
 
 /// Polar magnetometer sample
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 class PolarMagnetometerSample {
   /// Moment sample is taken in nanoseconds. The epoch of timestamp is 1.1.2000
   @PolarSampleTimestampConverter()
@@ -175,7 +198,7 @@ class PolarMagnetometerSample {
 typedef PolarMagnetometerData = PolarStreamingData<PolarMagnetometerSample>;
 
 /// Polar ohr sample
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 class PolarPpgSample {
   /// Moment sample is taken in nanoseconds. The epoch of timestamp is 1.1.2000
   @PolarSampleTimestampConverter()
@@ -195,10 +218,13 @@ class PolarPpgSample {
   /// From json
   factory PolarPpgSample.fromJson(Map<String, dynamic> json) =>
       _$PolarPpgSampleFromJson(json);
+
+  /// To json
+  Map<String, dynamic> toJson() => _$PolarPpgSampleToJson(this);
 }
 
 /// Polar ppg data
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 class PolarPpgData extends PolarStreamingData<PolarPpgSample> {
   /// Type of data, which varies based on what is type of optical sensor used
   /// in the device
@@ -214,10 +240,14 @@ class PolarPpgData extends PolarStreamingData<PolarPpgSample> {
   /// From json
   factory PolarPpgData.fromJson(Map<String, dynamic> json) =>
       _$PolarPpgDataFromJson(json);
+
+  /// To json
+  @override
+  Map<String, dynamic> toJson() => _$PolarPpgDataToJson(this);
 }
 
 /// Polar ppi sample
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 class PolarPpiSample {
   /// ppInMs Pulse to Pulse interval in milliseconds.
   /// The value indicates the quality of PP-intervals.

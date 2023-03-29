@@ -16,3 +16,12 @@ PolarDeviceInfo _$PolarDeviceInfoFromJson(Map<String, dynamic> json) =>
       name: json['name'] as String,
       isConnectable: _readConnectable(json, 'isConnectable') as bool,
     );
+
+Map<String, dynamic> _$PolarDeviceInfoToJson(PolarDeviceInfo instance) =>
+    <String, dynamic>{
+      'deviceId': instance.deviceId,
+      'address': instance.address,
+      'rssi': instance.rssi,
+      'name': instance.name,
+      'isConnectable': instance.isConnectable,
+    };

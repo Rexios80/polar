@@ -114,7 +114,7 @@ Object? _readEntryId(Map json, String key) =>
     readPlatformValue(json, _entryIdKeys);
 
 /// Polar Exercise Data
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 class PolarExerciseData {
   /// in seconds
   @JsonKey(readValue: _readInterval)
@@ -133,6 +133,9 @@ class PolarExerciseData {
   /// From json
   factory PolarExerciseData.fromJson(Map<String, dynamic> json) =>
       _$PolarExerciseDataFromJson(json);
+
+  /// To json
+  Map<String, dynamic> toJson() => _$PolarExerciseDataToJson(this);
 
   @override
   String toString() {

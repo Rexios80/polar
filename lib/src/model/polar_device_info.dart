@@ -5,7 +5,7 @@ import 'package:polar/src/model/convert.dart';
 part 'polar_device_info.g.dart';
 
 /// Polar device info
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 class PolarDeviceInfo {
   /// polar device id or UUID for 3rd party sensors
   final String deviceId;
@@ -37,6 +37,9 @@ class PolarDeviceInfo {
   /// From json
   factory PolarDeviceInfo.fromJson(Map<String, dynamic> json) =>
       _$PolarDeviceInfoFromJson(json);
+
+  /// To json
+  Map<String, dynamic> toJson() => _$PolarDeviceInfoToJson(this);
 }
 
 Object? _readConnectable(Map json, String key) => readPlatformValue(

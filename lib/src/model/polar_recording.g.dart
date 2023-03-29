@@ -28,3 +28,9 @@ PolarExerciseData _$PolarExerciseDataFromJson(Map<String, dynamic> json) =>
           .map((e) => e as int)
           .toList(),
     );
+
+Map<String, dynamic> _$PolarExerciseDataToJson(PolarExerciseData instance) =>
+    <String, dynamic>{
+      'interval': instance.interval,
+      'samples': instance.samples,
+    };

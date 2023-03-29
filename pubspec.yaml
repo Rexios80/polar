@@ -23,6 +23,9 @@ dev_dependencies:
   rexios_lints: ^5.0.0
   build_runner: ^2.3.2
   json_serializable: ^6.5.4
+  uuid: ^3.0.7
+  mock_event_channel:
+    path: ../mock_event_channel
 
 flutter:
   plugin:
