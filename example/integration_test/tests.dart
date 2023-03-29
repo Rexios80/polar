@@ -5,7 +5,13 @@ import 'package:uuid/uuid.dart';
 
 final polar = Polar();
 
-Future<void> requestPermissions() => polar.requestPermissions();
+Future<void> requestPermissions() {
+  debugPrint('''
+**********************************************************************
+* Accept the permission request on the device
+**********************************************************************''');
+  return polar.requestPermissions();
+}
 
 void testSearch(String identifier) {
   test('search', () async {
@@ -92,10 +98,7 @@ void testStreaming(
           .firstWhere((e) => e.feature == PolarSdkFeature.onlineStreaming);
       final streamingFeatures =
           await polar.getAvailableOnlineStreamDataTypes(identifier);
-      expect(
-        setEquals(streamingFeatures, features),
-        true,
-      );
+      expect(setEquals(streamingFeatures, features), true);
     });
 
     tearDownAll(() async {

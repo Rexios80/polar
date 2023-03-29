@@ -190,12 +190,12 @@ class Polar {
   Future<Set<PolarDataType>> getAvailableOnlineStreamDataTypes(
     String identifier,
   ) async {
-    final response = await _channel.invokeListMethod(
+    final response = await _channel.invokeMethod(
       'getAvailableOnlineStreamDataTypes',
       identifier,
     );
     if (response == null) return {};
-    return response.map(PolarDataType.fromJson).toSet();
+    return (jsonDecode(response) as List).map(PolarDataType.fromJson).toSet();
   }
 
   ///  Request the stream settings available in current operation mode. This request shall be used before the stream is started
@@ -235,7 +235,7 @@ class Polar {
       feature.toJson(),
     ]);
 
-    if (settings == null && feature != PolarDataType.ppi) {
+    if (settings == null && feature.supportsStreamSettings) {
       final availableSettings = await requestStreamSettings(
         identifier,
         feature,

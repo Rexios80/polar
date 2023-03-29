@@ -15,7 +15,7 @@ enum PolarDataType {
   ppg,
 
   /// PPI
-  ppi,
+  ppi(supportsStreamSettings: false),
 
   /// Gyro
   gyro,
@@ -24,7 +24,13 @@ enum PolarDataType {
   magnetometer,
 
   /// HR
-  hr;
+  hr(supportsStreamSettings: false);
+
+  /// If this feature supports stream settings
+  final bool supportsStreamSettings;
+
+  /// Constructor
+  const PolarDataType({this.supportsStreamSettings = true});
 
   /// Create a [PolarDataType] from json
   static PolarDataType fromJson(dynamic json) {
