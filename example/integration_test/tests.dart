@@ -105,10 +105,10 @@ void testStreaming(
     test(
       'hr',
       () async {
-        final ecgData = await polar.startHrStreaming(identifier).first;
-        expect(ecgData.samples.length, greaterThan(0));
+        final hrData = await polar.startHrStreaming(identifier).first;
+        expect(hrData.samples.length, greaterThan(0));
       },
-      skip: !features.contains(PolarDataType.ecg),
+      skip: !features.contains(PolarDataType.hr),
     );
 
     test(
