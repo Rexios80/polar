@@ -61,7 +61,19 @@ class PpgDataTypeConverter extends JsonConverter<PpgDataType, dynamic> {
   }
 
   @override
-  dynamic toJson(PpgDataType object) => throw UnimplementedError();
+  dynamic toJson(PpgDataType object) {
+    if (Platform.isIOS) {
+      switch (object) {
+        case PpgDataType.ppg3_ambient1:
+          return 4;
+        default: // PpgDataType.unknown
+          return 18;
+      }
+    } else {
+      // This is android
+      return object.name.snakeCase.toUpperCase();
+    }
+  }
 }
 
 /// Converter for unix time
@@ -119,5 +131,8 @@ class PolarSampleTimestampConverter extends JsonConverter<DateTime, int> {
   }
 
   @override
-  int toJson(DateTime object) => throw UnimplementedError();
+  int toJson(DateTime object) {
+    final millis = object.microsecondsSinceEpoch - _polarEpoch;
+    return millis * 1000;
+  }
 }
