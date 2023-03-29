@@ -172,7 +172,7 @@ void testStreaming(
 
 final exerciseId = const Uuid().v4();
 
-void testRecording(String identifier) {
+void testRecording(String identifier, {bool wait = true}) {
   test('recording', () async {
     await connect(identifier);
     await polar.sdkFeatureReady.firstWhere(
@@ -200,7 +200,9 @@ void testRecording(String identifier) {
     expect(status2.entryId, exerciseId);
     expect(status2.ongoing, true);
 
-    await Future.delayed(const Duration(seconds: 5));
+    if (wait) {
+      await Future.delayed(const Duration(seconds: 5));
+    }
     await polar.stopRecording(identifier);
 
     final status3 = await polar.requestRecordingStatus(identifier);

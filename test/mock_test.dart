@@ -31,12 +31,12 @@ void main() {
         .setMockStreamHandler(searchChannel, SearchHandler());
   });
 
-  // testSearch(identifier);
-  // testConnection(identifier);
-  // testBasicData(identifier);
-  // testBleSdkFeatures(identifier, features: PolarSdkFeature.values.toSet());
-  // testStreaming(identifier, features: PolarDataType.values.toSet());
-  testRecording(identifier);
+  testSearch(identifier);
+  testConnection(identifier);
+  testBasicData(identifier);
+  testBleSdkFeatures(identifier, features: PolarSdkFeature.values.toSet());
+  testStreaming(identifier, features: PolarDataType.values.toSet());
+  testRecording(identifier, wait: false);
 }
 
 Future<void> invoke(String method, [dynamic arguments]) {
@@ -51,6 +51,10 @@ Future<void> invoke(String method, [dynamic arguments]) {
 void executeLater<T>(FutureOr<T> Function() computation) {
   Future.delayed(Duration.zero, computation);
 }
+
+final exercises = <PolarExerciseEntry>[];
+var recording = false;
+var exerciseId = '';
 
 Future<dynamic> handleMethodCall(MethodCall call) async {
   switch (call.method) {
@@ -80,16 +84,23 @@ Future<dynamic> handleMethodCall(MethodCall call) async {
       );
       return null;
     case 'startRecording':
+      recording = true;
+      exerciseId = call.arguments[1];
       return null;
     case 'stopRecording':
+      recording = false;
+      exercises.add(
+        PolarExerciseEntry(path: '', date: DateTime.now(), entryId: exerciseId),
+      );
       return null;
     case 'requestRecordingStatus':
-      return null;
+      return [recording, exerciseId];
     case 'listExercises':
-      return null;
+      return exercises.map(jsonEncode).toList();
     case 'fetchExercise':
-      return null;
+      return jsonEncode({'recordingInterval': 0, 'hrSamples': [0]});
     case 'removeExercise':
+      exercises.clear();
       return null;
     default:
       throw UnimplementedError();
