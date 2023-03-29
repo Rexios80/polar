@@ -371,9 +371,10 @@ packages:
   mock_event_channel:
     dependency: "direct dev"
     description:
-      path: "../mock_event_channel"
-      relative: true
-    source: path
+      name: mock_event_channel
+      sha256: c95128bd3f2ce3df78b7555373c9c905db8bb7ef164b816b5ab5a7d2598421c9
+      url: "https://pub.dev"
+    source: hosted
     version: "0.0.1"
   package_config:
     dependency: transitive
@@ -637,5 +638,5 @@ packages:
     source: hosted
     version: "3.1.1"
 sdks:
-  dart: ">=2.19.5 <3.0.0"
+  dart: ">=2.19.0 <3.0.0"
   flutter: ">=3.0.0"
