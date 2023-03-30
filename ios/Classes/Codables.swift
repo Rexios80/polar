@@ -35,16 +35,19 @@ class PolarDeviceInfoCodable: Encodable {
 
 class PolarDataCodable<T>: Encodable {
     let data: T
-    
+
     required init(_ data: T) {
         self.data = data
     }
-    
+
     enum CodingKeys: String, CodingKey {
         case samples
+        case type
     }
-    
+
     func encode(to encoder: Encoder) {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
         let codables: [Encodable]
         if let data = data as? PolarHrData {
             codables = data.map(PolarHrSampleCodable.init)
@@ -53,6 +56,7 @@ class PolarDataCodable<T>: Encodable {
         } else if let data = data as? PolarAccData {
             codables = data.samples.map(PolarAccSampleCodable.init)
         } else if let data = data as? PolarPpgData {
+            try? container.encode(data.type.rawValue, forKey: .type)
             codables = data.samples.map(PolarPpgSampleCodable.init)
         } else if let data = data as? PolarPpiData {
             codables = data.samples.map(PolarPpiSampleCodable.init)
@@ -63,8 +67,7 @@ class PolarDataCodable<T>: Encodable {
         } else {
             codables = []
         }
-        
-        var container = encoder.container(keyedBy: CodingKeys.self)
+
         try? container.encode(codables.wrap(), forKey: .samples)
     }
 }

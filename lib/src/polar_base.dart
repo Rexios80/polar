@@ -86,7 +86,7 @@ class Polar {
         _sdkFeatureReady.add(
           PolarSdkFeatureReadyEvent(
             call.arguments[0],
-            PolarSdkFeature.fromJson(jsonDecode(call.arguments[1])),
+            PolarSdkFeature.fromJson(call.arguments[1]),
           ),
         );
         return;
