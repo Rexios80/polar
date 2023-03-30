@@ -299,7 +299,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
     }
 
     override fun bleSdkFeatureReady(identifier: String, feature: PolarBleSdkFeature) {
-        invokeOnUiThread("sdkFeatureReady", listOf(identifier, gson.toJson(feature)))
+        invokeOnUiThread("sdkFeatureReady", listOf(identifier, feature.name))
     }
 
     override fun deviceConnected(polarDeviceInfo: PolarDeviceInfo) {
