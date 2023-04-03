@@ -65,7 +65,7 @@ Future<dynamic> handleMethodCall(MethodCall call) async {
         await invoke('disInformationReceived', [identifier, '', '']);
         await invoke('batteryLevelReceived', [identifier, 100]);
         for (final feature in PolarSdkFeature.values) {
-          await invoke('sdkFeatureReady', [identifier, jsonEncode(feature)]);
+          await invoke('sdkFeatureReady', [identifier, feature.toJson()]);
         }
       });
       return null;
@@ -73,7 +73,7 @@ Future<dynamic> handleMethodCall(MethodCall call) async {
       executeLater(() => invoke('deviceDisconnected', info));
       return null;
     case 'getAvailableOnlineStreamDataTypes':
-      return jsonEncode(PolarDataType.values);
+      return jsonEncode(PolarDataType.values.map((e) => e.toJson()).toList());
     case 'requestStreamSettings':
       return jsonEncode(PolarSensorSetting({}));
     case 'createStreamingChannel':
