@@ -1,3 +1,6 @@
+## 5.1.0
+- Updates Polar SDK to `5.1.0`
+
 ## 5.0.0
 - Updates Polar SDK to `5.0.0`
 - BREAKING
