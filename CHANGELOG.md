@@ -1,3 +1,6 @@
+## 5.2.0
+- Dependency upgrades
+
 ## 5.1.0
 - Updates Polar SDK to `5.1.0`
 

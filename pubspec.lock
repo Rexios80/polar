@@ -372,10 +372,10 @@ packages:
     dependency: "direct dev"
     description:
       name: mock_event_channel
-      sha256: d71ba32acfe8ff4d18393a0bc93f3d48137a4877a48249678314a854ae6b4ac5
+      sha256: "858def4471c5ebd64c5c32bfc54313d98f3de1295df8a7fc61faa88f113d1c55"
       url: "https://pub.dev"
     source: hosted
-    version: "0.1.0"
+    version: "0.1.1"
   package_config:
     dependency: transitive
     description:
