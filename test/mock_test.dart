@@ -25,9 +25,9 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUpAll(() {
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, handleMethodCall);
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockStreamHandler(searchChannel, SearchHandler());
   });
 
@@ -40,7 +40,7 @@ void main() {
 }
 
 Future<void> invoke(String method, [dynamic arguments]) {
-  return TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+  return TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
       .handlePlatformMessage(
     channel.name,
     channel.codec.encodeMethodCall(MethodCall(method, arguments)),
@@ -77,7 +77,7 @@ Future<dynamic> handleMethodCall(MethodCall call) async {
     case 'requestStreamSettings':
       return jsonEncode(PolarSensorSetting({}));
     case 'createStreamingChannel':
-      TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockStreamHandler(
         EventChannel(call.arguments[0] as String),
         StreamingHandler(PolarDataType.fromJson(call.arguments[2])),
@@ -98,7 +98,10 @@ Future<dynamic> handleMethodCall(MethodCall call) async {
     case 'listExercises':
       return exercises.map(jsonEncode).toList();
     case 'fetchExercise':
-      return jsonEncode({'recordingInterval': 0, 'hrSamples': [0]});
+      return jsonEncode({
+        'recordingInterval': 0,
+        'hrSamples': [0]
+      });
     case 'removeExercise':
       exercises.clear();
       return null;

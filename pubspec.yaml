@@ -13,7 +13,7 @@ dependencies:
 
   flutter_plugin_android_lifecycle: ^2.0.5
   permission_handler: ^10.0.0
-  device_info_plus: ^8.0.0
+  device_info_plus: ^9.0.0
   recase: ^4.0.0
   json_annotation: ^4.8.0
 
