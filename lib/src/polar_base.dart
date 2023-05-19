@@ -144,15 +144,18 @@ class Polar {
     String identifier, {
     bool requestPermissions = true,
   }) async {
-    if (requestPermissions) {
-      await this.requestPermissions();
+    if (requestPermissions && !await this.requestPermissions()) {
+      // permission not granted
+      return;
     }
 
     unawaited(_channel.invokeMethod('connectToDevice', identifier));
   }
 
   /// Request the necessary permissions on Android
-  Future<void> requestPermissions() async {
+  ///
+  /// Return true if all necessary permission have been granted or permissions are not requested
+  Future<bool> requestPermissions() async {
     if (Platform.isAndroid) {
       final androidDeviceInfo = await DeviceInfoPlugin().androidInfo;
       final sdkInt = androidDeviceInfo.version.sdkInt;
@@ -161,15 +164,17 @@ class Polar {
       if (sdkInt >= 23) {
         // If we are on an Android version before S or bluetooth scan is used to derive location
         if (sdkInt < 31 || !_bluetoothScanNeverForLocation) {
-          await Permission.location.request();
+          return await Permission.location.request().isGranted;
         }
         // If we are on Android S+
         if (sdkInt >= 31) {
-          await Permission.bluetoothScan.request();
-          await Permission.bluetoothConnect.request();
+          return await Permission.bluetoothScan.request().isGranted &&
+              await Permission.bluetoothConnect.request().isGranted;
         }
       }
     }
+    // in case we do not request permissions always return true
+    return true;
   }
 
   /// Disconnect from the current Polar device.
