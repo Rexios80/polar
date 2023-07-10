@@ -36,6 +36,7 @@ android {
         minSdkVersion 24
         consumerProguardFiles 'proguard-rules.pro'
     }
+    namespace "dev.rexios.polar"
 }
 
 dependencies {
