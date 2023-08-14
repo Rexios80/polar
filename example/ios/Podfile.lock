@@ -8,12 +8,12 @@ PODS:
     - Flutter
   - polar (0.0.1):
     - Flutter
-    - PolarBleSdk (~> 5.1.0)
-  - PolarBleSdk (5.1.0):
+    - PolarBleSdk (~> 5.2.0)
+  - PolarBleSdk (5.2.0):
     - RxSwift (~> 6.5.0)
     - SwiftProtobuf (~> 1.0)
   - RxSwift (6.5.0)
-  - SwiftProtobuf (1.21.0)
+  - SwiftProtobuf (1.22.1)
 
 DEPENDENCIES:
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
@@ -41,14 +41,14 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/polar/ios"
 
 SPEC CHECKSUMS:
-  device_info_plus: e5c5da33f982a436e103237c0c85f9031142abed
+  device_info_plus: 7545d84d8d1b896cb16a4ff98c19f07ec4b298ea
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
-  integration_test: a1e7d09bd98eca2fc37aefd79d4f41ad37bdbbe5
+  integration_test: 13825b8a9334a850581300559b8839134b124670
   permission_handler_apple: 44366e37eaf29454a1e7b1b7d736c2cceaeb17ce
-  polar: 854c03a308c329a19759f1e0327058f362ebc6cb
-  PolarBleSdk: 4ff4df5c3767b6c31673ada5537dc259278cc008
+  polar: f4e6a7929dbc1136295430cd081e9e047d06e513
+  PolarBleSdk: 55b5de863ddc3640efc4df91fe8541a9802c7dc2
   RxSwift: 5710a9e6b17f3c3d6e40d6e559b9fa1e813b2ef8
-  SwiftProtobuf: afced68785854575756db965e9da52bbf3dc45e7
+  SwiftProtobuf: 7773c4e96a99d7b8ab7cda0fc30a883732ff93b1
 
 PODFILE CHECKSUM: c24c27344913105c54b95f33f73882923a0bd103
 

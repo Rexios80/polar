@@ -1,3 +1,6 @@
+## 5.2.2
+- Updates Polar SDK to `5.2.0`
+
 ## 5.2.1
 - Adds namespace to `build.gradle` to support Gradle 8
 
