@@ -4,7 +4,7 @@ PODS:
   - Flutter (1.0.0)
   - integration_test (0.0.1):
     - Flutter
-  - permission_handler_apple (9.0.4):
+  - permission_handler_apple (9.1.1):
     - Flutter
   - polar (0.0.1):
     - Flutter
@@ -44,7 +44,7 @@ SPEC CHECKSUMS:
   device_info_plus: 7545d84d8d1b896cb16a4ff98c19f07ec4b298ea
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
   integration_test: 13825b8a9334a850581300559b8839134b124670
-  permission_handler_apple: 44366e37eaf29454a1e7b1b7d736c2cceaeb17ce
+  permission_handler_apple: e76247795d700c14ea09e3a2d8855d41ee80a2e6
   polar: f4e6a7929dbc1136295430cd081e9e047d06e513
   PolarBleSdk: 55b5de863ddc3640efc4df91fe8541a9802c7dc2
   RxSwift: 5710a9e6b17f3c3d6e40d6e559b9fa1e813b2ef8
