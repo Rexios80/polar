@@ -1,4 +1,4 @@
-import 'package:polar/src/model/polar_ble_sdk_feature.dart';
+import 'package:polar/polar.dart';
 
 /// The feature is available in this device and it is ready. Called only for
 /// the features which are specified in [PolarBleApi] construction.
@@ -38,4 +38,18 @@ class PolarBatteryLevelEvent {
 
   /// Constructor
   PolarBatteryLevelEvent(this.identifier, this.level);
+}
+
+/// Polar disconnect event
+class PolarDeviceDisconnectedEvent {
+  /// The polar device info
+  final PolarDeviceInfo info;
+
+  /// If this disconnect was caused by a pairing error
+  ///
+  /// iOS only. See https://github.com/polarofficial/polar-ble-sdk/releases/tag/5.2.0
+  final bool pairingError;
+
+  /// Constructor
+  PolarDeviceDisconnectedEvent(this.info, this.pairingError);
 }

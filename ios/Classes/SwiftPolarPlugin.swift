@@ -270,12 +270,12 @@ public class SwiftPolarPlugin:
         channel.invokeMethod("deviceConnected", arguments: data)
     }
 
-    public func deviceDisconnected(_ polarDeviceInfo: PolarDeviceInfo) {
+    public func deviceDisconnected(_ polarDeviceInfo: PolarDeviceInfo, pairingError: Bool) {
         guard let data = jsonEncode(PolarDeviceInfoCodable(polarDeviceInfo))
         else {
             return
         }
-        channel.invokeMethod("deviceDisconnected", arguments: data)
+        channel.invokeMethod("deviceDisconnected", arguments: [data, pairingError])
     }
 
     public func batteryLevelReceived(_ identifier: String, batteryLevel: UInt) {

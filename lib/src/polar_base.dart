@@ -20,7 +20,8 @@ class Polar {
       StreamController<PolarSdkFeatureReadyEvent>.broadcast();
   final _deviceConnected = StreamController<PolarDeviceInfo>.broadcast();
   final _deviceConnecting = StreamController<PolarDeviceInfo>.broadcast();
-  final _deviceDisconnected = StreamController<PolarDeviceInfo>.broadcast();
+  final _deviceDisconnected =
+      StreamController<PolarDeviceDisconnectedEvent>.broadcast();
   final _disInformation =
       StreamController<PolarDisInformationEvent>.broadcast();
   final _batteryLevel = StreamController<PolarBatteryLevelEvent>.broadcast();
@@ -46,7 +47,8 @@ class Polar {
   /// If PolarBleApi#disconnectFromPolarDevice is not called, a new connection attempt is dispatched automatically.
   ///
   /// - Parameter identifier: Polar device info
-  Stream<PolarDeviceInfo> get deviceDisconnected => _deviceDisconnected.stream;
+  Stream<PolarDeviceDisconnectedEvent> get deviceDisconnected =>
+      _deviceDisconnected.stream;
 
   ///  Received DIS info.
   ///
@@ -99,8 +101,12 @@ class Polar {
             .add(PolarDeviceInfo.fromJson(jsonDecode(call.arguments)));
         return;
       case 'deviceDisconnected':
-        _deviceDisconnected
-            .add(PolarDeviceInfo.fromJson(jsonDecode(call.arguments)));
+        _deviceDisconnected.add(
+          PolarDeviceDisconnectedEvent(
+            PolarDeviceInfo.fromJson(jsonDecode(call.arguments[0])),
+            call.arguments[1],
+          ),
+        );
         return;
       case 'disInformationReceived':
         _disInformation.add(

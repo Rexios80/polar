@@ -311,7 +311,12 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
     }
 
     override fun deviceDisconnected(polarDeviceInfo: PolarDeviceInfo) {
-        invokeOnUiThread("deviceDisconnected", gson.toJson(polarDeviceInfo))
+        invokeOnUiThread(
+            "deviceDisconnected",
+            // The second argument is the `pairingError` field on iOS
+            // Since Android doesn't implement that, always send false
+            listOf(gson.toJson(polarDeviceInfo), false),
+        )
     }
 
     override fun disInformationReceived(identifier: String, uuid: UUID, value: String) {

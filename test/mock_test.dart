@@ -70,7 +70,7 @@ Future<dynamic> handleMethodCall(MethodCall call) async {
       });
       return null;
     case 'disconnectFromDevice':
-      executeLater(() => invoke('deviceDisconnected', info));
+      executeLater(() => invoke('deviceDisconnected', [info, false]));
       return null;
     case 'getAvailableOnlineStreamDataTypes':
       return jsonEncode(PolarDataType.values.map((e) => e.toJson()).toList());

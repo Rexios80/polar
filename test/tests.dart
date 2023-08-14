@@ -33,7 +33,7 @@ void testConnection(String identifier) {
     await polar.disconnectFromDevice(identifier);
 
     final disconnected = await polar.deviceDisconnected.first;
-    expect(disconnected.deviceId, identifier);
+    expect(disconnected.info.deviceId, identifier);
   });
 }
 

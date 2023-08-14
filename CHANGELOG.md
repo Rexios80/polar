@@ -1,5 +1,6 @@
-## 5.2.2
+## 6.0.0
 - Updates Polar SDK to `5.2.0`
+- BREAKING: `deviceDisconencted` stream now outputs `PolarDeviceDisconnectedEvent`
 
 ## 5.2.1
 - Adds namespace to `build.gradle` to support Gradle 8
