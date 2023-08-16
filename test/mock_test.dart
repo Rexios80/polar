@@ -3,7 +3,6 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mock_event_channel/mock_event_channel.dart';
 import 'package:polar/polar.dart';
 
 import 'tests.dart';
@@ -100,7 +99,7 @@ Future<dynamic> handleMethodCall(MethodCall call) async {
     case 'fetchExercise':
       return jsonEncode({
         'recordingInterval': 0,
-        'hrSamples': [0]
+        'hrSamples': [0],
       });
     case 'removeExercise':
       exercises.clear();

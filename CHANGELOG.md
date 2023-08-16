@@ -1,3 +1,6 @@
+## 6.0.1
+- Updates for Flutter 3.13.0
+
 ## 6.0.0
 - Updates Polar SDK to `5.2.0`
 - BREAKING: `deviceDisconencted` stream now outputs `PolarDeviceDisconnectedEvent`

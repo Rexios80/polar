@@ -96,7 +96,7 @@ class PolarExerciseEntry {
   /// To json
   Map<String, dynamic> toJson() => {
         ..._$PolarExerciseEntryToJson(this),
-        _entryIdKeys[defaultTargetPlatform]!: entryId
+        _entryIdKeys[defaultTargetPlatform]!: entryId,
       };
 
   @override
