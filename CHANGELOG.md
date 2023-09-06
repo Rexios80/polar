@@ -1,3 +1,7 @@
+## 6.1.0
+- Updates Polar SDK to `5.3.0`
+- Adds support for `enableLedAnimation` call
+
 ## 6.0.1
 - Updates for Flutter 3.13.0
 

@@ -102,6 +102,9 @@ public class SwiftPolarPlugin:
                 fetchExercise(call, result)
             case "removeExercise":
                 removeExercise(call, result)
+            case "enableLedAnimation":
+                api.enableLedAnimation(call.arguments[0] as! String, enable: call.arguments[1] as! Bool)
+                result(nil)
             default: result(FlutterMethodNotImplemented)
             }
         } catch {
@@ -251,6 +254,17 @@ public class SwiftPolarPlugin:
             result(nil)
         }, onError: { error in
             result(FlutterError(code: "Error removing exercise", message: error.localizedDescription, details: nil))
+        })
+    }
+
+    func enableLedAnimation(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        let arguments = call.arguments as! [Any]
+        let identifier = arguments[0] as! String
+        let enable = arguments[1] as! Bool
+        _ = api.enableLedAnimation(identifier, enable: enable).subscribe(onCompleted: {
+            result(nil)
+        }, onError: { error in
+            result(FlutterError(code: "Error toggling led animation", message: error.localizedDescription, details: nil))
         })
     }
 
