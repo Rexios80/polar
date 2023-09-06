@@ -103,8 +103,7 @@ public class SwiftPolarPlugin:
             case "removeExercise":
                 removeExercise(call, result)
             case "enableLedAnimation":
-                api.enableLedAnimation(call.arguments[0] as! String, enable: call.arguments[1] as! Bool)
-                result(nil)
+                enableLedAnimation(call, result)
             default: result(FlutterMethodNotImplemented)
             }
         } catch {
