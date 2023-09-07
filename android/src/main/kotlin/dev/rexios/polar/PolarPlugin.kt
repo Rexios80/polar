@@ -119,6 +119,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
             "listExercises" -> listExercises(call, result)
             "fetchExercise" -> fetchExercise(call, result)
             "removeExercise" -> removeExercise(call, result)
+            "enableLedAnimation" -> enableLedAnimation(call, result)
             else -> result.notImplemented()
         }
     }
@@ -286,6 +287,20 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
         val entry = gson.fromJson(arguments[1] as String, PolarExerciseEntry::class.java)
 
         api.removeExercise(identifier, entry).subscribe({
+            runOnUiThread { result.success(null) }
+        }, {
+            runOnUiThread {
+                result.error(it.toString(), it.message, null)
+            }
+        }).discard()
+    }
+
+    private fun enableLedAnimation(call: MethodCall, result: Result) {
+        val arguments = call.arguments as List<*>
+        val identifier = arguments[0] as String
+        val enable = arguments[1] as Boolean
+
+        api.enableLedAnimation(identifier, enable).subscribe({
             runOnUiThread { result.success(null) }
         }, {
             runOnUiThread {
