@@ -36,6 +36,7 @@ void main() {
   testBleSdkFeatures(identifier, features: PolarSdkFeature.values.toSet());
   testStreaming(identifier, features: PolarDataType.values.toSet());
   testRecording(identifier, wait: false);
+  testMisc(identifier, isVerity: true);
 }
 
 Future<void> invoke(String method, [dynamic arguments]) {
@@ -103,6 +104,8 @@ Future<dynamic> handleMethodCall(MethodCall call) async {
       });
     case 'removeExercise':
       exercises.clear();
+      return null;
+    case 'enableLedAnimation':
       return null;
     default:
       throw UnimplementedError();

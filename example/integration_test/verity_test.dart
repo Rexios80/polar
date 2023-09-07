@@ -30,4 +30,5 @@ void main() async {
       PolarDataType.magnetometer,
     },
   );
+  testMisc(identifier, isVerity: true);
 }

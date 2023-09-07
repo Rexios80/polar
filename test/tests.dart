@@ -223,3 +223,16 @@ void testRecording(String identifier, {bool wait = true}) {
     await disconnect(identifier);
   });
 }
+
+void testMisc(String identifier, {required bool isVerity}) {
+  test('misc', () async {
+    await connect(identifier);
+    // Wait to ensure device is connected (not sure why this is necessary)
+    await Future.delayed(const Duration(seconds: 3));
+    if (isVerity) {
+      await polar.enableLedAnimation(identifier, false);
+      await polar.enableLedAnimation(identifier, true);
+    }
+    await disconnect(identifier);
+  });
+}

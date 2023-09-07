@@ -28,4 +28,5 @@ void main() async {
     },
   );
   testRecording(identifier);
+  testMisc(identifier, isVerity: false);
 }
