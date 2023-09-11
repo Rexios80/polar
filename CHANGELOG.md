@@ -1,3 +1,6 @@
+## 6.1.1
+- Upgrades permission_handler to version 11.0.0
+
 ## 6.1.0
 - Updates Polar SDK to `5.3.0`
 - Adds support for `enableLedAnimation` call
