@@ -477,4 +477,22 @@ class Polar {
   Future<void> enableLedAnimation(String identifier, bool enable) {
     return _channel.invokeMethod('enableLedAnimation', [identifier, enable]);
   }
+
+  /// Perform factory reset to given device.
+  ///
+  /// - Parameters:
+  ///   - identifier: polar device id or UUID
+  ///   - preservePairingInformation: preserve pairing information during factory reset
+  /// - Returns: Completable stream
+  ///   - success: when factory reset notification sent to device
+  ///   - onError: see `PolarErrors` for possible errors invoked
+  Future<void> doFactoryReset(
+    String identifier,
+    bool preservePairingInformation,
+  ) {
+    return _channel.invokeMethod(
+      'doFactoryReset',
+      [identifier, preservePairingInformation],
+    );
+  }
 }

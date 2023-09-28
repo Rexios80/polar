@@ -1,3 +1,7 @@
+## 6.2.0
+- Upgrades Polar SDK to `5.4.0`
+- Adds `doFactoryReset` method
+
 ## 6.1.1
 - Upgrades permission_handler to version 11.0.0
 

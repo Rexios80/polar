@@ -104,6 +104,8 @@ public class SwiftPolarPlugin:
                 removeExercise(call, result)
             case "enableLedAnimation":
                 enableLedAnimation(call, result)
+            case "doFactoryReset":
+                doFactoryReset(call, result)
             default: result(FlutterMethodNotImplemented)
             }
         } catch {
@@ -264,6 +266,17 @@ public class SwiftPolarPlugin:
             result(nil)
         }, onError: { error in
             result(FlutterError(code: "Error toggling led animation", message: error.localizedDescription, details: nil))
+        })
+    }
+    
+    func doFactoryReset(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        let arguments = call.arguments as! [Any]
+        let identifier = arguments[0] as! String
+        let preservePairingInformation = arguments[1] as! Bool
+        _ = api.doFactoryReset(identifier, preservePairingInformation: preservePairingInformation).subscribe(onCompleted: {
+            result(nil)
+        }, onError: { error in
+            result(FlutterError(code: "Error doing factory reset", message: error.localizedDescription, details: nil))
         })
     }
 

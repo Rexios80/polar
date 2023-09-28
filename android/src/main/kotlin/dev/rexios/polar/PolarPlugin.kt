@@ -120,6 +120,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
             "fetchExercise" -> fetchExercise(call, result)
             "removeExercise" -> removeExercise(call, result)
             "enableLedAnimation" -> enableLedAnimation(call, result)
+            "doFactoryReset" -> doFactoryReset(call, result)
             else -> result.notImplemented()
         }
     }
@@ -301,6 +302,20 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
         val enable = arguments[1] as Boolean
 
         api.enableLedAnimation(identifier, enable).subscribe({
+            runOnUiThread { result.success(null) }
+        }, {
+            runOnUiThread {
+                result.error(it.toString(), it.message, null)
+            }
+        }).discard()
+    }
+
+    private fun doFactoryReset(call: MethodCall, result: Result) {
+        val arguments = call.arguments as List<*>
+        val identifier = arguments[0] as String
+        val preservePairingInformation = arguments[1] as Boolean
+
+        api.doFactoryReset(identifier, preservePairingInformation).subscribe({
             runOnUiThread { result.success(null) }
         }, {
             runOnUiThread {

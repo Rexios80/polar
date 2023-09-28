@@ -233,6 +233,8 @@ void testMisc(String identifier, {required bool isVerity}) {
       await polar.enableLedAnimation(identifier, false);
       await polar.enableLedAnimation(identifier, true);
     }
+
+    await polar.doFactoryReset(identifier, false);
     await disconnect(identifier);
   });
 }

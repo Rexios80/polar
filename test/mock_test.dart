@@ -107,6 +107,8 @@ Future<dynamic> handleMethodCall(MethodCall call) async {
       return null;
     case 'enableLedAnimation':
       return null;
+    case 'doFactoryReset':
+      return null;
     default:
       throw UnimplementedError();
   }
