@@ -25,17 +25,17 @@ class PolarStreamingData<T> {
   /// Convert from json
   factory PolarStreamingData.fromJson(Map<String, dynamic> json) {
     switch (T) {
-      case PolarHrSample:
+      case PolarHrSample _:
         return _fromJson(json, _$PolarHrSampleFromJson);
-      case PolarEcgSample:
+      case PolarEcgSample _:
         return _fromJson(json, _$PolarEcgSampleFromJson);
-      case PolarAccSample:
+      case PolarAccSample _:
         return _fromJson(json, _$PolarAccSampleFromJson);
-      case PolarGyroSample:
+      case PolarGyroSample _:
         return _fromJson(json, _$PolarGyroSampleFromJson);
-      case PolarMagnetometerSample:
+      case PolarMagnetometerSample _:
         return _fromJson(json, _$PolarMagnetometerSampleFromJson);
-      case PolarPpiSample:
+      case PolarPpiSample _:
         return _fromJson(json, _$PolarPpiSampleFromJson);
       default:
         throw UnsupportedError('Unsupported type: $T');
@@ -48,17 +48,17 @@ class PolarStreamingData<T> {
   /// Convert to json
   Map<String, dynamic> toJson() {
     switch (T) {
-      case PolarHrSample:
+      case PolarHrSample _:
         return _toJson(_$PolarHrSampleToJson);
-      case PolarEcgSample:
+      case PolarEcgSample _:
         return _toJson(_$PolarEcgSampleToJson);
-      case PolarAccSample:
+      case PolarAccSample _:
         return _toJson(_$PolarAccSampleToJson);
-      case PolarGyroSample:
+      case PolarGyroSample _:
         return _toJson(_$PolarGyroSampleToJson);
-      case PolarMagnetometerSample:
+      case PolarMagnetometerSample _:
         return _toJson(_$PolarMagnetometerSampleToJson);
-      case PolarPpiSample:
+      case PolarPpiSample _:
         return _toJson(_$PolarPpiSampleToJson);
       default:
         throw UnsupportedError('Unsupported type: $T');

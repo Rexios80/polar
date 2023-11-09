@@ -137,14 +137,12 @@ class StreamingHandler extends MockStreamHandler {
         data = PolarEcgData(
           samples: [PolarEcgSample(timeStamp: DateTime.now(), voltage: 0)],
         );
-        break;
       case PolarDataType.acc:
         data = PolarAccData(
           samples: [
             PolarAccSample(timeStamp: DateTime.now(), x: 0, y: 0, z: 0),
           ],
         );
-        break;
       case PolarDataType.ppg:
         data = PolarPpgData(
           type: PpgDataType.ppg3_ambient1,
@@ -152,7 +150,6 @@ class StreamingHandler extends MockStreamHandler {
             PolarPpgSample(timeStamp: DateTime.now(), channelSamples: []),
           ],
         );
-        break;
       case PolarDataType.ppi:
         data = PolarPpiData(
           samples: [
@@ -166,14 +163,12 @@ class StreamingHandler extends MockStreamHandler {
             ),
           ],
         );
-        break;
       case PolarDataType.gyro:
         data = PolarGyroData(
           samples: [
             PolarGyroSample(timeStamp: DateTime.now(), x: 0, y: 0, z: 0),
           ],
         );
-        break;
       case PolarDataType.magnetometer:
         data = PolarMagnetometerData(
           samples: [
@@ -185,7 +180,6 @@ class StreamingHandler extends MockStreamHandler {
             ),
           ],
         );
-        break;
       case PolarDataType.hr:
         data = PolarHrData(
           samples: [
@@ -197,7 +191,6 @@ class StreamingHandler extends MockStreamHandler {
             ),
           ],
         );
-        break;
     }
 
     events.success(jsonEncode(data));
