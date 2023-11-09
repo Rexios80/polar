@@ -336,6 +336,27 @@ class PolarExerciseEntryCodable: Codable {
     }
 }
 
+class LedConfigCodable: Decodable {
+    let data: LedConfig
+
+    required init(from decoder: Decoder) {
+        guard let container = try? decoder.container(keyedBy: CodingKeys.self),
+              let sdkModeLedEnabled = try? container.decode(Bool.self, forKey: .sdkModeLedEnabled),
+              let ppiModeLedEnabled = try? container.decode(Bool.self, forKey: .ppiModeLedEnabled)
+        else {
+            data = LedConfig(sdkModeLedEnabled: true, ppiModeLedEnabled: true)
+            return
+        }
+
+        data = LedConfig(sdkModeLedEnabled: sdkModeLedEnabled, ppiModeLedEnabled: ppiModeLedEnabled)
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case sdkModeLedEnabled
+        case ppiModeLedEnabled
+    }
+}
+
 extension Date {
     var millisecondsSince1970: Int64 {
         Int64((timeIntervalSince1970 * 1000).rounded())

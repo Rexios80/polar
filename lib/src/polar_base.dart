@@ -466,16 +466,17 @@ class Polar {
         .invokeMethod('removeExercise', [identifier, jsonEncode(entry)]);
   }
 
-  /// Enable or disable blinking sensor LEDs (Verity Sense).
+  /// Set [LedConfig] to enable or disable blinking LEDs (Verity Sense 2.2.1+).
   ///
   /// - Parameters:
   ///   - identifier: polar device id or UUID
-  ///   - enable: to enable or disable LEDs blinking
+  ///   - ledConfig: to enable or disable LEDs blinking
   /// - Returns: Completable stream
   ///   - success: when enable or disable sent to device
   ///   - onError: see `PolarErrors` for possible errors invoked
-  Future<void> enableLedAnimation(String identifier, bool enable) {
-    return _channel.invokeMethod('enableLedAnimation', [identifier, enable]);
+  Future<void> setLedConfig(String identifier, LedConfig config) {
+    return _channel
+        .invokeMethod('setLedConfig', [identifier, jsonEncode(config)]);
   }
 
   /// Perform factory reset to given device.

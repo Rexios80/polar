@@ -102,8 +102,8 @@ public class SwiftPolarPlugin:
                 fetchExercise(call, result)
             case "removeExercise":
                 removeExercise(call, result)
-            case "enableLedAnimation":
-                enableLedAnimation(call, result)
+            case "setLedConfig":
+                setLedConfig(call, result)
             case "doFactoryReset":
                 doFactoryReset(call, result)
             default: result(FlutterMethodNotImplemented)
@@ -258,17 +258,18 @@ public class SwiftPolarPlugin:
         })
     }
 
-    func enableLedAnimation(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+    func setLedConfig(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
         let arguments = call.arguments as! [Any]
         let identifier = arguments[0] as! String
-        let enable = arguments[1] as! Bool
-        _ = api.enableLedAnimation(identifier, enable: enable).subscribe(onCompleted: {
+        let config = try! decoder.decode(LedConfigCodable.self, from: (arguments[1] as! String)
+            .data(using: .utf8)!).data
+        _ = api.setLedConfig(identifier, ledConfig: config).subscribe(onCompleted: {
             result(nil)
         }, onError: { error in
-            result(FlutterError(code: "Error toggling led animation", message: error.localizedDescription, details: nil))
+            result(FlutterError(code: "Error setting led config", message: error.localizedDescription, details: nil))
         })
     }
-    
+
     func doFactoryReset(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
         let arguments = call.arguments as! [Any]
         let identifier = arguments[0] as! String

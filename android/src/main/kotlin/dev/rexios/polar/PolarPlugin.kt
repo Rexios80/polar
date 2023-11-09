@@ -18,6 +18,7 @@ import com.polar.sdk.api.PolarBleApiCallbackProvider
 import com.polar.sdk.api.PolarBleApiDefaultImpl
 import com.polar.sdk.api.PolarH10OfflineExerciseApi.RecordingInterval
 import com.polar.sdk.api.PolarH10OfflineExerciseApi.SampleType
+import com.polar.sdk.api.model.LedConfig
 import com.polar.sdk.api.model.PolarDeviceInfo
 import com.polar.sdk.api.model.PolarExerciseEntry
 import com.polar.sdk.api.model.PolarHrData
@@ -119,7 +120,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
             "listExercises" -> listExercises(call, result)
             "fetchExercise" -> fetchExercise(call, result)
             "removeExercise" -> removeExercise(call, result)
-            "enableLedAnimation" -> enableLedAnimation(call, result)
+            "setLedConfig" -> setLedConfig(call, result)
             "doFactoryReset" -> doFactoryReset(call, result)
             else -> result.notImplemented()
         }
@@ -296,12 +297,12 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
         }).discard()
     }
 
-    private fun enableLedAnimation(call: MethodCall, result: Result) {
+    private fun setLedConfig(call: MethodCall, result: Result) {
         val arguments = call.arguments as List<*>
         val identifier = arguments[0] as String
-        val enable = arguments[1] as Boolean
+        val config = gson.fromJson(arguments[1] as String, LedConfig::class.java)
 
-        api.enableLedAnimation(identifier, enable).subscribe({
+        api.setLedConfig(identifier, config).subscribe({
             runOnUiThread { result.success(null) }
         }, {
             runOnUiThread {

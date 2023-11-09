@@ -230,8 +230,14 @@ void testMisc(String identifier, {required bool isVerity}) {
     // Wait to ensure device is connected (not sure why this is necessary)
     await Future.delayed(const Duration(seconds: 3));
     if (isVerity) {
-      await polar.enableLedAnimation(identifier, false);
-      await polar.enableLedAnimation(identifier, true);
+      await polar.setLedConfig(
+        identifier,
+        LedConfig(ppiModeLedEnabled: false, sdkModeLedEnabled: false),
+      );
+      await polar.setLedConfig(
+        identifier,
+        LedConfig(ppiModeLedEnabled: true, sdkModeLedEnabled: true),
+      );
     }
 
     await polar.doFactoryReset(identifier, false);

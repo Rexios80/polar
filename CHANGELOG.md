@@ -1,3 +1,8 @@
+## 7.0.0
+- Upgrades Polar SDK to `5.5.0`
+- BREAKING: Replaces `enableLedAnimation` with `setLedConfig`
+- BREAKING: Required dart `^3.0.0`
+
 ## 6.2.0
 - Upgrades Polar SDK to `5.4.0`
 - Adds `doFactoryReset` method

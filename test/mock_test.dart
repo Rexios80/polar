@@ -105,7 +105,7 @@ Future<dynamic> handleMethodCall(MethodCall call) async {
     case 'removeExercise':
       exercises.clear();
       return null;
-    case 'enableLedAnimation':
+    case 'setLedConfig':
       return null;
     case 'doFactoryReset':
       return null;
