@@ -17,6 +17,7 @@ void main() async {
     features: PolarSdkFeature.values.toSet().difference({
       PolarSdkFeature.offlineRecording,
       PolarSdkFeature.sdkMode,
+      PolarSdkFeature.ledAnimation,
     }),
   );
   testStreaming(
