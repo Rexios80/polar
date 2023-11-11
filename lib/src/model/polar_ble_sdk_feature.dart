@@ -30,7 +30,10 @@ enum PolarSdkFeature {
 
   /// In SDK mode the wider range of capabilities are available for the online
   /// stream or offline recoding than in normal operation mode.
-  sdkMode;
+  sdkMode,
+
+  /// Feature to enable or disable SDK mode blinking LED animation.
+  ledAnimation;
 
   static const _featureStringMap = {
     hr: 'FEATURE_HR',
@@ -41,6 +44,7 @@ enum PolarSdkFeature {
     h10ExerciseRecording: 'FEATURE_POLAR_H10_EXERCISE_RECORDING',
     deviceTimeSetup: 'FEATURE_POLAR_DEVICE_TIME_SETUP',
     sdkMode: 'FEATURE_POLAR_SDK_MODE',
+    ledAnimation: 'FEATURE_POLAR_LED_ANIMATION',
   };
 
   static final _stringFeatureMap =

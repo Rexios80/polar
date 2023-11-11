@@ -25,17 +25,17 @@ class PolarStreamingData<T> {
   /// Convert from json
   factory PolarStreamingData.fromJson(Map<String, dynamic> json) {
     switch (T) {
-      case PolarHrSample _:
+      case const (PolarHrSample):
         return _fromJson(json, _$PolarHrSampleFromJson);
-      case PolarEcgSample _:
+      case const (PolarEcgSample):
         return _fromJson(json, _$PolarEcgSampleFromJson);
-      case PolarAccSample _:
+      case const (PolarAccSample):
         return _fromJson(json, _$PolarAccSampleFromJson);
-      case PolarGyroSample _:
+      case const (PolarGyroSample):
         return _fromJson(json, _$PolarGyroSampleFromJson);
-      case PolarMagnetometerSample _:
+      case const (PolarMagnetometerSample):
         return _fromJson(json, _$PolarMagnetometerSampleFromJson);
-      case PolarPpiSample _:
+      case const (PolarPpiSample):
         return _fromJson(json, _$PolarPpiSampleFromJson);
       default:
         throw UnsupportedError('Unsupported type: $T');
@@ -48,17 +48,17 @@ class PolarStreamingData<T> {
   /// Convert to json
   Map<String, dynamic> toJson() {
     switch (T) {
-      case PolarHrSample _:
+      case const (PolarHrSample):
         return _toJson(_$PolarHrSampleToJson);
-      case PolarEcgSample _:
+      case const (PolarEcgSample):
         return _toJson(_$PolarEcgSampleToJson);
-      case PolarAccSample _:
+      case const (PolarAccSample):
         return _toJson(_$PolarAccSampleToJson);
-      case PolarGyroSample _:
+      case const (PolarGyroSample):
         return _toJson(_$PolarGyroSampleToJson);
-      case PolarMagnetometerSample _:
+      case const (PolarMagnetometerSample):
         return _toJson(_$PolarMagnetometerSampleToJson);
-      case PolarPpiSample _:
+      case const (PolarPpiSample):
         return _toJson(_$PolarPpiSampleToJson);
       default:
         throw UnsupportedError('Unsupported type: $T');

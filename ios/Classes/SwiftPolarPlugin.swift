@@ -120,11 +120,17 @@ public class SwiftPolarPlugin:
         self.searchSubscription = self.api.searchForDevice().subscribe(onNext: { data in
             guard let data = jsonEncode(PolarDeviceInfoCodable(data))
             else { return }
-            events(data)
+            DispatchQueue.main.async {
+                events(data)
+            }
         }, onError: { error in
-            events(FlutterError(code: "Error in searchForDevice", message: error.localizedDescription, details: nil))
+            DispatchQueue.main.async {
+                events(FlutterError(code: "Error in searchForDevice", message: error.localizedDescription, details: nil))
+            }
         }, onCompleted: {
-            events(FlutterEndOfEventStream)
+            DispatchQueue.main.async {
+                events(FlutterEndOfEventStream)
+            }
         })
         return nil
     }, onCancel: { _ in
@@ -425,11 +431,17 @@ class StreamingChannel: NSObject, FlutterStreamHandler {
             guard let data = jsonEncode(PolarDataCodable(data)) else {
                 return
             }
-            events(data)
+            DispatchQueue.main.async {
+                events(data)
+            }
         }, onError: { error in
-            events(FlutterError(code: "Error while streaming", message: error.localizedDescription, details: nil))
+            DispatchQueue.main.async {
+                events(FlutterError(code: "Error while streaming", message: error.localizedDescription, details: nil))
+            }
         }, onCompleted: {
-            events(FlutterEndOfEventStream)
+            DispatchQueue.main.async {
+                events(FlutterEndOfEventStream)
+            }
         })
 
         return nil
