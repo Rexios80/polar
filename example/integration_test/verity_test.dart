@@ -30,6 +30,6 @@ void main() async {
       PolarDataType.magnetometer,
     },
   );
-  testMisc(identifier, isVerity: true);
   testSdkMode(identifier);
+  testMisc(identifier, isVerity: true);
 }
