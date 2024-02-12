@@ -106,6 +106,12 @@ public class SwiftPolarPlugin:
                 setLedConfig(call, result)
             case "doFactoryReset":
                 doFactoryReset(call, result)
+            case "enableSdkMode":
+                enableSdkMode(call, result)
+            case "disableSdkMode":
+                disableSdkMode(call, result)
+            case "isSdkModeEnabled":
+                isSdkModeEnabled(call, result)
             default: result(FlutterMethodNotImplemented)
             }
         } catch {
@@ -284,6 +290,33 @@ public class SwiftPolarPlugin:
             result(nil)
         }, onError: { error in
             result(FlutterError(code: "Error doing factory reset", message: error.localizedDescription, details: nil))
+        })
+    }
+
+    func enableSdkMode(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        let identifier = call.arguments as! String
+        _ = api.enableSDKMode(identifier).subscribe(onCompleted: {
+            result(nil)
+        }, onError: { error in
+            result(FlutterError(code: "Error enabling SDK mode", message: error.localizedDescription, details: nil))
+        })
+    }
+
+    func disableSdkMode(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        let identifier = call.arguments as! String
+        _ = api.disableSDKMode(identifier).subscribe(onCompleted: {
+            result(nil)
+        }, onError: { error in
+            result(FlutterError(code: "Error disabling SDK mode", message: error.localizedDescription, details: nil))
+        })
+    }
+
+    func isSdkModeEnabled(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        let identifier = call.arguments as! String
+        _ = api.isSDKModeEnabled(identifier).subscribe(onSuccess: {
+            result($0)
+        }, onFailure: { error in
+            result(FlutterError(code: "Error checking SDK mode status", message: error.localizedDescription, details: nil))
         })
     }
 

@@ -496,4 +496,23 @@ class Polar {
       [identifier, preservePairingInformation],
     );
   }
+
+  ///  Enables SDK mode.
+  Future<void> enableSdkMode(String identifier) {
+    return _channel.invokeMethod('enableSdkMode', identifier);
+  }
+
+  /// Disables SDK mode.
+  Future<void> disableSdkMode(String identifier) {
+    return _channel.invokeMethod('disableSdkMode', identifier);
+  }
+
+  /// Check if SDK mode currently enabled.
+  ///
+  /// Note, SDK status check is supported by VeritySense starting from firmware 2.1.0
+  Future<bool> isSdkModeEnabled(String identifier) async {
+    final result =
+        await _channel.invokeMethod<bool>('isSdkModeEnabled', identifier);
+    return result!;
+  }
 }

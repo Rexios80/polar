@@ -122,6 +122,9 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
             "removeExercise" -> removeExercise(call, result)
             "setLedConfig" -> setLedConfig(call, result)
             "doFactoryReset" -> doFactoryReset(call, result)
+            "enableSdkMode" -> enableSdkMode(call, result)
+            "disableSdkMode" -> disableSdkMode(call, result)
+            "isSdkModeEnabled" -> isSdkModeEnabled(call, result)
             else -> result.notImplemented()
         }
     }
@@ -318,6 +321,39 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
 
         api.doFactoryReset(identifier, preservePairingInformation).subscribe({
             runOnUiThread { result.success(null) }
+        }, {
+            runOnUiThread {
+                result.error(it.toString(), it.message, null)
+            }
+        }).discard()
+    }
+
+    private fun enableSdkMode(call: MethodCall, result: Result) {
+        val identifier = call.arguments as String
+        api.enableSDKMode(identifier).subscribe({
+            runOnUiThread { result.success(null) }
+        }, {
+            runOnUiThread {
+                result.error(it.toString(), it.message, null)
+            }
+        }).discard()
+    }
+
+    private fun disableSdkMode(call: MethodCall, result: Result) {
+        val identifier = call.arguments as String
+        api.disableSDKMode(identifier).subscribe({
+            runOnUiThread { result.success(null) }
+        }, {
+            runOnUiThread {
+                result.error(it.toString(), it.message, null)
+            }
+        }).discard()
+    }
+
+    private fun isSdkModeEnabled(call: MethodCall, result: Result) {
+        val identifier = call.arguments as String
+        api.isSDKModeEnabled(identifier).subscribe({
+            runOnUiThread { result.success(it) }
         }, {
             runOnUiThread {
                 result.error(it.toString(), it.message, null)

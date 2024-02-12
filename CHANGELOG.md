@@ -1,3 +1,6 @@
+## 7.1.0
+- Adds support for SDK mode
+
 ## 7.0.0
 - Upgrades Polar SDK to `5.5.0`
 - BREAKING: Replaces `enableLedAnimation` with `setLedConfig`

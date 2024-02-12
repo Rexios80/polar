@@ -224,6 +224,25 @@ void testRecording(String identifier, {bool wait = true}) {
   });
 }
 
+void testSdkMode(String identifier) {
+  test('sdk mode', () async {
+    await connect(identifier);
+
+    final status1 = await polar.isSdkModeEnabled(identifier);
+    expect(status1, false);
+
+    await polar.enableSdkMode(identifier);
+    final status2 = await polar.isSdkModeEnabled(identifier);
+    expect(status2, true);
+
+    await polar.disableSdkMode(identifier);
+    final status3 = await polar.isSdkModeEnabled(identifier);
+    expect(status3, false);
+
+    await disconnect(identifier);
+  });
+}
+
 void testMisc(String identifier, {required bool isVerity}) {
   test('misc', () async {
     await connect(identifier);

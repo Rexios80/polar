@@ -31,4 +31,5 @@ void main() async {
     },
   );
   testMisc(identifier, isVerity: true);
+  testSdkMode(identifier);
 }
