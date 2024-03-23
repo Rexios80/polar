@@ -1,3 +1,6 @@
+## 7.2.0
+- Dependency upgrades
+
 ## 7.1.0
 - Adds support for SDK mode
 
