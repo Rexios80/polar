@@ -36,6 +36,7 @@ void main() {
   testBleSdkFeatures(identifier, features: PolarSdkFeature.values.toSet());
   testStreaming(identifier, features: PolarDataType.values.toSet());
   testRecording(identifier, wait: false);
+  testSdkMode(identifier);
   testMisc(identifier, isVerity: true);
 }
 
@@ -55,6 +56,7 @@ void executeLater<T>(FutureOr<T> Function() computation) {
 final exercises = <PolarExerciseEntry>[];
 var recording = false;
 var exerciseId = '';
+var sdkModeEnabled = false;
 
 Future<dynamic> handleMethodCall(MethodCall call) async {
   switch (call.method) {
@@ -107,6 +109,14 @@ Future<dynamic> handleMethodCall(MethodCall call) async {
       return null;
     case 'setLedConfig':
       return null;
+    case 'enableSdkMode':
+      sdkModeEnabled = true;
+      return null;
+    case 'disableSdkMode':
+      sdkModeEnabled = false;
+      return null;
+    case 'isSdkModeEnabled':
+      return sdkModeEnabled;
     case 'doFactoryReset':
       return null;
     default:
