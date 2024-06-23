@@ -63,6 +63,10 @@ private val gson = GsonBuilder().registerTypeAdapter(Date::class.java, DateSeria
 
 /** PolarPlugin */
 class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvider, ActivityAware {
+    companion object {
+        private var initialized = false
+    }
+
     /// Binary messenger for dynamic EventChannel registration
     private lateinit var messenger: BinaryMessenger
 
@@ -78,6 +82,9 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
     private lateinit var api: PolarBleApi
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+        if (initialized) return
+        initialized = true
+
         messenger = flutterPluginBinding.binaryMessenger
 
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "polar")
