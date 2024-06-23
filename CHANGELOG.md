@@ -1,3 +1,6 @@
+## 7.3.0
+- Discard subsequent `onAttachedToEngine` calls on Android
+
 ## 7.2.0
 - Dependency upgrades
 
