@@ -83,7 +83,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         runOnUiThread { channel.invokeMethod(method, arguments, callback) }
     }
 
-    private val apiCallback = { method: String, arguments: Any? ->
+    private val polarCallback = { method: String, arguments: Any? ->
         invokeOnUiThread(method, arguments)
     }
 
@@ -102,7 +102,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             // This will throw if the wrapper is already initialized
         }
 
-        wrapper.addApiCallback(apiCallback)
+        wrapper.addCallback(polarCallback)
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
@@ -193,7 +193,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     override fun onDetachedFromActivity() {}
 
     private fun shutDown() {
-        wrapper.removeApiCallback(apiCallback)
+        wrapper.removeCallback(polarCallback)
         wrapper.shutDown()
     }
 
@@ -371,25 +371,27 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 class PolarWrapper(
     context: Context, val api: PolarBleApi = PolarBleApiDefaultImpl.defaultImplementation(
         context, PolarBleSdkFeature.values().toSet()
-    )
+    ), private val callbacks: MutableList<(String, Any?) -> Unit> = mutableListOf()
 ) : PolarBleApiCallbackProvider {
     init {
         api.setApiCallback(this)
     }
 
-    private val apiCallbacks = mutableListOf<(method: String, arguments: Any?) -> Unit>()
-
-    fun addApiCallback(callback: (method: String, arguments: Any?) -> Unit) {
-        apiCallbacks.add(callback)
+    fun addCallback(callback: (String, Any?) -> Unit) {
+        callbacks.add(callback)
     }
 
-    fun removeApiCallback(callback: (method: String, arguments: Any?) -> Unit) {
-        apiCallbacks.remove(callback)
+    fun removeCallback(callback: (String, Any?) -> Unit) {
+        callbacks.remove(callback)
+    }
+
+    private fun invoke(method: String, arguments: Any?) {
+        callbacks.forEach { it(method, arguments) }
     }
 
     fun shutDown() {
         // Do not shutdown the api if other engines are still using it
-        if (apiCallbacks.isNotEmpty()) return
+        if (callbacks.isNotEmpty()) return
         try {
             api.shutDown()
         } catch (e: Exception) {
@@ -397,28 +399,24 @@ class PolarWrapper(
         }
     }
 
-    private fun invokeApiCallbacks(method: String, arguments: Any?) {
-        apiCallbacks.forEach { it(method, arguments) }
-    }
-
     override fun blePowerStateChanged(powered: Boolean) {
-        invokeApiCallbacks("blePowerStateChanged", powered)
+        invoke("blePowerStateChanged", powered)
     }
 
     override fun bleSdkFeatureReady(identifier: String, feature: PolarBleSdkFeature) {
-        invokeApiCallbacks("sdkFeatureReady", listOf(identifier, feature.name))
+        invoke("sdkFeatureReady", listOf(identifier, feature.name))
     }
 
     override fun deviceConnected(polarDeviceInfo: PolarDeviceInfo) {
-        invokeApiCallbacks("deviceConnected", gson.toJson(polarDeviceInfo))
+        invoke("deviceConnected", gson.toJson(polarDeviceInfo))
     }
 
     override fun deviceConnecting(polarDeviceInfo: PolarDeviceInfo) {
-        invokeApiCallbacks("deviceConnecting", gson.toJson(polarDeviceInfo))
+        invoke("deviceConnecting", gson.toJson(polarDeviceInfo))
     }
 
     override fun deviceDisconnected(polarDeviceInfo: PolarDeviceInfo) {
-        invokeApiCallbacks(
+        invoke(
             "deviceDisconnected",
             // The second argument is the `pairingError` field on iOS
             // Since Android doesn't implement that, always send false
@@ -427,11 +425,11 @@ class PolarWrapper(
     }
 
     override fun disInformationReceived(identifier: String, uuid: UUID, value: String) {
-        invokeApiCallbacks("disInformationReceived", listOf(identifier, uuid.toString(), value))
+        invoke("disInformationReceived", listOf(identifier, uuid.toString(), value))
     }
 
     override fun batteryLevelReceived(identifier: String, level: Int) {
-        invokeApiCallbacks("batteryLevelReceived", listOf(identifier, level))
+        invoke("batteryLevelReceived", listOf(identifier, level))
     }
 
     @Deprecated("", replaceWith = ReplaceWith(""))
