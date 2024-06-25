@@ -62,7 +62,9 @@ private fun runOnUiThread(runnable: () -> Unit) {
 
 private val gson = GsonBuilder().registerTypeAdapter(Date::class.java, DateSerializer).create()
 
-private lateinit var wrapper: PolarWrapper
+private var _wrapper: PolarWrapper? = null
+private val wrapper: PolarWrapper
+    get() = _wrapper!!
 
 /** PolarPlugin */
 class PolarPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
@@ -96,10 +98,8 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         searchChannel = EventChannel(flutterPluginBinding.binaryMessenger, "polar/search")
         searchChannel.setStreamHandler(searchHandler)
 
-        try {
-            wrapper = PolarWrapper(flutterPluginBinding.applicationContext)
-        } catch (e: Exception) {
-            // This will throw if the wrapper is already initialized
+        if (_wrapper == null) {
+            _wrapper = PolarWrapper(flutterPluginBinding.applicationContext)
         }
 
         wrapper.addCallback(polarCallback)
