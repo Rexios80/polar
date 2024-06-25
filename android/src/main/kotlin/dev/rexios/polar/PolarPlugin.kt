@@ -1,5 +1,6 @@
 package dev.rexios.polar
 
+import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import androidx.lifecycle.Lifecycle.Event
@@ -61,12 +62,10 @@ private fun runOnUiThread(runnable: () -> Unit) {
 
 private val gson = GsonBuilder().registerTypeAdapter(Date::class.java, DateSerializer).create()
 
-/** PolarPlugin */
-class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvider, ActivityAware {
-    companion object {
-        private var initialized = false
-    }
+private lateinit var wrapper: PolarWrapper
 
+/** PolarPlugin */
+class PolarPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     /// Binary messenger for dynamic EventChannel registration
     private lateinit var messenger: BinaryMessenger
 
@@ -79,12 +78,16 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
     /// Streaming channels
     private val streamingChannels = mutableMapOf<String, StreamingChannel>()
 
-    private lateinit var api: PolarBleApi
+    // Apparently you have to call invokeMethod on the UI thread
+    private fun invokeOnUiThread(method: String, arguments: Any?, callback: Result? = null) {
+        runOnUiThread { channel.invokeMethod(method, arguments, callback) }
+    }
+
+    private val apiCallback = { method: String, arguments: Any? ->
+        invokeOnUiThread(method, arguments)
+    }
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-        if (initialized) return
-        initialized = true
-
         messenger = flutterPluginBinding.binaryMessenger
 
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "polar")
@@ -93,28 +96,31 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
         searchChannel = EventChannel(flutterPluginBinding.binaryMessenger, "polar/search")
         searchChannel.setStreamHandler(searchHandler)
 
-        api = PolarBleApiDefaultImpl.defaultImplementation(
-            flutterPluginBinding.applicationContext, PolarBleSdkFeature.values().toSet()
-        )
-        api.setApiCallback(this)
+        try {
+            wrapper = PolarWrapper(flutterPluginBinding.applicationContext)
+        } catch (e: Exception) {
+            // This will throw if the wrapper is already initialized
+        }
+
+        wrapper.addApiCallback(apiCallback)
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
         searchChannel.setStreamHandler(null)
         streamingChannels.values.forEach { it.dispose() }
-        shutdown()
+        shutDown()
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
         when (call.method) {
             "connectToDevice" -> {
-                api.connectToDevice(call.arguments as String)
+                wrapper.api.connectToDevice(call.arguments as String)
                 result.success(null)
             }
 
             "disconnectFromDevice" -> {
-                api.disconnectFromDevice(call.arguments as String)
+                wrapper.api.disconnectFromDevice(call.arguments as String)
                 result.success(null)
             }
 
@@ -140,7 +146,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
         private var searchSubscription: Disposable? = null
 
         override fun onListen(arguments: Any?, events: EventSink) {
-            searchSubscription = api.searchForDevice().subscribe({
+            searchSubscription = wrapper.api.searchForDevice().subscribe({
                 runOnUiThread { events.success(gson.toJson(it)) }
             }, {
                 runOnUiThread {
@@ -163,7 +169,8 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
         val feature = gson.fromJson(arguments[2] as String, PolarDeviceDataType::class.java)
 
         if (streamingChannels[name] == null) {
-            streamingChannels[name] = StreamingChannel(messenger, name, api, identifier, feature)
+            streamingChannels[name] =
+                StreamingChannel(messenger, name, wrapper.api, identifier, feature)
         }
 
         result.success(null)
@@ -174,8 +181,8 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
         val lifecycle = FlutterLifecycleAdapter.getActivityLifecycle(binding)
         lifecycle.addObserver(LifecycleEventObserver { _, event ->
             when (event) {
-                Event.ON_RESUME -> api.foregroundEntered()
-                Event.ON_DESTROY -> shutdown()
+                Event.ON_RESUME -> wrapper.api.foregroundEntered()
+                Event.ON_DESTROY -> shutDown()
                 else -> {}
             }
         })
@@ -185,23 +192,15 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
     override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {}
     override fun onDetachedFromActivity() {}
 
-    // Apparently you have to call invokeMethod on the UI thread
-    private fun invokeOnUiThread(method: String, arguments: Any?, callback: Result? = null) {
-        runOnUiThread { channel.invokeMethod(method, arguments, callback) }
-    }
-
-    private fun shutdown() {
-        try {
-            api.shutDown()
-        } catch (e: Exception) {
-            // This will throw if the api is already shut down
-        }
+    private fun shutDown() {
+        wrapper.removeApiCallback(apiCallback)
+        wrapper.shutDown()
     }
 
     private fun getAvailableOnlineStreamDataTypes(call: MethodCall, result: Result) {
         val identifier = call.arguments as String
 
-        api.getAvailableOnlineStreamDataTypes(identifier).subscribe({
+        wrapper.api.getAvailableOnlineStreamDataTypes(identifier).subscribe({
             runOnUiThread { result.success(gson.toJson(it)) }
         }, {
             runOnUiThread {
@@ -215,7 +214,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
         val identifier = arguments[0] as String
         val feature = gson.fromJson(arguments[1] as String, PolarDeviceDataType::class.java)
 
-        api.requestStreamSettings(identifier, feature).subscribe({
+        wrapper.api.requestStreamSettings(identifier, feature).subscribe({
             runOnUiThread { result.success(gson.toJson(it)) }
         }, {
             runOnUiThread {
@@ -231,7 +230,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
         val interval = gson.fromJson(arguments[2] as String, RecordingInterval::class.java)
         val sampleType = gson.fromJson(arguments[3] as String, SampleType::class.java)
 
-        api.startRecording(identifier, exerciseId, interval, sampleType).subscribe({
+        wrapper.api.startRecording(identifier, exerciseId, interval, sampleType).subscribe({
             runOnUiThread { result.success(null) }
         }, {
             runOnUiThread {
@@ -243,7 +242,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
     private fun stopRecording(call: MethodCall, result: Result) {
         val identifier = call.arguments as String
 
-        api.stopRecording(identifier).subscribe({
+        wrapper.api.stopRecording(identifier).subscribe({
             runOnUiThread { result.success(null) }
         }, {
             runOnUiThread {
@@ -255,7 +254,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
     private fun requestRecordingStatus(call: MethodCall, result: Result) {
         val identifier = call.arguments as String
 
-        api.requestRecordingStatus(identifier).subscribe({
+        wrapper.api.requestRecordingStatus(identifier).subscribe({
             runOnUiThread { result.success(listOf(it.first, it.second)) }
         }, {
             runOnUiThread {
@@ -268,7 +267,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
         val identifier = call.arguments as String
 
         val exercises = mutableListOf<String>()
-        api.listExercises(identifier).subscribe({
+        wrapper.api.listExercises(identifier).subscribe({
             exercises.add(gson.toJson(it))
         }, {
             runOnUiThread {
@@ -284,7 +283,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
         val identifier = arguments[0] as String
         val entry = gson.fromJson(arguments[1] as String, PolarExerciseEntry::class.java)
 
-        api.fetchExercise(identifier, entry).subscribe({
+        wrapper.api.fetchExercise(identifier, entry).subscribe({
             result.success(gson.toJson(it))
         }, {
             runOnUiThread {
@@ -298,7 +297,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
         val identifier = arguments[0] as String
         val entry = gson.fromJson(arguments[1] as String, PolarExerciseEntry::class.java)
 
-        api.removeExercise(identifier, entry).subscribe({
+        wrapper.api.removeExercise(identifier, entry).subscribe({
             runOnUiThread { result.success(null) }
         }, {
             runOnUiThread {
@@ -312,7 +311,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
         val identifier = arguments[0] as String
         val config = gson.fromJson(arguments[1] as String, LedConfig::class.java)
 
-        api.setLedConfig(identifier, config).subscribe({
+        wrapper.api.setLedConfig(identifier, config).subscribe({
             runOnUiThread { result.success(null) }
         }, {
             runOnUiThread {
@@ -326,7 +325,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
         val identifier = arguments[0] as String
         val preservePairingInformation = arguments[1] as Boolean
 
-        api.doFactoryReset(identifier, preservePairingInformation).subscribe({
+        wrapper.api.doFactoryReset(identifier, preservePairingInformation).subscribe({
             runOnUiThread { result.success(null) }
         }, {
             runOnUiThread {
@@ -337,7 +336,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
 
     private fun enableSdkMode(call: MethodCall, result: Result) {
         val identifier = call.arguments as String
-        api.enableSDKMode(identifier).subscribe({
+        wrapper.api.enableSDKMode(identifier).subscribe({
             runOnUiThread { result.success(null) }
         }, {
             runOnUiThread {
@@ -348,7 +347,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
 
     private fun disableSdkMode(call: MethodCall, result: Result) {
         val identifier = call.arguments as String
-        api.disableSDKMode(identifier).subscribe({
+        wrapper.api.disableSDKMode(identifier).subscribe({
             runOnUiThread { result.success(null) }
         }, {
             runOnUiThread {
@@ -359,7 +358,7 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
 
     private fun isSdkModeEnabled(call: MethodCall, result: Result) {
         val identifier = call.arguments as String
-        api.isSDKModeEnabled(identifier).subscribe({
+        wrapper.api.isSDKModeEnabled(identifier).subscribe({
             runOnUiThread { result.success(it) }
         }, {
             runOnUiThread {
@@ -367,25 +366,59 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
             }
         }).discard()
     }
+}
+
+class PolarWrapper(
+    context: Context, val api: PolarBleApi = PolarBleApiDefaultImpl.defaultImplementation(
+        context, PolarBleSdkFeature.values().toSet()
+    )
+) : PolarBleApiCallbackProvider {
+    init {
+        api.setApiCallback(this)
+    }
+
+    private val apiCallbacks = mutableListOf<(method: String, arguments: Any?) -> Unit>()
+
+    fun addApiCallback(callback: (method: String, arguments: Any?) -> Unit) {
+        apiCallbacks.add(callback)
+    }
+
+    fun removeApiCallback(callback: (method: String, arguments: Any?) -> Unit) {
+        apiCallbacks.remove(callback)
+    }
+
+    fun shutDown() {
+        // Do not shutdown the api if other engines are still using it
+        if (apiCallbacks.isNotEmpty()) return
+        try {
+            api.shutDown()
+        } catch (e: Exception) {
+            // This will throw if the API is already shut down
+        }
+    }
+
+    private fun invokeApiCallbacks(method: String, arguments: Any?) {
+        apiCallbacks.forEach { it(method, arguments) }
+    }
 
     override fun blePowerStateChanged(powered: Boolean) {
-        invokeOnUiThread("blePowerStateChanged", powered)
+        invokeApiCallbacks("blePowerStateChanged", powered)
     }
 
     override fun bleSdkFeatureReady(identifier: String, feature: PolarBleSdkFeature) {
-        invokeOnUiThread("sdkFeatureReady", listOf(identifier, feature.name))
+        invokeApiCallbacks("sdkFeatureReady", listOf(identifier, feature.name))
     }
 
     override fun deviceConnected(polarDeviceInfo: PolarDeviceInfo) {
-        invokeOnUiThread("deviceConnected", gson.toJson(polarDeviceInfo))
+        invokeApiCallbacks("deviceConnected", gson.toJson(polarDeviceInfo))
     }
 
     override fun deviceConnecting(polarDeviceInfo: PolarDeviceInfo) {
-        invokeOnUiThread("deviceConnecting", gson.toJson(polarDeviceInfo))
+        invokeApiCallbacks("deviceConnecting", gson.toJson(polarDeviceInfo))
     }
 
     override fun deviceDisconnected(polarDeviceInfo: PolarDeviceInfo) {
-        invokeOnUiThread(
+        invokeApiCallbacks(
             "deviceDisconnected",
             // The second argument is the `pairingError` field on iOS
             // Since Android doesn't implement that, always send false
@@ -394,11 +427,11 @@ class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvide
     }
 
     override fun disInformationReceived(identifier: String, uuid: UUID, value: String) {
-        invokeOnUiThread("disInformationReceived", listOf(identifier, uuid.toString(), value))
+        invokeApiCallbacks("disInformationReceived", listOf(identifier, uuid.toString(), value))
     }
 
     override fun batteryLevelReceived(identifier: String, level: Int) {
-        invokeOnUiThread("batteryLevelReceived", listOf(identifier, level))
+        invokeApiCallbacks("batteryLevelReceived", listOf(identifier, level))
     }
 
     @Deprecated("", replaceWith = ReplaceWith(""))
