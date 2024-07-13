@@ -11,7 +11,7 @@ part of 'polar_recording.dart';
 PolarExerciseEntry _$PolarExerciseEntryFromJson(Map<String, dynamic> json) =>
     PolarExerciseEntry(
       path: json['path'] as String,
-      date: const UnixTimeConverter().fromJson(json['date'] as int),
+      date: const UnixTimeConverter().fromJson((json['date'] as num).toInt()),
       entryId: _readEntryId(json, 'entryId') as String,
     );
 
@@ -23,9 +23,9 @@ Map<String, dynamic> _$PolarExerciseEntryToJson(PolarExerciseEntry instance) =>
 
 PolarExerciseData _$PolarExerciseDataFromJson(Map<String, dynamic> json) =>
     PolarExerciseData(
-      interval: _readInterval(json, 'interval') as int,
+      interval: (_readInterval(json, 'interval') as num).toInt(),
       samples: (_readSamples(json, 'samples') as List<dynamic>)
-          .map((e) => e as int)
+          .map((e) => (e as num).toInt())
           .toList(),
     );
 

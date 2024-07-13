@@ -13,7 +13,7 @@ PolarSensorSetting _$PolarSensorSettingFromJson(Map<String, dynamic> json) =>
       settings: (json['settings'] as Map<String, dynamic>).map(
         (k, e) => MapEntry(
             const PolarSettingTypeConverter().fromJson(k as String),
-            (e as List<dynamic>).map((e) => e as int).toList()),
+            (e as List<dynamic>).map((e) => (e as num).toInt()).toList()),
       ),
     );
 
