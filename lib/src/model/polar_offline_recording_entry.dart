@@ -1,6 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:polar/polar.dart';
-import 'convert.dart';
+import 'package:polar/src/model/convert.dart';
 
 part 'polar_offline_recording_entry.g.dart';
 

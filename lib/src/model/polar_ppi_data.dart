@@ -24,7 +24,7 @@ class PpiSample {
   final int skinContactSupported;
 
   PpiSample(this.hr, this.ppInMs, this.ppErrorEstimate, this.blockerBit,
-      this.skinContactStatus, this.skinContactSupported);
+      this.skinContactStatus, this.skinContactSupported,);
 
   factory PpiSample.fromJson(Map<String, dynamic> json) =>
       _$PpiSampleFromJson(json);

@@ -128,9 +128,9 @@ class _MyAppState extends State<MyApp> {
                 ],
               ),
               isLoading
-                  ? Center(child: CircularProgressIndicator())
+                  ? const Center(child: CircularProgressIndicator())
                   : recordings.isEmpty
-                      ? Center(child: Text('No recordings found'))
+                      ? const Center(child: Text('No recordings found'))
                       : SizedBox(
                           height: MediaQuery.of(context).size.height,
                           child: ListView.builder(
@@ -138,8 +138,8 @@ class _MyAppState extends State<MyApp> {
                             itemBuilder: (context, index) {
                               return GestureDetector(
                                   onTap: () async {
-                                    var res = await polar.fetchOfflineRecording(
-                                        identifier, recordings[index]);
+                                    final res = await polar.fetchOfflineRecording(
+                                        identifier, recordings[index],);
 
                                     log('Fetched recording data: ${res.toString()}');
                                     Navigator.of(context).push(
@@ -147,13 +147,13 @@ class _MyAppState extends State<MyApp> {
                                             builder: (context) =>
                                                 OfflineDataWidget(
                                                   data: res,
-                                                )));
+                                                ),),);
                                   },
                                   child: ListTile(
                                     title: Text(recordings[index].path),
                                     subtitle: Text(
-                                        'Size: ${recordings[index].size} bytes, Date: ${recordings[index].date}, Type: ${recordings[index].type}'),
-                                  ));
+                                        'Size: ${recordings[index].size} bytes, Date: ${recordings[index].date}, Type: ${recordings[index].type}',),
+                                  ),);
                             },
                           ),
                         ),
@@ -275,7 +275,7 @@ class _MyAppState extends State<MyApp> {
       case RecordingAction.offlineStart:
         log('Starting offline recording');
         try {
-          var res = await polar.requestRecordingStatus(identifier);
+          final res = await polar.requestRecordingStatus(identifier);
 
           log('Recording status: ${res.toString()}');
           // await polar.startOfflineRecording(

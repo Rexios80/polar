@@ -1,12 +1,12 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'polar_device_data_type.dart';
-import 'polar_sensor_setting.dart';
+import 'package:polar/src/model/polar_device_data_type.dart';
+import 'package:polar/src/model/polar_sensor_setting.dart';
 // import 'polar_acc_data.dart';
 // import 'polar_gyro_data.dart';
 // import 'polar_magnetometer_data.dart';
 // import 'polar_ppg_data.dart';
 // import 'polar_ppi_data.dart';
-import 'polar_streaming.dart';
+import 'package:polar/src/model/polar_streaming.dart';
 
 // import 'polar_streaming.dart';
 

@@ -7,8 +7,6 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:polar/polar.dart';
-import 'package:polar/src/model/offline_trigger_type.dart';
-import 'package:polar/src/model/polar_offline_recording_entry.dart';
 
 /// Flutter implementation of the [PolarBleSdk]
 class Polar {
@@ -334,7 +332,7 @@ class Polar {
   ///   - completed: the listing completed
   ///   - error: see `PolarErrors` for possible errors invoked
   Future<List<PolarOfflineRecordingEntry>> listOfflineRecords(
-      String identifier) async {
+      String identifier,) async {
     final result =
         await _channel.invokeListMethod('listOfflineRecordings', identifier);
     if (result == null) {
@@ -598,12 +596,12 @@ class Polar {
   ///   - error: the offline recording trigger was not set successfully
   Future<void> setOfflineRecordingTrigger(String identifier) async {
     try {
-      print("Invoking setOfflineRecordingTrigger with identifier: $identifier");
+      print('Invoking setOfflineRecordingTrigger with identifier: $identifier');
       await _channel.invokeMethod('setOfflineRecordingTrigger', [identifier]);
-      print("Successfully invoked setOfflineRecordingTrigger");
+      print('Successfully invoked setOfflineRecordingTrigger');
     } on PlatformException catch (e) {
       print(
-          "Failed to set offline recording trigger: ${e.message} ${e.details}");
+          'Failed to set offline recording trigger: ${e.message} ${e.details}',);
       throw Exception(
         'Failed to set offline recording trigger: ${e.message} ${e.details}',
       );
@@ -619,14 +617,14 @@ class Polar {
   ///   - completed: the listing completed
   ///   - error: see `PolarErrors` for possible errors invoked
   Future<List<PolarOfflineRecordingEntry>> listOfflineRecordings(
-      String identifier) async {
+      String identifier,) async {
     try {
       final String jsonString =
           await _channel.invokeMethod('listOfflineRecordings', identifier);
       final List<dynamic> jsonResponse = jsonDecode(jsonString);
       return jsonResponse
           .map((e) =>
-              PolarOfflineRecordingEntry.fromJson(e as Map<String, dynamic>))
+              PolarOfflineRecordingEntry.fromJson(e as Map<String, dynamic>),)
           .toList();
     } on PlatformException catch (e) {
       throw Exception('Failed to list offline recordings: ${e.message}');
