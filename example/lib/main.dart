@@ -108,8 +108,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   void log(String log) {
-    // ignore: avoid_print
-    print(log);
+    debugPrint(log);
     setState(() {
       logs.add(log);
     });

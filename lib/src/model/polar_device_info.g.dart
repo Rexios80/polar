@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-// ignore_for_file: unnecessary_cast, require_trailing_commas
+// ignore_for_file: document_ignores, unnecessary_cast, require_trailing_commas
 
 part of 'polar_device_info.dart';
 
@@ -12,7 +12,7 @@ PolarDeviceInfo _$PolarDeviceInfoFromJson(Map<String, dynamic> json) =>
     PolarDeviceInfo(
       deviceId: json['deviceId'] as String,
       address: json['address'] as String,
-      rssi: json['rssi'] as int,
+      rssi: (json['rssi'] as num).toInt(),
       name: json['name'] as String,
       isConnectable: _readConnectable(json, 'isConnectable') as bool,
     );
