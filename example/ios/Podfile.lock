@@ -4,7 +4,7 @@ PODS:
   - Flutter (1.0.0)
   - integration_test (0.0.1):
     - Flutter
-  - permission_handler_apple (9.1.1):
+  - permission_handler_apple (9.3.0):
     - Flutter
   - polar (0.0.1):
     - Flutter
@@ -41,10 +41,10 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/polar/ios"
 
 SPEC CHECKSUMS:
-  device_info_plus: c6fb39579d0f423935b0c9ce7ee2f44b71b9fce6
+  device_info_plus: 97af1d7e84681a90d0693e63169a5d50e0839a0d
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  integration_test: 13825b8a9334a850581300559b8839134b124670
-  permission_handler_apple: e76247795d700c14ea09e3a2d8855d41ee80a2e6
+  integration_test: 252f60fa39af5e17c3aa9899d35d908a0721b573
+  permission_handler_apple: 9878588469a2b0d0fc1e048d9f43605f92e6cec2
   polar: 8efdf64c1b4e0034e8fa3b1d12b64e5b27a877f1
   PolarBleSdk: 2551160f3dcba0207723fc466a275e2d3aeda01f
   RxSwift: 5710a9e6b17f3c3d6e40d6e559b9fa1e813b2ef8
