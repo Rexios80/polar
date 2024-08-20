@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  analyze:
+  analyze-dart:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -29,6 +29,30 @@ jobs:
         run: dart format --set-exit-if-changed .
       - name: Analyze
         run: dart analyze --fatal-infos .
+
+  analyze-swift:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+      - name: Install swift-format
+        run: brew install swift-format
+      - name: Format
+        run: swift-format lint --strict --recursive ios
+
+  analyze-kotlin:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+      - name: Install ktlint
+        run: brew install ktlint
+      - name: Format
+        run: ktlint android
 
   pana:
     runs-on: ubuntu-latest
