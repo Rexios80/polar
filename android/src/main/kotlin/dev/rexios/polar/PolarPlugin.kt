@@ -71,16 +71,16 @@ class PolarPlugin :
     FlutterPlugin,
     MethodCallHandler,
     ActivityAware {
-    // / Binary messenger for dynamic EventChannel registration
+    // Binary messenger for dynamic EventChannel registration
     private lateinit var messenger: BinaryMessenger
 
-    // / Method channel
+    // Method channel
     private lateinit var channel: MethodChannel
 
-    // / Search channel
+    // Search channel
     private lateinit var searchChannel: EventChannel
 
-    // / Streaming channels
+    // Streaming channels
     private val streamingChannels = mutableMapOf<String, StreamingChannel>()
 
     // Apparently you have to call invokeMethod on the UI thread
