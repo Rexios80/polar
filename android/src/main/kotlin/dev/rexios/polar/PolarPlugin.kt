@@ -105,8 +105,8 @@ class PolarPlugin :
         searchChannel = EventChannel(flutterPluginBinding.binaryMessenger, "polar/search")
         searchChannel.setStreamHandler(searchHandler)
 
-        if (_wrapper == null) {
-            _wrapper = PolarWrapper(flutterPluginBinding.applicationContext)
+        if (wrapperInternal == null) {
+            wrapperInternal = PolarWrapper(flutterPluginBinding.applicationContext)
         }
 
         wrapper.addCallback(polarCallback)
