@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  package="com.rexios.polar">
+  package="dev.rexios.polar">
   <!-- Polar SDK needs Bluetooth scan permission to search for BLE devices.-->
   <!-- <uses-permission android:name="android.permission.BLUETOOTH_SCAN" android:usesPermissionFlags="neverForLocation" /> -->
 

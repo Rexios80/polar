@@ -1,4 +1,4 @@
-package com.rexios.polar
+package dev.rexios.polar
 
 import android.content.Context
 import android.os.Handler
@@ -62,8 +62,8 @@ private fun runOnUiThread(runnable: () -> Unit) {
 
 private val gson = GsonBuilder().registerTypeAdapter(Date::class.java, DateSerializer).create()
 
-/** PolarSdkPlugin */
-class PolarSdkPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvider, ActivityAware {
+/** PolarPlugin */
+class PolarPlugin : FlutterPlugin, MethodCallHandler, PolarBleApiCallbackProvider, ActivityAware {
     /// Binary messenger for dynamic EventChannel registration
     private lateinit var messenger: BinaryMessenger
 

@@ -1,4 +1,4 @@
-group = "com.rexios.polar"
+group = "dev.rexios.polar"
 version = "1.0-SNAPSHOT"
 
 buildscript {
@@ -27,7 +27,7 @@ apply plugin: "kotlin-android"
 
 android {
     if (project.android.hasProperty("namespace")) {
-        namespace = "com.rexios.polar"
+        namespace = "dev.rexios.polar"
     }
 
     compileSdk = 33

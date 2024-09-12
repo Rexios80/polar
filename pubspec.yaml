@@ -11,7 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  plugin_platform_interface: ^2.0.2
+  plugin_platform_interface: ^2.0.5
   permission_handler: ^11.0.0
   device_info_plus: ^10.0.1
   recase: ^4.1.0

@@ -17,7 +17,7 @@ private func jsonEncode(_ value: Encodable) -> String? {
     return data
 }
 
-public class PolarSdkPlugin: NSObject, FlutterPlugin, PolarBleApiObserver,
+public class PolarPlugin: NSObject, FlutterPlugin, PolarBleApiObserver,
     PolarBleApiPowerStateObserver,
     PolarBleApiDeviceFeaturesObserver,
     PolarBleApiDeviceInfoObserver {
@@ -49,7 +49,7 @@ public class PolarSdkPlugin: NSObject, FlutterPlugin, PolarBleApiObserver,
         let channel = FlutterMethodChannel(name: "polar", binaryMessenger: registrar.messenger())
         let searchChannel = FlutterEventChannel(name: "polar/search", binaryMessenger: registrar.messenger())
 
-        let instance = PolarSdkPlugin(
+        let instance = PolarPlugin(
             messenger: registrar.messenger(),
             channel: channel,
             searchChannel: searchChannel
