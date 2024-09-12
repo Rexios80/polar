@@ -1,4 +1,4 @@
-package com.vigilife.polar_sdk_example
+package dev.rexios.polar_example
 
 import io.flutter.embedding.android.FlutterActivity
 
