@@ -1,51 +1,61 @@
-group 'dev.rexios.polar'
-version '1.0-SNAPSHOT'
+group = "com.rexios.polar"
+version = "1.0-SNAPSHOT"
 
 buildscript {
-    ext.kotlin_version = '1.8.22'
+    ext.kotlin_version = "1.9.20"
     repositories {
         google()
         mavenCentral()
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.3.1'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath("com.android.tools.build:gradle:8.2.2")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
     }
 }
 
-rootProject.allprojects {
+allprojects {
     repositories {
         google()
         mavenCentral()
-
         maven { url 'https://jitpack.io' }
     }
 }
 
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
+apply plugin: "com.android.library"
+apply plugin: "kotlin-android"
 
 android {
-    compileSdk 33
+    if (project.android.hasProperty("namespace")) {
+        namespace = "com.rexios.polar"
+    }
+
+    compileSdk = 33
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
 
     sourceSets {
-        main.java.srcDirs += 'src/main/kotlin'
+        main.java.srcDirs += "src/main/kotlin"
+        test.java.srcDirs += "src/test/kotlin"
     }
+
     defaultConfig {
-        minSdkVersion 24
+        minSdk = 28
         consumerProguardFiles 'proguard-rules.pro'
     }
-    namespace "dev.rexios.polar"
-}
 
-dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    dependencies {
+        api 'com.github.polarofficial:polar-ble-sdk:5.5.0'
+        implementation 'io.reactivex.rxjava3:rxjava:3.1.6'
+        implementation 'io.reactivex.rxjava3:rxandroid:3.0.2'
 
-    // Dependencies for Polar SDK
-    api 'com.github.polarofficial:polar-ble-sdk:5.5.0'
-    implementation 'io.reactivex.rxjava3:rxjava:3.1.6'
-    implementation 'io.reactivex.rxjava3:rxandroid:3.0.2'
-
-    implementation 'com.google.code.gson:gson:2.10'
+        implementation 'com.google.code.gson:gson:2.10.1'
+    }
 }

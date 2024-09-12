@@ -3,7 +3,13 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:polar/polar.dart';
+import 'package:polar/model/polar_ble_sdk_feature.dart';
+import 'package:polar/model/polar_device_data_type.dart';
+import 'package:polar/model/polar_device_info.dart';
+import 'package:polar/model/polar_recording.dart';
+import 'package:polar/model/polar_sensor_setting.dart';
+import 'package:polar/model/polar_streaming.dart';
+import 'package:polar/model/ppg_data_type.dart';
 
 import 'tests.dart';
 
@@ -87,7 +93,7 @@ Future<dynamic> handleMethodCall(MethodCall call) async {
       return null;
     case 'startRecording':
       recording = true;
-      exerciseId = call.arguments[1];
+      exerciseId = call.arguments[1] as String;
       return null;
     case 'stopRecording':
       recording = false;

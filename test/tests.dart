@@ -201,7 +201,7 @@ void testRecording(String identifier, {bool wait = true}) {
     expect(status2.ongoing, true);
 
     if (wait) {
-      await Future.delayed(const Duration(seconds: 5));
+      await Future.delayed(const Duration(seconds: 5), () {});
     }
     await polar.stopRecording(identifier);
 
@@ -247,7 +247,7 @@ void testMisc(String identifier, {required bool isVerity}) {
   test('misc', () async {
     await connect(identifier);
     // Wait to ensure device is connected (not sure why this is necessary)
-    await Future.delayed(const Duration(seconds: 3));
+    await Future.delayed(const Duration(seconds: 3), () {});
     if (isVerity) {
       await polar.setLedConfig(
         identifier,
