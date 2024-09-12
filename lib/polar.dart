@@ -14,7 +14,7 @@ export 'model/polar_streaming.dart';
 /// Entry class for the Polar SDK.
 class Polar extends MethodChannelPolarSdk {
   /// Constructor for the Polar SDK.
-  /// 
+  ///
   /// [bluetoothScanNeverForLocation] is a boolean that is used to determine if the
   /// bluetooth scan should be started with the location permission.
   Polar({bluetoothScanNeverForLocation = true})

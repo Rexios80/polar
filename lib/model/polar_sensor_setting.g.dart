@@ -11,22 +11,14 @@ part of 'polar_sensor_setting.dart';
 PolarSensorSetting _$PolarSensorSettingFromJson(Map<String, dynamic> json) =>
     PolarSensorSetting._(
       settings: (json['settings'] as Map<String, dynamic>).map(
-        (k, e) => MapEntry($enumDecode(_$PolarSettingTypeEnumMap, k),
+        (k, e) => MapEntry(
+            const PolarSettingTypeConverter().fromJson(k as String),
             (e as List<dynamic>).map((e) => (e as num).toInt()).toList()),
       ),
     );
 
 Map<String, dynamic> _$PolarSensorSettingToJson(PolarSensorSetting instance) =>
     <String, dynamic>{
-      'settings': instance.settings
-          .map((k, e) => MapEntry(_$PolarSettingTypeEnumMap[k]!, e)),
+      'settings': instance.settings.map(
+          (k, e) => MapEntry(const PolarSettingTypeConverter().toJson(k), e)),
     };
-
-const _$PolarSettingTypeEnumMap = {
-  PolarSettingType.sampleRate: 'sampleRate',
-  PolarSettingType.resolution: 'resolution',
-  PolarSettingType.range: 'range',
-  PolarSettingType.rangeMilliunit: 'rangeMilliunit',
-  PolarSettingType.channels: 'channels',
-  PolarSettingType.unknown: 'unknown',
-};

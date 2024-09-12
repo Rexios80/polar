@@ -125,24 +125,20 @@ class _MyAppState extends State<MyApp> {
           sampleType: SampleType.rr,
         );
         log('Started recording');
-        break;
       case RecordingAction.stop:
         log('Stopping recording');
         await polar.stopRecording(identifier);
         log('Stopped recording');
-        break;
       case RecordingAction.status:
         log('Getting recording status');
         final status = await polar.requestRecordingStatus(identifier);
         log('Recording status: $status');
-        break;
       case RecordingAction.list:
         log('Listing recordings');
         final entries = await polar.listExercises(identifier);
         log('Recordings: $entries');
         // H10 can only store one recording at a time
         exerciseEntry = entries.first;
-        break;
       case RecordingAction.fetch:
         log('Fetching recording');
         if (exerciseEntry == null) {
@@ -151,7 +147,6 @@ class _MyAppState extends State<MyApp> {
         }
         final entry = await polar.fetchExercise(identifier, exerciseEntry!);
         log('Fetched recording: $entry');
-        break;
       case RecordingAction.remove:
         log('Removing recording');
         if (exerciseEntry == null) {
@@ -160,7 +155,6 @@ class _MyAppState extends State<MyApp> {
         }
         await polar.removeExercise(identifier, exerciseEntry!);
         log('Removed recording');
-        break;
     }
   }
 }
