@@ -45,6 +45,7 @@ android {
             signingConfig signingConfigs.debug
         }
     }
+    namespace 'dev.rexios.polar_example'
 }
 
 flutter {
