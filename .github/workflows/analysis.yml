@@ -34,10 +34,12 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install swift-format
-        run: brew install swift-format
+      - name: Lint
+        run: swift format lint -rs ios
       - name: Format
-        run: swift-format lint --strict --recursive ios
+        run: swift format -ri ios
+      - name: Exit if changed
+        run: git diff --exit-code
 
   analyze-kotlin:
     runs-on: macos-latest
