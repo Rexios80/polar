@@ -2,6 +2,7 @@
 
 - Updates Polar SDK to `5.7.0`
 - Adds support for temperature and pressure streaming
+- Maybe fixes issues with multiple Flutter engine instances on Android
 
 ## 7.3.0
 
