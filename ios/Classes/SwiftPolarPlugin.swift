@@ -457,8 +457,10 @@ public class SwiftPolarPlugin:
     channel.invokeMethod("disInformationReceived", arguments: [identifier, uuid.uuidString, value])
   }
 
-  public func disInformationReceivedWithKeysAsStrings(_ identifier: String, key: String, value: String) {
-      channel.invokeMethod("disInformationReceived", arguments: [identifier, key, value])
+  public func disInformationReceivedWithKeysAsStrings(
+    _ identifier: String, key: String, value: String
+  ) {
+    channel.invokeMethod("disInformationReceived", arguments: [identifier, key, value])
   }
 
   // MARK: Deprecated functions
