@@ -33,11 +33,13 @@ jobs:
   analyze-swift:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4'
+      - name: Install swift-format
+        run: brew install swift-format
       - name: Lint
-        run: swift format lint -rs ios
+        run: swift-format lint -rs ios
       - name: Format
-        run: swift format -ri ios
+        run: swift-format -ri ios
       - name: Exit if changed
         run: git diff --exit-code
 
