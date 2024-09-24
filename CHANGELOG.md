@@ -1,6 +1,7 @@
 ## 7.4.0
 
 - Updates Polar SDK to `5.7.0`
+- Adds support for temperature and pressure streaming
 
 ## 7.3.0
 

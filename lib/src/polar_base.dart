@@ -371,6 +371,46 @@ class Polar {
         .map(PolarPpiData.fromJson);
   }
 
+  /// Start temperature stream. Temperature stream is stopped if the connection is closed,
+  /// error occurs or stream is disposed.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or device address
+  ///   - settings: selected settings to start the stream
+  /// - Returns: Observable stream
+  ///   - onNext: for every air packet received. see `PolarTemperatureData`
+  ///   - onError: see `PolarErrors` for possible errors invoked
+  Stream<PolarTemperatureData> startTemperatureStreaming(
+    String identifier, {
+    PolarSensorSetting? settings,
+  }) {
+    return _startStreaming(
+      PolarDataType.temperature,
+      identifier,
+      settings: settings,
+    ).map(PolarTemperatureData.fromJson);
+  }
+
+  /// Start pressure stream. Pressure stream is stopped if the connection is closed,
+  /// error occurs or stream is disposed.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or device address
+  ///   - settings: selected settings to start the stream
+  /// - Returns: Observable stream
+  ///   - onNext: for every air packet received. see `PolarPressureData`
+  ///   - onError: see `PolarErrors` for possible errors invoked
+  Stream<PolarPressureData> startPressureStreaming(
+    String identifier, {
+    PolarSensorSetting? settings,
+  }) {
+    return _startStreaming(
+      PolarDataType.pressure,
+      identifier,
+      settings: settings,
+    ).map(PolarPressureData.fromJson);
+  }
+
   /// Request start recording. Supported only by Polar H10. Requires `polarFileTransfer` feature.
   ///
   /// - Parameters:
