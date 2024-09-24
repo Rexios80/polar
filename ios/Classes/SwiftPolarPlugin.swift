@@ -49,16 +49,7 @@ public class SwiftPolarPlugin:
     self.searchChannel = searchChannel
   }
 
-  private func initApi() {
-    guard api == nil else { return }
-    api = PolarBleApiDefaultImpl.polarImplementation(
-      DispatchQueue.main, features: Set(PolarBleSdkFeature.allCases))
 
-    api.observer = self
-    api.powerStateObserver = self
-    api.deviceFeaturesObserver = self
-    api.deviceInfoObserver = self
-  }
 
   public static func register(with registrar: FlutterPluginRegistrar) {
     let channel = FlutterMethodChannel(name: "polar", binaryMessenger: registrar.messenger())
@@ -76,8 +67,6 @@ public class SwiftPolarPlugin:
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-    initApi()
-
     do {
       switch call.method {
       case "connectToDevice":
@@ -114,6 +103,8 @@ public class SwiftPolarPlugin:
         disableSdkMode(call, result)
       case "isSdkModeEnabled":
         isSdkModeEnabled(call, result)
+      case "init":
+        initSdk(call, result)
       default: result(FlutterMethodNotImplemented)
       }
     } catch {
@@ -122,12 +113,22 @@ public class SwiftPolarPlugin:
           code: "Error in Polar plugin", message: error.localizedDescription, details: nil))
     }
   }
+  
+  private func initSdk(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+    guard api == nil else { return result(nil) }
+    api = PolarBleApiDefaultImpl.polarImplementation(
+      DispatchQueue.main, features: Set(PolarBleSdkFeature.allCases))
+
+    api.observer = self
+    api.powerStateObserver = self
+    api.deviceFeaturesObserver = self
+    api.deviceInfoObserver = self
+    result(nil)
+  }
 
   var searchSubscription: Disposable?
   lazy var searchHandler = StreamHandler(
     onListen: { _, events in
-      self.initApi()
-
       self.searchSubscription = self.api.searchForDevice().subscribe(
         onNext: { data in
           guard let data = jsonEncode(PolarDeviceInfoCodable(data))
@@ -413,7 +414,9 @@ public class SwiftPolarPlugin:
     else {
       return
     }
-    channel.invokeMethod("deviceConnecting", arguments: data)
+      DispatchQueue.main.async {
+          self.channel.invokeMethod("deviceConnecting", arguments: data)
+      }
   }
 
   public func deviceConnected(_ polarDeviceInfo: PolarDeviceInfo) {
@@ -421,7 +424,9 @@ public class SwiftPolarPlugin:
     else {
       return
     }
-    channel.invokeMethod("deviceConnected", arguments: data)
+      DispatchQueue.main.async {
+          self.channel.invokeMethod("deviceConnected", arguments: data)
+      }
   }
 
   public func deviceDisconnected(_ polarDeviceInfo: PolarDeviceInfo, pairingError: Bool) {
@@ -429,32 +434,44 @@ public class SwiftPolarPlugin:
     else {
       return
     }
-    channel.invokeMethod("deviceDisconnected", arguments: [data, pairingError])
+      DispatchQueue.main.async {
+          self.channel.invokeMethod("deviceDisconnected", arguments: [data, pairingError])
+      }
   }
 
   public func batteryLevelReceived(_ identifier: String, batteryLevel: UInt) {
-    channel.invokeMethod("batteryLevelReceived", arguments: [identifier, batteryLevel])
+      DispatchQueue.main.async {
+          self.channel.invokeMethod("batteryLevelReceived", arguments: [identifier, batteryLevel])
+      }
   }
 
   public func blePowerOn() {
-    channel.invokeMethod("blePowerStateChanged", arguments: true)
+      DispatchQueue.main.async {
+          self.channel.invokeMethod("blePowerStateChanged", arguments: true)
+      }
   }
 
   public func blePowerOff() {
-    channel.invokeMethod("blePowerStateChanged", arguments: false)
+      DispatchQueue.main.async {
+          self.channel.invokeMethod("blePowerStateChanged", arguments: false)
+      }
   }
 
   public func bleSdkFeatureReady(_ identifier: String, feature: PolarBleSdkFeature) {
-    channel.invokeMethod(
-      "sdkFeatureReady",
-      arguments: [
-        identifier,
-        PolarBleSdkFeature.allCases.firstIndex(of: feature)!,
-      ])
+      DispatchQueue.main.async {
+          self.channel.invokeMethod(
+            "sdkFeatureReady",
+            arguments: [
+                identifier,
+                PolarBleSdkFeature.allCases.firstIndex(of: feature)!,
+            ])
+      }
   }
 
   public func disInformationReceived(_ identifier: String, uuid: CBUUID, value: String) {
-    channel.invokeMethod("disInformationReceived", arguments: [identifier, uuid.uuidString, value])
+      DispatchQueue.main.async {
+          self.channel.invokeMethod("disInformationReceived", arguments: [identifier, uuid.uuidString, value])
+      }
   }
 
   // MARK: Deprecated functions

@@ -63,7 +63,7 @@ private fun runOnUiThread(runnable: () -> Unit) {
 private val gson = GsonBuilder().registerTypeAdapter(Date::class.java, DateSerializer).create()
 
 private var wrapperInternal: PolarWrapper? = null
-val wrapper: PolarWrapper
+private val wrapper: PolarWrapper
     get() = wrapperInternal!!
 
 /** PolarPlugin */
@@ -79,6 +79,9 @@ class PolarPlugin :
 
     // Search channel
     private lateinit var searchChannel: EventChannel
+
+    // Context
+    private lateinit var context: Context
 
     // Streaming channels
     private val streamingChannels = mutableMapOf<String, StreamingChannel>()
@@ -105,11 +108,7 @@ class PolarPlugin :
         searchChannel = EventChannel(flutterPluginBinding.binaryMessenger, "polar/search")
         searchChannel.setStreamHandler(searchHandler)
 
-        if (wrapperInternal == null) {
-            wrapperInternal = PolarWrapper(flutterPluginBinding.applicationContext)
-        }
-
-        wrapper.addCallback(polarCallback)
+        context = flutterPluginBinding.applicationContext
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
@@ -123,6 +122,9 @@ class PolarPlugin :
         call: MethodCall,
         result: Result,
     ) {
+        if(call.method != "init" && wrapperInternal == null) {
+            return result.error("SDK not initialized", "Call `init()` to set up SDK", null)
+        }
         when (call.method) {
             "connectToDevice" -> {
                 wrapper.api.connectToDevice(call.arguments as String)
@@ -148,7 +150,23 @@ class PolarPlugin :
             "enableSdkMode" -> enableSdkMode(call, result)
             "disableSdkMode" -> disableSdkMode(call, result)
             "isSdkModeEnabled" -> isSdkModeEnabled(call, result)
+            "init" -> initSdk(call, result)
             else -> result.notImplemented()
+        }
+    }
+
+    private fun initSdk(
+        call: MethodCall,
+        result: Result,
+    ) {
+        try {
+            if (wrapperInternal == null) {
+                wrapperInternal = PolarWrapper(context)
+            }
+            wrapper.addCallback(polarCallback)
+            result.success(null)
+        } catch (e: Exception) {
+            result.error("Could not initialize Polar SDK", e.message, e.stackTraceToString())
         }
     }
 
@@ -199,7 +217,7 @@ class PolarPlugin :
         lifecycle.addObserver(
             LifecycleEventObserver { _, event ->
                 when (event) {
-                    Event.ON_RESUME -> wrapper.api.foregroundEntered()
+                    Event.ON_RESUME -> wrapperInternal?.api?.foregroundEntered()
                     Event.ON_DESTROY -> shutDown()
                     else -> {}
                 }
@@ -214,8 +232,10 @@ class PolarPlugin :
     override fun onDetachedFromActivity() {}
 
     private fun shutDown() {
-        wrapper.removeCallback(polarCallback)
-        wrapper.shutDown()
+        if(wrapperInternal != null) {
+            wrapper.removeCallback(polarCallback)
+            wrapper.shutDown()
+        }
     }
 
     private fun getAvailableOnlineStreamDataTypes(
