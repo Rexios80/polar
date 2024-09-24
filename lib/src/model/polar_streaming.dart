@@ -37,6 +37,10 @@ class PolarStreamingData<T> {
         return _fromJson(json, _$PolarMagnetometerSampleFromJson);
       case const (PolarPpiSample):
         return _fromJson(json, _$PolarPpiSampleFromJson);
+      case const (PolarTemperatureData):
+        return _fromJson(json, _$PolarTemperatureSampleFromJson);
+      case const (PolarPressureData):
+        return _fromJson(json, _$PolarPressureSampleFromJson);
       default:
         throw UnsupportedError('Unsupported type: $T');
     }
@@ -60,6 +64,10 @@ class PolarStreamingData<T> {
         return _toJson(_$PolarMagnetometerSampleToJson);
       case const (PolarPpiSample):
         return _toJson(_$PolarPpiSampleToJson);
+      case const (PolarTemperatureData):
+        return _toJson(_$PolarTemperatureSampleToJson);
+      case const (PolarPressureData):
+        return _toJson(_$PolarPressureSampleToJson);
       default:
         throw UnsupportedError('Unsupported type: $T');
     }
@@ -286,6 +294,49 @@ class PolarPpiSample {
   });
 }
 
+/// Polar ppi data
+typedef PolarPpiData = PolarStreamingData<PolarPpiSample>;
+
+/// Polar temperature sample
+@JsonSerializable()
+class PolarTemperatureSample {
+  /// moment sample is taken in nanoseconds. The epoch of timestamp is 1.1.2000
+  @PolarSampleTimestampConverter()
+  final DateTime timeStamp;
+
+  /// temperature value in celsius
+  final double temperature;
+
+  /// Constructor
+  PolarTemperatureSample({
+    required this.timeStamp,
+    required this.temperature,
+  });
+}
+
+/// Polar temperature data
+typedef PolarTemperatureData = PolarStreamingData<PolarTemperatureSample>;
+
+/// Polar pressure sample
+@JsonSerializable()
+class PolarPressureSample {
+  /// moment sample is taken in nanoseconds. The epoch of timestamp is 1.1.2000
+  @PolarSampleTimestampConverter()
+  final DateTime timeStamp;
+
+  /// pressure value in pascal
+  final double pressure;
+
+  /// Constructor
+  PolarPressureSample({
+    required this.timeStamp,
+    required this.pressure,
+  });
+}
+
+/// Polar pressure data
+typedef PolarPressureData = PolarStreamingData<PolarPressureSample>;
+
 Object? _readErrorEstimate(Map json, String key) => readPlatformValue(
       json,
       {
@@ -301,6 +352,3 @@ Object? _readPpi(Map json, String key) => readPlatformValue(
         TargetPlatform.android: 'ppi',
       },
     );
-
-/// Polar ppi data
-typedef PolarPpiData = PolarStreamingData<PolarPpiSample>;

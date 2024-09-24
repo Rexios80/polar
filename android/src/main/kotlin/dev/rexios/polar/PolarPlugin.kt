@@ -12,6 +12,7 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonPrimitive
 import com.google.gson.JsonSerializationContext
 import com.google.gson.JsonSerializer
+import com.polar.androidcommunications.api.ble.model.DisInfo
 import com.polar.sdk.api.PolarBleApi
 import com.polar.sdk.api.PolarBleApi.PolarBleSdkFeature
 import com.polar.sdk.api.PolarBleApi.PolarDeviceDataType
@@ -541,6 +542,13 @@ class PolarWrapper(
         invoke("disInformationReceived", listOf(identifier, uuid.toString(), value))
     }
 
+    override fun disInformationReceived(
+        identifier: String,
+        disInfo: DisInfo,
+    ) {
+        invoke("disInformationReceived", listOf(identifier, disInfo.key, disInfo.value))
+    }
+
     override fun batteryLevelReceived(
         identifier: String,
         level: Int,
@@ -614,8 +622,11 @@ class StreamingChannel(
                         identifier,
                         settings,
                     )
-
-                else -> throw Exception("Unknown streaming feature $feature")
+                PolarDeviceDataType.TEMPERATURE ->
+                    api.startTemperatureStreaming(
+                        identifier,
+                        settings,
+                    )
             }
 
         subscription =

@@ -36,8 +36,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install swift-format
         run: brew install swift-format
-      - name: Format
-        run: swift-format lint --strict --recursive ios
+      - name: Lint
+        run: swift-format lint -rs ios
 
   analyze-kotlin:
     runs-on: macos-latest

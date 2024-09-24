@@ -10,15 +10,11 @@ part of 'polar_sensor_setting.dart';
 
 PolarSensorSetting _$PolarSensorSettingFromJson(Map<String, dynamic> json) =>
     PolarSensorSetting._(
-      settings: (json['settings'] as Map<String, dynamic>).map(
-        (k, e) => MapEntry(
-            const PolarSettingTypeConverter().fromJson(k as String),
-            (e as List<dynamic>).map((e) => (e as num).toInt()).toList()),
-      ),
+      settings: PolarSensorSetting._settingsFromJson(
+          json['settings'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$PolarSensorSettingToJson(PolarSensorSetting instance) =>
     <String, dynamic>{
-      'settings': instance.settings.map(
-          (k, e) => MapEntry(const PolarSettingTypeConverter().toJson(k), e)),
+      'settings': PolarSensorSetting._settingsToJson(instance.settings),
     };

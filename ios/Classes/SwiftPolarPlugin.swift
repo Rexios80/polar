@@ -457,6 +457,12 @@ public class SwiftPolarPlugin:
     channel.invokeMethod("disInformationReceived", arguments: [identifier, uuid.uuidString, value])
   }
 
+  public func disInformationReceivedWithKeysAsStrings(
+    _ identifier: String, key: String, value: String
+  ) {
+    channel.invokeMethod("disInformationReceived", arguments: [identifier, key, value])
+  }
+
   // MARK: Deprecated functions
 
   public func streamingFeaturesReady(
@@ -563,6 +569,10 @@ class StreamingChannel: NSObject, FlutterStreamHandler {
       stream = api.startMagnetometerStreaming(identifier, settings: settings!)
     case .hr:
       stream = api.startHrStreaming(identifier)
+    case .temperature:
+      stream = api.startTemperatureStreaming(identifier, settings: settings!)
+    case .pressure:
+      stream = api.startPressureStreaming(identifier, settings: settings!)
     }
 
     subscription = stream.anySubscribe(
