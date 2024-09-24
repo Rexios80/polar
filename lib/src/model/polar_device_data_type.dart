@@ -24,7 +24,13 @@ enum PolarDataType {
   magnetometer,
 
   /// HR
-  hr(supportsStreamSettings: false);
+  hr(supportsStreamSettings: false),
+
+  /// Temperature
+  temperature,
+
+  /// Pressure
+  pressure;
 
   /// If this feature supports stream settings
   final bool supportsStreamSettings;

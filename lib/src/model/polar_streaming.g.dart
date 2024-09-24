@@ -165,3 +165,34 @@ Map<String, dynamic> _$PolarPpiSampleToJson(PolarPpiSample instance) =>
       'skinContactSupported': const PlatformBooleanConverter()
           .toJson(instance.skinContactSupported),
     };
+
+PolarTemperatureSample _$PolarTemperatureSampleFromJson(
+        Map<String, dynamic> json) =>
+    PolarTemperatureSample(
+      timeStamp: const PolarSampleTimestampConverter()
+          .fromJson((json['timeStamp'] as num).toInt()),
+      temperature: (json['temperature'] as num).toDouble(),
+    );
+
+Map<String, dynamic> _$PolarTemperatureSampleToJson(
+        PolarTemperatureSample instance) =>
+    <String, dynamic>{
+      'timeStamp':
+          const PolarSampleTimestampConverter().toJson(instance.timeStamp),
+      'temperature': instance.temperature,
+    };
+
+PolarPressureSample _$PolarPressureSampleFromJson(Map<String, dynamic> json) =>
+    PolarPressureSample(
+      timeStamp: const PolarSampleTimestampConverter()
+          .fromJson((json['timeStamp'] as num).toInt()),
+      pressure: (json['pressure'] as num).toDouble(),
+    );
+
+Map<String, dynamic> _$PolarPressureSampleToJson(
+        PolarPressureSample instance) =>
+    <String, dynamic>{
+      'timeStamp':
+          const PolarSampleTimestampConverter().toJson(instance.timeStamp),
+      'pressure': instance.pressure,
+    };

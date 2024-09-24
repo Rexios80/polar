@@ -201,6 +201,24 @@ class StreamingHandler extends MockStreamHandler {
             ),
           ],
         );
+      case PolarDataType.temperature:
+        data = PolarTemperatureData(
+          samples: [
+            PolarTemperatureSample(
+              timeStamp: DateTime.now(),
+              temperature: 0,
+            ),
+          ],
+        );
+      case PolarDataType.pressure:
+        data = PolarPressureData(
+          samples: [
+            PolarPressureSample(
+              timeStamp: DateTime.now(),
+              pressure: 0,
+            ),
+          ],
+        );
     }
 
     events.success(jsonEncode(data));

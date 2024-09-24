@@ -8,8 +8,29 @@ part 'polar_sensor_setting.g.dart';
 /// polar sensor settings class
 @JsonSerializable(constructor: '_')
 class PolarSensorSetting {
+  static const _settingTypeConverter = PolarSettingTypeConverter();
+
+  static Map<PolarSettingType, List<int>> _settingsFromJson(
+    Map<String, dynamic> json,
+  ) {
+    return json.map(
+      (key, value) => MapEntry(_settingTypeConverter.fromJson(key), value),
+    );
+  }
+
+  static Map<String, dynamic> _settingsToJson(
+    Map<PolarSettingType, List<int>> settings,
+  ) {
+    return settings.map(
+      (key, value) => MapEntry(_settingTypeConverter.toJson(key), value),
+    );
+  }
+
   /// current settings available / set
-  @PolarSettingTypeConverter()
+  @JsonKey(
+    fromJson: _settingsFromJson,
+    toJson: _settingsToJson,
+  )
   final Map<PolarSettingType, List<int>> settings;
 
   /// Verify that this is a selection of settings and not a list of available settings
