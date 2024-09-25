@@ -17,7 +17,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   static const identifier = '1C709B20';
 
-  final polar = Polar()..init();
+  final polar = Polar();
   final logs = ['Service started'];
 
   PolarExerciseEntry? exerciseEntry;

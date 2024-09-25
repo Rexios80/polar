@@ -123,8 +123,12 @@ class PolarPlugin :
         call: MethodCall,
         result: Result,
     ) {
-        if(call.method != "init" && wrapperInternal == null) {
-            return result.error("SDK not initialized", "Call `init()` to set up SDK", null)
+        if (wrapperInternal == null) {
+            try {
+                initSdk()
+            } catch (e: Exception) {
+                return result.error("Could not initialize Polar SDK", e.message, e.stackTraceToString())
+            }
         }
         when (call.method) {
             "connectToDevice" -> {
@@ -151,24 +155,15 @@ class PolarPlugin :
             "enableSdkMode" -> enableSdkMode(call, result)
             "disableSdkMode" -> disableSdkMode(call, result)
             "isSdkModeEnabled" -> isSdkModeEnabled(call, result)
-            "init" -> initSdk(call, result)
             else -> result.notImplemented()
         }
     }
 
-    private fun initSdk(
-        call: MethodCall,
-        result: Result,
-    ) {
-        try {
-            if (wrapperInternal == null) {
-                wrapperInternal = PolarWrapper(context)
-            }
-            wrapper.addCallback(polarCallback)
-            result.success(null)
-        } catch (e: Exception) {
-            result.error("Could not initialize Polar SDK", e.message, e.stackTraceToString())
+    private fun initSdk() {
+        if (wrapperInternal == null) {
+            wrapperInternal = PolarWrapper(context)
         }
+        wrapper.addCallback(polarCallback)
     }
 
     private val searchHandler =
@@ -233,7 +228,7 @@ class PolarPlugin :
     override fun onDetachedFromActivity() {}
 
     private fun shutDown() {
-        if(wrapperInternal != null) {
+        if (wrapperInternal != null) {
             wrapper.removeCallback(polarCallback)
             wrapper.shutDown()
         }

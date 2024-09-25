@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:polar/polar.dart';
 
 const identifier = '1C709B20';
-final polar = Polar()..init();
+final polar = Polar();
 
 void example() {
   polar.connectToDevice(identifier);

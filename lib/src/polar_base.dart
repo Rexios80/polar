@@ -555,14 +555,4 @@ class Polar {
         await _channel.invokeMethod<bool>('isSdkModeEnabled', identifier);
     return result!;
   }
-
-  /// Initialize the Polar SDK.
-  /// 
-  /// - Parameters:
-  ///  - allowSdkShutdown: if true, the SDK will be shut down when when the 
-  ///   Flutter engine is destroyed - this will break the SDK if background tasks
-  ///   are run.
-  Future<void> init() async {
-    return await _channel.invokeMethod('init');
-  }
 }
