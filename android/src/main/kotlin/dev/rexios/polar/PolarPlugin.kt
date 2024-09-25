@@ -228,7 +228,7 @@ class PolarPlugin :
     override fun onDetachedFromActivity() {}
 
     private fun shutDown() {
-        if (wrapperInternal != null) {
+        if (wrapperInternal == null) return
             wrapper.removeCallback(polarCallback)
             wrapper.shutDown()
         }
