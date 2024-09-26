@@ -14,7 +14,10 @@ class PolarSensorSetting {
     Map<String, dynamic> json,
   ) {
     return json.map(
-      (key, value) => MapEntry(_settingTypeConverter.fromJson(key), value),
+      (key, value) => MapEntry(
+        _settingTypeConverter.fromJson(key),
+        (value as List).cast<int>(),
+      ),
     );
   }
 

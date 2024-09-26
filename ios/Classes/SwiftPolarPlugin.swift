@@ -408,12 +408,18 @@ public class SwiftPolarPlugin:
       })
   }
 
+  private func invokeMethod(_ methodName: String, arguments: Any? = nil) {
+    DispatchQueue.main.async {
+      self.channel.invokeMethod(methodName, arguments: arguments)
+    }
+  }
+
   public func deviceConnecting(_ polarDeviceInfo: PolarDeviceInfo) {
     guard let data = jsonEncode(PolarDeviceInfoCodable(polarDeviceInfo))
     else {
       return
     }
-    channel.invokeMethod("deviceConnecting", arguments: data)
+    invokeMethod("deviceConnecting", arguments: data)
   }
 
   public func deviceConnected(_ polarDeviceInfo: PolarDeviceInfo) {
@@ -421,7 +427,7 @@ public class SwiftPolarPlugin:
     else {
       return
     }
-    channel.invokeMethod("deviceConnected", arguments: data)
+    invokeMethod("deviceConnected", arguments: data)
   }
 
   public func deviceDisconnected(_ polarDeviceInfo: PolarDeviceInfo, pairingError: Bool) {
@@ -429,23 +435,23 @@ public class SwiftPolarPlugin:
     else {
       return
     }
-    channel.invokeMethod("deviceDisconnected", arguments: [data, pairingError])
+    invokeMethod("deviceDisconnected", arguments: [data, pairingError])
   }
 
   public func batteryLevelReceived(_ identifier: String, batteryLevel: UInt) {
-    channel.invokeMethod("batteryLevelReceived", arguments: [identifier, batteryLevel])
+    invokeMethod("batteryLevelReceived", arguments: [identifier, batteryLevel])
   }
 
   public func blePowerOn() {
-    channel.invokeMethod("blePowerStateChanged", arguments: true)
+    invokeMethod("blePowerStateChanged", arguments: true)
   }
 
   public func blePowerOff() {
-    channel.invokeMethod("blePowerStateChanged", arguments: false)
+    invokeMethod("blePowerStateChanged", arguments: false)
   }
 
   public func bleSdkFeatureReady(_ identifier: String, feature: PolarBleSdkFeature) {
-    channel.invokeMethod(
+    invokeMethod(
       "sdkFeatureReady",
       arguments: [
         identifier,
@@ -454,7 +460,8 @@ public class SwiftPolarPlugin:
   }
 
   public func disInformationReceived(_ identifier: String, uuid: CBUUID, value: String) {
-    channel.invokeMethod("disInformationReceived", arguments: [identifier, uuid.uuidString, value])
+    invokeMethod(
+      "disInformationReceived", arguments: [identifier, uuid.uuidString, value])
   }
 
   public func disInformationReceivedWithKeysAsStrings(

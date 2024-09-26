@@ -64,7 +64,7 @@ private fun runOnUiThread(runnable: () -> Unit) {
 private val gson = GsonBuilder().registerTypeAdapter(Date::class.java, DateSerializer).create()
 
 private var wrapperInternal: PolarWrapper? = null
-val wrapper: PolarWrapper
+private val wrapper: PolarWrapper
     get() = wrapperInternal!!
 
 /** PolarPlugin */
@@ -80,6 +80,9 @@ class PolarPlugin :
 
     // Search channel
     private lateinit var searchChannel: EventChannel
+
+    // Context
+    private lateinit var context: Context
 
     // Streaming channels
     private val streamingChannels = mutableMapOf<String, StreamingChannel>()
@@ -106,11 +109,7 @@ class PolarPlugin :
         searchChannel = EventChannel(flutterPluginBinding.binaryMessenger, "polar/search")
         searchChannel.setStreamHandler(searchHandler)
 
-        if (wrapperInternal == null) {
-            wrapperInternal = PolarWrapper(flutterPluginBinding.applicationContext)
-        }
-
-        wrapper.addCallback(polarCallback)
+        context = flutterPluginBinding.applicationContext
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
@@ -120,10 +119,19 @@ class PolarPlugin :
         shutDown()
     }
 
+    private fun initApi() {
+        if (wrapperInternal == null) {
+            wrapperInternal = PolarWrapper(context)
+        }
+        wrapper.addCallback(polarCallback)
+    }
+
     override fun onMethodCall(
         call: MethodCall,
         result: Result,
     ) {
+        initApi()
+
         when (call.method) {
             "connectToDevice" -> {
                 wrapper.api.connectToDevice(call.arguments as String)
@@ -161,6 +169,8 @@ class PolarPlugin :
                 arguments: Any?,
                 events: EventSink,
             ) {
+                initApi()
+
                 searchSubscription =
                     wrapper.api.searchForDevice().subscribe({
                         runOnUiThread { events.success(gson.toJson(it)) }
@@ -200,7 +210,7 @@ class PolarPlugin :
         lifecycle.addObserver(
             LifecycleEventObserver { _, event ->
                 when (event) {
-                    Event.ON_RESUME -> wrapper.api.foregroundEntered()
+                    Event.ON_RESUME -> wrapperInternal?.api?.foregroundEntered()
                     Event.ON_DESTROY -> shutDown()
                     else -> {}
                 }
@@ -215,6 +225,7 @@ class PolarPlugin :
     override fun onDetachedFromActivity() {}
 
     private fun shutDown() {
+        if (wrapperInternal == null) return
         wrapper.removeCallback(polarCallback)
         wrapper.shutDown()
     }
@@ -475,13 +486,14 @@ class PolarWrapper(
             context,
             PolarBleSdkFeature.values().toSet(),
         ),
-    private val callbacks: MutableList<(String, Any?) -> Unit> = mutableListOf(),
+    private val callbacks: MutableSet<(String, Any?) -> Unit> = mutableSetOf(),
 ) : PolarBleApiCallbackProvider {
     init {
         api.setApiCallback(this)
     }
 
     fun addCallback(callback: (String, Any?) -> Unit) {
+        if (callbacks.contains(callback)) return
         callbacks.add(callback)
     }
 
@@ -622,6 +634,7 @@ class StreamingChannel(
                         identifier,
                         settings,
                     )
+
                 PolarDeviceDataType.TEMPERATURE ->
                     api.startTemperatureStreaming(
                         identifier,
