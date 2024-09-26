@@ -77,6 +77,7 @@ public class SwiftPolarPlugin:
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
     initApi()
+
     do {
       switch call.method {
       case "connectToDevice":
@@ -126,6 +127,7 @@ public class SwiftPolarPlugin:
   lazy var searchHandler = StreamHandler(
     onListen: { _, events in
       self.initApi()
+
       self.searchSubscription = self.api.searchForDevice().subscribe(
         onNext: { data in
           guard let data = jsonEncode(PolarDeviceInfoCodable(data))

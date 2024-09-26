@@ -119,11 +119,19 @@ class PolarPlugin :
         shutDown()
     }
 
+    private fun initApi() {
+        if (wrapperInternal == null) {
+            wrapperInternal = PolarWrapper(context)
+        }
+        wrapper.addCallback(polarCallback)
+    }
+
     override fun onMethodCall(
         call: MethodCall,
         result: Result,
     ) {
-        initSdk()
+        initApi()
+
         when (call.method) {
             "connectToDevice" -> {
                 wrapper.api.connectToDevice(call.arguments as String)
@@ -153,13 +161,6 @@ class PolarPlugin :
         }
     }
 
-    private fun initSdk() {
-        if (wrapperInternal == null) {
-            wrapperInternal = PolarWrapper(context)
-        }
-        wrapper.addCallback(polarCallback)
-    }
-
     private val searchHandler =
         object : EventChannel.StreamHandler {
             private var searchSubscription: Disposable? = null
@@ -168,7 +169,8 @@ class PolarPlugin :
                 arguments: Any?,
                 events: EventSink,
             ) {
-                initSdk()
+                initApi()
+
                 searchSubscription =
                     wrapper.api.searchForDevice().subscribe({
                         runOnUiThread { events.success(gson.toJson(it)) }
@@ -484,7 +486,7 @@ class PolarWrapper(
             context,
             PolarBleSdkFeature.values().toSet(),
         ),
-    private val callbacks: MutableList<(String, Any?) -> Unit> = mutableListOf(),
+    private val callbacks: MutableSet<(String, Any?) -> Unit> = mutableSetOf(),
 ) : PolarBleApiCallbackProvider {
     init {
         api.setApiCallback(this)
@@ -632,6 +634,7 @@ class StreamingChannel(
                         identifier,
                         settings,
                     )
+
                 PolarDeviceDataType.TEMPERATURE ->
                     api.startTemperatureStreaming(
                         identifier,
