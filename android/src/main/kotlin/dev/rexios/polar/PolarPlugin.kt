@@ -123,13 +123,7 @@ class PolarPlugin :
         call: MethodCall,
         result: Result,
     ) {
-        if (wrapperInternal == null) {
-            try {
-                initSdk()
-            } catch (e: Exception) {
-                return result.error("Could not initialize Polar SDK", e.message, e.stackTraceToString())
-            }
-        }
+        initSdk()
         when (call.method) {
             "connectToDevice" -> {
                 wrapper.api.connectToDevice(call.arguments as String)
@@ -174,6 +168,7 @@ class PolarPlugin :
                 arguments: Any?,
                 events: EventSink,
             ) {
+                initSdk()
                 searchSubscription =
                     wrapper.api.searchForDevice().subscribe({
                         runOnUiThread { events.success(gson.toJson(it)) }
@@ -497,6 +492,7 @@ class PolarWrapper(
     }
 
     fun addCallback(callback: (String, Any?) -> Unit) {
+        if (callbacks.contains(callback)) return
         callbacks.add(callback)
     }
 

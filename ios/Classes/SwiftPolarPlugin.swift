@@ -49,6 +49,17 @@ public class SwiftPolarPlugin:
     self.searchChannel = searchChannel
   }
 
+  private func initApi() {
+    guard api == nil else { return }
+    api = PolarBleApiDefaultImpl.polarImplementation(
+      DispatchQueue.main, features: Set(PolarBleSdkFeature.allCases))
+
+    api.observer = self
+    api.powerStateObserver = self
+    api.deviceFeaturesObserver = self
+    api.deviceInfoObserver = self
+  }
+
   public static func register(with registrar: FlutterPluginRegistrar) {
     let channel = FlutterMethodChannel(name: "polar", binaryMessenger: registrar.messenger())
     let searchChannel = FlutterEventChannel(
@@ -65,7 +76,7 @@ public class SwiftPolarPlugin:
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-    initSdk()
+    initApi()
     do {
       switch call.method {
       case "connectToDevice":
@@ -111,20 +122,10 @@ public class SwiftPolarPlugin:
     }
   }
 
-  private func initSdk() {
-    guard api == nil else { return }
-    api = PolarBleApiDefaultImpl.polarImplementation(
-      DispatchQueue.main, features: Set(PolarBleSdkFeature.allCases))
-
-    api.observer = self
-    api.powerStateObserver = self
-    api.deviceFeaturesObserver = self
-    api.deviceInfoObserver = self
-  }
-
   var searchSubscription: Disposable?
   lazy var searchHandler = StreamHandler(
     onListen: { _, events in
+      self.initApi()
       self.searchSubscription = self.api.searchForDevice().subscribe(
         onNext: { data in
           guard let data = jsonEncode(PolarDeviceInfoCodable(data))
@@ -297,9 +298,11 @@ public class SwiftPolarPlugin:
 
     _ = api.fetchExercise(identifier, entry: entry).subscribe(
       onSuccess: { data in
-        if let data = jsonEncode(PolarExerciseDataCodable(data)) {
-          result(data)
+        guard let data = jsonEncode(PolarExerciseDataCodable(data))
+        else {
+          return
         }
+        result(data)
       },
       onFailure: { error in
         result(
@@ -409,21 +412,27 @@ public class SwiftPolarPlugin:
     }
   }
   public func deviceConnecting(_ polarDeviceInfo: PolarDeviceInfo) {
-    if let data = jsonEncode(PolarDeviceInfoCodable(polarDeviceInfo)) {
-      invokeMethod("deviceConnecting", arguments: data)
+    guard let data = jsonEncode(PolarDeviceInfoCodable(polarDeviceInfo))
+    else {
+      return
     }
+    invokeMethod("deviceConnecting", arguments: data)
   }
 
   public func deviceConnected(_ polarDeviceInfo: PolarDeviceInfo) {
-    if let data = jsonEncode(PolarDeviceInfoCodable(polarDeviceInfo)) {
-      invokeMethod("deviceConnected", arguments: data)
+    guard let data = jsonEncode(PolarDeviceInfoCodable(polarDeviceInfo))
+    else {
+      return
     }
+    invokeMethod("deviceConnected", arguments: data)
   }
 
   public func deviceDisconnected(_ polarDeviceInfo: PolarDeviceInfo, pairingError: Bool) {
-    if let data = jsonEncode(PolarDeviceInfoCodable(polarDeviceInfo)) {
-      invokeMethod("deviceDisconnected", arguments: [data, pairingError])
+    guard let data = jsonEncode(PolarDeviceInfoCodable(polarDeviceInfo))
+    else {
+      return
     }
+    invokeMethod("deviceDisconnected", arguments: [data, pairingError])
   }
 
   public func batteryLevelReceived(_ identifier: String, batteryLevel: UInt) {
