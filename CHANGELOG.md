@@ -1,3 +1,7 @@
+## NEXT
+
+- Fixes temperature and pressure decoding on iOS
+
 ## 7.4.0
 
 - Updates Polar SDK to `5.7.0`
