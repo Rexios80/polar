@@ -4,6 +4,7 @@
 - Specifies `jvmTarget` to fix Android build issues
 - Initializes Android SDK on method call instead of on plugin registration
 - Invokes iOS methods on the main queue
+- Fixes `PolarSensorSetting` deserialization
 
 ## 7.4.0
 
