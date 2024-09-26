@@ -224,9 +224,8 @@ class PolarPlugin :
 
     private fun shutDown() {
         if (wrapperInternal == null) return
-            wrapper.removeCallback(polarCallback)
-            wrapper.shutDown()
-        }
+        wrapper.removeCallback(polarCallback)
+        wrapper.shutDown()
     }
 
     private fun getAvailableOnlineStreamDataTypes(
