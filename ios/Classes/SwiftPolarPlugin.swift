@@ -413,6 +413,7 @@ public class SwiftPolarPlugin:
       self.channel.invokeMethod(methodName, arguments: arguments)
     }
   }
+
   public func deviceConnecting(_ polarDeviceInfo: PolarDeviceInfo) {
     guard let data = jsonEncode(PolarDeviceInfoCodable(polarDeviceInfo))
     else {
