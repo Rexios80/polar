@@ -1,3 +1,7 @@
+## 7.5.1
+
+- Dependency upgrades
+
 ## 7.5.0
 
 - Fixes temperature and pressure decoding on iOS
