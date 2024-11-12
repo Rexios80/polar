@@ -537,6 +537,11 @@ class Polar {
     );
   }
 
+  /// Set local time of the device
+  Future<void> setLocalTime(String identifier) {
+    return _channel.invokeMethod('setLocalTime', identifier);
+  }
+
   ///  Enables SDK mode.
   Future<void> enableSdkMode(String identifier) {
     return _channel.invokeMethod('enableSdkMode', identifier);
