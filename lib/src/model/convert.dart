@@ -138,17 +138,21 @@ class PolarSampleTimestampConverter extends JsonConverter<DateTime, int> {
 }
 
 /// Converts [PolarDataType] to and from JSON strings.
-class PolarDataTypeConverter implements JsonConverter<PolarDataType, String> {
+class PolarDataTypeConverter implements JsonConverter<PolarDataType, dynamic> {
   /// Constant constructor for [PolarDataTypeConverter].
   const PolarDataTypeConverter();
 
-  /// Converts JSON string to [PolarDataType] enum.
+  /// Converts JSON to [PolarDataType].
   @override
-  PolarDataType fromJson(String json) => PolarDataType.fromJson(json);
+  PolarDataType fromJson(dynamic json) {
+    return PolarDataType.fromJson(json);
+  }
 
-  /// Converts [PolarDataType] enum to JSON string.
+  /// Converts [PolarDataType] to JSON.
   @override
-  String toJson(PolarDataType object) => object.toJson();
+  dynamic toJson(PolarDataType object) {
+    return object.toJson();
+  }
 }
 
 /// Converts a map with time components to and from [DateTime].

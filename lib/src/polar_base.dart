@@ -718,7 +718,7 @@ class Polar {
     try {
       final result = await _channel.invokeMethod<String>(
         'getOfflineRecord',
-        [identifier, jsonEncode(entry)],
+        [identifier, jsonEncode(entry.toJson())],
       );
       final data = jsonDecode(result!);
       return AccOfflineRecording.fromJson(data);
@@ -766,7 +766,7 @@ class Polar {
     try {
       await _channel.invokeMethod(
         'removeOfflineRecord',
-        [identifier, jsonEncode(entry)],
+        [identifier, jsonEncode(entry.toJson())],
       );
     } on PlatformException catch (e) {
       throw Exception('Error: ${e.message}');

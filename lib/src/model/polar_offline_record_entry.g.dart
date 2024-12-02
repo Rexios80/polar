@@ -7,12 +7,13 @@ part of 'polar_offline_record_entry.dart';
 // **************************************************************************
 
 PolarOfflineRecordingEntry _$PolarOfflineRecordingEntryFromJson(
-    Map<String, dynamic> json) {
+  Map<String, dynamic> json,
+) {
   return PolarOfflineRecordingEntry(
     path: json['path'] as String,
     size: json['size'] as int,
     date: const UnixTimeConverter().fromJson((json['date'] as num).toInt()),
-    type: const PolarDataTypeConverter().fromJson(json['type'] as String),
+    type: const PolarDataTypeConverter().fromJson(json['type']),
   );
 }
 

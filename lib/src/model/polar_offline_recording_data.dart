@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:polar/polar.dart';
 import 'package:polar/src/model/convert.dart';
 
@@ -51,9 +53,11 @@ class AccOfflineRecording extends PolarOfflineRecordingData {
   factory AccOfflineRecording.fromJson(Map<String, dynamic> json) {
     return AccOfflineRecording(
       data: PolarAccData.fromJson(json['data']),
-      startTime: const MapToDateTimeConverter().fromJson(
-        json['startTime'],
-      ),
+      startTime: Platform.isIOS
+          ? const PolarSampleTimestampConverter().fromJson(json['startTime'])
+          : const MapToDateTimeConverter().fromJson(
+              json['startTime'],
+            ),
       settings: PolarSensorSetting.fromJson(json['settings']),
     );
   }
@@ -85,9 +89,11 @@ class PpiOfflineRecording extends PolarOfflineRecordingData {
   factory PpiOfflineRecording.fromJson(Map<String, dynamic> json) {
     return PpiOfflineRecording(
       data: PolarPpiData.fromJson(json['data']),
-      startTime: const MapToDateTimeConverter().fromJson(
-        json['startTime'],
-      ),
+      startTime: Platform.isIOS
+          ? const PolarSampleTimestampConverter().fromJson(json['startTime'])
+          : const MapToDateTimeConverter().fromJson(
+              json['startTime'],
+            ),
       settings: PolarSensorSetting.fromJson(json['settings']),
     );
   }
