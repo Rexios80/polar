@@ -25,6 +25,10 @@ import com.polar.sdk.api.model.PolarDeviceInfo
 import com.polar.sdk.api.model.PolarExerciseEntry
 import com.polar.sdk.api.model.PolarHrData
 import com.polar.sdk.api.model.PolarSensorSetting
+import com.polar.sdk.api.model.PolarOfflineRecordingEntry
+import com.polar.sdk.api.model.PolarOfflineRecordingTrigger
+import com.polar.sdk.api.model.PolarOfflineRecordingTriggerMode
+import com.polar.sdk.api.model.PolarRecordingSecret
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -157,6 +161,16 @@ class PolarPlugin :
             "enableSdkMode" -> enableSdkMode(call, result)
             "disableSdkMode" -> disableSdkMode(call, result)
             "isSdkModeEnabled" -> isSdkModeEnabled(call, result)
+            "getAvailableOfflineRecordingDataTypes" -> getAvailableOfflineRecordingDataTypes(call, result)
+            "requestOfflineRecordingSettings" -> requestOfflineRecordingSettings(call, result)
+            "startOfflineRecording" -> startOfflineRecording(call, result)
+            "stopOfflineRecording" -> stopOfflineRecording(call, result)
+            "getOfflineRecordingStatus" -> getOfflineRecordingStatus(call, result)
+            "listOfflineRecordings" -> listOfflineRecordings(call, result)
+            "getOfflineRecord" -> getOfflineRecord(call, result)
+            "removeOfflineRecord" -> removeOfflineRecord(call, result)
+            "getDiskSpace" -> getDiskSpace(call, result)
+
             else -> result.notImplemented()
         }
     }
@@ -470,6 +484,160 @@ class PolarPlugin :
             .isSDKModeEnabled(identifier)
             .subscribe({
                 runOnUiThread { result.success(it) }
+            }, {
+                runOnUiThread {
+                    result.error(it.toString(), it.message, null)
+                }
+            })
+            .discard()
+    }
+
+    private fun getAvailableOfflineRecordingDataTypes(call: MethodCall, result: Result) {
+        val identifier = call.arguments as String
+
+        wrapper.api
+            .getAvailableOfflineRecordingDataTypes(identifier)
+            .subscribe({
+                runOnUiThread { result.success(gson.toJson(it)) }
+            }, {
+                runOnUiThread {
+                    result.error(it.toString(), it.message, null)
+                }
+            })
+            .discard()
+    }
+
+    private fun requestOfflineRecordingSettings(call: MethodCall, result: Result) {
+        val arguments = call.arguments as List<*>
+        val identifier = arguments[0] as String
+        val feature = gson.fromJson(arguments[1] as String, PolarDeviceDataType::class.java)
+
+        wrapper.api
+            .requestOfflineRecordingSettings(identifier, feature)
+            .subscribe({
+                runOnUiThread { result.success(gson.toJson(it)) }
+            }, {
+                runOnUiThread {
+                    result.error(it.toString(), it.message, null)
+                }
+            })
+            .discard()
+    }
+
+    private fun startOfflineRecording(call: MethodCall, result: Result) {
+        val arguments = call.arguments as List<*>
+        val identifier = arguments[0] as String
+        val feature = gson.fromJson(arguments[1] as String, PolarDeviceDataType::class.java)
+        val settings = gson.fromJson(arguments[2] as String, PolarSensorSetting::class.java)
+
+        wrapper.api
+            .startOfflineRecording(identifier, feature, settings)
+            .subscribe({
+                runOnUiThread { result.success(null) }
+            }, {
+                runOnUiThread {
+                    result.error("ERROR_STARTING_RECORDING", it.message, null)
+                }
+            })
+            .discard()
+    }
+
+    private fun stopOfflineRecording(call: MethodCall, result: Result) {
+        val arguments = call.arguments as List<*>
+        val identifier = arguments[0] as String
+        val feature = gson.fromJson(arguments[1] as String, PolarDeviceDataType::class.java)
+
+        wrapper.api
+            .stopOfflineRecording(identifier, feature)
+            .subscribe({
+                runOnUiThread { result.success(null) }
+            }, {
+                runOnUiThread {
+                    result.error("ERROR_STOPPING_RECORDING", it.message, null)
+                }
+            })
+            .discard()
+    }
+
+    private fun getOfflineRecordingStatus(call: MethodCall, result: Result) {
+        val arguments = call.arguments as List<*>
+        val identifier = arguments[0] as String
+
+        wrapper.api
+            .getOfflineRecordingStatus(identifier) // Only pass identifier
+            .subscribe({
+                runOnUiThread { result.success(it) }
+            }, {
+                runOnUiThread {
+                    result.error(it.toString(), it.message, null)
+                }
+            })
+            .discard()
+    }
+
+    private fun listOfflineRecordings(call: MethodCall, result: Result) {
+        val identifier = call.arguments as String
+
+        val recordings = mutableListOf<String>()
+        wrapper.api
+            .listOfflineRecordings(identifier)
+            .subscribe({
+                recordings.add(gson.toJson(it))
+            }, {
+                runOnUiThread {
+                    result.error(it.toString(), it.message, null)
+                }
+            }, {
+                result.success(recordings)
+            })
+            .discard()
+    }
+
+    private fun getOfflineRecord(call: MethodCall, result: Result) {
+        val arguments = call.arguments as List<*>
+        val identifier = arguments[0] as String
+        val entry = gson.fromJson(arguments[1] as String, PolarOfflineRecordingEntry::class.java)
+
+        wrapper.api
+            .getOfflineRecord(identifier, entry)
+            .subscribe({
+                runOnUiThread { result.success(gson.toJson(it)) }
+            }, {
+                runOnUiThread {
+                    result.error(it.toString(), it.message, null)
+                }
+            })
+            .discard()
+    }
+
+    private fun removeOfflineRecord(call: MethodCall, result: Result) {
+        val arguments = call.arguments as List<*>
+        val identifier = arguments[0] as String
+        val entry = gson.fromJson(arguments[1] as String, PolarOfflineRecordingEntry::class.java)
+
+        wrapper.api
+            .removeOfflineRecord(identifier, entry)
+            .subscribe({
+                runOnUiThread { result.success(null) }
+            }, {
+                runOnUiThread {
+                    result.error(it.toString(), it.message, null)
+                }
+            })
+            .discard()
+    }
+
+    private fun getDiskSpace(call: MethodCall, result: Result) {
+        val identifier = call.arguments as String
+
+        wrapper.api
+            .getDiskSpace(identifier)
+            .subscribe({
+                // Destructure the Pair into availableSpace and totalSpace
+                val (availableSpace, totalSpace) = it
+                runOnUiThread {
+                    result.success(listOf(availableSpace, totalSpace))
+                }
             }, {
                 runOnUiThread {
                     result.error(it.toString(), it.message, null)

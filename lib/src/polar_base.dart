@@ -6,6 +6,8 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:polar/polar.dart';
+import 'package:polar/src/model/polar_offline_record_entry.dart';
+import 'package:polar/src/model/polar_offline_recording_data.dart';
 
 /// Flutter implementation of the [PolarBleSdk]
 class Polar {
@@ -554,5 +556,239 @@ class Polar {
     final result =
         await _channel.invokeMethod<bool>('isSdkModeEnabled', identifier);
     return result!;
+  }
+
+  /// Fetches the available offline recording data types for a given Polar device.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or address.
+  /// - Returns: A list of available offline recording data types in JSON format.
+  ///   - success: Returns a list of strings representing available data types.
+  ///   - onError: Possible errors are returned as exceptions.
+  Future<List<String>> getAvailableOfflineRecordingDataTypes(
+    String identifier,
+  ) async {
+    try {
+      final result = await _channel.invokeMethod<String>(
+        'getAvailableOfflineRecordingDataTypes',
+        identifier,
+      );
+      return List<String>.from(jsonDecode(result!));
+    } on PlatformException catch (e) {
+      throw Exception('Error: ${e.message}');
+    }
+  }
+
+  /// Requests the offline recording settings for a specific data type.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or address.
+  ///   - feature: The data type for which settings are requested.
+  /// - Returns: Offline recording settings in JSON format.
+  ///   - success: Returns a map of settings.
+  ///   - onError: Possible errors are returned as exceptions.
+  Future<PolarSensorSetting?> requestOfflineRecordingSettings(
+    String identifier,
+    PolarDataType feature,
+  ) async {
+    try {
+      final response = await _channel.invokeMethod<String>(
+        'requestOfflineRecordingSettings',
+        [identifier, feature.toJson()],
+      );
+
+      return response != null
+          ? PolarSensorSetting.fromJson(jsonDecode(response))
+          : null;
+    } on PlatformException catch (e) {
+      throw Exception('Error: ${e.message}');
+    }
+  }
+
+  /// Starts offline recording on a Polar device with the given settings.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or address.
+  ///   - feature: The data type to be recorded.
+  ///   - settings: Recording settings in JSON format.
+  ///   - encryptionKey: Optional encryption key for the recording.
+  /// - Returns: Void.
+  ///   - success: Invoked when recording starts successfully.
+  ///   - onError: Possible errors are returned as exceptions.
+  Future<void> startOfflineRecording(
+    String identifier,
+    PolarDataType feature,
+    PolarSensorSetting? settings,
+  ) async {
+    try {
+      await _channel.invokeMethod(
+        'startOfflineRecording',
+        [
+          identifier,
+          feature.toJson(),
+          settings != null ? jsonEncode(settings) : null,
+        ],
+      );
+    } on PlatformException catch (e) {
+      throw Exception('Error: ${e.message}');
+    }
+  }
+
+  /// Stops offline recording for a specific data type on a Polar device.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or address.
+  ///   - feature: The data type to stop recording.
+  /// - Returns: Void.
+  ///   - success: Invoked when recording stops successfully.
+  ///   - onError: Possible errors are returned as exceptions.
+  Future<void> stopOfflineRecording(
+    String identifier,
+    PolarDataType feature,
+  ) async {
+    try {
+      await _channel.invokeMethod(
+        'stopOfflineRecording',
+        [identifier, feature.toJson()],
+      );
+    } on PlatformException catch (e) {
+      throw Exception('Error: ${e.message}');
+    }
+  }
+
+  /// Checks the status of offline recording for a specific data type.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or address.
+  ///   - feature: The data type to check the status for.
+  /// - Returns: Recording status.
+  ///   - success: Returns the recording status.
+  ///   - onError: Possible errors are returned as exceptions.
+  Future<dynamic> getOfflineRecordingStatus(
+    String identifier,
+    PolarDataType feature,
+  ) async {
+    try {
+      final result = await _channel.invokeMethod(
+        'getOfflineRecordingStatus',
+        [identifier, feature.toJson()],
+      );
+      return result;
+    } on PlatformException catch (e) {
+      throw Exception('Error: ${e.message}');
+    }
+  }
+
+  /// Lists all offline recordings available on a Polar device.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or address.
+  /// - Returns: A list of recordings in JSON format.
+  ///   - success: Returns a list of strings representing recording entries.
+  ///   - onError: Possible errors are returned as exceptions.
+  Future<List<PolarOfflineRecordingEntry>> listOfflineRecordings(
+    String identifier,
+  ) async {
+    try {
+      final result = await _channel.invokeMethod<List<dynamic>>(
+        'listOfflineRecordings',
+        identifier,
+      );
+      return result
+              ?.map((e) => PolarOfflineRecordingEntry.fromJson(jsonDecode(e)))
+              .toList() ??
+          [];
+    } on PlatformException catch (e) {
+      throw Exception('Error: ${e.message}');
+    }
+  }
+
+  /// Fetches a specific offline recording from a Polar device.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or address.
+  ///   - entry: The entry representing the offline recording to fetch.
+  /// - Returns: Recording data in JSON format.
+  ///   - success: Returns the fetched recording data.
+  ///   - onError: Possible errors are returned as exceptions.
+  Future<AccOfflineRecording> getOfflineAccRecord(
+    String identifier,
+    PolarOfflineRecordingEntry entry,
+  ) async {
+    try {
+      final result = await _channel.invokeMethod<String>(
+        'getOfflineRecord',
+        [identifier, jsonEncode(entry)],
+      );
+      final data = jsonDecode(result!);
+      return AccOfflineRecording.fromJson(data);
+    } on PlatformException catch (e) {
+      throw Exception('Error: ${e.message}');
+    }
+  }
+
+  /// Fetches a specific offline recording from a Polar device.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or address.
+  ///   - entry: The entry representing the offline recording to fetch.
+  /// - Returns: Recording data in JSON format.
+  ///   - success: Returns the fetched recording data.
+  ///   - onError: Possible errors are returned as exceptions.
+  Future<PpiOfflineRecording> getOfflinePpiRecord(
+    String identifier,
+    PolarOfflineRecordingEntry entry,
+  ) async {
+    try {
+      final result = await _channel.invokeMethod<String>(
+        'getOfflineRecord',
+        [identifier, jsonEncode(entry)],
+      );
+      final data = jsonDecode(result!);
+      return PpiOfflineRecording.fromJson(data);
+    } on PlatformException catch (e) {
+      throw Exception('Error: ${e.message}');
+    }
+  }
+
+  /// Removes a specific offline recording from a Polar device.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or address.
+  ///   - entry: The entry representing the offline recording to remove.
+  /// - Returns: Void.
+  ///   - success: Invoked when the recording is removed successfully.
+  ///   - onError: Possible errors are returned as exceptions.
+  Future<void> removeOfflineRecord(
+    String identifier,
+    PolarOfflineRecordingEntry entry,
+  ) async {
+    try {
+      await _channel.invokeMethod(
+        'removeOfflineRecord',
+        [identifier, jsonEncode(entry)],
+      );
+    } on PlatformException catch (e) {
+      throw Exception('Error: ${e.message}');
+    }
+  }
+
+  /// Fetches the available and used disk space on a Polar device.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or address.
+  /// - Returns: A list with two integers: available space and total space (in bytes).
+  ///   - success: Returns a list containing the available and total space.
+  ///   - onError: Possible errors are returned as exceptions.
+  Future<List<int>> getDiskSpace(String identifier) async {
+    try {
+      final result = await _channel.invokeMethod<List<dynamic>>(
+        'getDiskSpace',
+        identifier,
+      );
+      return result?.map((e) => e as int).toList() ?? [];
+    } on PlatformException catch (e) {
+      throw Exception('Error: ${e.message}');
+    }
   }
 }

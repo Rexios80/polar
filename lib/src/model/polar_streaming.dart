@@ -144,6 +144,13 @@ class PolarAccSample {
     required this.y,
     required this.z,
   });
+
+  /// From json
+  factory PolarAccSample.fromJson(Map<String, dynamic> json) =>
+      _$PolarAccSampleFromJson(json);
+
+  /// To json
+  Map<String, dynamic> toJson() => _$PolarAccSampleToJson(this);
 }
 
 /// Polar acc data
@@ -292,6 +299,13 @@ class PolarPpiSample {
     required this.skinContactStatus,
     required this.skinContactSupported,
   });
+
+  /// From json
+  factory PolarPpiSample.fromJson(Map<String, dynamic> json) =>
+      _$PolarPpiSampleFromJson(json);
+
+  /// To json
+  Map<String, dynamic> toJson() => _$PolarPpiSampleToJson(this);
 }
 
 /// Polar ppi data
