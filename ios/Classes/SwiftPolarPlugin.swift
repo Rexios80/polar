@@ -132,10 +132,10 @@ public class SwiftPolarPlugin:
           removeOfflineRecord(call, result)
       case "getDiskSpace":
           getDiskSpace(call, result)
-      case "setOfflineRecordingTrigger":
-          setOfflineRecordingTrigger(call, result)
-      case "getOfflineRecordingTriggerSetup":
-          getOfflineRecordingTriggerSetup(call, result)
+      // case "setOfflineRecordingTrigger":
+      //     setOfflineRecordingTrigger(call, result)
+      // case "getOfflineRecordingTriggerSetup":
+      //     getOfflineRecordingTriggerSetup(call, result)
       default: result(FlutterMethodNotImplemented)
       }
     } catch {
@@ -723,92 +723,93 @@ func getDiskSpace(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) 
     })
 }
 
-func setOfflineRecordingTrigger(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
-    let arguments = call.arguments as! [Any]
+// func setOfflineRecordingTrigger(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+//     let arguments = call.arguments as! [Any]
     
-    // Validate identifier argument
-    guard let identifier = arguments[0] as? String else {
-        result(FlutterError(code: "INVALID_ARGUMENT", message: "Invalid identifier argument", details: nil))
-        return
-    }
+//     // Validate identifier argument
+//     guard let identifier = arguments[0] as? String else {
+//         result(FlutterError(code: "INVALID_ARGUMENT", message: "Invalid identifier argument", details: nil))
+//         return
+//     }
 
-    // Parse trigger mode from arguments
-    guard let triggerModeString = arguments[1] as? String,
-          let triggerMode = PolarOfflineRecordingTriggerMode(rawValue: triggerModeString) else {
-        result(FlutterError(code: "INVALID_ARGUMENT", message: "Invalid or missing trigger mode", details: nil))
-        return
-    }
+//     // Parse trigger mode from arguments
+//     guard let triggerModeString = arguments[1] as? String,
+//           let triggerMode = PolarOfflineRecordingTriggerMode(rawValue: triggerModeString) else {
+//         result(FlutterError(code: "INVALID_ARGUMENT", message: "Invalid or missing trigger mode", details: nil))
+//         return
+//     }
 
-    // Deserialize the trigger features from JSON
-    guard let triggerFeaturesJson = arguments[2] as? String else {
-        result(FlutterError(code: "INVALID_ARGUMENT", message: "Invalid or missing trigger features", details: nil))
-        return
-    }
+//     // Deserialize the trigger features from JSON
+//     guard let triggerFeaturesJson = arguments[2] as? String else {
+//         result(FlutterError(code: "INVALID_ARGUMENT", message: "Invalid or missing trigger features", details: nil))
+//         return
+//     }
 
-    var triggerFeatures: [PolarDeviceDataType: PolarSensorSetting?] = [:]
+//     var triggerFeatures: [PolarDeviceDataType: PolarSensorSetting?] = [:]
     
-    // Attempt to parse the trigger features JSON
-    do {
-        if let featuresDict = try JSONSerialization.jsonObject(with: Data(triggerFeaturesJson.utf8), options: []) as? [String: [String: Any]] {
-            for (key, settings) in featuresDict {
-                if let deviceType = PolarDeviceDataType(rawValue: key), let settingsData = settings as? [String: Any] {
-                    // Initialize the PolarSensorSetting with the parsed data
-                    let sensorSetting = PolarSensorSetting(settingsData)
-                    triggerFeatures[deviceType] = sensorSetting
-                }
-            }
-        }
-    } catch {
-        result(FlutterError(code: "JSON_PARSE_ERROR", message: "Failed to parse trigger features JSON", details: error.localizedDescription))
-        return
-    }
+//     // Attempt to parse the trigger features JSON
+//     do {
+//         if let featuresDict = try JSONSerialization.jsonObject(with: Data(triggerFeaturesJson.utf8), options: []) as? [String: [String: Any]] {
+//             for (key, settings) in featuresDict {
+//                 if let deviceType = PolarDeviceDataType(rawValue: key), let settingsData = settings as? [String: Any] {
+//                     // Initialize the PolarSensorSetting with the parsed data
+//                     let sensorSetting = PolarSensorSetting(settingsData)
+//                     triggerFeatures[deviceType] = sensorSetting
+//                 }
+//             }
+//         }
+//     } catch {
+//         result(FlutterError(code: "JSON_PARSE_ERROR", message: "Failed to parse trigger features JSON", details: error.localizedDescription))
+//         return
+//     }
 
-    // Create the PolarOfflineRecordingTrigger object
-    let trigger = PolarOfflineRecordingTrigger(triggerMode: triggerMode, triggerFeatures: triggerFeatures)
+//     // Create the PolarOfflineRecordingTrigger object
+//     let trigger = PolarOfflineRecordingTrigger(triggerMode: triggerMode, triggerFeatures: triggerFeatures)
 
-    // Call Polar SDK to set the offline recording trigger
-    _ = api.setOfflineRecordingTrigger(identifier, trigger: trigger, secret: nil)
-        .subscribe(onCompleted: {
-            print("Successfully set offline recording trigger")
-            result(nil)  // Success
-        }, onError: { error in
-            print("Error during setting offline recording trigger: \(error.localizedDescription)")
-            result(FlutterError(code: "SET_TRIGGER_ERROR", message: "Failed to set offline recording trigger", details: error.localizedDescription))
-        })
-}
+//     // Call Polar SDK to set the offline recording trigger
+//     _ = api.setOfflineRecordingTrigger(identifier, trigger: trigger, secret: nil)
+//         .subscribe(onCompleted: {
+//             print("Successfully set offline recording trigger")
+//             result(nil)  // Success
+//         }, onError: { error in
+//             print("Error during setting offline recording trigger: \(error.localizedDescription)")
+//             result(FlutterError(code: "SET_TRIGGER_ERROR", message: "Failed to set offline recording trigger", details: error.localizedDescription))
+//         })
+// }
 
 
-func getOfflineRecordingTriggerSetup(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
-    let arguments = call.arguments as! [Any]
+// func getOfflineRecordingTriggerSetup(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+//     let arguments = call.arguments as! [Any]
     
-    // Validate identifier argument
-    guard let identifier = arguments[0] as? String else {
-        result(FlutterError(code: "INVALID_ARGUMENT", message: "Invalid identifier argument", details: nil))
-        return
-    }
+//     // Validate identifier argument
+//     guard let identifier = arguments[0] as? String else {
+//         result(FlutterError(code: "INVALID_ARGUMENT", message: "Invalid identifier argument", details: nil))
+//         return
+//     }
 
-    // Fetch offline recording trigger setup from the device
-    _ = api.getOfflineRecordingTriggerSetup(identifier)
-        .subscribe(onSuccess: { trigger in
-            // Successfully fetched the trigger setup, return the result
-            do {
-                encoder.keyEncodingStrategy = .convertToSnakeCase  // Convert camelCase to snake_case, if needed
-                let jsonData = try encoder.encode(trigger)  // Assuming `trigger` is Codable
+//     // Fetch offline recording trigger setup from the device
+//     _ = api.getOfflineRecordingTriggerSetup(identifier)
+//         .subscribe(onSuccess: { trigger in
+//             // Successfully fetched the trigger setup, return the result
+//             do {
+//                 // encoder.keyEncodingStrategy = .convertToSnakeCase  // Convert camelCase to snake_case, if needed
+//                 // let jsonData = try encoder.encode(trigger)  // Assuming `trigger` is Codable
                 
-                // Convert JSON data to a string for Flutter to process
-                if let jsonString = String(data: jsonData, encoding: .utf8) {
-                    result(jsonString)
-                } else {
-                    result(FlutterError(code: "ENCODE_ERROR", message: "Failed to convert JSON data to string", details: nil))
-                }
-            } catch {
-                result(FlutterError(code: "ENCODE_ERROR", message: "Failed to encode trigger: \(error.localizedDescription)", details: nil))
-            }
-        }, onError: { error in
-            // Handle error during fetching the trigger setup
-            print("Error during fetching offline recording trigger setup: \(error.localizedDescription)")
-            result(FlutterError(code: "FETCH_ERROR", message: "Failed to fetch offline recording trigger setup", details: error.localizedDescription))
-        })
+//                 // // Convert JSON data to a string for Flutter to process
+//                 // if let jsonString = String(data: jsonData, encoding: .utf8) {
+//                 //     result(jsonString)
+//                 // } else {
+//                 //     result(FlutterError(code: "ENCODE_ERROR", message: "Failed to convert JSON data to string", details: nil))
+//                 // }
+//                 result("")
+//             } catch {
+//                 result(FlutterError(code: "ENCODE_ERROR", message: "Failed to encode trigger: \(error.localizedDescription)", details: nil))
+//             }
+//         }, onError: { error in
+//             // Handle error during fetching the trigger setup
+//             print("Error during fetching offline recording trigger setup: \(error.localizedDescription)")
+//             result(FlutterError(code: "FETCH_ERROR", message: "Failed to fetch offline recording trigger setup", details: error.localizedDescription))
+//         })
 }
 
 
