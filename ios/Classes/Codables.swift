@@ -8,7 +8,15 @@
 import Foundation
 import PolarBleSdk
 
-extension PolarDeviceDataType {
+extension Collection {
+    subscript(safe index: Index) -> Element? {
+        return indices.contains(index) ? self[index] : nil
+    }
+}
+
+enum PolarDeviceDataType: CaseIterable {
+    case ecg, acc, ppg, ppi, gyro, magnetometer, hr, temperature, pressure
+
     var stringValue: String {
         switch self {
         case .ecg: return "ecg"
@@ -23,19 +31,8 @@ extension PolarDeviceDataType {
         }
     }
 
-    static func fromString(_ string: String) -> PolarDeviceDataType? {
-        switch string {
-        case "ecg": return .ecg
-        case "acc": return .acc
-        case "ppg": return .ppg
-        case "ppi": return .ppi
-        case "gyro": return .gyro
-        case "magnetometer": return .magnetometer
-        case "hr": return .hr
-        case "temperature": return .temperature
-        case "pressure": return .pressure
-        default: return nil
-        }
+    static func fromIndex(_ index: Int) -> PolarDeviceDataType? {
+        return PolarDeviceDataType.allCases[safe: index]
     }
 }
 
@@ -461,25 +458,37 @@ class PolarOfflineRecordingEntryCodable: Codable {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(data.path, forKey: .path)
         try container.encode(data.size, forKey: .size)
-        try container.encode(data.date.timeIntervalSince1970 * 1000, forKey: .date)  // Encode date as milliseconds since epoch
+        try container.encode(data.date.timeIntervalSince1970 * 1000, forKey: .date) // Date in milliseconds
         if let typeIndex = PolarDeviceDataType.allCases.firstIndex(of: data.type) {
-                    try container.encode(typeIndex, forKey: .type)  // Encode type as enum index
-                } else {
-                    throw EncodingError.invalidValue(data.type, EncodingError.Context(codingPath: [CodingKeys.type], debugDescription: "Invalid PolarDeviceDataType"))
-                }
+            try container.encode(typeIndex, forKey: .type) // Store as index
+        } else {
+            throw EncodingError.invalidValue(
+                data.type, 
+                EncodingError.Context(
+                    codingPath: [CodingKeys.type], 
+                    debugDescription: "Invalid PolarDeviceDataType"
+                )
+            )
+        }
     }
 
-    required init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        let path = try container.decode(String.self, forKey: .path)
-        let size = try container.decode(UInt.self, forKey: .size)
-        let dateMillis = try container.decode(Double.self, forKey: .date)
-        let date = Date(timeIntervalSince1970: dateMillis / 1000)  // Convert milliseconds back to Date
-        let typeIndex = try container.decode(Int.self, forKey: .type)
-        let type = PolarDeviceDataType.allCases[typeIndex]
+  required init(from decoder: Decoder) throws {
+      let container = try decoder.container(keyedBy: CodingKeys.self)
+      let path = try container.decode(String.self, forKey: .path)
+      let size = try container.decode(UInt.self, forKey: .size)
+      let dateMillis = try container.decode(Double.self, forKey: .date)
+      let date = Date(timeIntervalSince1970: dateMillis / 1000) // Convert milliseconds back to Date
+      let typeIndex = try container.decode(Int.self, forKey: .type)
+      guard let type = PolarDeviceDataType.fromIndex(typeIndex) else {
+          throw DecodingError.dataCorruptedError(
+              forKey: .type, 
+              in: container, 
+              debugDescription: "Invalid index for PolarDeviceDataType"
+          )
+      }
+      data = PolarOfflineRecordingEntry(path: path, size: size, date: date, type: type)
+  }
 
-        data = PolarOfflineRecordingEntry(path: path, size: size, date: date, type: type)
-    }
 }
 
 class PolarOfflineRecordingDataCodable: Encodable {
@@ -580,4 +589,79 @@ extension Date {
   init(milliseconds: Int64) {
     self = Date(timeIntervalSince1970: TimeInterval(milliseconds) / 1000)
   }
+}
+
+public struct PolarOfflineRecordingTrigger: Codable {
+    public let triggerMode: PolarOfflineRecordingTriggerMode
+    public let triggerFeatures: [PolarDeviceDataType : PolarSensorSetting?]
+
+    // Custom initializer
+    public init(triggerMode: PolarOfflineRecordingTriggerMode, triggerFeatures: [PolarDeviceDataType : PolarSensorSetting?]) {
+        self.triggerMode = triggerMode
+        self.triggerFeatures = triggerFeatures
+    }
+
+    // Coding keys to map struct properties to keys in JSON
+    enum CodingKeys: String, CodingKey {
+        case triggerMode
+        case triggerFeatures
+    }
+
+    // Encoding function
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        // Encode triggerMode
+        try container.encode(triggerMode.rawValue, forKey: .triggerMode)
+        
+        // Encode triggerFeatures: a dictionary of PolarDeviceDataType to PolarSensorSetting?
+        var featuresContainer = container.nestedContainer(keyedBy: PolarDeviceDataTypeCodingKeys.self, forKey: .triggerFeatures)
+        for (deviceType, setting) in triggerFeatures {
+            if let setting = setting {
+                try featuresContainer.encode(setting, forKey: PolarDeviceDataTypeCodingKeys(key: deviceType))
+            }
+        }
+    }
+
+    // Decoding function
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        // Decode triggerMode
+        let triggerModeRawValue = try container.decode(String.self, forKey: .triggerMode)
+        guard let triggerMode = PolarOfflineRecordingTriggerMode(rawValue: triggerModeRawValue) else {
+            throw DecodingError.dataCorruptedError(forKey: .triggerMode, in: container, debugDescription: "Invalid triggerMode value.")
+        }
+        self.triggerMode = triggerMode
+        
+        // Decode triggerFeatures
+        let featuresContainer = try container.nestedContainer(keyedBy: PolarDeviceDataTypeCodingKeys.self, forKey: .triggerFeatures)
+        var features = [PolarDeviceDataType: PolarSensorSetting?]()
+        
+        // Decode each feature
+        for deviceType in PolarDeviceDataType.allCases {
+            if let setting = try? featuresContainer.decode(PolarSensorSetting?.self, forKey: PolarDeviceDataTypeCodingKeys(key: deviceType)) {
+                features[deviceType] = setting
+            }
+        }
+        self.triggerFeatures = features
+    }
+
+    // Helper struct for the device type keys in the triggerFeatures dictionary
+    struct PolarDeviceDataTypeCodingKeys: CodingKey {
+        var stringValue: String
+        var intValue: Int? { return nil }
+        
+        init(key: PolarDeviceDataType) {
+            self.stringValue = key.stringValue
+        }
+        
+        init?(stringValue: String) {
+            self.stringValue = stringValue
+        }
+        
+        init?(intValue: Int) {
+            return nil // Not needed for this case
+        }
+    }
 }

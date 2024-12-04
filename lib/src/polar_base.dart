@@ -8,6 +8,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:polar/polar.dart';
 import 'package:polar/src/model/polar_offline_record_entry.dart';
 import 'package:polar/src/model/polar_offline_recording_data.dart';
+import 'package:polar/src/model/polar_offline_recording_trigger.dart';
 
 /// Flutter implementation of the [PolarBleSdk]
 class Polar {
@@ -568,15 +569,15 @@ class Polar {
   Future<List<String>> getAvailableOfflineRecordingDataTypes(
     String identifier,
   ) async {
-    try {
-      final result = await _channel.invokeMethod<String>(
-        'getAvailableOfflineRecordingDataTypes',
-        identifier,
-      );
-      return List<String>.from(jsonDecode(result!));
-    } on PlatformException catch (e) {
-      throw Exception('Error: ${e.message}');
+    final result = await _channel.invokeListMethod(
+      'getAvailableOfflineRecordingDataTypes',
+      identifier,
+    );
+
+    if (result == null) {
+      return [];
     }
+    return result.cast<String>().toList();
   }
 
   /// Requests the offline recording settings for a specific data type.
@@ -591,18 +592,14 @@ class Polar {
     String identifier,
     PolarDataType feature,
   ) async {
-    try {
-      final response = await _channel.invokeMethod<String>(
-        'requestOfflineRecordingSettings',
-        [identifier, feature.toJson()],
-      );
+    final response = await _channel.invokeMethod<String>(
+      'requestOfflineRecordingSettings',
+      [identifier, feature.toJson()],
+    );
 
-      return response != null
-          ? PolarSensorSetting.fromJson(jsonDecode(response))
-          : null;
-    } on PlatformException catch (e) {
-      throw Exception('Error: ${e.message}');
-    }
+    return response != null
+        ? PolarSensorSetting.fromJson(jsonDecode(response))
+        : null;
   }
 
   /// Starts offline recording on a Polar device with the given settings.
@@ -617,21 +614,17 @@ class Polar {
   ///   - onError: Possible errors are returned as exceptions.
   Future<void> startOfflineRecording(
     String identifier,
-    PolarDataType feature,
+    PolarDataType feature, {
     PolarSensorSetting? settings,
-  ) async {
-    try {
-      await _channel.invokeMethod(
-        'startOfflineRecording',
-        [
-          identifier,
-          feature.toJson(),
-          settings != null ? jsonEncode(settings) : null,
-        ],
-      );
-    } on PlatformException catch (e) {
-      throw Exception('Error: ${e.message}');
-    }
+  }) async {
+    await _channel.invokeMethod(
+      'startOfflineRecording',
+      [
+        identifier,
+        feature.toJson(),
+        settings != null ? jsonEncode(settings) : null,
+      ],
+    );
   }
 
   /// Stops offline recording for a specific data type on a Polar device.
@@ -646,14 +639,10 @@ class Polar {
     String identifier,
     PolarDataType feature,
   ) async {
-    try {
-      await _channel.invokeMethod(
-        'stopOfflineRecording',
-        [identifier, feature.toJson()],
-      );
-    } on PlatformException catch (e) {
-      throw Exception('Error: ${e.message}');
-    }
+    await _channel.invokeMethod(
+      'stopOfflineRecording',
+      [identifier, feature.toJson()],
+    );
   }
 
   /// Checks the status of offline recording for a specific data type.
@@ -668,15 +657,10 @@ class Polar {
     String identifier,
     PolarDataType feature,
   ) async {
-    try {
-      final result = await _channel.invokeMethod(
-        'getOfflineRecordingStatus',
-        [identifier, feature.toJson()],
-      );
-      return result;
-    } on PlatformException catch (e) {
-      throw Exception('Error: ${e.message}');
-    }
+    return await _channel.invokeMethod(
+      'getOfflineRecordingStatus',
+      [identifier, feature.toJson()],
+    );
   }
 
   /// Lists all offline recordings available on a Polar device.
@@ -689,18 +673,17 @@ class Polar {
   Future<List<PolarOfflineRecordingEntry>> listOfflineRecordings(
     String identifier,
   ) async {
-    try {
-      final result = await _channel.invokeMethod<List<dynamic>>(
-        'listOfflineRecordings',
-        identifier,
-      );
-      return result
-              ?.map((e) => PolarOfflineRecordingEntry.fromJson(jsonDecode(e)))
-              .toList() ??
-          [];
-    } on PlatformException catch (e) {
-      throw Exception('Error: ${e.message}');
-    }
+    final result = await _channel.invokeListMethod(
+      'listOfflineRecordings',
+      identifier,
+    );
+
+    if (result == null) return [];
+
+    return result
+        .cast<String>()
+        .map((e) => PolarOfflineRecordingEntry.fromJson(jsonDecode(e)))
+        .toList();
   }
 
   /// Fetches a specific offline recording from a Polar device.
@@ -715,16 +698,12 @@ class Polar {
     String identifier,
     PolarOfflineRecordingEntry entry,
   ) async {
-    try {
-      final result = await _channel.invokeMethod<String>(
-        'getOfflineRecord',
-        [identifier, jsonEncode(entry.toJson())],
-      );
-      final data = jsonDecode(result!);
-      return AccOfflineRecording.fromJson(data);
-    } on PlatformException catch (e) {
-      throw Exception('Error: ${e.message}');
-    }
+    final result = await _channel.invokeMethod<String>(
+      'getOfflineRecord',
+      [identifier, jsonEncode(entry.toJson())],
+    );
+    final data = jsonDecode(result!);
+    return AccOfflineRecording.fromJson(data);
   }
 
   /// Fetches a specific offline recording from a Polar device.
@@ -739,16 +718,12 @@ class Polar {
     String identifier,
     PolarOfflineRecordingEntry entry,
   ) async {
-    try {
-      final result = await _channel.invokeMethod<String>(
-        'getOfflineRecord',
-        [identifier, jsonEncode(entry)],
-      );
-      final data = jsonDecode(result!);
-      return PpiOfflineRecording.fromJson(data);
-    } on PlatformException catch (e) {
-      throw Exception('Error: ${e.message}');
-    }
+    final result = await _channel.invokeMethod<String>(
+      'getOfflineRecord',
+      [identifier, jsonEncode(entry)],
+    );
+    final data = jsonDecode(result!);
+    return PpiOfflineRecording.fromJson(data);
   }
 
   /// Removes a specific offline recording from a Polar device.
@@ -763,14 +738,10 @@ class Polar {
     String identifier,
     PolarOfflineRecordingEntry entry,
   ) async {
-    try {
-      await _channel.invokeMethod(
-        'removeOfflineRecord',
-        [identifier, jsonEncode(entry.toJson())],
-      );
-    } on PlatformException catch (e) {
-      throw Exception('Error: ${e.message}');
-    }
+    await _channel.invokeMethod(
+      'removeOfflineRecord',
+      [identifier, jsonEncode(entry.toJson())],
+    );
   }
 
   /// Fetches the available and used disk space on a Polar device.
@@ -781,14 +752,61 @@ class Polar {
   ///   - success: Returns a list containing the available and total space.
   ///   - onError: Possible errors are returned as exceptions.
   Future<List<int>> getDiskSpace(String identifier) async {
-    try {
-      final result = await _channel.invokeMethod<List<dynamic>>(
-        'getDiskSpace',
+    final result = await _channel.invokeMethod<List<dynamic>>(
+      'getDiskSpace',
+      identifier,
+    );
+    return result?.map((e) => e as int).toList() ?? [];
+  }
+
+  /// Sets the offline recording triggers for a Polar device.
+  /// The changes to the trigger settings will take effect on the next device startup.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device ID
+  ///   - triggerMode: Type of trigger to set
+  ///   - triggerFeatures: Map of trigger features with their respective settings
+  /// - Returns: Completes when the offline recording trigger is set successfully or an error occurs.
+  Future<void> setOfflineRecordingTrigger(
+    String identifier,
+    PolarOfflineRecordingTriggerMode triggerMode,
+    Map<PolarDataType, PolarSensorSetting?> triggerFeatures,
+  ) async {
+    final triggerFeaturesJson = jsonEncode(
+      triggerFeatures.map(
+        (key, value) => MapEntry(
+          key.toString(),
+          value?.toJson(),
+        ),
+      ),
+    );
+
+    await _channel.invokeMethod(
+      'setOfflineRecordingTrigger',
+      [
         identifier,
-      );
-      return result?.map((e) => e as int).toList() ?? [];
-    } on PlatformException catch (e) {
-      throw Exception('Error: ${e.message}');
-    }
+        triggerMode
+            .toString()
+            .split('.')
+            .last, // Convert enum to string (e.g., 'triggerSystemStart')
+        triggerFeaturesJson,
+      ],
+    );
+  }
+
+  /// Fetches the current offline recording trigger setup from the Polar device.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device ID
+  /// - Returns: The serialized JSON string representing the offline recording trigger setup.
+  Future<PolarOfflineRecordingTrigger?> getOfflineRecordingTriggerSetup(
+    String identifier,
+  ) async {
+    final result = await _channel
+        .invokeMethod<String>('getOfflineRecordingTriggerSetup', [identifier]);
+
+    return result == null
+        ? null
+        : PolarOfflineRecordingTrigger.fromJson(jsonDecode(result));
   }
 }

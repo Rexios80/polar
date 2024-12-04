@@ -3,8 +3,8 @@ import 'dart:io';
 import 'package:polar/polar.dart';
 import 'package:polar/src/model/convert.dart';
 
-/// A class representing offline recording data from a Polar device.
-class PolarOfflineRecordingData {
+/// An abstract class representing offline recording data from a Polar device.
+abstract class PolarOfflineRecordingData {
   /// The start time of the recording.
   final DateTime startTime;
 
@@ -16,24 +16,6 @@ class PolarOfflineRecordingData {
     required this.startTime,
     required this.settings,
   });
-
-  /// Factory method to create an instance from JSON (illustrative).
-  factory PolarOfflineRecordingData.fromJson(Map<String, dynamic> json) {
-    return PolarOfflineRecordingData(
-      startTime: const MapToDateTimeConverter().fromJson(
-        json['startTime'],
-      ),
-      settings: PolarSensorSetting.fromJson(json['settings']),
-    );
-  }
-
-  /// Converts the instance to JSON (illustrative).
-  Map<String, dynamic> toJson() {
-    return {
-      'startTime': const MapToDateTimeConverter().toJson(startTime),
-      'settings': settings.toJson(),
-    };
-  }
 }
 
 /// A class representing accelerometer offline recording data from a Polar device,
@@ -61,15 +43,6 @@ class AccOfflineRecording extends PolarOfflineRecordingData {
       settings: PolarSensorSetting.fromJson(json['settings']),
     );
   }
-
-  /// Converts the instance to JSON.
-  @override
-  Map<String, dynamic> toJson() {
-    return super.toJson()
-      ..addAll({
-        'data': data.toJson(),
-      });
-  }
 }
 
 /// A class representing PPI (Peak-to-Peak Interval) offline recording data from a Polar device,
@@ -96,14 +69,5 @@ class PpiOfflineRecording extends PolarOfflineRecordingData {
             ),
       settings: PolarSensorSetting.fromJson(json['settings']),
     );
-  }
-
-  /// Converts the instance to JSON.
-  @override
-  Map<String, dynamic> toJson() {
-    return super.toJson()
-      ..addAll({
-        'data': data.toJson(),
-      });
   }
 }
