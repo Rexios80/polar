@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:polar/polar.dart';
@@ -260,6 +262,29 @@ void testMisc(String identifier, {required bool isVerity}) {
     }
 
     await polar.doFactoryReset(identifier, false);
+    await disconnect(identifier);
+  });
+}
+
+void testOfflineRecording(String identifier) {
+  test('test offline recording', () async {
+    await connect(identifier);
+    // Wait to ensure device is connected (not sure why this is necessary)
+    await Future.delayed(const Duration(seconds: 3));
+
+    final accSettings = await polar.requestOfflineRecordingSettings(
+      identifier,
+      PolarDataType.acc,
+    );
+
+    await polar.startOfflineRecording(identifier, PolarDataType.acc);
+    final status =
+        polar.getOfflineRecordingStatus(identifier, PolarDataType.acc);
+    expect(status, PolarDataType.acc);
+
+    await Future.delayed(const Duration(seconds: 6));
+    await polar.stopOfflineRecording(identifier, PolarDataType.acc);
+
     await disconnect(identifier);
   });
 }
