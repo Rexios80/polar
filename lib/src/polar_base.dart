@@ -6,6 +6,7 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:polar/polar.dart';
+import 'package:polar/src/model/convert.dart';
 import 'package:polar/src/model/polar_offline_record_entry.dart';
 import 'package:polar/src/model/polar_offline_recording_data.dart';
 import 'package:polar/src/model/polar_offline_recording_trigger.dart';
@@ -653,14 +654,16 @@ class Polar {
   /// - Returns: Recording status.
   ///   - success: Returns the recording status.
   ///   - onError: Possible errors are returned as exceptions.
-  Future<dynamic> getOfflineRecordingStatus(
+  Future<PolarDataType> getOfflineRecordingStatus(
     String identifier,
     PolarDataType feature,
   ) async {
-    return await _channel.invokeMethod(
+    final result = await _channel.invokeMethod(
       'getOfflineRecordingStatus',
       [identifier, feature.toJson()],
     );
+
+    return const PolarDataTypeConverter().fromJson(result);
   }
 
   /// Lists all offline recordings available on a Polar device.
