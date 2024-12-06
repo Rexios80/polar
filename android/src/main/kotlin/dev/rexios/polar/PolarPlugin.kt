@@ -27,8 +27,6 @@ import com.polar.sdk.api.model.PolarExerciseEntry
 import com.polar.sdk.api.model.PolarHrData
 import com.polar.sdk.api.model.PolarSensorSetting
 import com.polar.sdk.api.model.PolarOfflineRecordingEntry
-import com.polar.sdk.api.model.PolarOfflineRecordingTrigger
-import com.polar.sdk.api.model.PolarOfflineRecordingTriggerMode
 import com.polar.sdk.api.model.PolarRecordingSecret
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
@@ -171,8 +169,6 @@ class PolarPlugin :
             "getOfflineRecord" -> getOfflineRecord(call, result)
             "removeOfflineRecord" -> removeOfflineRecord(call, result)
             "getDiskSpace" -> getDiskSpace(call, result)
-            "getOfflineRecordingTriggerSetup" -> getOfflineRecordingTriggerSetup(call, result)
-            "setOfflineRecordingTrigger" -> setOfflineRecordingTrigger(call, result)
 
             else -> result.notImplemented()
         }
@@ -648,73 +644,6 @@ class PolarPlugin :
                 }
             })
             .discard()
-    }
-
-    private fun setOfflineRecordingTrigger(
-        call: MethodCall,
-        result: Result,
-    ) {
-        val arguments = call.arguments as List<*>
-        val identifier = arguments[0] as String
-        val triggerModeName = arguments[1] as String
-        val triggerFeaturesJson = arguments[2] as String
-
-        try {
-            val triggerMode = PolarOfflineRecordingTriggerMode.valueOf(triggerModeName)
-
-            val triggerFeatures: Map<PolarDeviceDataType, PolarSensorSetting> =
-                gson.fromJson(triggerFeaturesJson, object : TypeToken<Map<PolarDeviceDataType, PolarSensorSetting>>() {}.type)
-
-            val trigger = PolarOfflineRecordingTrigger(triggerMode, triggerFeatures)
-
-            wrapper.api
-                .setOfflineRecordingTrigger(identifier, trigger)
-                .subscribe({
-                    runOnUiThread { result.success(null) } // Trigger set successfully
-                }, {
-                    runOnUiThread { result.error(it.toString(), it.message, null) } // Error occurred
-                })
-                .discard()
-        } catch (e: Exception) {
-            runOnUiThread { result.error("InvalidArguments", "Failed to parse arguments: ${e.message}", null) }
-        }
-    }
-
-    private fun getOfflineRecordingTriggerSetup(
-    call: MethodCall,
-    result: Result
-    ) {
-        val arguments = call.arguments as List<*>
-        val identifier = arguments[0] as String
-
-        try {
-            // Call the Polar SDK API to get the offline recording trigger setup
-            wrapper.api
-                .getOfflineRecordingTriggerSetup(identifier)
-                .subscribe({ trigger ->
-                    // On success, encode the trigger object to JSON string
-                    try {
-                        val triggerJson = gson.toJson(trigger)
-
-                        runOnUiThread { result.success(triggerJson) }
-                    } catch (e: Exception) {
-                        // Handle any serialization issues
-                        runOnUiThread {
-                            result.error("EncodeError", "Failed to serialize trigger: ${e.message}", null)
-                        }
-                    }
-                }, { error ->
-                    runOnUiThread {
-                        result.error("FetchError", "Failed to fetch offline recording trigger setup: ${error.message}", null)
-                    }
-                })
-                .discard()
-        } catch (e: Exception) {
-            // Handle any initial exceptions
-            runOnUiThread {
-                result.error("InvalidArguments", "Failed to parse arguments: ${e.message}", null)
-            }
-        }
     }
 }
 

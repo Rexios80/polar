@@ -132,10 +132,6 @@ public class SwiftPolarPlugin:
           removeOfflineRecord(call, result)
       case "getDiskSpace":
           getDiskSpace(call, result)
-      // case "setOfflineRecordingTrigger":
-      //     setOfflineRecordingTrigger(call, result)
-      // case "getOfflineRecordingTriggerSetup":
-      //     getOfflineRecordingTriggerSetup(call, result)
       default: result(FlutterMethodNotImplemented)
       }
     } catch {
