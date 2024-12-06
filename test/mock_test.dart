@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:polar/polar.dart';
+import 'package:polar/src/model/polar_offline_record_entry.dart';
+import 'package:polar/src/model/polar_offline_recording_data.dart';
 
 import 'tests.dart';
 
@@ -38,6 +40,8 @@ void main() {
   testRecording(identifier, wait: false);
   testSdkMode(identifier);
   testMisc(identifier, isVerity: true);
+  testAvailableOfflineRecordingDataTypes(identifier);
+  testOfflineRecording(identifier);
 }
 
 Future<void> invoke(String method, [dynamic arguments]) {
@@ -57,6 +61,8 @@ final exercises = <PolarExerciseEntry>[];
 var recording = false;
 var exerciseId = '';
 var sdkModeEnabled = false;
+final offlineRecordings = <PolarOfflineRecordingEntry>[];
+var diskSpace = [14416896, 14369729];
 
 Future<dynamic> handleMethodCall(MethodCall call) async {
   switch (call.method) {
@@ -119,6 +125,44 @@ Future<dynamic> handleMethodCall(MethodCall call) async {
       return sdkModeEnabled;
     case 'doFactoryReset':
       return null;
+    case 'getAvailableOfflineRecordingDataTypes':
+      return jsonEncode(PolarDataType.values.map((e) => e.toJson()).toList());
+    case 'requestOfflineRecordingSettings':
+      return jsonEncode(PolarSensorSetting({}));
+    case 'startOfflineRecording':
+      offlineRecordings.add(
+        PolarOfflineRecordingEntry(
+          date: DateTime.now(),
+          path: '',
+          size: 1,
+          type: PolarDataType.acc,
+        ),
+      );
+      return null;
+    case 'stopOfflineRecording':
+      diskSpace = [14416896, 14362624];
+      return null;
+    case 'listOfflineRecordings':
+      return offlineRecordings;
+    case 'getOfflineAccRecord':
+      return offlineRecordings.isNotEmpty
+          ? AccOfflineRecording(
+              data: PolarStreamingData<PolarAccSample>(
+                samples: [
+                  PolarAccSample(timeStamp: DateTime.now(), x: 1, y: 1, z: 1),
+                ],
+              ),
+              startTime: DateTime.now(),
+              settings: PolarSensorSetting({}),
+            )
+          : null;
+    case 'getOfflinePpiRecord':
+      return null;
+    case 'getDiskSpace':
+      return diskSpace;
+    case 'removeOfflineRecord':
+      diskSpace = [14416896, 14369729];
+      return offlineRecordings.clear();
     default:
       throw UnimplementedError();
   }

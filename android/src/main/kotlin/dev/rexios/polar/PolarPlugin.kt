@@ -567,12 +567,13 @@ class PolarPlugin :
         val identifier = arguments[0] as String
 
         wrapper.api
-            .getOfflineRecordingStatus(identifier) // Only pass identifier
-            .subscribe({
-                runOnUiThread { result.success(it) }
-            }, {
+            .getOfflineRecordingStatus(identifier)
+            .subscribe({ dataTypes ->
+                val dataTypeNames = dataTypes.map { it.name } // Convert to list of strings
+                runOnUiThread { result.success(dataTypeNames) }
+            }, { error ->
                 runOnUiThread {
-                    result.error(it.toString(), it.message, null)
+                    result.error("ERROR", error.message, null)
                 }
             })
             .discard()

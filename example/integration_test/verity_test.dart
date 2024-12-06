@@ -32,4 +32,6 @@ void main() async {
   );
   testSdkMode(identifier);
   testMisc(identifier, isVerity: true);
+  testAvailableOfflineRecordingDataTypes(identifier);
+  testOfflineRecording(identifier);
 }

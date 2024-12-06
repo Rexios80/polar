@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -266,25 +266,54 @@ void testMisc(String identifier, {required bool isVerity}) {
   });
 }
 
-void testOfflineRecording(String identifier) {
-  test('test offline recording', () async {
-    await connect(identifier);
-    // Wait to ensure device is connected (not sure why this is necessary)
-    await Future.delayed(const Duration(seconds: 3));
+void testAvailableOfflineRecordingDataTypes(String identifier) {
+  test('Should test available offline recordings data types', () async {
+    final mockDataTypes =
+        jsonEncode(PolarDataType.values.map((e) => e.toJson()).toList());
 
-    final accSettings = await polar.requestOfflineRecordingSettings(
+    final dataTypes =
+        await polar.getAvailableOfflineRecordingDataTypes(identifier);
+    expect(dataTypes, mockDataTypes);
+  });
+}
+
+void testOfflineRecording(String identifier) {
+  test('Should test all offline recording functions', () async {
+    final settings = await polar.requestOfflineRecordingSettings(
       identifier,
       PolarDataType.acc,
     );
+    expect(settings != null, true);
 
-    await polar.startOfflineRecording(identifier, PolarDataType.acc);
-    final status =
-        polar.getOfflineRecordingStatus(identifier, PolarDataType.acc);
-    expect(status, PolarDataType.acc);
+    await polar.startOfflineRecording(
+      identifier,
+      PolarDataType.acc,
+      settings: settings,
+    );
 
-    await Future.delayed(const Duration(seconds: 6));
+    final recordingStatus = await polar.getOfflineRecordingStatus(identifier);
+    expect(recordingStatus[0], PolarDataType.acc);
+
     await polar.stopOfflineRecording(identifier, PolarDataType.acc);
 
-    await disconnect(identifier);
+    final recordings = await polar.listOfflineRecordings(identifier);
+
+    expect(recordings.length, 1);
+
+    final entry = recordings.first;
+
+    final accRecord = await polar.getOfflineAccRecord(identifier, entry);
+    expect(accRecord?.data.samples.length, 1);
+
+    final ppiRecord = await polar.getOfflineAccRecord(identifier, entry);
+    expect(ppiRecord == null, true);
+
+    final diskSpace = await polar.getDiskSpace(identifier);
+    expect(diskSpace[1], 14362624);
+
+    await polar.removeOfflineRecord(identifier, entry);
+
+    final diskSpaceAfterRemove = await polar.getDiskSpace(identifier);
+    expect(diskSpaceAfterRemove[1], 14369729);
   });
 }
