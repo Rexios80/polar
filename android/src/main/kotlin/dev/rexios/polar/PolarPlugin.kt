@@ -12,7 +12,6 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonPrimitive
 import com.google.gson.JsonSerializationContext
 import com.google.gson.JsonSerializer
-import com.google.gson.reflect.TypeToken
 import com.polar.androidcommunications.api.ble.model.DisInfo
 import com.polar.sdk.api.PolarBleApi
 import com.polar.sdk.api.PolarBleApi.PolarBleSdkFeature
@@ -27,7 +26,6 @@ import com.polar.sdk.api.model.PolarExerciseEntry
 import com.polar.sdk.api.model.PolarHrData
 import com.polar.sdk.api.model.PolarSensorSetting
 import com.polar.sdk.api.model.PolarOfflineRecordingEntry
-import com.polar.sdk.api.model.PolarRecordingSecret
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -169,6 +167,8 @@ class PolarPlugin :
             "getOfflineRecord" -> getOfflineRecord(call, result)
             "removeOfflineRecord" -> removeOfflineRecord(call, result)
             "getDiskSpace" -> getDiskSpace(call, result)
+            "getLocalTime" -> getLocalTime(call, result)
+            "setLocalTime" -> setLocalTime(call, result)
 
             else -> result.notImplemented()
         }
@@ -633,7 +633,6 @@ class PolarPlugin :
         wrapper.api
             .getDiskSpace(identifier)
             .subscribe({
-                // Destructure the Pair into availableSpace and totalSpace
                 val (availableSpace, totalSpace) = it
                 runOnUiThread {
                     result.success(listOf(availableSpace, totalSpace))
@@ -645,7 +644,79 @@ class PolarPlugin :
             })
             .discard()
     }
+
+    private fun getLocalTime(call: MethodCall, result: Result) {
+        val identifier = call.arguments as? String ?: run {
+            result.error("ERROR_INVALID_ARGUMENT", "Expected a single String argument", null)
+            return
+        }
+
+        wrapper.api
+            .getLocalTime(identifier)
+            .subscribe({ deviceTime ->
+                try {
+                    // Format the device time using SimpleDateFormat
+                    val dateFormat = java.text.SimpleDateFormat(
+                        "yyyy-MM-dd'T'HH:mm:ssXXX",
+                        java.util.Locale.getDefault()
+                    )
+                    dateFormat.timeZone = deviceTime.timeZone
+                    val timeString = dateFormat.format(deviceTime.time)
+
+                    // Return the formatted date as a string
+                    runOnUiThread {
+                        result.success(timeString)
+                    }
+                } catch (e: Exception) {
+                    runOnUiThread {
+                        result.error("ERROR_FORMATTING_TIME", e.message, null)
+                    }
+                }
+            }, { error ->
+                runOnUiThread {
+                    result.error("ERROR_GETTING_LOCAL_TIME", error.message, null)
+                }
+            })
+            .discard()
+    }
+
+    private fun setLocalTime(call: MethodCall, result: Result) {
+        val arguments = call.arguments as List<*>
+        val identifier = arguments[0] as String
+        val timestamp = arguments[1] as Double
+
+        try {
+            // Convert the timestamp to a Date object
+            val date =
+                java.util.Date((timestamp * 1000).toLong()) // Multiply by 1000 to convert seconds to milliseconds
+
+            // Convert Date to Calendar
+            val calendar = java.util.Calendar.getInstance()
+            calendar.time = date
+
+            // Now, call the API with Calendar
+            wrapper.api
+                .setLocalTime(identifier, calendar)
+                .subscribe({
+                    runOnUiThread { result.success(null) }
+                }, { error ->
+                    runOnUiThread {
+                        result.error("ERROR_SETTING_LOCAL_TIME", error.message, null)
+                    }
+                })
+                .discard()
+        } catch (e: Exception) {
+            runOnUiThread {
+                result.error(
+                    "INVALID_ARGUMENTS",
+                    "Failed to parse timestamp or identifier",
+                    e.localizedMessage
+                )
+            }
+        }
+    }
 }
+
 
 class PolarWrapper(
     context: Context,

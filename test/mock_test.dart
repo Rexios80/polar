@@ -158,6 +158,8 @@ Future<dynamic> handleMethodCall(MethodCall call) async {
           : null;
     case 'getOfflinePpiRecord':
       return null;
+    case 'getOfflinePpgRecord':
+      return null;
     case 'getDiskSpace':
       return diskSpace;
     case 'removeOfflineRecord':

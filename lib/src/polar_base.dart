@@ -564,20 +564,18 @@ class Polar {
   /// - Parameters:
   ///   - identifier: Polar device id or address.
   /// - Returns: A list of available offline recording data types in JSON format.
-  ///   - success: Returns a list of strings representing available data types.
+  ///   - success: Returns a set of PolarDataType representing available data types.
   ///   - onError: Possible errors are returned as exceptions.
-  Future<List<String>> getAvailableOfflineRecordingDataTypes(
+  Future<Set<PolarDataType>> getAvailableOfflineRecordingDataTypes(
     String identifier,
   ) async {
-    final result = await _channel.invokeListMethod(
+    final response = await _channel.invokeMethod(
       'getAvailableOfflineRecordingDataTypes',
       identifier,
     );
 
-    if (result == null) {
-      return [];
-    }
-    return result.cast<String>().toList();
+    if (response == null) return {};
+    return (jsonDecode(response) as List).map(PolarDataType.fromJson).toSet();
   }
 
   /// Requests the offline recording settings for a specific data type.
@@ -729,11 +727,32 @@ class Polar {
   ) async {
     final result = await _channel.invokeMethod<String>(
       'getOfflineRecord',
-      [identifier, jsonEncode(entry)],
+      [identifier, jsonEncode(entry.toJson())],
     );
     if (result == null) return null;
     final data = jsonDecode(result);
     return PpiOfflineRecording.fromJson(data);
+  }
+
+  /// Fetches a specific offline recording from a Polar device.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or address.
+  ///   - entry: The entry representing the offline recording to fetch.
+  /// - Returns: Recording data in JSON format.
+  ///   - success: Returns the fetched recording data.
+  ///   - onError: Possible errors are returned as exceptions.
+  Future<PpgOfflineRecording?> getOfflinePpgRecord(
+    String identifier,
+    PolarOfflineRecordingEntry entry,
+  ) async {
+    final result = await _channel.invokeMethod<String>(
+      'getOfflineRecord',
+      [identifier, jsonEncode(entry.toJson())],
+    );
+    if (result == null) return null;
+    final data = jsonDecode(result);
+    return PpgOfflineRecording.fromJson(data);
   }
 
   /// Removes a specific offline recording from a Polar device.
@@ -767,5 +786,52 @@ class Polar {
       identifier,
     );
     return result?.map((e) => e as int).toList() ?? [];
+  }
+
+  /// Fetches the local time from a Polar device.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or address.
+  /// - Returns: The local time of the Polar device as a DateTime object.
+  ///   - success: Returns the local time.
+  ///   - onError: Possible errors are returned as exceptions.
+  Future<DateTime?> getLocalTime(String identifier) async {
+    try {
+      // Call the native method to get the local time from the Polar device
+      final result =
+          await _channel.invokeMethod<String>('getLocalTime', identifier);
+
+      // If the result is null, return null
+      if (result == null) return null;
+
+      // Convert the string result to a DateTime object
+      final time = DateTime.parse(result);
+
+      return time;
+    } catch (e) {
+      // Handle any errors by throwing an exception with the error message
+      throw 'Failed to get local time: $e';
+    }
+  }
+
+  /// Sets the local time on a Polar device.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or address.
+  ///   - time: The DateTime object representing the time to set on the device.
+  /// - Returns: Void.
+  ///   - success: Invoked when the time is set successfully.
+  ///   - onError: Possible errors are returned as exceptions.
+  Future<void> setLocalTime(String identifier, DateTime time) async {
+    try {
+      // Convert the DateTime object to a timestamp (in seconds)
+      final timestamp = time.millisecondsSinceEpoch / 1000;
+
+      // Call the native method to set the local time on the Polar device
+      await _channel.invokeMethod('setLocalTime', [identifier, timestamp]);
+    } catch (e) {
+      // Handle any errors by throwing an exception with the error message
+      throw 'Failed to set local time: $e';
+    }
   }
 }

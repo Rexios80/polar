@@ -71,3 +71,30 @@ class PpiOfflineRecording extends PolarOfflineRecordingData {
     );
   }
 }
+
+/// A class representing PPI (Peak-to-Peak Interval) offline recording data from a Polar device,
+/// extending the generic [PolarOfflineRecordingData].
+class PpgOfflineRecording extends PolarOfflineRecordingData {
+  /// The PPI data.
+  final PolarPpgData data;
+
+  /// Constructor for [PpgOfflineRecording].
+  PpgOfflineRecording({
+    required this.data,
+    required super.startTime,
+    required super.settings,
+  });
+
+  /// Factory method to create an instance from JSON.
+  factory PpgOfflineRecording.fromJson(Map<String, dynamic> json) {
+    return PpgOfflineRecording(
+      data: PolarPpgData.fromJson(json['data']),
+      startTime: Platform.isIOS
+          ? const PolarSampleTimestampConverter().fromJson(json['startTime'])
+          : const MapToDateTimeConverter().fromJson(
+              json['startTime'],
+            ),
+      settings: PolarSensorSetting.fromJson(json['settings']),
+    );
+  }
+}
