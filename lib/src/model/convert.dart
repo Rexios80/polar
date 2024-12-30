@@ -165,7 +165,7 @@ class MapToDateTimeConverter
   DateTime fromJson(Map<String, dynamic> json) {
     return DateTime(
       json['year'] as int,
-      json['month'] as int,
+      (json['month'] as int) + 1,
       json['dayOfMonth'] as int,
       json['hourOfDay'] as int,
       json['minute'] as int,

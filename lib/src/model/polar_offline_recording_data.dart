@@ -9,12 +9,12 @@ abstract class PolarOfflineRecordingData {
   final DateTime startTime;
 
   /// The sensor settings associated with the recording.
-  final PolarSensorSetting settings;
+  final PolarSensorSetting? settings;
 
   /// Constructor for [PolarOfflineRecordingData].
   PolarOfflineRecordingData({
     required this.startTime,
-    required this.settings,
+    this.settings,
   });
 }
 
@@ -52,11 +52,7 @@ class PpiOfflineRecording extends PolarOfflineRecordingData {
   final PolarPpiData data;
 
   /// Constructor for [PpiOfflineRecording].
-  PpiOfflineRecording({
-    required this.data,
-    required super.startTime,
-    required super.settings,
-  });
+  PpiOfflineRecording({required this.data, required super.startTime});
 
   /// Factory method to create an instance from JSON.
   factory PpiOfflineRecording.fromJson(Map<String, dynamic> json) {
@@ -67,7 +63,6 @@ class PpiOfflineRecording extends PolarOfflineRecordingData {
           : const MapToDateTimeConverter().fromJson(
               json['startTime'],
             ),
-      settings: PolarSensorSetting.fromJson(json['settings']),
     );
   }
 }
