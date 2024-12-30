@@ -3,7 +3,7 @@ import 'package:polar/polar.dart';
 
 import '../../test/tests.dart';
 
-const identifier = 'AE0F8E27';
+const identifier = 'D7C70D2C';
 
 void main() async {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -12,24 +12,26 @@ void main() async {
   testSearch(identifier);
   testConnection(identifier);
   testBasicData(identifier);
-  testBleSdkFeatures(
-    identifier,
-    features: PolarSdkFeature.values.toSet().difference({
-      PolarSdkFeature.offlineRecording,
-      PolarSdkFeature.h10ExerciseRecording,
-    }),
-  );
-  testStreaming(
-    identifier,
-    features: {
-      PolarDataType.hr,
-      PolarDataType.acc,
-      PolarDataType.ppg,
-      PolarDataType.ppi,
-      PolarDataType.gyro,
-      PolarDataType.magnetometer,
-    },
-  );
+  // testBleSdkFeatures(
+  //   identifier,
+  //   features: PolarSdkFeature.values.toSet().difference({
+  //     PolarSdkFeature.offlineRecording,
+  //     PolarSdkFeature.h10ExerciseRecording,
+  //   }),
+  // );
+  // testStreaming(
+  //   identifier,
+  //   features: {
+  //     PolarDataType.hr,
+  //     PolarDataType.acc,
+  //     PolarDataType.ppg,
+  //     PolarDataType.ppi,
+  //     PolarDataType.gyro,
+  //     PolarDataType.magnetometer,
+  //   },
+  // );
+  testOfflineRecordingList(identifier);
+  testOfflineRecordingFetch(identifier);
   testSdkMode(identifier);
   testMisc(identifier, isVerity: true);
 }

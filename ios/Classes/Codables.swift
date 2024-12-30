@@ -421,3 +421,116 @@ extension Date {
     self = Date(timeIntervalSince1970: TimeInterval(milliseconds) / 1000)
   }
 }
+
+class PolarOfflineRecordingEntryCodable: Codable {
+    var data: PolarOfflineRecordingEntry
+
+    required init(_ data: PolarOfflineRecordingEntry) {
+        self.data = data
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case path
+        case size
+        case date
+        case type
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(data.path, forKey: .path)
+        try container.encode(data.size, forKey: .size)
+        try container.encode(data.date.timeIntervalSince1970 * 1000, forKey: .date)  // Encode date as milliseconds since epoch
+        if let typeIndex = PolarDeviceDataType.allCases.firstIndex(of: data.type) {
+                    try container.encode(typeIndex, forKey: .type)  // Encode type as enum index
+                } else {
+                    throw EncodingError.invalidValue(data.type, EncodingError.Context(codingPath: [CodingKeys.type], debugDescription: "Invalid PolarDeviceDataType"))
+                }
+    }
+
+    required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let path = try container.decode(String.self, forKey: .path)
+        let size = try container.decode(UInt.self, forKey: .size)
+        let dateMillis = try container.decode(Double.self, forKey: .date)
+        let date = Date(timeIntervalSince1970: dateMillis / 1000)  // Convert milliseconds back to Date
+        let typeIndex = try container.decode(Int.self, forKey: .type)
+        let type = PolarDeviceDataType.allCases[typeIndex]
+
+        data = PolarOfflineRecordingEntry(path: path, size: size, date: date, type: type)
+    }
+}
+
+
+class PolarOfflineRecordingDataCodable: Encodable {
+    let data: PolarOfflineRecordingData
+
+    required init(_ data: PolarOfflineRecordingData) {
+        self.data = data
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case startTime
+        case settings
+        case accData
+        case gyroData
+        case magData
+        case ppgData
+        case ppiData
+        case hrData
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        switch data {
+        case .accOfflineRecordingData(let accData, let startTime, let settings):
+              if let typeIndex = PolarDeviceDataType.allCases.firstIndex(of: .acc) {
+                  try container.encode(typeIndex, forKey: .type)
+              }
+              try container.encode(startTime.millisecondsSince1970, forKey: .startTime)
+              try container.encode(PolarSensorSettingCodable(settings), forKey: .settings)
+            
+              try container.encode(PolarDataCodable(accData), forKey: .accData)
+          case .gyroOfflineRecordingData(let gyroData, let startTime, let settings):
+              if let typeIndex = PolarDeviceDataType.allCases.firstIndex(of: .gyro) {
+                  try container.encode(typeIndex, forKey: .type)
+              }
+              try container.encode(startTime.millisecondsSince1970, forKey: .startTime)
+              try container.encode(PolarSensorSettingCodable(settings), forKey: .settings)
+              try container.encode(PolarDataCodable(gyroData), forKey: .gyroData)
+          case .magOfflineRecordingData(let magData, let startTime, let settings):
+              if let typeIndex = PolarDeviceDataType.allCases.firstIndex(of: .magnetometer) {
+                  try container.encode(typeIndex, forKey: .type)
+              }
+              try container.encode(startTime.millisecondsSince1970, forKey: .startTime)
+              try container.encode(PolarSensorSettingCodable(settings), forKey: .settings)
+              try container.encode(PolarDataCodable(magData), forKey: .magData)
+          case .ppgOfflineRecordingData(let ppgData, let startTime, let settings):
+              if let typeIndex = PolarDeviceDataType.allCases.firstIndex(of: .ppg) {
+                  try container.encode(typeIndex, forKey: .type)
+              }
+              try container.encode(startTime.millisecondsSince1970, forKey: .startTime)
+              try container.encode(PolarSensorSettingCodable(settings), forKey: .settings)
+              try container.encode(PolarDataCodable(ppgData), forKey: .ppgData)
+          case .ppiOfflineRecordingData(let ppiData, let startTime):
+              if let typeIndex = PolarDeviceDataType.allCases.firstIndex(of: .ppi) {
+                  try container.encode(typeIndex, forKey: .type)
+              }
+              try container.encode(startTime.millisecondsSince1970, forKey: .startTime)
+              try container.encode(PolarDataCodable(ppiData), forKey: .ppiData)
+          case .hrOfflineRecordingData(let hrData, let startTime):
+              if let typeIndex = PolarDeviceDataType.allCases.firstIndex(of: .hr) {
+                  try container.encode(typeIndex, forKey: .type)
+              }
+              try container.encode(startTime.millisecondsSince1970, forKey: .startTime)
+            try container.encode(PolarDataCodable(hrData), forKey: .hrData)
+        @unknown default:
+            throw EncodingError.invalidValue(data, EncodingError.Context(
+                codingPath: container.codingPath,
+                debugDescription: "Unknown offline recording data type"
+            ))
+        }
+    }
+}

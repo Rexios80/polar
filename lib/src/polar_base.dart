@@ -125,6 +125,15 @@ class Polar {
           ),
         );
         return;
+      case 'offlineRecordingTriggerSet':
+        try {
+          await setOfflineRecordingTrigger(
+            call.arguments[0],
+          );
+        } catch (e) {
+          throw Exception('Failed to set offline recording trigger: $e');
+        }
+        return;
       default:
         throw UnimplementedError(call.method);
     }
@@ -175,6 +184,190 @@ class Polar {
           await Permission.bluetoothConnect.request();
         }
       }
+    }
+  }
+
+  ///  Request the offline recording settings available in current operation mode. This request shall be used before the offline recording is started
+  ///  to decide currently available settings. The available settings depend on the state of the device.
+  ///
+  /// - Parameters:
+  ///   - identifier: polar device id
+  ///   - feature: selected feature from`PolarDeviceDataType`
+  /// - Returns: Single stream
+  ///   - success: once after settings received from device
+  ///   - onError: see `PolarErrors` for possible errors invoked
+  Future<PolarSensorSetting> requestOfflineRecordingSettings(
+    String identifier,
+    PolarDataType feature,
+  ) async {
+    final response = await _channel.invokeMethod(
+      'requestOfflineRecordingSettings',
+      [identifier, feature.toJson()],
+    );
+    return PolarSensorSetting.fromJson(jsonDecode(response));
+  }
+
+  /// Start offline recording.
+  ///
+  /// - Parameters:
+  ///   - identifier: polar device id
+  ///   - feature: the feature to be started
+  ///   - settings: optional settings used for offline recording. `PolarDeviceDataType.hr` and `PolarDeviceDataType.ppi` do not require settings
+  ///  - secret if the secret is provided the offline recordings are encrypted in device
+  /// - Returns: Completable
+  ///   - completed :  offline recording is started successfully
+  ///   - error: see `PolarErrors` for possible errors invoked
+  ///
+
+  Future<void> startOfflineRecording(
+    String identifier,
+    PolarDataType feature, {
+    PolarSensorSetting? settings,
+    String? secret,
+  }) {
+    return _channel.invokeMethod(
+      'startOfflineRecording',
+      [identifier, feature.toJson(), jsonEncode(settings), secret],
+    );
+  }
+
+  /// Stop offline recording.
+  ///
+  /// - Parameters:
+  ///   - identifier: polar device id
+  ///   - feature: the feature to be stopped
+  /// - Returns: Completable
+  ///   - completed :  offline recording is stopped successfully
+  ///   - error: see `PolarErrors` for possible errors invoked
+  ///
+  Future<void> stopOfflineRecording(
+    String identifier,
+    PolarDataType feature,
+  ) {
+    return _channel.invokeMethod(
+      'stopOfflineRecording',
+      [identifier, feature.toJson()],
+    );
+  }
+
+  /// List offline recordings stored in the device.
+  ///
+  /// - Parameters:
+  ///   - identifier: polar device id
+  /// - Returns: Completable
+  ///   - next :  the found offline recording entry
+  ///   - completed: the listing completed
+  ///   - error: see `PolarErrors` for possible errors invoked
+  Future<List<PolarOfflineRecordingEntry>> listOfflineRecords(
+    String identifier,
+  ) async {
+    final result =
+        await _channel.invokeListMethod('listOfflineRecordings', identifier);
+    if (result == null) {
+      return [];
+    }
+    return result
+        .cast<String>()
+        .map((e) => PolarOfflineRecordingEntry.fromJson(jsonDecode(e)))
+        .toList();
+  }
+
+  /// Sets the offline recording triggers for a Polar device.
+  /// The changes to the trigger settings will take effect on the next device startup.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device ID
+  ///   - triggerMode: type of trigger to set
+  /// - Returns: Completable
+  ///   - success: the offline recording trigger was set successfully
+  ///   - error: the offline recording trigger was not set successfully
+  Future<void> setOfflineRecordingTrigger(String identifier) async {
+    try {
+      await _channel.invokeMethod('setOfflineRecordingTrigger', [identifier]);
+    } on PlatformException catch (e) {
+      throw Exception(
+        'Failed to set offline recording trigger: ${e.message} ${e.details}',
+      );
+    }
+  }
+
+  /// List offline recordings stored in the device.
+  ///
+  /// - Parameters:
+  ///   - identifier: polar device id
+  /// - Returns: Completable
+  ///   - next :  the found offline recording entry
+  ///   - completed: the listing completed
+  ///   - error: see `PolarErrors` for possible errors invoked
+  Future<List<PolarOfflineRecordingEntry>> listOfflineRecordings(
+    String identifier,
+  ) async {
+    try {
+      final String jsonString =
+          await _channel.invokeMethod('listOfflineRecordings', identifier);
+      final List<dynamic> jsonResponse = jsonDecode(jsonString);
+      return jsonResponse
+          .map(
+            (e) =>
+                PolarOfflineRecordingEntry.fromJson(e as Map<String, dynamic>),
+          )
+          .toList();
+    } on PlatformException catch (e) {
+      throw Exception('Failed to list offline recordings: ${e.message}');
+    } catch (e) {
+      throw Exception('Failed to process data: ${e.toString()}');
+    }
+  }
+
+  /// Fetch offline recording data from the device.
+  ///
+  /// - Parameters:
+  ///   - identifier: polar device id
+  ///   - entry: the entry to fetch
+  /// - Returns: Single stream
+  ///   - success: the offline recording data
+  ///   - error: see `PolarErrors` for possible errors invoked
+
+  Future<PolarOfflineRecordingData> fetchOfflineRecording(
+    String identifier,
+    PolarOfflineRecordingEntry entry,
+  ) async {
+    try {
+      final String jsonString = await _channel.invokeMethod(
+        'fetchOfflineRecording',
+        [identifier, jsonEncode(entry.toJson())],
+      );
+
+      return PolarOfflineRecordingData.fromJson(jsonDecode(jsonString));
+    } on PlatformException catch (e) {
+      throw Exception('Failed to fetch offline recording: ${e.message}');
+    } catch (e) {
+      throw Exception('Failed to process data: ${e.toString()}');
+    }
+  }
+
+  /// Remove offline recording data from the device.
+  ///
+  /// - Parameters:
+  ///   - identifier: polar device id
+  ///   - entry: the entry to remove
+  /// - Returns: Completable
+  ///   - completed :  offline recording is removed successfully
+  ///   - error: see `PolarErrors` for possible errors invoked
+
+  Future<void> removeOfflineRecord(
+    String identifier,
+    PolarOfflineRecordingEntry entry,
+  ) async {
+    try {
+      await _channel.invokeMethod(
+        'removeOfflineRecording',
+        [identifier, jsonEncode(entry.toJson())],
+      );
+    } on PlatformException catch (e) {
+      throw Exception('Failed to remove offline recording: ${e.message}');
+    } catch (e) {
+      throw Exception('Failed to remove data: ${e.toString()}');
     }
   }
 
