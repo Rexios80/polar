@@ -15,12 +15,59 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  static const identifier = '1C709B20';
+  static const identifier = 'D7C70D2C';
 
   final polar = Polar();
   final logs = ['Service started'];
 
   PolarExerciseEntry? exerciseEntry;
+  List<PolarOfflineRecordingEntry> recordings = [];
+  bool isLoading = true;
+  Future<void> fetchOfflineRecordings() async {
+    try {
+      final fetchedRecordings = await polar.listOfflineRecordings(identifier);
+      setState(() {
+        recordings = fetchedRecordings;
+        isLoading = false;
+      });
+    } catch (e) {
+      log('Failed to fetch recordings: $e');
+      setState(() => isLoading = false);
+    }
+  }
+
+  Future<void> getDiskSpace() async {
+    try {
+      final diskSpace = await polar.getDiskSpace(identifier);
+      var availableSpace = diskSpace[0];
+      var totalSpace = diskSpace[1];
+      log('Disk space details: $availableSpace / $totalSpace');
+    } catch (e) {
+      log('Failed to get disk space: $e');
+    }
+  }
+
+  Future<void> setOfflineTrigger() async {
+    try {
+      log('Setting offline trigger to device: $identifier');
+      await polar.setOfflineRecordingTrigger(identifier);
+      log('Offline trigger set');
+    } catch (e) {
+      log('Failed to set offline trigger: $e');
+    }
+  }
+
+  Future<void> stopOfflineRecordings() async {
+    try {
+      log('stopping offline records for device: $identifier');
+      await polar.stopOfflineRecording(identifier, PolarDataType.hr);
+      log('offline hr streams stopped');
+      await polar.stopOfflineRecording(identifier, PolarDataType.acc);
+      log('offline acc streams stopped');
+    } catch (e) {
+      log('Failed to stop offline records: $e');
+    }
+  }
 
   @override
   void initState() {
@@ -54,6 +101,14 @@ class _MyAppState extends State<MyApp> {
               ),
             ),
             IconButton(
+              icon: const Icon(Icons.crib_outlined),
+              onPressed: getDiskSpace,
+            ),
+            IconButton(
+              icon: const Icon(Icons.stop_circle),
+              onPressed: stopOfflineRecordings,
+            ),
+            IconButton(
               icon: const Icon(Icons.stop),
               onPressed: () {
                 log('Disconnecting from device: $identifier');
@@ -65,15 +120,71 @@ class _MyAppState extends State<MyApp> {
               onPressed: () {
                 log('Connecting to device: $identifier');
                 polar.connectToDevice(identifier);
-                streamWhenReady();
+                // streamWhenReady();
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.pin_end_outlined),
+              onPressed: setOfflineTrigger,
+            ),
+            IconButton(
+              icon: const Icon(Icons.download),
+              onPressed: () {
+                log('listing offline recordings');
+                fetchOfflineRecordings();
               },
             ),
           ],
         ),
-        body: ListView(
-          padding: const EdgeInsets.all(10),
-          shrinkWrap: true,
-          children: logs.reversed.map(Text.new).toList(),
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              const Text('Logs:'),
+              SizedBox(
+                height: MediaQuery.of(context).size.height / 2 - 100,
+                child: ListView(
+                  padding: const EdgeInsets.all(10),
+                  shrinkWrap: true,
+                  children: logs.reversed.map(Text.new).toList(),
+                ),
+              ),
+              isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : recordings.isEmpty
+                      ? const Center(child: Text('No recordings found'))
+                      : SizedBox(
+                          height: MediaQuery.of(context).size.height,
+                          child: ListView.builder(
+                            itemCount: recordings.length,
+                            itemBuilder: (context, index) {
+                              return GestureDetector(
+                                onTap: () async {
+                                  final res = await polar.fetchOfflineRecording(
+                                    identifier,
+                                    recordings[index],
+                                  );
+
+                                  log('Fetched recording data: ${res.toString()}');
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => OfflineDataWidget(
+                                        data: res,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: ListTile(
+                                  title: Text(recordings[index].path),
+                                  subtitle: Text(
+                                    'Size: ${recordings[index].size} bytes, Date: ${recordings[index].date}, Type: ${recordings[index].type}',
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+            ],
+          ),
         ),
       ),
     );
@@ -172,4 +283,48 @@ enum RecordingAction {
   list,
   fetch,
   remove,
+}
+
+class OfflineDataWidget extends StatelessWidget {
+  final PolarOfflineRecordingData data;
+  const OfflineDataWidget({super.key, required this.data});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: const Text('Offline data'),
+      ),
+      body: SafeArea(
+        child: SizedBox(
+          height: MediaQuery.of(context).size.height,
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                Text('Type: ${data.type}'),
+                Text('Start time: ${data.startTime}'),
+                if (data.settings != null) Text('Settings: ${data.settings}'),
+                if (data.accData != null)
+                  for (final acc in data.accData!.samples)
+                    Text('Acc data: ${acc.x} ${acc.y} ${acc.z}'),
+                if (data.gyroData != null)
+                  for (final gyro in data.gyroData!.samples)
+                    Text('Gyro data: ${gyro.x} ${gyro.y} ${gyro.z}'),
+                if (data.magData != null)
+                  for (final mag in data.magData!.samples)
+                    Text('Mag data: ${mag.x} ${mag.y} ${mag.z}'),
+                if (data.hrData != null)
+                  for (final hr in data.hrData!.samples)
+                    Text('Hr data: ${hr.hr}'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }

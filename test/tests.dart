@@ -263,3 +263,35 @@ void testMisc(String identifier, {required bool isVerity}) {
     await disconnect(identifier);
   });
 }
+
+void testOfflineRecordingList(String identifier) {
+  test('offline recording list', () async {
+    await connect(identifier);
+    final entries = await polar.listOfflineRecordings(identifier);
+    expect(entries.isNotEmpty, true);
+    await disconnect(identifier);
+  });
+}
+
+void testOfflineRecordingFetch(String identifier) {
+  test('offline recording fetch', () async {
+    await connect(identifier);
+    final entries = await polar.listOfflineRecordings(identifier);
+    final entry = entries.first;
+    final data = await polar.fetchOfflineRecording(identifier, entry);
+    expect(data.hrData?.samples.isNotEmpty, true);
+    expect(data.accData?.samples.isNotEmpty, true);
+    await disconnect(identifier);
+  });
+}
+
+void testOfflineRecordingRemove(String identifier) {
+  //! Remove offline recording (THIS IS DESTRUCTIVE)
+  test('offline recording remove', () async {
+    await connect(identifier);
+    final entries = await polar.listOfflineRecordings(identifier);
+    final entry = entries.first;
+    await polar.removeOfflineRecord(identifier, entry);
+    await disconnect(identifier);
+  });
+}

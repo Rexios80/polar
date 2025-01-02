@@ -136,3 +136,50 @@ class PolarSampleTimestampConverter extends JsonConverter<DateTime, int> {
     return millis * 1000;
   }
 }
+
+/// Converts [PolarDataType] to and from JSON strings.
+class PolarDataTypeConverter implements JsonConverter<PolarDataType, dynamic> {
+  /// Constant constructor for [PolarDataTypeConverter].
+  const PolarDataTypeConverter();
+
+  /// Converts JSON to [PolarDataType].
+  @override
+  PolarDataType fromJson(dynamic json) {
+    return PolarDataType.fromJson(json);
+  }
+
+  /// Converts [PolarDataType] to JSON.
+  @override
+  dynamic toJson(PolarDataType object) {
+    return object.toJson();
+  }
+}
+
+/// Converts a map with time components to and from [DateTime].
+class MapToDateTimeConverter
+    implements JsonConverter<DateTime, Map<String, dynamic>> {
+  /// Constant constructor for [MapToDateTimeConverter].
+  const MapToDateTimeConverter();
+
+  @override
+  DateTime fromJson(Map<String, dynamic> json) {
+    return DateTime(
+      json['year'] as int,
+      json['month'] as int,
+      json['dayOfMonth'] as int,
+      json['hourOfDay'] as int,
+      json['minute'] as int,
+      json['second'] as int,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson(DateTime date) => {
+        'year': date.year,
+        'month': date.month,
+        'dayOfMonth': date.day,
+        'hourOfDay': date.hour,
+        'minute': date.minute,
+        'second': date.second,
+      };
+}

@@ -88,10 +88,28 @@ public class SwiftPolarPlugin:
         result(nil)
       case "getAvailableOnlineStreamDataTypes":
         getAvailableOnlineStreamDataTypes(call, result)
+
+      case "requestOfflineRecordingSettings":
+                try requestOfflineRecordingSettings(call, result)
       case "requestStreamSettings":
         try requestStreamSettings(call, result)
       case "createStreamingChannel":
         createStreamingChannel(call, result)
+
+      case "listOfflineRecordings":
+                listOfflineRecordings(call,result)
+
+      case "removeOfflineRecording":
+                removeOfflineRecord(call, result)
+
+      case "fetchOfflineRecording":
+                fetchOfflineRecord(call, result)
+
+      case "stopOfflineRecording":
+                stopOfflineRecording(call, result)
+      //setOfflineRecordingTrigger with hardcoded settings
+      case "setOfflineRecordingTrigger":
+                setOfflineRecordingTrigger(call, result)
       case "startRecording":
         startRecording(call, result)
       case "stopRecording":
@@ -214,6 +232,167 @@ public class SwiftPolarPlugin:
             details: nil))
       })
   }
+  func requestOfflineRecordingSettings(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) throws {
+        let arguments = call.arguments as! [Any]
+        let identifier = arguments[0] as! String
+        let feature = PolarDeviceDataType.allCases[arguments[1] as! Int]
+
+        _ = api.requestFullOfflineRecordingSettings(identifier, feature: feature)
+
+            .subscribe(onSuccess: { data in
+               
+                guard let data = jsonEncode(PolarSensorSettingCodable(data))
+                else {
+                  return
+                }
+                result(data)
+            }, onError: { error in
+                result(FlutterError(code: "Error requesting offline recording settings", message: error.localizedDescription, details: nil))
+            })
+  }
+func setOfflineRecordingTrigger(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+
+    let arguments = call.arguments as! [Any]
+        guard let identifier = arguments[0] as? String else {
+            result(FlutterError(code: "INVALID_ARGUMENT", message: "Invalid identifier argument", details: nil))
+            return
+        }
+
+    let triggerMode = PolarOfflineRecordingTriggerMode.triggerSystemStart
+    
+    
+        let simpleSettingsAcc = PolarSensorSetting([
+            .sampleRate: 52,  // Use the simplest and most likely supported configuration
+            .range: 8,
+            .resolution: 16,
+            .channels: 3
+        ])
+    
+ 
+    
+
+
+
+        let triggerFeatures: [PolarDeviceDataType: PolarSensorSetting?] = [
+            PolarDeviceDataType.hr: nil,  // Test with just o
+            PolarDeviceDataType.acc: simpleSettingsAcc,
+//            PolarDeviceDataType.magnetometer:simpleSettingsMag,
+  //          PolarDeviceDataType.gyro: simpleSettingsGyro
+            
+            
+        ]
+    
+        let trigger = PolarOfflineRecordingTrigger(triggerMode: triggerMode, triggerFeatures: triggerFeatures)
+
+        _ = api.setOfflineRecordingTrigger(identifier, trigger: trigger, secret: nil)
+            .subscribe(onCompleted: {
+                
+                result(nil)
+            }, onError: { error in
+                
+                
+                result(FlutterError(code: "TEST_ERROR", message: "Test error setting offline recording trigger", details: error.localizedDescription))
+            })
+}
+       func stopOfflineRecording(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+         
+        let arguments = call.arguments as! [Any]
+        let identifier = arguments[0] as! String
+        let feature = PolarDeviceDataType.allCases[arguments[1] as! Int]
+       
+
+      api.stopOfflineRecording(identifier,feature:feature).subscribe(onCompleted: {
+            result(nil)
+
+        }, onError: { error in
+            
+            result(FlutterError(code: "Error stopping offline recording", message: error.localizedDescription.description, details: nil))
+        })
+    }
+
+    func listOfflineRecordings(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        guard let identifier = call.arguments as? String else {
+            result(FlutterError(code: "INVALID_ARGUMENTS", message: "Expected a string identifier as argument", details: nil))
+            return
+        }
+
+        api.listOfflineRecordings(identifier).debug("listOfflineRecordings")
+            .toArray() 
+            .subscribe(
+                onSuccess: { entries in
+                    let entriesCodable = entries.map { PolarOfflineRecordingEntryCodable($0) }
+                    do {
+                        let encoder = JSONEncoder()
+                        encoder.dateEncodingStrategy = .millisecondsSince1970
+                        let data = try encoder.encode(entriesCodable)
+                        let jsonString = String(data: data, encoding: .utf8)
+                        result(jsonString)
+                    } catch {
+                        result(FlutterError(code: "ENCODE_ERROR", message: "Failed to encode entries to JSON", details: nil))
+                    }
+                },
+                onError: { error in
+                    result(FlutterError(code: "ERROR", message: "Offline recording listing error: \(error.localizedDescription)", details: nil))
+                }
+            )
+    }
+
+      
+    func fetchOfflineRecord(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        let arguments = call.arguments as! [Any]
+        let identifier = arguments[0] as! String
+        let entryJsonString = arguments[1] as! String
+
+        guard let entryData = entryJsonString.data(using: .utf8) else {
+            result(FlutterError(code: "INVALID_ARGUMENT", message: "Invalid entry JSON string", details: nil))
+            return
+        }
+
+        do {
+            let entry = try JSONDecoder().decode(PolarOfflineRecordingEntryCodable.self, from: entryData).data
+            
+            // Fetch offline record
+            _ = api.getOfflineRecord(identifier, entry: entry, secret: nil)
+                .subscribe(
+                    onSuccess: { recordingData in
+                        do {
+                           
+                            let encoder = JSONEncoder()
+                            encoder.dateEncodingStrategy = .millisecondsSince1970
+                            let data = try encoder.encode(PolarOfflineRecordingDataCodable(recordingData))
+                            let jsonString = String(data: data, encoding: .utf8)
+                            result(jsonString)
+                        } catch {
+                            result(FlutterError(code: "ENCODE_ERROR", message: "Failed to encode recording data to JSON", details: nil))
+                        }
+                    },
+                    onError: { error in
+                        result(FlutterError(code: "FETCH_ERROR", message: "Failed to fetch recording: \(error.localizedDescription)", details: nil))
+                    }
+                )
+        } catch {
+            result(FlutterError(code: "DECODE_ERROR", message: "Failed to decode entry JSON", details: nil))
+        }
+    }
+        func removeOfflineRecord(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        let arguments = call.arguments as! [Any]
+        let identifier = arguments[0] as! String
+        let entryJsonString = arguments[1] as! String
+        
+        guard let entryData = entryJsonString.data(using: .utf8) else {
+            result(FlutterError(code: "INVALID_ARGUMENT", message: "Invalid entry JSON string", details: nil))
+            return
+        }
+        do {
+            let entry = try! JSONDecoder().decode(PolarOfflineRecordingEntryCodable.self, from: entryData).data
+                _ = api.removeOfflineRecord(identifier, entry: entry).subscribe(onCompleted: {
+                    result(nil)
+                }, onError: { error in
+                    result(FlutterError(code: "Error removing exercise", message: error.localizedDescription, details: nil))
+                })
+    
+        }
+    }
 
   func startRecording(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
     let arguments = call.arguments as! [Any]
