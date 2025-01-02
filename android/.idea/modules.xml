@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/polar.iml" filepath="$PROJECT_DIR$/.idea/modules/polar.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/polar.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/polar.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/polar.main.iml" filepath="$PROJECT_DIR$/.idea/modules/polar.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/polar.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/polar.unitTest.iml" />
+    </modules>
+  </component>
+</project>

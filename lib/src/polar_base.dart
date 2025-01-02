@@ -748,4 +748,23 @@ class Polar {
         await _channel.invokeMethod<bool>('isSdkModeEnabled', identifier);
     return result!;
   }
+
+  /// Fetches the available and used disk space on a Polar device.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or address.
+  /// - Returns: A list with two integers: available space and total space (in bytes).
+  ///   - success: Returns a list containing the available and total space.
+  ///   - onError: Possible errors are returned as exceptions.
+  Future<List<int>> getDiskSpace(String identifier) async {
+    try {
+      final result = await _channel.invokeMethod<List<dynamic>>(
+        'getDiskSpace',
+        identifier,
+      );
+      return result?.map((e) => e as int).toList() ?? [];
+    } on PlatformException catch (e) {
+      throw Exception('Error: ${e.message}');
+    }
+  }
 }

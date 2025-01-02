@@ -36,6 +36,39 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
+  Future<void> getDiskSpace() async {
+    try {
+      final diskSpace = await polar.getDiskSpace(identifier);
+      var availableSpace = diskSpace[0];
+      var totalSpace = diskSpace[1];
+      log('Disk space details: $availableSpace / $totalSpace');
+    } catch (e) {
+      log('Failed to get disk space: $e');
+    }
+  }
+
+  Future<void> setOfflineTrigger() async {
+    try {
+      log('Setting offline trigger to device: $identifier');
+      await polar.setOfflineRecordingTrigger(identifier);
+      log('Offline trigger set');
+    } catch (e) {
+      log('Failed to set offline trigger: $e');
+    }
+  }
+
+  Future<void> stopOfflineRecordings() async {
+    try {
+      log('stopping offline records for device: $identifier');
+      await polar.stopOfflineRecording(identifier, PolarDataType.hr);
+      log('offline hr streams stopped');
+      await polar.stopOfflineRecording(identifier, PolarDataType.acc);
+      log('offline acc streams stopped');
+    } catch (e) {
+      log('Failed to stop offline records: $e');
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -68,6 +101,14 @@ class _MyAppState extends State<MyApp> {
               ),
             ),
             IconButton(
+              icon: const Icon(Icons.crib_outlined),
+              onPressed: getDiskSpace,
+            ),
+            IconButton(
+              icon: const Icon(Icons.stop_circle),
+              onPressed: stopOfflineRecordings,
+            ),
+            IconButton(
               icon: const Icon(Icons.stop),
               onPressed: () {
                 log('Disconnecting from device: $identifier');
@@ -79,8 +120,12 @@ class _MyAppState extends State<MyApp> {
               onPressed: () {
                 log('Connecting to device: $identifier');
                 polar.connectToDevice(identifier);
-                streamWhenReady();
+                // streamWhenReady();
               },
+            ),
+            IconButton(
+              icon: const Icon(Icons.pin_end_outlined),
+              onPressed: setOfflineTrigger,
             ),
             IconButton(
               icon: const Icon(Icons.download),
