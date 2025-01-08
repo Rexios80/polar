@@ -36,7 +36,7 @@ class AccOfflineRecording extends PolarOfflineRecordingData {
     return AccOfflineRecording(
       data: PolarAccData.fromJson(json['data']),
       startTime: Platform.isIOS
-          ? const PolarSampleTimestampConverter().fromJson(json['startTime'])
+          ? DateTime.fromMillisecondsSinceEpoch(json['startTime'])
           : const MapToDateTimeConverter().fromJson(
               json['startTime'],
             ),
@@ -59,7 +59,7 @@ class PpiOfflineRecording extends PolarOfflineRecordingData {
     return PpiOfflineRecording(
       data: PolarPpiData.fromJson(json['data']),
       startTime: Platform.isIOS
-          ? const PolarSampleTimestampConverter().fromJson(json['startTime'])
+          ? DateTime.fromMillisecondsSinceEpoch(json['startTime'])
           : const MapToDateTimeConverter().fromJson(
               json['startTime'],
             ),
