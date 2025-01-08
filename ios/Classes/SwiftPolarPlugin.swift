@@ -132,6 +132,10 @@ public class SwiftPolarPlugin:
           removeOfflineRecord(call, result)
       case "getDiskSpace":
           getDiskSpace(call, result)
+      case "getLocalTime":
+          getLocalTime(call, result)
+      case "setLocalTime":
+          setLocalTime(call, result)
       default: result(FlutterMethodNotImplemented)
       }
     } catch {
@@ -721,6 +725,58 @@ public class SwiftPolarPlugin:
           result(FlutterError(code: "Error getting disk space", message: error.localizedDescription, details: nil))
       })
   }
+    
+    func getLocalTime(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        guard let identifier = call.arguments as? String else {
+            result(FlutterError(code: "INVALID_ARGUMENTS", message: "Expected a device identifier as a String", details: nil))
+            return
+        }
+
+        _ = api.getLocalTime(identifier).subscribe(onSuccess: { time in
+            let dateFormatter = ISO8601DateFormatter()
+            let timeString = dateFormatter.string(from: time)
+
+            result(timeString)
+        }, onFailure: { error in
+            result(
+                FlutterError(
+                    code: "GET_LOCAL_TIME_ERROR",
+                    message: error.localizedDescription,
+                    details: nil
+                )
+            )
+        })
+    }
+    
+    func setLocalTime(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        guard let args = call.arguments as? [Any],
+              args.count == 2,
+              let identifier = args[0] as? String,
+              let timestamp = args[1] as? Double else {
+            result(FlutterError(code: "INVALID_ARGUMENTS", message: "Expected [identifier, timestamp] as arguments", details: nil))
+            return
+        }
+        
+        let time = Date(timeIntervalSince1970: timestamp)
+        
+        let timeZone = TimeZone.current
+        
+        _ = api.setLocalTime(identifier, time: time, zone: timeZone).subscribe(
+            onCompleted: {
+                result(nil)
+            },
+            onError: { error in
+                result(
+                    FlutterError(
+                        code: "SET_LOCAL_TIME_ERROR",
+                        message: error.localizedDescription,
+                        details: nil
+                    )
+                )
+            }
+        )
+    }
+
 }
 
 
