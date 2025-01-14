@@ -710,22 +710,14 @@ public class SwiftPolarPlugin:
   func getDiskSpace(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
       let identifier = call.arguments as! String
       _ = api.getDiskSpace(identifier).subscribe(onSuccess: { diskSpaceData in
-          do {
-              let diskSpaceDataCodable = PolarDiskSpaceDataCodable(diskSpaceData)
-              let data = try encoder.encode(diskSpaceDataCodable)
-              if let jsonString = String(data: data, encoding: .utf8) {
-                  result(jsonString)
-              } else {
-                  result(FlutterError(code: "ENCODE_ERROR", message: "Failed to encode disk space data to JSON string", details: nil))
-              }
-          } catch {
-              result(FlutterError(code: "ENCODE_ERROR", message: "Failed to encode disk space data: \(error.localizedDescription)", details: nil))
-          }
+          let freeSpace = diskSpaceData.freeSpace // Corrected from 'availableSpace'
+          let totalSpace = diskSpaceData.totalSpace
+          result([freeSpace, totalSpace]) // Return as a list
       }, onFailure: { error in
           result(FlutterError(code: "Error getting disk space", message: error.localizedDescription, details: nil))
       })
   }
-    
+
     func getLocalTime(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
         guard let identifier = call.arguments as? String else {
             result(FlutterError(code: "INVALID_ARGUMENTS", message: "Expected a device identifier as a String", details: nil))
