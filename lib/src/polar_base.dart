@@ -7,7 +7,6 @@ import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:polar/polar.dart';
 import 'package:polar/src/model/convert.dart';
-import 'package:polar/src/model/polar_offline_record_entry.dart';
 import 'package:polar/src/model/polar_offline_recording_data.dart';
 
 /// Flutter implementation of the [PolarBleSdk]
@@ -832,6 +831,26 @@ class Polar {
     } catch (e) {
       // Handle any errors by throwing an exception with the error message
       throw 'Failed to set local time: $e';
+    }
+  }
+
+  /// Performs the First Time Use setup for a Polar 360 device.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or address.
+  ///   - config: Configuration data for the first-time use.
+  /// - Returns: Future<void>.
+  ///   - success: Completes when the configuration is sent to device.
+  ///   - onError: Possible errors are returned as exceptions.
+  Future<void> doFirstTimeUse(
+      String identifier, PolarFirstTimeUseConfig config) async {
+    try {
+      await _channel.invokeMethod('doFirstTimeUse', {
+        'identifier': identifier,
+        'config': config.toMap(),
+      });
+    } catch (e) {
+      throw 'Failed to perform First Time Use setup: $e';
     }
   }
 }

@@ -136,6 +136,8 @@ public class SwiftPolarPlugin:
           getLocalTime(call, result)
       case "setLocalTime":
           setLocalTime(call, result)
+      case "doFirstTimeUse":
+          doFirstTimeUse(call, result)
       default: result(FlutterMethodNotImplemented)
       }
     } catch {
@@ -768,7 +770,82 @@ public class SwiftPolarPlugin:
             }
         )
     }
-
+    
+    // Swift Implementation
+    func doFirstTimeUse(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        guard let args = call.arguments as? [String: Any],
+              let identifier = args["identifier"] as? String,
+              let configDict = args["config"] as? [String: Any] else {
+            result(FlutterError(code: "INVALID_ARGUMENTS",
+                               message: "Expected identifier and config dictionary",
+                               details: nil))
+            return
+        }
+        
+        // Convert the dictionary to PolarFirstTimeUseConfig
+        guard let gender = configDict["gender"] as? String,
+              let birthDateString = configDict["birthDate"] as? String,
+              let height = configDict["height"] as? Int,
+              let weight = configDict["weight"] as? Int,
+              let maxHeartRate = configDict["maxHeartRate"] as? Int,
+              let vo2Max = configDict["vo2Max"] as? Int,
+              let restingHeartRate = configDict["restingHeartRate"] as? Int,
+              let trainingBackground = configDict["trainingBackground"] as? Int,
+              let deviceTime = configDict["deviceTime"] as? String else {
+            result(FlutterError(code: "INVALID_CONFIG",
+                               message: "Invalid configuration parameters",
+                               details: nil))
+            return
+        }
+        
+        // Convert string date to Date object
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        guard let birthDate = dateFormatter.date(from: birthDateString) else {
+            result(FlutterError(code: "INVALID_DATE",
+                               message: "Invalid birth date format",
+                               details: nil))
+            return
+        }
+        
+        // Convert training background value to appropriate enum case
+        let trainingBackgroundLevel: PolarFirstTimeUseConfig.TrainingBackground
+        switch trainingBackground {
+            case 10: trainingBackgroundLevel = .occasional
+            case 20: trainingBackgroundLevel = .regular
+            case 30: trainingBackgroundLevel = .frequent
+            case 40: trainingBackgroundLevel = .heavy
+            case 50: trainingBackgroundLevel = .semiPro
+            case 60: trainingBackgroundLevel = .pro
+            default: trainingBackgroundLevel = .occasional  // default fallback
+        }
+        
+        // Create config object with validation
+        let config = PolarBleSdk.PolarFirstTimeUseConfig(
+            gender: gender == "Male" ? .male : .female,
+            birthDate: birthDate,
+            height: Float(height),
+            weight: Float(weight),
+            maxHeartRate: maxHeartRate,
+            vo2Max: vo2Max,
+            restingHeartRate: restingHeartRate,
+            trainingBackground: trainingBackgroundLevel,
+            deviceTime: deviceTime
+        )
+        
+        _ = api.doFirstTimeUse(identifier, ftuConfig: config).subscribe(
+            onCompleted: {
+                result(nil)
+            },
+            onError: { error in
+                result(FlutterError(
+                    code: "FTU_ERROR",
+                    message: error.localizedDescription,
+                    details: nil
+                ))
+            }
+        )
+    }
 }
 
 
