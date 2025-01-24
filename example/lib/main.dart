@@ -1,175 +1,42 @@
 import 'package:flutter/material.dart';
-import 'package:polar/polar.dart';
-import 'package:uuid/uuid.dart';
+import 'package:flutter_polar_verity_sense/pages/start_page.dart';
+import 'package:flutter_polar_verity_sense/permission_handler.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // await BluetoothPermissionHandler.requestBluetoothPermissions();
   runApp(const MyApp());
 }
 
-/// Example app
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  static const identifier = '1C709B20';
-
-  final polar = Polar();
-  final logs = ['Service started'];
-
-  PolarExerciseEntry? exerciseEntry;
-
-  @override
-  void initState() {
-    super.initState();
-
-    // polar
-    //     .searchForDevice()
-    //     .listen((e) => log('Found device in scan: ${e.deviceId}'));
-    polar.batteryLevel.listen((e) => log('Battery: ${e.level}'));
-    polar.deviceConnecting.listen((_) => log('Device connecting'));
-    polar.deviceConnected.listen((_) => log('Device connected'));
-    polar.deviceDisconnected.listen((_) => log('Device disconnected'));
-  }
-
+  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Polar example app'),
-          actions: [
-            PopupMenuButton(
-              itemBuilder: (context) => RecordingAction.values
-                  .map((e) => PopupMenuItem(value: e, child: Text(e.name)))
-                  .toList(),
-              onSelected: handleRecordingAction,
-              child: const IconButton(
-                icon: Icon(Icons.fiber_manual_record),
-                disabledColor: Colors.white,
-                onPressed: null,
-              ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.stop),
-              onPressed: () {
-                log('Disconnecting from device: $identifier');
-                polar.disconnectFromDevice(identifier);
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.play_arrow),
-              onPressed: () {
-                log('Connecting to device: $identifier');
-                polar.connectToDevice(identifier);
-                streamWhenReady();
-              },
-            ),
-          ],
-        ),
-        body: ListView(
-          padding: const EdgeInsets.all(10),
-          shrinkWrap: true,
-          children: logs.reversed.map(Text.new).toList(),
-        ),
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        // This is the theme of your application.
+        //
+        // TRY THIS: Try running your application with "flutter run". You'll see
+        // the application has a purple toolbar. Then, without quitting the app,
+        // try changing the seedColor in the colorScheme below to Colors.green
+        // and then invoke "hot reload" (save your changes or press the "hot
+        // reload" button in a Flutter-supported IDE, or press "r" if you used
+        // the command line to start the app).
+        //
+        // Notice that the counter didn't reset back to zero; the application
+        // state is not lost during the reload. To reset the state, use hot
+        // restart instead.
+        //
+        // This works for code too, not just values: Most code changes can be
+        // tested with just a hot reload.
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
       ),
+      home: const StartPage(),
     );
   }
-
-  void streamWhenReady() async {
-    await polar.sdkFeatureReady.firstWhere(
-      (e) =>
-          e.identifier == identifier &&
-          e.feature == PolarSdkFeature.onlineStreaming,
-    );
-    final availabletypes =
-        await polar.getAvailableOnlineStreamDataTypes(identifier);
-
-    debugPrint('available types: $availabletypes');
-
-    if (availabletypes.contains(PolarDataType.hr)) {
-      polar
-          .startHrStreaming(identifier)
-          .listen((e) => log('Heart rate: ${e.samples.map((e) => e.hr)}'));
-    }
-    if (availabletypes.contains(PolarDataType.ecg)) {
-      polar
-          .startEcgStreaming(identifier)
-          .listen((e) => log('ECG data received'));
-    }
-    if (availabletypes.contains(PolarDataType.acc)) {
-      polar
-          .startAccStreaming(identifier)
-          .listen((e) => log('ACC data received'));
-    }
-  }
-
-  void log(String log) {
-    debugPrint(log);
-    setState(() {
-      logs.add(log);
-    });
-  }
-
-  Future<void> handleRecordingAction(RecordingAction action) async {
-    switch (action) {
-      case RecordingAction.start:
-        log('Starting recording');
-        await polar.startRecording(
-          identifier,
-          exerciseId: const Uuid().v4(),
-          interval: RecordingInterval.interval_1s,
-          sampleType: SampleType.rr,
-        );
-        log('Started recording');
-        break;
-      case RecordingAction.stop:
-        log('Stopping recording');
-        await polar.stopRecording(identifier);
-        log('Stopped recording');
-        break;
-      case RecordingAction.status:
-        log('Getting recording status');
-        final status = await polar.requestRecordingStatus(identifier);
-        log('Recording status: $status');
-        break;
-      case RecordingAction.list:
-        log('Listing recordings');
-        final entries = await polar.listExercises(identifier);
-        log('Recordings: $entries');
-        // H10 can only store one recording at a time
-        exerciseEntry = entries.first;
-        break;
-      case RecordingAction.fetch:
-        log('Fetching recording');
-        if (exerciseEntry == null) {
-          log('Exercises not yet listed');
-          await handleRecordingAction(RecordingAction.list);
-        }
-        final entry = await polar.fetchExercise(identifier, exerciseEntry!);
-        log('Fetched recording: $entry');
-        break;
-      case RecordingAction.remove:
-        log('Removing recording');
-        if (exerciseEntry == null) {
-          log('No exercise to remove. Try calling list first.');
-          return;
-        }
-        await polar.removeExercise(identifier, exerciseEntry!);
-        log('Removed recording');
-        break;
-    }
-  }
-}
-
-enum RecordingAction {
-  start,
-  stop,
-  status,
-  list,
-  fetch,
-  remove,
 }

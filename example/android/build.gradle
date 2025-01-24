@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
-
 allprojects {
     repositories {
         google()
@@ -7,17 +5,12 @@ allprojects {
     }
 }
 
-rootProject.buildDir = '../build'
+rootProject.buildDir = "../build"
 subprojects {
-    afterEvaluate {
-        def kotlinExt = extensions.findByType(KotlinProjectExtension)
-        if (kotlinExt != null) {
-            kotlinExt.jvmToolchain(21)
-        }
-    }
-
     project.buildDir = "${rootProject.buildDir}/${project.name}"
-    project.evaluationDependsOn(':app')
+}
+subprojects {
+    project.evaluationDependsOn(":app")
 }
 
 tasks.register("clean", Delete) {
