@@ -771,7 +771,6 @@ public class SwiftPolarPlugin:
         )
     }
     
-    // Swift Implementation
     func doFirstTimeUse(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
         guard let args = call.arguments as? [String: Any],
               let identifier = args["identifier"] as? String,
@@ -791,7 +790,9 @@ public class SwiftPolarPlugin:
               let vo2Max = configDict["vo2Max"] as? Int,
               let restingHeartRate = configDict["restingHeartRate"] as? Int,
               let trainingBackground = configDict["trainingBackground"] as? Int,
-              let deviceTime = configDict["deviceTime"] as? String else {
+              let deviceTime = configDict["deviceTime"] as? String,
+              let typicalDay = configDict["typicalDay"] as? Int,
+              let sleepGoalMinutes = configDict["sleepGoalMinutes"] as? Int else {
             result(FlutterError(code: "INVALID_CONFIG",
                                message: "Invalid configuration parameters",
                                details: nil))
@@ -820,6 +821,15 @@ public class SwiftPolarPlugin:
             default: trainingBackgroundLevel = .occasional  // default fallback
         }
         
+        // Convert typical day to enum
+        let typicalDayEnum: PolarFirstTimeUseConfig.TypicalDay
+        switch typicalDay {
+            case 1: typicalDayEnum = .mostlyMoving
+            case 2: typicalDayEnum = .mostlySitting
+            case 3: typicalDayEnum = .mostlyStanding
+            default: typicalDayEnum = .mostlySitting
+        }
+        
         // Create config object with validation
         let config = PolarBleSdk.PolarFirstTimeUseConfig(
             gender: gender == "Male" ? .male : .female,
@@ -830,7 +840,9 @@ public class SwiftPolarPlugin:
             vo2Max: vo2Max,
             restingHeartRate: restingHeartRate,
             trainingBackground: trainingBackgroundLevel,
-            deviceTime: deviceTime
+            deviceTime: deviceTime,
+            typicalDay: typicalDayEnum,
+            sleepGoalMinutes: sleepGoalMinutes
         )
         
         _ = api.doFirstTimeUse(identifier, ftuConfig: config).subscribe(

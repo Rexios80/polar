@@ -23,6 +23,7 @@ import com.polar.sdk.api.PolarH10OfflineExerciseApi.SampleType
 import com.polar.sdk.api.model.LedConfig
 import com.polar.sdk.api.model.PolarDeviceInfo
 import com.polar.sdk.api.model.PolarExerciseEntry
+import com.polar.sdk.api.model.PolarFirstTimeUseConfig
 import com.polar.sdk.api.model.PolarHrData
 import com.polar.sdk.api.model.PolarSensorSetting
 import com.polar.sdk.api.model.PolarOfflineRecordingEntry
@@ -39,7 +40,9 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.reactivex.rxjava3.disposables.Disposable
 import java.lang.reflect.Type
+import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Locale
 import java.util.UUID
 
 fun Any?.discard() = Unit
@@ -169,6 +172,7 @@ class PolarPlugin :
             "getDiskSpace" -> getDiskSpace(call, result)
             "getLocalTime" -> getLocalTime(call, result)
             "setLocalTime" -> setLocalTime(call, result)
+            "doFirstTimeUse" -> doFirstTimeUse(call, result)
 
             else -> result.notImplemented()
         }
@@ -565,11 +569,11 @@ class PolarPlugin :
         wrapper.api
             .getOfflineRecordingStatus(identifier)
             .subscribe({ dataTypes ->
-                val dataTypeNames = dataTypes.map { it.name } // Convert to list of strings
+                val dataTypeNames = dataTypes.map { it.name }
                 runOnUiThread { result.success(dataTypeNames) }
-            }, { error ->
+            }, {
                 runOnUiThread {
-                    result.error("ERROR", error.message, null)
+                    result.error(it.toString(), it.message, null)
                 }
             })
             .discard()
@@ -633,9 +637,9 @@ class PolarPlugin :
         wrapper.api
             .getDiskSpace(identifier)
             .subscribe({
-                val (availableSpace, totalSpace) = it
+                val (availableSpace, freeSpace) = it
                 runOnUiThread {
-                    result.success(listOf(availableSpace, totalSpace))
+                    result.success(listOf(availableSpace, freeSpace))
                 }
             }, {
                 runOnUiThread {
@@ -672,9 +676,9 @@ class PolarPlugin :
                         result.error("ERROR_FORMATTING_TIME", e.message, null)
                     }
                 }
-            }, { error ->
+            }, {
                 runOnUiThread {
-                    result.error("ERROR_GETTING_LOCAL_TIME", error.message, null)
+                    result.error(it.toString(), it.message, null)
                 }
             })
             .discard()
@@ -685,45 +689,121 @@ class PolarPlugin :
         val identifier = arguments[0] as String
         val timestamp = arguments[1] as Double
 
-        try {
-            // Convert the timestamp to a Date object
-            val date =
-                java.util.Date((timestamp * 1000).toLong()) // Multiply by 1000 to convert seconds to milliseconds
+        // Convert the timestamp to a Date object
+        val date =
+            java.util.Date((timestamp * 1000).toLong()) // Multiply by 1000 to convert seconds to milliseconds
 
-            // Convert Date to Calendar
-            val calendar = java.util.Calendar.getInstance()
-            calendar.time = date
+        // Convert Date to Calendar
+        val calendar = java.util.Calendar.getInstance()
+        calendar.time = date
 
-            // Now, call the API with Calendar
-            wrapper.api
-                .setLocalTime(identifier, calendar)
-                .subscribe({
-                    runOnUiThread { result.success(null) }
-                }, { error ->
-                    runOnUiThread {
-                        result.error("ERROR_SETTING_LOCAL_TIME", error.message, null)
-                    }
-                })
-                .discard()
-        } catch (e: Exception) {
-            runOnUiThread {
-                result.error(
-                    "INVALID_ARGUMENTS",
-                    "Failed to parse timestamp or identifier",
-                    e.localizedMessage
-                )
-            }
-        }
+        // Now, call the API with Calendar
+        wrapper.api
+            .setLocalTime(identifier, calendar)
+            .subscribe({
+                runOnUiThread { result.success(null) }
+            }, {
+                runOnUiThread {
+                    result.error(it.toString(), it.message, null)
+                }
+            })
+            .discard()
     }
-}
 
+    private fun doFirstTimeUse(call: MethodCall, result: Result) {
+        val arguments = call.arguments as Map<*, *>
+        val identifier = arguments["identifier"] as? String
+        val configMap = arguments["config"] as? Map<*, *>
+
+        if (identifier == null || configMap == null) {
+            result.error(
+                "INVALID_ARGUMENTS",
+                "Expected identifier and config map",
+                null
+            )
+            return
+        }
+        // Extract configuration values
+        val gender = configMap["gender"] as? String
+        val birthDateString = configMap["birthDate"] as? String
+        val height = (configMap["height"] as? Int)?.toFloat()
+        val weight = (configMap["weight"] as? Int)?.toFloat()
+        val maxHeartRate = configMap["maxHeartRate"] as? Int
+        val vo2Max = configMap["vo2Max"] as? Int
+        val restingHeartRate = configMap["restingHeartRate"] as? Int
+        val trainingBackground = configMap["trainingBackground"] as? Int
+        val deviceTime = configMap["deviceTime"] as? String
+        val typicalDay = configMap["typicalDay"] as? Int
+        val sleepGoalMinutes = configMap["sleepGoalMinutes"] as? Int
+
+        // Validate required parameters
+        if (gender == null || birthDateString == null || height == null || weight == null ||
+            maxHeartRate == null || vo2Max == null || restingHeartRate == null ||
+            trainingBackground == null || deviceTime == null || typicalDay == null ||
+            sleepGoalMinutes == null
+        ) {
+            result.error(
+                "INVALID_CONFIG",
+                "Invalid configuration parameters",
+                null
+            )
+            return
+        }
+
+        // Parse birth date
+        val birthDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(birthDateString)
+
+        // Map gender string to PolarFirstTimeUseConfig.Gender enum
+        val genderEnum = when (gender) {
+            "Male" -> PolarFirstTimeUseConfig.Gender.MALE
+            "Female" -> PolarFirstTimeUseConfig.Gender.FEMALE
+            else -> throw IllegalArgumentException("Invalid gender value")
+        }
+
+        // Map typicalDay to PolarFirstTimeUseConfig.TypicalDay enum
+        val typicalDayEnum = when (typicalDay) {
+            1 -> PolarFirstTimeUseConfig.TypicalDay.MOSTLY_MOVING
+            2 -> PolarFirstTimeUseConfig.TypicalDay.MOSTLY_SITTING
+            3 -> PolarFirstTimeUseConfig.TypicalDay.MOSTLY_STANDING
+            else -> PolarFirstTimeUseConfig.TypicalDay.MOSTLY_SITTING // Default
+        }
+
+        // Create PolarFirstTimeUseConfig instance
+        val ftuConfig = PolarFirstTimeUseConfig(
+            genderEnum,
+            birthDate,
+            height,
+            weight,
+            maxHeartRate,
+            vo2Max,
+            restingHeartRate,
+            trainingBackground,
+            deviceTime,
+            typicalDayEnum,
+            sleepGoalMinutes
+        )
+
+        // Call the Polar API
+        wrapper.api
+            .doFirstTimeUse(identifier, ftuConfig)
+            .subscribe({
+                runOnUiThread { result.success(null) }
+            }, {
+                runOnUiThread {
+                    result.error(it.toString(), it.message, null)
+                }
+            })
+            .discard()
+    }
+
+}
 
 class PolarWrapper(
     context: Context,
     val api: PolarBleApi =
         PolarBleApiDefaultImpl.defaultImplementation(
             context,
-            PolarBleSdkFeature.values().toSet(),
+            PolarBleSdkFeature.entries.toSet(),
         ),
     private val callbacks: MutableSet<(String, Any?) -> Unit> = mutableSetOf(),
 ) : PolarBleApiCallbackProvider {

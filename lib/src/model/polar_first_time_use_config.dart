@@ -11,6 +11,16 @@ enum TrainingBackground {
   const TrainingBackground(this.value);
 }
 
+/// Enum representing the typical day activity levels
+enum TypicalDay {
+  mostlyMoving(1),
+  mostlySitting(2),
+  mostlyStanding(3);
+
+  final int value;
+  const TypicalDay(this.value);
+}
+
 /// Configuration class for First Time Use setup
 class PolarFirstTimeUseConfig {
   final String gender;
@@ -22,6 +32,8 @@ class PolarFirstTimeUseConfig {
   final int restingHeartRate;
   final TrainingBackground trainingBackground;
   final String deviceTime;
+  final TypicalDay typicalDay;
+  final int sleepGoalMinutes;
 
   PolarFirstTimeUseConfig({
     required this.gender,
@@ -33,6 +45,8 @@ class PolarFirstTimeUseConfig {
     required this.restingHeartRate,
     required this.trainingBackground,
     required this.deviceTime,
+    required this.typicalDay,
+    required this.sleepGoalMinutes,
   }) {
     // Validate ranges
     if (height < 90 || height > 240) {
@@ -66,21 +80,24 @@ class PolarFirstTimeUseConfig {
       'restingHeartRate': restingHeartRate,
       'trainingBackground': trainingBackground.value,
       'deviceTime': deviceTime,
+      'typicalDay': typicalDay.value,
+      'sleepGoalMinutes': sleepGoalMinutes,
     };
   }
 }
 
-// Example usage
 // final config = PolarFirstTimeUseConfig(
-//     gender: 'Male',
-//     birthDate: DateTime(1990, 1, 1),
-//     height: 180,
-//     weight: 75,
-//     maxHeartRate: 180,
-//     vo2Max: 50,
-//     restingHeartRate: 60,
-//     trainingBackground: TrainingBackground.occasional,
-//     deviceTime: '2024-01-17T12:00:00' // ISO 8601 format
-//     );
+//   gender: 'Male',
+//   birthDate: DateTime(1990, 1, 1),
+//   height: 180,
+//   weight: 75,
+//   maxHeartRate: 180,
+//   vo2Max: 50,
+//   restingHeartRate: 60,
+//   trainingBackground: TrainingBackground.occasional,
+//   deviceTime: '2025-01-24T12:00:00Z',
+//   typicalDay: TypicalDay.normal,
+//   sleepGoalMinutes: 480,
+// );
 
 // await doFirstTimeUse('deviceId', config);
