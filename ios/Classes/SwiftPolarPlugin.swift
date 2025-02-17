@@ -138,6 +138,8 @@ public class SwiftPolarPlugin:
           setLocalTime(call, result)
       case "doFirstTimeUse":
           doFirstTimeUse(call, result)
+      case "isFtuDone":
+          isFtuDone(call, result)
       default: result(FlutterMethodNotImplemented)
       }
     } catch {
@@ -855,6 +857,32 @@ public class SwiftPolarPlugin:
                     message: error.localizedDescription,
                     details: nil
                 ))
+            }
+        )
+    }
+    
+    func isFtuDone(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        guard let identifier = call.arguments as? String else {
+            result(FlutterError(
+                code: "INVALID_ARGUMENTS",
+                message: "Expected a device identifier as a String",
+                details: nil
+            ))
+            return
+        }
+        
+        _ = api.isFtuDone(identifier).subscribe(
+            onSuccess: { isFtuDone in
+                result(isFtuDone)
+            },
+            onFailure: { error in
+                result(
+                    FlutterError(
+                        code: "FTU_CHECK_ERROR",
+                        message: error.localizedDescription,
+                        details: nil
+                    )
+                )
             }
         )
     }

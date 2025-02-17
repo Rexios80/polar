@@ -795,22 +795,17 @@ class Polar {
   ///   - success: Returns the local time.
   ///   - onError: Possible errors are returned as exceptions.
   Future<DateTime?> getLocalTime(String identifier) async {
-    try {
-      // Call the native method to get the local time from the Polar device
-      final result =
-          await _channel.invokeMethod<String>('getLocalTime', identifier);
+    // Call the native method to get the local time from the Polar device
+    final result =
+        await _channel.invokeMethod<String>('getLocalTime', identifier);
 
-      // If the result is null, return null
-      if (result == null) return null;
+    // If the result is null, return null
+    if (result == null) return null;
 
-      // Convert the string result to a DateTime object
-      final time = DateTime.parse(result);
+    // Convert the string result to a DateTime object
+    final time = DateTime.parse(result);
 
-      return time;
-    } catch (e) {
-      // Handle any errors by throwing an exception with the error message
-      throw 'Failed to get local time: $e';
-    }
+    return time;
   }
 
   /// Sets the local time on a Polar device.
@@ -822,16 +817,11 @@ class Polar {
   ///   - success: Invoked when the time is set successfully.
   ///   - onError: Possible errors are returned as exceptions.
   Future<void> setLocalTime(String identifier, DateTime time) async {
-    try {
-      // Convert the DateTime object to a timestamp (in seconds)
-      final timestamp = time.millisecondsSinceEpoch / 1000;
+    // Convert the DateTime object to a timestamp (in seconds)
+    final timestamp = time.millisecondsSinceEpoch / 1000;
 
-      // Call the native method to set the local time on the Polar device
-      await _channel.invokeMethod('setLocalTime', [identifier, timestamp]);
-    } catch (e) {
-      // Handle any errors by throwing an exception with the error message
-      throw 'Failed to set local time: $e';
-    }
+    // Call the native method to set the local time on the Polar device
+    await _channel.invokeMethod('setLocalTime', [identifier, timestamp]);
   }
 
   /// Performs the First Time Use setup for a Polar 360 device.
@@ -843,14 +833,27 @@ class Polar {
   ///   - success: Completes when the configuration is sent to device.
   ///   - onError: Possible errors are returned as exceptions.
   Future<void> doFirstTimeUse(
-      String identifier, PolarFirstTimeUseConfig config) async {
-    try {
-      await _channel.invokeMethod('doFirstTimeUse', {
-        'identifier': identifier,
-        'config': config.toMap(),
-      });
-    } catch (e) {
-      throw 'Failed to perform First Time Use setup: $e';
-    }
+    String identifier,
+    PolarFirstTimeUseConfig config,
+  ) async {
+    await _channel.invokeMethod('doFirstTimeUse', {
+      'identifier': identifier,
+      'config': config.toMap(),
+    });
+  }
+
+  /// Checks if First Time Use setup has been completed for a Polar device.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or address.
+  /// - Returns: A boolean indicating if FTU is completed.
+  ///   - success: Returns true if FTU is done, false otherwise.
+  ///   - onError: Possible errors are returned as exceptions.
+  Future<bool> isFtuDone(String identifier) async {
+    // Call the native method to check FTU status
+    final result = await _channel.invokeMethod<bool>('isFtuDone', identifier);
+
+    // If the result is null, default to false for safety
+    return result ?? false;
   }
 }
