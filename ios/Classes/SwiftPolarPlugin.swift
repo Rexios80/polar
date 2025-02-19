@@ -138,8 +138,8 @@ public class SwiftPolarPlugin:
           setLocalTime(call, result)
       case "doFirstTimeUse":
           doFirstTimeUse(call, result)
-      case "isFtuDone":
-          isFtuDone(call, result)
+      // case "isFtuDone":
+      //    isFtuDone(call, result)
       default: result(FlutterMethodNotImplemented)
       }
     } catch {
@@ -861,7 +861,7 @@ public class SwiftPolarPlugin:
         )
     }
     
-    func isFtuDone(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+    /*func isFtuDone(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
         guard let identifier = call.arguments as? String else {
             result(FlutterError(
                 code: "INVALID_ARGUMENTS",
@@ -885,7 +885,7 @@ public class SwiftPolarPlugin:
                 )
             }
         )
-    }
+    }*/
 }
 
 

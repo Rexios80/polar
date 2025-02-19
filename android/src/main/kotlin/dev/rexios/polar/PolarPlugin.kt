@@ -173,7 +173,7 @@ class PolarPlugin :
             "getLocalTime" -> getLocalTime(call, result)
             "setLocalTime" -> setLocalTime(call, result)
             "doFirstTimeUse" -> doFirstTimeUse(call, result)
-            "isFtuDone" -> isFtuDone(call, result)
+            // "isFtuDone" -> isFtuDone(call, result)
 
             else -> result.notImplemented()
         }
@@ -797,7 +797,7 @@ class PolarPlugin :
             .discard()
     }
 
-    private fun isFtuDone(call: MethodCall, result: Result) {
+    /* private fun isFtuDone(call: MethodCall, result: Result) {
         val arguments = call.arguments as List<*>
         val identifier = arguments[0] as String
 
@@ -811,7 +811,7 @@ class PolarPlugin :
                 }
             })
             .discard()
-    }
+    }*/
 }
 
 class PolarWrapper(
