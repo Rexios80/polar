@@ -24,6 +24,7 @@ import com.polar.sdk.api.model.LedConfig
 import com.polar.sdk.api.model.PolarDeviceInfo
 import com.polar.sdk.api.model.PolarExerciseEntry
 import com.polar.sdk.api.model.PolarFirstTimeUseConfig
+import com.polar.sdk.api.model.PolarHealthThermometerData
 import com.polar.sdk.api.model.PolarHrData
 import com.polar.sdk.api.model.PolarSensorSetting
 import com.polar.sdk.api.model.PolarOfflineRecordingEntry
@@ -161,7 +162,11 @@ class PolarPlugin :
             "enableSdkMode" -> enableSdkMode(call, result)
             "disableSdkMode" -> disableSdkMode(call, result)
             "isSdkModeEnabled" -> isSdkModeEnabled(call, result)
-            "getAvailableOfflineRecordingDataTypes" -> getAvailableOfflineRecordingDataTypes(call, result)
+            "getAvailableOfflineRecordingDataTypes" -> getAvailableOfflineRecordingDataTypes(
+                call,
+                result
+            )
+
             "requestOfflineRecordingSettings" -> requestOfflineRecordingSettings(call, result)
             "startOfflineRecording" -> startOfflineRecording(call, result)
             "stopOfflineRecording" -> stopOfflineRecording(call, result)
@@ -173,7 +178,7 @@ class PolarPlugin :
             "getLocalTime" -> getLocalTime(call, result)
             "setLocalTime" -> setLocalTime(call, result)
             "doFirstTimeUse" -> doFirstTimeUse(call, result)
-            // "isFtuDone" -> isFtuDone(call, result)
+            "isFtuDone" -> isFtuDone(call, result)
 
             else -> result.notImplemented()
         }
@@ -797,9 +802,11 @@ class PolarPlugin :
             .discard()
     }
 
-    /* private fun isFtuDone(call: MethodCall, result: Result) {
-        val arguments = call.arguments as List<*>
-        val identifier = arguments[0] as String
+    private fun isFtuDone(call: MethodCall, result: Result) {
+        val identifier = call.arguments as? String ?: run {
+            result.error("ERROR_INVALID_ARGUMENT", "Expected a single String argument", null)
+            return
+        }
 
         wrapper.api
             .isFtuDone(identifier)
@@ -811,15 +818,15 @@ class PolarPlugin :
                 }
             })
             .discard()
-    }*/
+    }
 }
 
-class PolarWrapper(
+class PolarWrapper @OptIn(ExperimentalStdlibApi::class) constructor(
     context: Context,
     val api: PolarBleApi =
         PolarBleApiDefaultImpl.defaultImplementation(
             context,
-            PolarBleSdkFeature.entries.toSet(),
+            PolarBleSdkFeature.values().toSet(),
         ),
     private val callbacks: MutableSet<(String, Any?) -> Unit> = mutableSetOf(),
 ) : PolarBleApiCallbackProvider {
@@ -904,7 +911,7 @@ class PolarWrapper(
     }
 
     @Deprecated("", replaceWith = ReplaceWith(""))
-    override fun hrFeatureReady(identifier: String) {
+    fun hrFeatureReady(identifier: String) {
         // Do nothing
     }
 
@@ -916,18 +923,22 @@ class PolarWrapper(
         // Do nothing
     }
 
+    override fun htsNotificationReceived(identifier: String, data: PolarHealthThermometerData) {
+        TODO("Not yet implemented")
+    }
+
     @Deprecated("", replaceWith = ReplaceWith(""))
-    override fun polarFtpFeatureReady(identifier: String) {
+    fun polarFtpFeatureReady(identifier: String) {
         // Do nothing
     }
 
     @Deprecated("", replaceWith = ReplaceWith(""))
-    override fun sdkModeFeatureAvailable(identifier: String) {
+    fun sdkModeFeatureAvailable(identifier: String) {
         // Do nothing
     }
 
     @Deprecated("", replaceWith = ReplaceWith(""))
-    override fun streamingFeaturesReady(
+    fun streamingFeaturesReady(
         identifier: String,
         features: Set<PolarDeviceDataType>,
     ) {
@@ -975,6 +986,10 @@ class StreamingChannel(
                         identifier,
                         settings,
                     )
+
+                PolarDeviceDataType.PRESSURE -> TODO()
+                PolarDeviceDataType.LOCATION -> TODO()
+                PolarDeviceDataType.SKIN_TEMPERATURE -> TODO()
             }
 
         subscription =

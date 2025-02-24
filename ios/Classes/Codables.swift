@@ -21,6 +21,7 @@ extension PolarDeviceDataType {
         case .hr: return "hr"
         case .temperature: return "temperature"
         case .pressure: return "pressure"
+        case .skinTemperature: return "skinTemperature"
         }
     }
 
@@ -84,18 +85,18 @@ class PolarDataCodable<T>: Encodable {
     if let data = data as? PolarHrData {
       codables = data.map(PolarHrSampleCodable.init)
     } else if let data = data as? PolarEcgData {
-      codables = data.samples.map(PolarEcgSampleCodable.init)
+      codables = data.map(PolarEcgSampleCodable.init)
     } else if let data = data as? PolarAccData {
-      codables = data.samples.map(PolarAccSampleCodable.init)
+        codables = data.map(PolarAccSampleCodable.init)
     } else if let data = data as? PolarPpgData {
       try? container.encode(data.type.rawValue, forKey: .type)
       codables = data.samples.map(PolarPpgSampleCodable.init)
     } else if let data = data as? PolarPpiData {
       codables = data.samples.map(PolarPpiSampleCodable.init)
     } else if let data = data as? PolarGyroData {
-      codables = data.samples.map(PolarGyroSampleCodable.init)
+      codables = data.map(PolarGyroSampleCodable.init)
     } else if let data = data as? PolarMagnetometerData {
-      codables = data.samples.map(PolarMagnetometerSampleCodable.init)
+      codables = data.map(PolarMagnetometerSampleCodable.init)
     } else if let data = data as? PolarTemperatureData {
       codables = data.samples.map(PolarTemperatureSampleCodable.init)
     } else if let data = data as? PolarPressureData {
@@ -553,6 +554,12 @@ class PolarOfflineRecordingDataCodable: Encodable {
             try container.encode("temperatureOfflineRecordingData", forKey: .type)
             let temperatureDataCodable = PolarDataCodable(temperatureData)
             try container.encode(temperatureDataCodable, forKey: .data)
+            try container.encode(startTime.millisecondsSince1970, forKey: .startTime)
+            
+        case .skinTemperatureOfflineRecordingData(let skinTemperatureData, let startTime):
+            try container.encode("skinTemperatureOfflineRecordingData", forKey: .type)
+            let skinTemperatureDataCodable = PolarDataCodable(skinTemperatureData)
+            try container.encode(skinTemperatureDataCodable, forKey: .data)
             try container.encode(startTime.millisecondsSince1970, forKey: .startTime)
         }
     }

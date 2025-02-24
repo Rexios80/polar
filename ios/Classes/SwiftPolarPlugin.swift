@@ -115,31 +115,31 @@ public class SwiftPolarPlugin:
       case "isSdkModeEnabled":
         isSdkModeEnabled(call, result)
       case "getAvailableOfflineRecordingDataTypes":
-          getAvailableOfflineRecordingDataTypes(call, result)
+        getAvailableOfflineRecordingDataTypes(call, result)
       case "requestOfflineRecordingSettings":
-          requestOfflineRecordingSettings(call, result)
+        requestOfflineRecordingSettings(call, result)
       case "startOfflineRecording":
-          startOfflineRecording(call, result)
+        startOfflineRecording(call, result)
       case "stopOfflineRecording":
-          stopOfflineRecording(call, result)
+        stopOfflineRecording(call, result)
       case "getOfflineRecordingStatus":
-          getOfflineRecordingStatus(call, result)
+        getOfflineRecordingStatus(call, result)
       case "listOfflineRecordings":
-          listOfflineRecordings(call, result)
+        listOfflineRecordings(call, result)
       case "getOfflineRecord":
-          getOfflineRecord(call, result)
+        getOfflineRecord(call, result)
       case "removeOfflineRecord":
-          removeOfflineRecord(call, result)
+        removeOfflineRecord(call, result)
       case "getDiskSpace":
-          getDiskSpace(call, result)
+        getDiskSpace(call, result)
       case "getLocalTime":
-          getLocalTime(call, result)
+        getLocalTime(call, result)
       case "setLocalTime":
-          setLocalTime(call, result)
+        setLocalTime(call, result)
       case "doFirstTimeUse":
-          doFirstTimeUse(call, result)
-      // case "isFtuDone":
-      //    isFtuDone(call, result)
+        doFirstTimeUse(call, result)
+      case "isFtuDone":
+        isFtuDone(call, result)
       default: result(FlutterMethodNotImplemented)
       }
     } catch {
@@ -512,143 +512,186 @@ public class SwiftPolarPlugin:
     // Do nothing
   }
 
-  func getAvailableOfflineRecordingDataTypes(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
-      guard let identifier = call.arguments as? String else {
-          result(FlutterError(code: "INVALID_ARGUMENT", message: "Identifier is not a string", details: nil))
-          return
-      }
+  func getAvailableOfflineRecordingDataTypes(
+    _ call: FlutterMethodCall, _ result: @escaping FlutterResult
+  ) {
+    guard let identifier = call.arguments as? String else {
+      result(
+        FlutterError(code: "INVALID_ARGUMENT", message: "Identifier is not a string", details: nil))
+      return
+    }
 
-      // Use the api to get available offline recording data types
-      _ = api.getAvailableOfflineRecordingDataTypes(identifier).subscribe(
-          onSuccess: { dataTypes in
-              // Map data types to their respective indices
-              let dataTypesIds = dataTypes.compactMap { PolarDeviceDataType.allCases.firstIndex(of: $0) }
-              // Safely convert indices to description strings and return
-              let dataTypesDescriptions = dataTypesIds.map { "\($0)" }
-              result(dataTypesDescriptions)
-          },
-          onFailure: { error in
-              result(FlutterError(
-                  code: "ERROR_GETTING_DATA_TYPES", 
-                  message: error.localizedDescription, 
-                  details: nil
-              ))
-          }
-      )
+    // Use the api to get available offline recording data types
+    _ = api.getAvailableOfflineRecordingDataTypes(identifier).subscribe(
+      onSuccess: { dataTypes in
+        // Map data types to their respective indices
+        let dataTypesIds = dataTypes.compactMap { PolarDeviceDataType.allCases.firstIndex(of: $0) }
+        // Safely convert indices to description strings and return
+        let dataTypesDescriptions = dataTypesIds.map { "\($0)" }
+        result(dataTypesDescriptions)
+      },
+      onFailure: { error in
+        result(
+          FlutterError(
+            code: "ERROR_GETTING_DATA_TYPES",
+            message: error.localizedDescription,
+            details: nil
+          ))
+      }
+    )
   }
 
-  func requestOfflineRecordingSettings(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
-      guard let arguments = call.arguments as? [Any] else {
-          result(FlutterError(code: "INVALID_ARGUMENT", message: "Arguments are not in expected format", details: nil))
-          return
-      }
-      guard let identifier = arguments[0] as? String else {
-          result(FlutterError(code: "INVALID_IDENTIFIER", message: "Identifier is not a string", details: nil))
-          return
-      }
-      guard let index = arguments[1] as? Int, index < PolarDeviceDataType.allCases.count else {
-          result(FlutterError(code: "INVALID_FEATURE", message: "Feature index is out of bounds", details: nil))
-          return
-      }
-      let feature = PolarDeviceDataType.allCases[index]
+  func requestOfflineRecordingSettings(_ call: FlutterMethodCall, _ result: @escaping FlutterResult)
+  {
+    guard let arguments = call.arguments as? [Any] else {
+      result(
+        FlutterError(
+          code: "INVALID_ARGUMENT", message: "Arguments are not in expected format", details: nil))
+      return
+    }
+    guard let identifier = arguments[0] as? String else {
+      result(
+        FlutterError(
+          code: "INVALID_IDENTIFIER", message: "Identifier is not a string", details: nil))
+      return
+    }
+    guard let index = arguments[1] as? Int, index < PolarDeviceDataType.allCases.count else {
+      result(
+        FlutterError(
+          code: "INVALID_FEATURE", message: "Feature index is out of bounds", details: nil))
+      return
+    }
+    let feature = PolarDeviceDataType.allCases[index]
 
-      _ = api.requestStreamSettings(identifier, feature: feature)
-          .subscribe(onSuccess: { settings in
-              if let encodedData = jsonEncode(PolarSensorSettingCodable(settings)) {
-                  result(encodedData)
-              } else {
-                  result(FlutterError(code: "ENCODING_ERROR", message: "Failed to encode stream settings", details: nil))
-              }
-          }, onFailure: { error in
-              result(FlutterError(code: "REQUEST_ERROR", message: "Error requesting stream settings: \(error.localizedDescription)", details: nil))
-          })
+    _ = api.requestStreamSettings(identifier, feature: feature)
+      .subscribe(
+        onSuccess: { settings in
+          if let encodedData = jsonEncode(PolarSensorSettingCodable(settings)) {
+            result(encodedData)
+          } else {
+            result(
+              FlutterError(
+                code: "ENCODING_ERROR", message: "Failed to encode stream settings", details: nil))
+          }
+        },
+        onFailure: { error in
+          result(
+            FlutterError(
+              code: "REQUEST_ERROR",
+              message: "Error requesting stream settings: \(error.localizedDescription)",
+              details: nil))
+        })
   }
 
   func startOfflineRecording(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
-      let arguments = call.arguments as! [Any]
-      let identifier = arguments[0] as! String
-      let feature = PolarDeviceDataType.allCases[arguments[1] as! Int]
-      // Attempt to decode the sensor settings
-      let settingsData = arguments[2] as? String
-      let settings = settingsData != nil ? try? decoder.decode(
-          PolarSensorSettingCodable.self, 
-          from: settingsData!.data(using: .utf8)!
+    let arguments = call.arguments as! [Any]
+    let identifier = arguments[0] as! String
+    let feature = PolarDeviceDataType.allCases[arguments[1] as! Int]
+    // Attempt to decode the sensor settings
+    let settingsData = arguments[2] as? String
+    let settings =
+      settingsData != nil
+      ? try? decoder.decode(
+        PolarSensorSettingCodable.self,
+        from: settingsData!.data(using: .utf8)!
       ).data : nil
 
-      _ = api.startOfflineRecording(identifier, feature: feature, settings: settings, secret: nil)
-          .subscribe(onCompleted: {
-              result(nil)
-          }, onError: { error in
-              result(FlutterError(code: "Error starting offline recording", message: error.localizedDescription, details: nil))
-          })
+    _ = api.startOfflineRecording(identifier, feature: feature, settings: settings, secret: nil)
+      .subscribe(
+        onCompleted: {
+          result(nil)
+        },
+        onError: { error in
+          result(
+            FlutterError(
+              code: "Error starting offline recording", message: error.localizedDescription,
+              details: nil))
+        })
   }
 
   func stopOfflineRecording(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
 
-      let arguments = call.arguments as! [Any]
-      let identifier = arguments[0] as! String
-      let feature = PolarDeviceDataType.allCases[arguments[1] as! Int]
+    let arguments = call.arguments as! [Any]
+    let identifier = arguments[0] as! String
+    let feature = PolarDeviceDataType.allCases[arguments[1] as! Int]
 
-      api.stopOfflineRecording(identifier,feature:feature).subscribe(onCompleted: {
+    api.stopOfflineRecording(identifier, feature: feature).subscribe(
+      onCompleted: {
 
-      result(nil)
+        result(nil)
 
-      }, onError: { error in
+      },
+      onError: { error in
 
-          result(FlutterError(code: "Error stopping offline recording", message: error.localizedDescription.description, details: nil))
+        result(
+          FlutterError(
+            code: "Error stopping offline recording",
+            message: error.localizedDescription.description, details: nil))
       })
   }
 
   func getOfflineRecordingStatus(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
     let arguments = call.arguments as! [Any]
     let identifier = arguments[0] as! String
-    
+
     _ = api.getOfflineRecordingStatus(identifier)
-        .subscribe(onSuccess: { statusDict in
-            // Filter and map keys where the value is true
-            let keysWithTrueValues = statusDict.compactMap { key, value -> Int? in
-                value ? PolarDeviceDataType.allCases.firstIndex(of: key) : nil
-            }
-            result(keysWithTrueValues) // Return only the filtered list of keys
-        }, onFailure: { error in
-            result(
-                FlutterError(code: "Error getting offline recording status", message: error.localizedDescription, details: nil)
-            )
+      .subscribe(
+        onSuccess: { statusDict in
+          // Filter and map keys where the value is true
+          let keysWithTrueValues = statusDict.compactMap { key, value -> Int? in
+            value ? PolarDeviceDataType.allCases.firstIndex(of: key) : nil
+          }
+          result(keysWithTrueValues)  // Return only the filtered list of keys
+        },
+        onFailure: { error in
+          result(
+            FlutterError(
+              code: "Error getting offline recording status", message: error.localizedDescription,
+              details: nil)
+          )
         })
   }
 
-
   func listOfflineRecordings(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
-      guard let identifier = call.arguments as? String else {
-          result(FlutterError(code: "INVALID_ARGUMENTS", message: "Expected a string identifier as argument", details: nil))
-          return
-      }
+    guard let identifier = call.arguments as? String else {
+      result(
+        FlutterError(
+          code: "INVALID_ARGUMENTS", message: "Expected a string identifier as argument",
+          details: nil))
+      return
+    }
 
-      api.listOfflineRecordings(identifier).debug("listOfflineRecordings")
-          .toArray()
-          .subscribe(
-              onSuccess: { entries in
-                  var jsonStringList: [String] = []
+    api.listOfflineRecordings(identifier).debug("listOfflineRecordings")
+      .toArray()
+      .subscribe(
+        onSuccess: { entries in
+          var jsonStringList: [String] = []
 
-                  do {                      
-                      encoder.dateEncodingStrategy = .millisecondsSince1970
-                      for entry in entries {
-                          // Use PolarOfflineRecordingEntryCodable for encoding
-                          let entryCodable = PolarOfflineRecordingEntryCodable(entry)
-                          let data = try encoder.encode(entryCodable)
-                          if let jsonString = String(data: data, encoding: .utf8) {
-                              jsonStringList.append(jsonString)
-                          }
-                      }
-                      result(jsonStringList) // Return the array of JSON strings
-                  } catch {
-                      result(FlutterError(code: "ENCODE_ERROR", message: "Failed to encode entries to JSON", details: nil))
-                  }
-              },
-              onFailure: { error in
-                  result(FlutterError(code: "ERROR", message: "Offline recording listing error: \(error.localizedDescription)", details: nil))
+          do {
+            encoder.dateEncodingStrategy = .millisecondsSince1970
+            for entry in entries {
+              // Use PolarOfflineRecordingEntryCodable for encoding
+              let entryCodable = PolarOfflineRecordingEntryCodable(entry)
+              let data = try encoder.encode(entryCodable)
+              if let jsonString = String(data: data, encoding: .utf8) {
+                jsonStringList.append(jsonString)
               }
-          )
+            }
+            result(jsonStringList)  // Return the array of JSON strings
+          } catch {
+            result(
+              FlutterError(
+                code: "ENCODE_ERROR", message: "Failed to encode entries to JSON", details: nil))
+          }
+        },
+        onFailure: { error in
+          result(
+            FlutterError(
+              code: "ERROR",
+              message: "Offline recording listing error: \(error.localizedDescription)",
+              details: nil))
+        }
+      )
   }
 
   func getOfflineRecord(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
@@ -657,237 +700,277 @@ public class SwiftPolarPlugin:
     let entryJsonString = arguments[1] as! String
 
     guard let entryData = entryJsonString.data(using: .utf8) else {
-        result(FlutterError(code: "INVALID_ARGUMENT", message: "Invalid entry JSON string", details: nil))
-        return
+      result(
+        FlutterError(code: "INVALID_ARGUMENT", message: "Invalid entry JSON string", details: nil))
+      return
     }
 
     do {
-        let entry = try JSONDecoder().decode(PolarOfflineRecordingEntryCodable.self, from: entryData).data
+      let entry = try JSONDecoder().decode(PolarOfflineRecordingEntryCodable.self, from: entryData)
+        .data
 
-        _ = api.getOfflineRecord(identifier, entry: entry, secret: nil)
-            .subscribe(
-                onSuccess: { recordingData in
-                    do {
-                        // Use the PolarOfflineRecordingDataCodable to encode the data to JSON
-                        let dataCodable = PolarOfflineRecordingDataCodable(recordingData)
-                        encoder.dateEncodingStrategy = .millisecondsSince1970
-                        let data = try encoder.encode(dataCodable)
-                        if let jsonString = String(data: data, encoding: .utf8) {
-                            result(jsonString)
-                        } else {
-                            result(FlutterError(code: "ENCODE_ERROR", message: "Failed to encode recording data to JSON string", details: nil))
-                        }
-                    } catch {
-                        result(FlutterError(code: "ENCODE_ERROR", message: "Failed to encode recording data to JSON", details: nil))
-                    }
-                },
-                onFailure: { error in
-                    result(FlutterError(code: "FETCH_ERROR", message: "Failed to fetch recording: \(error.localizedDescription)", details: nil))
-                }
-            )
+      _ = api.getOfflineRecord(identifier, entry: entry, secret: nil)
+        .subscribe(
+          onSuccess: { recordingData in
+            do {
+              // Use the PolarOfflineRecordingDataCodable to encode the data to JSON
+              let dataCodable = PolarOfflineRecordingDataCodable(recordingData)
+              encoder.dateEncodingStrategy = .millisecondsSince1970
+              let data = try encoder.encode(dataCodable)
+              if let jsonString = String(data: data, encoding: .utf8) {
+                result(jsonString)
+              } else {
+                result(
+                  FlutterError(
+                    code: "ENCODE_ERROR", message: "Failed to encode recording data to JSON string",
+                    details: nil))
+              }
+            } catch {
+              result(
+                FlutterError(
+                  code: "ENCODE_ERROR", message: "Failed to encode recording data to JSON",
+                  details: nil))
+            }
+          },
+          onFailure: { error in
+            result(
+              FlutterError(
+                code: "FETCH_ERROR",
+                message: "Failed to fetch recording: \(error.localizedDescription)", details: nil))
+          }
+        )
     } catch {
-        result(FlutterError(code: "DECODE_ERROR", message: "Failed to decode entry JSON", details: nil))
+      result(
+        FlutterError(code: "DECODE_ERROR", message: "Failed to decode entry JSON", details: nil))
     }
   }
 
   func removeOfflineRecord(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
-      let arguments = call.arguments as! [Any]
-      let identifier = arguments[0] as! String
-      let entryJsonString = arguments[1] as! String
+    let arguments = call.arguments as! [Any]
+    let identifier = arguments[0] as! String
+    let entryJsonString = arguments[1] as! String
 
-      guard let entryData = entryJsonString.data(using: .utf8) else {
-          result(FlutterError(code: "INVALID_ARGUMENT", message: "Invalid entry JSON string", details: nil))
-          return
-      }
+    guard let entryData = entryJsonString.data(using: .utf8) else {
+      result(
+        FlutterError(code: "INVALID_ARGUMENT", message: "Invalid entry JSON string", details: nil))
+      return
+    }
 
-      do {
-          let entry = try! JSONDecoder().decode(PolarOfflineRecordingEntryCodable.self, from: entryData).data
+    do {
+      let entry = try! JSONDecoder().decode(PolarOfflineRecordingEntryCodable.self, from: entryData)
+        .data
 
-          _ = api.removeOfflineRecord(identifier, entry: entry).subscribe(onCompleted: {
-              result(nil)
-          }, onError: { error in
-              result(FlutterError(code: "Error removing exercise", message: error.localizedDescription, details: nil))
-          })
-      }
+      _ = api.removeOfflineRecord(identifier, entry: entry).subscribe(
+        onCompleted: {
+          result(nil)
+        },
+        onError: { error in
+          result(
+            FlutterError(
+              code: "Error removing exercise", message: error.localizedDescription, details: nil))
+        })
+    }
   }
 
   func getDiskSpace(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
-      let identifier = call.arguments as! String
-      _ = api.getDiskSpace(identifier).subscribe(onSuccess: { diskSpaceData in
-          let freeSpace = diskSpaceData.freeSpace // Corrected from 'availableSpace'
-          let totalSpace = diskSpaceData.totalSpace
-          result([freeSpace, totalSpace]) // Return as a list
-      }, onFailure: { error in
-          result(FlutterError(code: "Error getting disk space", message: error.localizedDescription, details: nil))
+    let identifier = call.arguments as! String
+    _ = api.getDiskSpace(identifier).subscribe(
+      onSuccess: { diskSpaceData in
+        let freeSpace = diskSpaceData.freeSpace  // Corrected from 'availableSpace'
+        let totalSpace = diskSpaceData.totalSpace
+        result([freeSpace, totalSpace])  // Return as a list
+      },
+      onFailure: { error in
+        result(
+          FlutterError(
+            code: "Error getting disk space", message: error.localizedDescription, details: nil))
       })
   }
 
-    func getLocalTime(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
-        guard let identifier = call.arguments as? String else {
-            result(FlutterError(code: "INVALID_ARGUMENTS", message: "Expected a device identifier as a String", details: nil))
-            return
-        }
+  func getLocalTime(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+    guard let identifier = call.arguments as? String else {
+      result(
+        FlutterError(
+          code: "INVALID_ARGUMENTS", message: "Expected a device identifier as a String",
+          details: nil))
+      return
+    }
 
-        _ = api.getLocalTime(identifier).subscribe(onSuccess: { time in
-            let dateFormatter = ISO8601DateFormatter()
-            let timeString = dateFormatter.string(from: time)
+    _ = api.getLocalTime(identifier).subscribe(
+      onSuccess: { time in
+        let dateFormatter = ISO8601DateFormatter()
+        let timeString = dateFormatter.string(from: time)
 
-            result(timeString)
-        }, onFailure: { error in
-            result(
-                FlutterError(
-                    code: "GET_LOCAL_TIME_ERROR",
-                    message: error.localizedDescription,
-                    details: nil
-                )
-            )
-        })
+        result(timeString)
+      },
+      onFailure: { error in
+        result(
+          FlutterError(
+            code: "GET_LOCAL_TIME_ERROR",
+            message: error.localizedDescription,
+            details: nil
+          )
+        )
+      })
+  }
+
+  func setLocalTime(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+    guard let args = call.arguments as? [Any],
+      args.count == 2,
+      let identifier = args[0] as? String,
+      let timestamp = args[1] as? Double
+    else {
+      result(
+        FlutterError(
+          code: "INVALID_ARGUMENTS", message: "Expected [identifier, timestamp] as arguments",
+          details: nil))
+      return
     }
-    
-    func setLocalTime(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
-        guard let args = call.arguments as? [Any],
-              args.count == 2,
-              let identifier = args[0] as? String,
-              let timestamp = args[1] as? Double else {
-            result(FlutterError(code: "INVALID_ARGUMENTS", message: "Expected [identifier, timestamp] as arguments", details: nil))
-            return
-        }
-        
-        let time = Date(timeIntervalSince1970: timestamp)
-        
-        let timeZone = TimeZone.current
-        
-        _ = api.setLocalTime(identifier, time: time, zone: timeZone).subscribe(
-            onCompleted: {
-                result(nil)
-            },
-            onError: { error in
-                result(
-                    FlutterError(
-                        code: "SET_LOCAL_TIME_ERROR",
-                        message: error.localizedDescription,
-                        details: nil
-                    )
-                )
-            }
+
+    let time = Date(timeIntervalSince1970: timestamp)
+
+    let timeZone = TimeZone.current
+
+    _ = api.setLocalTime(identifier, time: time, zone: timeZone).subscribe(
+      onCompleted: {
+        result(nil)
+      },
+      onError: { error in
+        result(
+          FlutterError(
+            code: "SET_LOCAL_TIME_ERROR",
+            message: error.localizedDescription,
+            details: nil
+          )
         )
+      }
+    )
+  }
+
+  func doFirstTimeUse(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+    guard let args = call.arguments as? [String: Any],
+      let identifier = args["identifier"] as? String,
+      let configDict = args["config"] as? [String: Any]
+    else {
+      result(
+        FlutterError(
+          code: "INVALID_ARGUMENTS",
+          message: "Expected identifier and config dictionary",
+          details: nil))
+      return
     }
-    
-    func doFirstTimeUse(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
-        guard let args = call.arguments as? [String: Any],
-              let identifier = args["identifier"] as? String,
-              let configDict = args["config"] as? [String: Any] else {
-            result(FlutterError(code: "INVALID_ARGUMENTS",
-                               message: "Expected identifier and config dictionary",
-                               details: nil))
-            return
-        }
-        
-        // Convert the dictionary to PolarFirstTimeUseConfig
-        guard let gender = configDict["gender"] as? String,
-              let birthDateString = configDict["birthDate"] as? String,
-              let height = configDict["height"] as? Int,
-              let weight = configDict["weight"] as? Int,
-              let maxHeartRate = configDict["maxHeartRate"] as? Int,
-              let vo2Max = configDict["vo2Max"] as? Int,
-              let restingHeartRate = configDict["restingHeartRate"] as? Int,
-              let trainingBackground = configDict["trainingBackground"] as? Int,
-              let deviceTime = configDict["deviceTime"] as? String,
-              let typicalDay = configDict["typicalDay"] as? Int,
-              let sleepGoalMinutes = configDict["sleepGoalMinutes"] as? Int else {
-            result(FlutterError(code: "INVALID_CONFIG",
-                               message: "Invalid configuration parameters",
-                               details: nil))
-            return
-        }
-        
-        // Convert string date to Date object
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd"
-        guard let birthDate = dateFormatter.date(from: birthDateString) else {
-            result(FlutterError(code: "INVALID_DATE",
-                               message: "Invalid birth date format",
-                               details: nil))
-            return
-        }
-        
-        // Convert training background value to appropriate enum case
-        let trainingBackgroundLevel: PolarFirstTimeUseConfig.TrainingBackground
-        switch trainingBackground {
-            case 10: trainingBackgroundLevel = .occasional
-            case 20: trainingBackgroundLevel = .regular
-            case 30: trainingBackgroundLevel = .frequent
-            case 40: trainingBackgroundLevel = .heavy
-            case 50: trainingBackgroundLevel = .semiPro
-            case 60: trainingBackgroundLevel = .pro
-            default: trainingBackgroundLevel = .occasional  // default fallback
-        }
-        
-        // Convert typical day to enum
-        let typicalDayEnum: PolarFirstTimeUseConfig.TypicalDay
-        switch typicalDay {
-            case 1: typicalDayEnum = .mostlyMoving
-            case 2: typicalDayEnum = .mostlySitting
-            case 3: typicalDayEnum = .mostlyStanding
-            default: typicalDayEnum = .mostlySitting
-        }
-        
-        // Create config object with validation
-        let config = PolarBleSdk.PolarFirstTimeUseConfig(
-            gender: gender == "Male" ? .male : .female,
-            birthDate: birthDate,
-            height: Float(height),
-            weight: Float(weight),
-            maxHeartRate: maxHeartRate,
-            vo2Max: vo2Max,
-            restingHeartRate: restingHeartRate,
-            trainingBackground: trainingBackgroundLevel,
-            deviceTime: deviceTime,
-            typicalDay: typicalDayEnum,
-            sleepGoalMinutes: sleepGoalMinutes
-        )
-        
-        _ = api.doFirstTimeUse(identifier, ftuConfig: config).subscribe(
-            onCompleted: {
-                result(nil)
-            },
-            onError: { error in
-                result(FlutterError(
-                    code: "FTU_ERROR",
-                    message: error.localizedDescription,
-                    details: nil
-                ))
-            }
-        )
+
+    // Convert the dictionary to PolarFirstTimeUseConfig
+    guard let gender = configDict["gender"] as? String,
+      let birthDateString = configDict["birthDate"] as? String,
+      let height = configDict["height"] as? Int,
+      let weight = configDict["weight"] as? Int,
+      let maxHeartRate = configDict["maxHeartRate"] as? Int,
+      let vo2Max = configDict["vo2Max"] as? Int,
+      let restingHeartRate = configDict["restingHeartRate"] as? Int,
+      let trainingBackground = configDict["trainingBackground"] as? Int,
+      let deviceTime = configDict["deviceTime"] as? String,
+      let typicalDay = configDict["typicalDay"] as? Int,
+      let sleepGoalMinutes = configDict["sleepGoalMinutes"] as? Int
+    else {
+      result(
+        FlutterError(
+          code: "INVALID_CONFIG",
+          message: "Invalid configuration parameters",
+          details: nil))
+      return
     }
-    
-    /*func isFtuDone(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
-        guard let identifier = call.arguments as? String else {
-            result(FlutterError(
-                code: "INVALID_ARGUMENTS",
-                message: "Expected a device identifier as a String",
-                details: nil
-            ))
-            return
-        }
-        
-        _ = api.isFtuDone(identifier).subscribe(
-            onSuccess: { isFtuDone in
-                result(isFtuDone)
-            },
-            onFailure: { error in
-                result(
-                    FlutterError(
-                        code: "FTU_CHECK_ERROR",
-                        message: error.localizedDescription,
-                        details: nil
-                    )
-                )
-            }
+
+    // Convert string date to Date object
+    let dateFormatter = DateFormatter()
+    dateFormatter.dateFormat = "yyyy-MM-dd"
+    guard let birthDate = dateFormatter.date(from: birthDateString) else {
+      result(
+        FlutterError(
+          code: "INVALID_DATE",
+          message: "Invalid birth date format",
+          details: nil))
+      return
+    }
+
+    // Convert training background value to appropriate enum case
+    let trainingBackgroundLevel: PolarFirstTimeUseConfig.TrainingBackground
+    switch trainingBackground {
+    case 10: trainingBackgroundLevel = .occasional
+    case 20: trainingBackgroundLevel = .regular
+    case 30: trainingBackgroundLevel = .frequent
+    case 40: trainingBackgroundLevel = .heavy
+    case 50: trainingBackgroundLevel = .semiPro
+    case 60: trainingBackgroundLevel = .pro
+    default: trainingBackgroundLevel = .occasional  // default fallback
+    }
+
+    // Convert typical day to enum
+    let typicalDayEnum: PolarFirstTimeUseConfig.TypicalDay
+    switch typicalDay {
+    case 1: typicalDayEnum = .mostlyMoving
+    case 2: typicalDayEnum = .mostlySitting
+    case 3: typicalDayEnum = .mostlyStanding
+    default: typicalDayEnum = .mostlySitting
+    }
+
+    // Create config object with validation
+    let config = PolarBleSdk.PolarFirstTimeUseConfig(
+      gender: gender == "Male" ? .male : .female,
+      birthDate: birthDate,
+      height: Float(height),
+      weight: Float(weight),
+      maxHeartRate: maxHeartRate,
+      vo2Max: vo2Max,
+      restingHeartRate: restingHeartRate,
+      trainingBackground: trainingBackgroundLevel,
+      deviceTime: deviceTime,
+      typicalDay: typicalDayEnum,
+      sleepGoalMinutes: sleepGoalMinutes
+    )
+
+    _ = api.doFirstTimeUse(identifier, ftuConfig: config).subscribe(
+      onCompleted: {
+        result(nil)
+      },
+      onError: { error in
+        result(
+          FlutterError(
+            code: "FTU_ERROR",
+            message: error.localizedDescription,
+            details: nil
+          ))
+      }
+    )
+  }
+
+  func isFtuDone(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+    guard let identifier = call.arguments as? String else {
+      result(
+        FlutterError(
+          code: "INVALID_ARGUMENTS",
+          message: "Expected a device identifier as a String",
+          details: nil
+        ))
+      return
+    }
+
+    _ = api.isFtuDone(identifier).subscribe(
+      onSuccess: { isFtuDone in
+        result(isFtuDone)
+      },
+      onFailure: { error in
+        result(
+          FlutterError(
+            code: "FTU_CHECK_ERROR",
+            message: error.localizedDescription,
+            details: nil
+          )
         )
-    }*/
+      }
+    )
+  }
 }
-
 
 class StreamHandler: NSObject, FlutterStreamHandler {
   let onListen: (Any?, @escaping FlutterEventSink) -> FlutterError?
@@ -982,6 +1065,8 @@ class StreamingChannel: NSObject, FlutterStreamHandler {
       stream = api.startTemperatureStreaming(identifier, settings: settings!)
     case .pressure:
       stream = api.startPressureStreaming(identifier, settings: settings!)
+    case .skinTemperature:
+        stream = api.startSkinTemperatureStreaming(identifier, settings: settings!)
     }
 
     subscription = stream.anySubscribe(
@@ -1019,4 +1104,3 @@ class StreamingChannel: NSObject, FlutterStreamHandler {
     channel.setStreamHandler(nil)
   }
 }
-  
