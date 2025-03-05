@@ -151,8 +151,11 @@ PolarPpiSample _$PolarPpiSampleFromJson(Map<String, dynamic> json) =>
           const PlatformBooleanConverter().fromJson(json['skinContactStatus']),
       skinContactSupported: const PlatformBooleanConverter()
           .fromJson(json['skinContactSupported']),
-      timeStamp: const PolarSampleTimestampConverter()
-          .fromJson((json['timeStamp'] as num).toInt()),
+      timeStamp: Platform.isIOS
+          ? DateTime.fromMillisecondsSinceEpoch(json['timeStamp'])
+          : const MapToDateTimeConverter().fromJson(
+              json['timeStamp'],
+            ),
     );
 
 Map<String, dynamic> _$PolarPpiSampleToJson(PolarPpiSample instance) =>
