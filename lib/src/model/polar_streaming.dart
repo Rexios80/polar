@@ -290,6 +290,10 @@ class PolarPpiSample {
   @PlatformBooleanConverter()
   final bool skinContactSupported;
 
+  /// moment sample is taken in nanoseconds. The epoch of timestamp is 1.1.2000
+  @PolarSampleTimestampConverter()
+  final DateTime timeStamp;
+
   /// Constructor
   PolarPpiSample({
     required this.ppi,
@@ -298,6 +302,7 @@ class PolarPpiSample {
     required this.blockerBit,
     required this.skinContactStatus,
     required this.skinContactSupported,
+    required this.timeStamp,
   });
 
   /// From json

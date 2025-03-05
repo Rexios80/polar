@@ -278,7 +278,7 @@ class PolarPpgSampleCodable: Encodable {
   }
 }
 
-typealias PolarPpiSample = (
+typealias PolarPpiSample = (timeStamp: UInt64,
   hr: Int, ppInMs: UInt16, ppErrorEstimate: UInt16, blockerBit: Int, skinContactStatus: Int,
   skinContactSupported: Int
 )
@@ -297,10 +297,12 @@ class PolarPpiSampleCodable: Encodable {
     case blockerBit
     case skinContactStatus
     case skinContactSupported
+    case timeStamp
   }
 
   func encode(to encoder: Encoder) {
     var container = encoder.container(keyedBy: CodingKeys.self)
+    try? container.encode(data.timeStamp, forKey: .timeStamp)
     try? container.encode(data.hr, forKey: .hr)
     try? container.encode(data.ppInMs, forKey: .ppInMs)
     try? container.encode(data.ppErrorEstimate, forKey: .ppErrorEstimate)

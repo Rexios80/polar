@@ -216,6 +216,7 @@ class StreamingHandler extends MockStreamHandler {
               blockerBit: false,
               skinContactStatus: false,
               skinContactSupported: false,
+              timeStamp: DateTime.now(),
             ),
           ],
         );
