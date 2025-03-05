@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:polar/src/model/convert.dart';
@@ -144,6 +146,13 @@ class PolarAccSample {
     required this.y,
     required this.z,
   });
+
+  /// From json
+  factory PolarAccSample.fromJson(Map<String, dynamic> json) =>
+      _$PolarAccSampleFromJson(json);
+
+  /// To json
+  Map<String, dynamic> toJson() => _$PolarAccSampleToJson(this);
 }
 
 /// Polar acc data
@@ -283,6 +292,10 @@ class PolarPpiSample {
   @PlatformBooleanConverter()
   final bool skinContactSupported;
 
+  /// moment sample is taken in nanoseconds. The epoch of timestamp is 1.1.2000
+  @PolarSampleTimestampConverter()
+  final DateTime timeStamp;
+
   /// Constructor
   PolarPpiSample({
     required this.ppi,
@@ -291,7 +304,15 @@ class PolarPpiSample {
     required this.blockerBit,
     required this.skinContactStatus,
     required this.skinContactSupported,
+    required this.timeStamp,
   });
+
+  /// From json
+  factory PolarPpiSample.fromJson(Map<String, dynamic> json) =>
+      _$PolarPpiSampleFromJson(json);
+
+  /// To json
+  Map<String, dynamic> toJson() => _$PolarPpiSampleToJson(this);
 }
 
 /// Polar ppi data

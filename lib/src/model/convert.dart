@@ -127,7 +127,8 @@ class PolarSampleTimestampConverter extends JsonConverter<DateTime, int> {
   @override
   DateTime fromJson(int json) {
     final millis = json ~/ 1000;
-    return DateTime.fromMicrosecondsSinceEpoch(_polarEpoch + millis);
+    final dateTime = DateTime.fromMicrosecondsSinceEpoch(_polarEpoch + millis);
+    return dateTime.add(const Duration(hours: 1));
   }
 
   @override
@@ -135,4 +136,51 @@ class PolarSampleTimestampConverter extends JsonConverter<DateTime, int> {
     final millis = object.microsecondsSinceEpoch - _polarEpoch;
     return millis * 1000;
   }
+}
+
+/// Converts [PolarDataType] to and from JSON strings.
+class PolarDataTypeConverter implements JsonConverter<PolarDataType, dynamic> {
+  /// Constant constructor for [PolarDataTypeConverter].
+  const PolarDataTypeConverter();
+
+  /// Converts JSON to [PolarDataType].
+  @override
+  PolarDataType fromJson(dynamic json) {
+    return PolarDataType.fromJson(json);
+  }
+
+  /// Converts [PolarDataType] to JSON.
+  @override
+  dynamic toJson(PolarDataType object) {
+    return object.toJson();
+  }
+}
+
+/// Converts a map with time components to and from [DateTime].
+class MapToDateTimeConverter
+    implements JsonConverter<DateTime, Map<String, dynamic>> {
+  /// Constant constructor for [MapToDateTimeConverter].
+  const MapToDateTimeConverter();
+
+  @override
+  DateTime fromJson(Map<String, dynamic> json) {
+    return DateTime.utc(
+      json['year'] as int,
+      (json['month'] as int) + 1,
+      json['dayOfMonth'] as int,
+      json['hourOfDay'] as int,
+      json['minute'] as int,
+      json['second'] as int,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson(DateTime date) => {
+        'year': date.toUtc().year,
+        'month': date.toUtc().month - 1,
+        'dayOfMonth': date.toUtc().day,
+        'hourOfDay': date.toUtc().hour,
+        'minute': date.toUtc().minute,
+        'second': date.toUtc().second,
+      };
 }

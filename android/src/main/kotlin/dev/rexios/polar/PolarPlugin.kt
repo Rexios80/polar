@@ -23,8 +23,11 @@ import com.polar.sdk.api.PolarH10OfflineExerciseApi.SampleType
 import com.polar.sdk.api.model.LedConfig
 import com.polar.sdk.api.model.PolarDeviceInfo
 import com.polar.sdk.api.model.PolarExerciseEntry
+import com.polar.sdk.api.model.PolarFirstTimeUseConfig
+import com.polar.sdk.api.model.PolarHealthThermometerData
 import com.polar.sdk.api.model.PolarHrData
 import com.polar.sdk.api.model.PolarSensorSetting
+import com.polar.sdk.api.model.PolarOfflineRecordingEntry
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -38,7 +41,9 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.reactivex.rxjava3.disposables.Disposable
 import java.lang.reflect.Type
+import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Locale
 import java.util.UUID
 
 fun Any?.discard() = Unit
@@ -157,6 +162,24 @@ class PolarPlugin :
             "enableSdkMode" -> enableSdkMode(call, result)
             "disableSdkMode" -> disableSdkMode(call, result)
             "isSdkModeEnabled" -> isSdkModeEnabled(call, result)
+            "getAvailableOfflineRecordingDataTypes" -> getAvailableOfflineRecordingDataTypes(
+                call,
+                result
+            )
+
+            "requestOfflineRecordingSettings" -> requestOfflineRecordingSettings(call, result)
+            "startOfflineRecording" -> startOfflineRecording(call, result)
+            "stopOfflineRecording" -> stopOfflineRecording(call, result)
+            "getOfflineRecordingStatus" -> getOfflineRecordingStatus(call, result)
+            "listOfflineRecordings" -> listOfflineRecordings(call, result)
+            "getOfflineRecord" -> getOfflineRecord(call, result)
+            "removeOfflineRecord" -> removeOfflineRecord(call, result)
+            "getDiskSpace" -> getDiskSpace(call, result)
+            "getLocalTime" -> getLocalTime(call, result)
+            "setLocalTime" -> setLocalTime(call, result)
+            "doFirstTimeUse" -> doFirstTimeUse(call, result)
+            "isFtuDone" -> isFtuDone(call, result)
+
             else -> result.notImplemented()
         }
     }
@@ -477,9 +500,328 @@ class PolarPlugin :
             })
             .discard()
     }
+
+    private fun getAvailableOfflineRecordingDataTypes(call: MethodCall, result: Result) {
+        val identifier = call.arguments as String
+
+        wrapper.api
+            .getAvailableOfflineRecordingDataTypes(identifier)
+            .subscribe({
+                runOnUiThread { result.success(gson.toJson(it)) }
+            }, {
+                runOnUiThread {
+                    result.error(it.toString(), it.message, null)
+                }
+            })
+            .discard()
+    }
+
+    private fun requestOfflineRecordingSettings(call: MethodCall, result: Result) {
+        val arguments = call.arguments as List<*>
+        val identifier = arguments[0] as String
+        val feature = gson.fromJson(arguments[1] as String, PolarDeviceDataType::class.java)
+
+        wrapper.api
+            .requestOfflineRecordingSettings(identifier, feature)
+            .subscribe({
+                runOnUiThread { result.success(gson.toJson(it)) }
+            }, {
+                runOnUiThread {
+                    result.error(it.toString(), it.message, null)
+                }
+            })
+            .discard()
+    }
+
+    private fun startOfflineRecording(call: MethodCall, result: Result) {
+        val arguments = call.arguments as List<*>
+        val identifier = arguments[0] as String
+        val feature = gson.fromJson(arguments[1] as String, PolarDeviceDataType::class.java)
+        val settings = gson.fromJson(arguments[2] as String, PolarSensorSetting::class.java)
+
+        wrapper.api
+            .startOfflineRecording(identifier, feature, settings)
+            .subscribe({
+                runOnUiThread { result.success(null) }
+            }, {
+                runOnUiThread {
+                    result.error("ERROR_STARTING_RECORDING", it.message, null)
+                }
+            })
+            .discard()
+    }
+
+    private fun stopOfflineRecording(call: MethodCall, result: Result) {
+        val arguments = call.arguments as List<*>
+        val identifier = arguments[0] as String
+        val feature = gson.fromJson(arguments[1] as String, PolarDeviceDataType::class.java)
+
+        wrapper.api
+            .stopOfflineRecording(identifier, feature)
+            .subscribe({
+                runOnUiThread { result.success(null) }
+            }, {
+                runOnUiThread {
+                    result.error("ERROR_STOPPING_RECORDING", it.message, null)
+                }
+            })
+            .discard()
+    }
+
+    private fun getOfflineRecordingStatus(call: MethodCall, result: Result) {
+        val arguments = call.arguments as List<*>
+        val identifier = arguments[0] as String
+
+        wrapper.api
+            .getOfflineRecordingStatus(identifier)
+            .subscribe({ dataTypes ->
+                val dataTypeNames = dataTypes.map { it.name }
+                runOnUiThread { result.success(dataTypeNames) }
+            }, {
+                runOnUiThread {
+                    result.error(it.toString(), it.message, null)
+                }
+            })
+            .discard()
+    }
+
+    private fun listOfflineRecordings(call: MethodCall, result: Result) {
+        val identifier = call.arguments as String
+
+        val recordings = mutableListOf<String>()
+        wrapper.api
+            .listOfflineRecordings(identifier)
+            .subscribe({
+                recordings.add(gson.toJson(it))
+            }, {
+                runOnUiThread {
+                    result.error(it.toString(), it.message, null)
+                }
+            }, {
+                result.success(recordings)
+            })
+            .discard()
+    }
+
+    private fun getOfflineRecord(call: MethodCall, result: Result) {
+        val arguments = call.arguments as List<*>
+        val identifier = arguments[0] as String
+        val entry = gson.fromJson(arguments[1] as String, PolarOfflineRecordingEntry::class.java)
+
+        wrapper.api
+            .getOfflineRecord(identifier, entry)
+            .subscribe({
+                runOnUiThread { result.success(gson.toJson(it)) }
+            }, {
+                runOnUiThread {
+                    result.error(it.toString(), it.message, null)
+                }
+            })
+            .discard()
+    }
+
+    private fun removeOfflineRecord(call: MethodCall, result: Result) {
+        val arguments = call.arguments as List<*>
+        val identifier = arguments[0] as String
+        val entry = gson.fromJson(arguments[1] as String, PolarOfflineRecordingEntry::class.java)
+
+        wrapper.api
+            .removeOfflineRecord(identifier, entry)
+            .subscribe({
+                runOnUiThread { result.success(null) }
+            }, {
+                runOnUiThread {
+                    result.error(it.toString(), it.message, null)
+                }
+            })
+            .discard()
+    }
+
+    private fun getDiskSpace(call: MethodCall, result: Result) {
+        val identifier = call.arguments as String
+
+        wrapper.api
+            .getDiskSpace(identifier)
+            .subscribe({
+                val (availableSpace, freeSpace) = it
+                runOnUiThread {
+                    result.success(listOf(availableSpace, freeSpace))
+                }
+            }, {
+                runOnUiThread {
+                    result.error(it.toString(), it.message, null)
+                }
+            })
+            .discard()
+    }
+
+    private fun getLocalTime(call: MethodCall, result: Result) {
+        val identifier = call.arguments as? String ?: run {
+            result.error("ERROR_INVALID_ARGUMENT", "Expected a single String argument", null)
+            return
+        }
+
+        wrapper.api
+            .getLocalTime(identifier)
+            .subscribe({ deviceTime ->
+                try {
+                    // Format the device time using SimpleDateFormat
+                    val dateFormat = java.text.SimpleDateFormat(
+                        "yyyy-MM-dd'T'HH:mm:ssXXX",
+                        java.util.Locale.getDefault()
+                    )
+                    dateFormat.timeZone = deviceTime.timeZone
+                    val timeString = dateFormat.format(deviceTime.time)
+
+                    // Return the formatted date as a string
+                    runOnUiThread {
+                        result.success(timeString)
+                    }
+                } catch (e: Exception) {
+                    runOnUiThread {
+                        result.error("ERROR_FORMATTING_TIME", e.message, null)
+                    }
+                }
+            }, {
+                runOnUiThread {
+                    result.error(it.toString(), it.message, null)
+                }
+            })
+            .discard()
+    }
+
+    private fun setLocalTime(call: MethodCall, result: Result) {
+        val arguments = call.arguments as List<*>
+        val identifier = arguments[0] as String
+        val timestamp = arguments[1] as Double
+
+        // Convert the timestamp to a Date object
+        val date =
+            java.util.Date((timestamp * 1000).toLong()) // Multiply by 1000 to convert seconds to milliseconds
+
+        // Convert Date to Calendar
+        val calendar = java.util.Calendar.getInstance()
+        calendar.time = date
+
+        // Now, call the API with Calendar
+        wrapper.api
+            .setLocalTime(identifier, calendar)
+            .subscribe({
+                runOnUiThread { result.success(null) }
+            }, {
+                runOnUiThread {
+                    result.error(it.toString(), it.message, null)
+                }
+            })
+            .discard()
+    }
+
+    private fun doFirstTimeUse(call: MethodCall, result: Result) {
+        val arguments = call.arguments as Map<*, *>
+        val identifier = arguments["identifier"] as? String
+        val configMap = arguments["config"] as? Map<*, *>
+
+        if (identifier == null || configMap == null) {
+            result.error(
+                "INVALID_ARGUMENTS",
+                "Expected identifier and config map",
+                null
+            )
+            return
+        }
+        // Extract configuration values
+        val gender = configMap["gender"] as? String
+        val birthDateString = configMap["birthDate"] as? String
+        val height = (configMap["height"] as? Int)?.toFloat()
+        val weight = (configMap["weight"] as? Int)?.toFloat()
+        val maxHeartRate = configMap["maxHeartRate"] as? Int
+        val vo2Max = configMap["vo2Max"] as? Int
+        val restingHeartRate = configMap["restingHeartRate"] as? Int
+        val trainingBackground = configMap["trainingBackground"] as? Int
+        val deviceTime = configMap["deviceTime"] as? String
+        val typicalDay = configMap["typicalDay"] as? Int
+        val sleepGoalMinutes = configMap["sleepGoalMinutes"] as? Int
+
+        // Validate required parameters
+        if (gender == null || birthDateString == null || height == null || weight == null ||
+            maxHeartRate == null || vo2Max == null || restingHeartRate == null ||
+            trainingBackground == null || deviceTime == null || typicalDay == null ||
+            sleepGoalMinutes == null
+        ) {
+            result.error(
+                "INVALID_CONFIG",
+                "Invalid configuration parameters",
+                null
+            )
+            return
+        }
+
+        // Parse birth date
+        val birthDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(birthDateString)
+
+        // Map gender string to PolarFirstTimeUseConfig.Gender enum
+        val genderEnum = when (gender) {
+            "Male" -> PolarFirstTimeUseConfig.Gender.MALE
+            "Female" -> PolarFirstTimeUseConfig.Gender.FEMALE
+            else -> throw IllegalArgumentException("Invalid gender value")
+        }
+
+        // Map typicalDay to PolarFirstTimeUseConfig.TypicalDay enum
+        val typicalDayEnum = when (typicalDay) {
+            1 -> PolarFirstTimeUseConfig.TypicalDay.MOSTLY_MOVING
+            2 -> PolarFirstTimeUseConfig.TypicalDay.MOSTLY_SITTING
+            3 -> PolarFirstTimeUseConfig.TypicalDay.MOSTLY_STANDING
+            else -> PolarFirstTimeUseConfig.TypicalDay.MOSTLY_SITTING // Default
+        }
+
+        // Create PolarFirstTimeUseConfig instance
+        val ftuConfig = PolarFirstTimeUseConfig(
+            genderEnum,
+            birthDate,
+            height,
+            weight,
+            maxHeartRate,
+            vo2Max,
+            restingHeartRate,
+            trainingBackground,
+            deviceTime,
+            typicalDayEnum,
+            sleepGoalMinutes
+        )
+
+        // Call the Polar API
+        wrapper.api
+            .doFirstTimeUse(identifier, ftuConfig)
+            .subscribe({
+                runOnUiThread { result.success(null) }
+            }, {
+                runOnUiThread {
+                    result.error(it.toString(), it.message, null)
+                }
+            })
+            .discard()
+    }
+
+    private fun isFtuDone(call: MethodCall, result: Result) {
+        val identifier = call.arguments as? String ?: run {
+            result.error("ERROR_INVALID_ARGUMENT", "Expected a single String argument", null)
+            return
+        }
+
+        wrapper.api
+            .isFtuDone(identifier)
+            .subscribe({ isFtuDone ->
+                runOnUiThread { result.success(isFtuDone) }
+            }, {
+                runOnUiThread {
+                    result.error(it.toString(), it.message, null)
+                }
+            })
+            .discard()
+    }
 }
 
-class PolarWrapper(
+class PolarWrapper @OptIn(ExperimentalStdlibApi::class) constructor(
     context: Context,
     val api: PolarBleApi =
         PolarBleApiDefaultImpl.defaultImplementation(
@@ -569,7 +911,7 @@ class PolarWrapper(
     }
 
     @Deprecated("", replaceWith = ReplaceWith(""))
-    override fun hrFeatureReady(identifier: String) {
+    fun hrFeatureReady(identifier: String) {
         // Do nothing
     }
 
@@ -581,18 +923,22 @@ class PolarWrapper(
         // Do nothing
     }
 
+    override fun htsNotificationReceived(identifier: String, data: PolarHealthThermometerData) {
+        TODO("Not yet implemented")
+    }
+
     @Deprecated("", replaceWith = ReplaceWith(""))
-    override fun polarFtpFeatureReady(identifier: String) {
+    fun polarFtpFeatureReady(identifier: String) {
         // Do nothing
     }
 
     @Deprecated("", replaceWith = ReplaceWith(""))
-    override fun sdkModeFeatureAvailable(identifier: String) {
+    fun sdkModeFeatureAvailable(identifier: String) {
         // Do nothing
     }
 
     @Deprecated("", replaceWith = ReplaceWith(""))
-    override fun streamingFeaturesReady(
+    fun streamingFeaturesReady(
         identifier: String,
         features: Set<PolarDeviceDataType>,
     ) {
@@ -640,6 +986,10 @@ class StreamingChannel(
                         identifier,
                         settings,
                     )
+
+                PolarDeviceDataType.PRESSURE -> TODO()
+                PolarDeviceDataType.LOCATION -> TODO()
+                PolarDeviceDataType.SKIN_TEMPERATURE -> TODO()
             }
 
         subscription =

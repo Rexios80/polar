@@ -6,6 +6,8 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:polar/polar.dart';
+import 'package:polar/src/model/convert.dart';
+import 'package:polar/src/model/polar_offline_recording_data.dart';
 
 /// Flutter implementation of the [PolarBleSdk]
 class Polar {
@@ -554,5 +556,304 @@ class Polar {
     final result =
         await _channel.invokeMethod<bool>('isSdkModeEnabled', identifier);
     return result!;
+  }
+
+  /// Fetches the available offline recording data types for a given Polar device.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or address.
+  /// - Returns: A list of available offline recording data types in JSON format.
+  ///   - success: Returns a set of PolarDataType representing available data types.
+  ///   - onError: Possible errors are returned as exceptions.
+  Future<Set<PolarDataType>> getAvailableOfflineRecordingDataTypes(
+    String identifier,
+  ) async {
+    final response = await _channel.invokeMethod(
+      'getAvailableOfflineRecordingDataTypes',
+      identifier,
+    );
+
+    if (response == null) return {};
+    return (jsonDecode(response) as List).map(PolarDataType.fromJson).toSet();
+  }
+
+  /// Requests the offline recording settings for a specific data type.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or address.
+  ///   - feature: The data type for which settings are requested.
+  /// - Returns: Offline recording settings in JSON format.
+  ///   - success: Returns a map of settings.
+  ///   - onError: Possible errors are returned as exceptions.
+  Future<PolarSensorSetting?> requestOfflineRecordingSettings(
+    String identifier,
+    PolarDataType feature,
+  ) async {
+    final response = await _channel.invokeMethod<String>(
+      'requestOfflineRecordingSettings',
+      [identifier, feature.toJson()],
+    );
+
+    return response != null
+        ? PolarSensorSetting.fromJson(jsonDecode(response))
+        : null;
+  }
+
+  /// Starts offline recording on a Polar device with the given settings.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or address.
+  ///   - feature: The data type to be recorded.
+  ///   - settings: Recording settings in JSON format.
+  ///   - encryptionKey: Optional encryption key for the recording.
+  /// - Returns: Void.
+  ///   - success: Invoked when recording starts successfully.
+  ///   - onError: Possible errors are returned as exceptions.
+  Future<void> startOfflineRecording(
+    String identifier,
+    PolarDataType feature, {
+    PolarSensorSetting? settings,
+  }) async {
+    await _channel.invokeMethod(
+      'startOfflineRecording',
+      [
+        identifier,
+        feature.toJson(),
+        settings != null ? jsonEncode(settings) : null,
+      ],
+    );
+  }
+
+  /// Stops offline recording for a specific data type on a Polar device.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or address.
+  ///   - feature: The data type to stop recording.
+  /// - Returns: Void.
+  ///   - success: Invoked when recording stops successfully.
+  ///   - onError: Possible errors are returned as exceptions.
+  Future<void> stopOfflineRecording(
+    String identifier,
+    PolarDataType feature,
+  ) async {
+    await _channel.invokeMethod(
+      'stopOfflineRecording',
+      [identifier, feature.toJson()],
+    );
+  }
+
+  /// Checks the status of offline recording for a specific data type.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or address.
+  ///   - feature: The data type to check the status for.
+  /// - Returns: Recording status.
+  ///   - success: Returns the recording status.
+  ///   - onError: Possible errors are returned as exceptions.
+  Future<List<PolarDataType>> getOfflineRecordingStatus(
+    String identifier,
+  ) async {
+    final result = await _channel.invokeMethod<List<dynamic>>(
+      'getOfflineRecordingStatus',
+      [identifier],
+    );
+
+    if (result != null) {
+      return result
+          .map((e) => const PolarDataTypeConverter().fromJson(e))
+          .toList();
+    }
+
+    throw Exception('Unexpected null result from getOfflineRecordingStatus');
+  }
+
+  /// Lists all offline recordings available on a Polar device.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or address.
+  /// - Returns: A list of recordings in JSON format.
+  ///   - success: Returns a list of strings representing recording entries.
+  ///   - onError: Possible errors are returned as exceptions.
+  Future<List<PolarOfflineRecordingEntry>> listOfflineRecordings(
+    String identifier,
+  ) async {
+    final result = await _channel.invokeListMethod(
+      'listOfflineRecordings',
+      identifier,
+    );
+
+    if (result == null) return [];
+
+    return result
+        .cast<String>()
+        .map((e) => PolarOfflineRecordingEntry.fromJson(jsonDecode(e)))
+        .toList();
+  }
+
+  /// Fetches a specific offline recording from a Polar device.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or address.
+  ///   - entry: The entry representing the offline recording to fetch.
+  /// - Returns: Recording data in JSON format.
+  ///   - success: Returns the fetched recording data.
+  ///   - onError: Possible errors are returned as exceptions.
+  Future<AccOfflineRecording?> getOfflineAccRecord(
+    String identifier,
+    PolarOfflineRecordingEntry entry,
+  ) async {
+    final result = await _channel.invokeMethod<String>(
+      'getOfflineRecord',
+      [identifier, jsonEncode(entry.toJson())],
+    );
+
+    if (result == null) return null;
+    final data = jsonDecode(result);
+    return AccOfflineRecording.fromJson(data);
+  }
+
+  /// Fetches a specific offline recording from a Polar device.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or address.
+  ///   - entry: The entry representing the offline recording to fetch.
+  /// - Returns: Recording data in JSON format.
+  ///   - success: Returns the fetched recording data.
+  ///   - onError: Possible errors are returned as exceptions.
+  Future<PpiOfflineRecording?> getOfflinePpiRecord(
+    String identifier,
+    PolarOfflineRecordingEntry entry,
+  ) async {
+    final result = await _channel.invokeMethod<String>(
+      'getOfflineRecord',
+      [identifier, jsonEncode(entry.toJson())],
+    );
+    if (result == null) return null;
+    final data = jsonDecode(result);
+    return PpiOfflineRecording.fromJson(data);
+  }
+
+  /// Fetches a specific offline recording from a Polar device.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or address.
+  ///   - entry: The entry representing the offline recording to fetch.
+  /// - Returns: Recording data in JSON format.
+  ///   - success: Returns the fetched recording data.
+  ///   - onError: Possible errors are returned as exceptions.
+  Future<PpgOfflineRecording?> getOfflinePpgRecord(
+    String identifier,
+    PolarOfflineRecordingEntry entry,
+  ) async {
+    final result = await _channel.invokeMethod<String>(
+      'getOfflineRecord',
+      [identifier, jsonEncode(entry.toJson())],
+    );
+    if (result == null) return null;
+    final data = jsonDecode(result);
+    return PpgOfflineRecording.fromJson(data);
+  }
+
+  /// Removes a specific offline recording from a Polar device.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or address.
+  ///   - entry: The entry representing the offline recording to remove.
+  /// - Returns: Void.
+  ///   - success: Invoked when the recording is removed successfully.
+  ///   - onError: Possible errors are returned as exceptions.
+  Future<void> removeOfflineRecord(
+    String identifier,
+    PolarOfflineRecordingEntry entry,
+  ) async {
+    await _channel.invokeMethod(
+      'removeOfflineRecord',
+      [identifier, jsonEncode(entry.toJson())],
+    );
+  }
+
+  /// Fetches the available and used disk space on a Polar device.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or address.
+  /// - Returns: A list with two integers: available space and total space (in bytes).
+  ///   - success: Returns a list containing the available and total space.
+  ///   - onError: Possible errors are returned as exceptions.
+  Future<List<int>> getDiskSpace(String identifier) async {
+    final result = await _channel.invokeMethod<List<dynamic>>(
+      'getDiskSpace',
+      identifier,
+    );
+    return result?.map((e) => e as int).toList() ?? [];
+  }
+
+  /// Fetches the local time from a Polar device.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or address.
+  /// - Returns: The local time of the Polar device as a DateTime object.
+  ///   - success: Returns the local time.
+  ///   - onError: Possible errors are returned as exceptions.
+  Future<DateTime?> getLocalTime(String identifier) async {
+    // Call the native method to get the local time from the Polar device
+    final result =
+        await _channel.invokeMethod<String>('getLocalTime', identifier);
+
+    // If the result is null, return null
+    if (result == null) return null;
+
+    // Convert the string result to a DateTime object
+    final time = DateTime.parse(result);
+
+    return time;
+  }
+
+  /// Sets the local time on a Polar device.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or address.
+  ///   - time: The DateTime object representing the time to set on the device.
+  /// - Returns: Void.
+  ///   - success: Invoked when the time is set successfully.
+  ///   - onError: Possible errors are returned as exceptions.
+  Future<void> setLocalTime(String identifier, DateTime time) async {
+    // Convert the DateTime object to a timestamp (in seconds)
+    final timestamp = time.millisecondsSinceEpoch / 1000;
+
+    // Call the native method to set the local time on the Polar device
+    await _channel.invokeMethod('setLocalTime', [identifier, timestamp]);
+  }
+
+  /// Performs the First Time Use setup for a Polar 360 device.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or address.
+  ///   - config: Configuration data for the first-time use.
+  /// - Returns: Future<void>.
+  ///   - success: Completes when the configuration is sent to device.
+  ///   - onError: Possible errors are returned as exceptions.
+  Future<void> doFirstTimeUse(
+    String identifier,
+    PolarFirstTimeUseConfig config,
+  ) async {
+    await _channel.invokeMethod('doFirstTimeUse', {
+      'identifier': identifier,
+      'config': config.toMap(),
+    });
+  }
+
+  /// Checks if First Time Use setup has been completed for a Polar device.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or address.
+  /// - Returns: A boolean indicating if FTU is completed.
+  ///   - success: Returns true if FTU is done, false otherwise.
+  ///   - onError: Possible errors are returned as exceptions.
+  Future<bool> isFtuDone(String identifier) async {
+    // Call the native method to check FTU status
+    final result = await _channel.invokeMethod<bool>('isFtuDone', identifier);
+
+    // If the result is null, default to false for safety
+    return result ?? false;
   }
 }
