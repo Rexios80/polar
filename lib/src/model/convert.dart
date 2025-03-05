@@ -127,7 +127,11 @@ class PolarSampleTimestampConverter extends JsonConverter<DateTime, int> {
   @override
   DateTime fromJson(int json) {
     final millis = json ~/ 1000;
-    return DateTime.fromMicrosecondsSinceEpoch(_polarEpoch + millis);
+    final dateTime = DateTime.fromMicrosecondsSinceEpoch(_polarEpoch + millis);
+    if (Platform.isIOS) {
+      return dateTime.add(const Duration(hours: 1));
+    }
+    return dateTime;
   }
 
   @override
@@ -163,7 +167,7 @@ class MapToDateTimeConverter
 
   @override
   DateTime fromJson(Map<String, dynamic> json) {
-    return DateTime(
+    return DateTime.utc(
       json['year'] as int,
       (json['month'] as int) + 1,
       json['dayOfMonth'] as int,
@@ -175,11 +179,11 @@ class MapToDateTimeConverter
 
   @override
   Map<String, dynamic> toJson(DateTime date) => {
-        'year': date.year,
-        'month': date.month,
-        'dayOfMonth': date.day,
-        'hourOfDay': date.hour,
-        'minute': date.minute,
-        'second': date.second,
+        'year': date.toUtc().year,
+        'month': date.toUtc().month - 1,
+        'dayOfMonth': date.toUtc().day,
+        'hourOfDay': date.toUtc().hour,
+        'minute': date.toUtc().minute,
+        'second': date.toUtc().second,
       };
 }
