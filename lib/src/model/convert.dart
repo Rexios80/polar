@@ -128,10 +128,7 @@ class PolarSampleTimestampConverter extends JsonConverter<DateTime, int> {
   DateTime fromJson(int json) {
     final millis = json ~/ 1000;
     final dateTime = DateTime.fromMicrosecondsSinceEpoch(_polarEpoch + millis);
-    if (Platform.isIOS) {
-      return dateTime.add(const Duration(hours: 1));
-    }
-    return dateTime;
+    return dateTime.add(const Duration(hours: 1));
   }
 
   @override
