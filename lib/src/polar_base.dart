@@ -537,6 +537,28 @@ class Polar {
     );
   }
 
+  /// Perform first time use (FTU) operation for a given device.
+  ///
+  /// - Parameters:
+  ///   - identifier: polar device id or UUID
+  ///   - config: PolarFirstTimeUseConfig configuration for first time use
+  /// - Returns: Completable stream
+  ///   - success: when FTU notification sent to device
+  ///   - onError: see `PolarErrors` for possible errors invoked
+  Future<void> doFirstTimeUse(
+    String identifier,
+    PolarFirstTimeUseConfig config,
+  ) {
+    return _channel
+        .invokeMethod('doFirstTimeUse', [identifier, jsonEncode(config)]);
+  }
+
+  /// Checks if the first time use (FTU) operation has been done on a given device
+  Future<bool> isFtuDone(String identifier) async {
+    final result = await _channel.invokeMethod<bool>('isFtuDone', identifier);
+    return result!;
+  }
+
   ///  Enables SDK mode.
   Future<void> enableSdkMode(String identifier) {
     return _channel.invokeMethod('enableSdkMode', identifier);
