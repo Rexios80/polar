@@ -608,13 +608,6 @@ class PolarWrapper(
         invoke("batteryLevelReceived", listOf(identifier, level))
     }
 
-    override fun htsNotificationReceived(
-        identifier: String,
-        data: PolarHealthThermometerData
-    ) {
-        invoke("htNotificationReceived", listOf(identifier, data))
-    }
-
     @Deprecated("", replaceWith = ReplaceWith(""))
     override fun hrFeatureReady(identifier: String) {
         // Do nothing
