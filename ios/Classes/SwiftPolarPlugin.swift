@@ -114,6 +114,10 @@ public class SwiftPolarPlugin:
         disableSdkMode(call, result)
       case "isSdkModeEnabled":
         isSdkModeEnabled(call, result)
+      case "doFirstTimeUse":
+        doFirstTimeUse(call, result)
+      case "isFtuDone":
+        isFtuDone(call, result)
       default: result(FlutterMethodNotImplemented)
       }
     } catch {
@@ -408,6 +412,40 @@ public class SwiftPolarPlugin:
       })
   }
 
+  func doFirstTimeUse(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+    let arguments = call.arguments as! [Any]
+    let identifier = arguments[0] as! String
+    let config = try! decoder.decode(
+      PolarFirstTimeUseConfigCodable.self,
+      from: (arguments[1] as! String)
+        .data(using: .utf8)!
+    ).data
+    _ = api.doFirstTimeUse(identifier, ftuConfig: config).subscribe(
+      onCompleted: {
+        result(nil)
+      },
+      onError: { error in
+        result(
+          FlutterError(
+            code: "Error doing first time setup", message: error.localizedDescription, details: nil)
+        )
+      })
+  }
+
+  func isFtuDone(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+    let identifier = call.arguments as! String
+    _ = api.isFtuDone(identifier).subscribe(
+      onSuccess: {
+        result($0)
+      },
+      onFailure: { error in
+        result(
+          FlutterError(
+            code: "Error checking FTU status", message: error.localizedDescription,
+            details: nil))
+      })
+  }
+
   private func invokeMethod(_ methodName: String, arguments: Any? = nil) {
     DispatchQueue.main.async {
       self.channel.invokeMethod(methodName, arguments: arguments)
@@ -580,6 +618,8 @@ class StreamingChannel: NSObject, FlutterStreamHandler {
       stream = api.startTemperatureStreaming(identifier, settings: settings!)
     case .pressure:
       stream = api.startPressureStreaming(identifier, settings: settings!)
+    case .skinTemperature:
+      stream = api.startSkinTemperatureStreaming(identifier, settings: settings!)
     }
 
     subscription = stream.anySubscribe(
