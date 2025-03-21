@@ -615,10 +615,10 @@ class PolarWrapper(
         invoke("htNotificationReceived", listOf(identifier, data))
     }
 
-   @Deprecated("", replaceWith = ReplaceWith(""))
-   override fun hrFeatureReady(identifier: String) {
-       // Do nothing
-   }
+    @Deprecated("", replaceWith = ReplaceWith(""))
+    override fun hrFeatureReady(identifier: String) {
+        // Do nothing
+    }
 
     @Deprecated("", replaceWith = ReplaceWith(""))
     override fun hrNotificationReceived(
@@ -628,23 +628,23 @@ class PolarWrapper(
         // Do nothing
     }
 
-   @Deprecated("", replaceWith = ReplaceWith(""))
-   override fun polarFtpFeatureReady(identifier: String) {
-       // Do nothing
-   }
+    @Deprecated("", replaceWith = ReplaceWith(""))
+    override fun polarFtpFeatureReady(identifier: String) {
+        // Do nothing
+    }
 
-   @Deprecated("", replaceWith = ReplaceWith(""))
-   override fun sdkModeFeatureAvailable(identifier: String) {
-       // Do nothing
-   }
+    @Deprecated("", replaceWith = ReplaceWith(""))
+    override fun sdkModeFeatureAvailable(identifier: String) {
+        // Do nothing
+    }
 
-   @Deprecated("", replaceWith = ReplaceWith(""))
-   override fun streamingFeaturesReady(
-       identifier: String,
-       features: Set<PolarDeviceDataType>,
-   ) {
-       // Do nothing
-   }
+    @Deprecated("", replaceWith = ReplaceWith(""))
+    override fun streamingFeaturesReady(
+        identifier: String,
+        features: Set<PolarDeviceDataType>,
+    ) {
+        // Do nothing
+    }
 }
 
 class StreamingChannel(
