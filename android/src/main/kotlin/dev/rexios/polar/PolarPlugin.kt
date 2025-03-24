@@ -616,9 +616,9 @@ class PolarWrapper(
     }
 
     @Deprecated("", replaceWith = ReplaceWith(""))
-    override fun streamingFeaturesReady(
+    override fun hrNotificationReceived(
         identifier: String,
-        features: Set<PolarDeviceDataType>,
+        data: PolarHrData.PolarHrSample,
     ) {
         // Do nothing
     }
@@ -664,8 +664,7 @@ class StreamingChannel(
                         identifier,
                         settings,
                     )
-            } else {
-                throw IllegalArgumentException("Not implemented or supported feature")
+                else -> throw IllegalArgumentException("Unsupported feature: $feature")
             }
 
         subscription =

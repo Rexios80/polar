@@ -8,8 +8,8 @@ class PolarFirstTimeUseConfig {
   /// Gender of the user
   final Gender gender;
 
-  /// Date of the configuration
-  final DateTime date;
+  /// Date of birth
+  final DateTime birthDate;
 
   /// Height of the user in centimeters
   final double height;
@@ -41,7 +41,7 @@ class PolarFirstTimeUseConfig {
   /// Constructor
   PolarFirstTimeUseConfig({
     this.gender = Gender.male,
-    required this.date,
+    required this.birthDate,
     required this.trainingBackground,
     this.height = 165,
     this.weight = 70,

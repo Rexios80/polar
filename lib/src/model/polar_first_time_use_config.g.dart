@@ -13,7 +13,7 @@ PolarFirstTimeUseConfig _$PolarFirstTimeUseConfigFromJson(
     PolarFirstTimeUseConfig(
       gender:
           $enumDecodeNullable(_$GenderEnumMap, json['gender']) ?? Gender.male,
-      date: DateTime.parse(json['date'] as String),
+      birthDate: DateTime.parse(json['birthDate'] as String),
       trainingBackground: (json['trainingBackground'] as num).toInt(),
       height: (json['height'] as num?)?.toDouble() ?? 165,
       weight: (json['weight'] as num?)?.toDouble() ?? 70,
@@ -31,7 +31,7 @@ Map<String, dynamic> _$PolarFirstTimeUseConfigToJson(
         PolarFirstTimeUseConfig instance) =>
     <String, dynamic>{
       'gender': _$GenderEnumMap[instance.gender]!,
-      'date': instance.date.toIso8601String(),
+      'birthDate': instance.birthDate.toIso8601String(),
       'height': instance.height,
       'weight': instance.weight,
       'maxHeartRate': instance.maxHeartRate,
