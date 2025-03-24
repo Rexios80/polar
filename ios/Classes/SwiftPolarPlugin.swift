@@ -618,6 +618,9 @@ class StreamingChannel: NSObject, FlutterStreamHandler {
       stream = api.startTemperatureStreaming(identifier, settings: settings!)
     case .pressure:
       stream = api.startPressureStreaming(identifier, settings: settings!)
+    default:
+      /// case in which something is not implemented.
+      return nil
     }
 
     subscription = stream.anySubscribe(
