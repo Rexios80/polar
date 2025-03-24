@@ -608,27 +608,11 @@ class PolarWrapper(
         invoke("batteryLevelReceived", listOf(identifier, level))
     }
 
-    @Deprecated("", replaceWith = ReplaceWith(""))
-    override fun hrFeatureReady(identifier: String) {
-        // Do nothing
-    }
-
-    @Deprecated("", replaceWith = ReplaceWith(""))
-    override fun hrNotificationReceived(
+    override fun htsNotificationReceived(
         identifier: String,
-        data: PolarHrData.PolarHrSample,
+        data: PolarHealthThermometerData
     ) {
-        // Do nothing
-    }
-
-    @Deprecated("", replaceWith = ReplaceWith(""))
-    override fun polarFtpFeatureReady(identifier: String) {
-        // Do nothing
-    }
-
-    @Deprecated("", replaceWith = ReplaceWith(""))
-    override fun sdkModeFeatureAvailable(identifier: String) {
-        // Do nothing
+        invoke("htNotificationReceived", listOf(identifier, data))
     }
 
     @Deprecated("", replaceWith = ReplaceWith(""))
@@ -680,6 +664,8 @@ class StreamingChannel(
                         identifier,
                         settings,
                     )
+            } else {
+                throw IllegalArgumentException("Not implemented or supported feature")
             }
 
         subscription =
