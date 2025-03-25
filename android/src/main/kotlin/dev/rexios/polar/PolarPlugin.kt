@@ -25,6 +25,7 @@ import com.polar.sdk.api.model.PolarDeviceInfo
 import com.polar.sdk.api.model.PolarExerciseEntry
 import com.polar.sdk.api.model.PolarHrData
 import com.polar.sdk.api.model.PolarSensorSetting
+import com.polar.sdk.api.model.PolarHealthThermometerData
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -568,33 +569,17 @@ class PolarWrapper(
         invoke("batteryLevelReceived", listOf(identifier, level))
     }
 
-    @Deprecated("", replaceWith = ReplaceWith(""))
-    override fun hrFeatureReady(identifier: String) {
-        // Do nothing
+    override fun htsNotificationReceived(
+        identifier: String,
+        data: PolarHealthThermometerData, 
+    ) {
+        /// Not yet implemented
     }
 
     @Deprecated("", replaceWith = ReplaceWith(""))
     override fun hrNotificationReceived(
         identifier: String,
         data: PolarHrData.PolarHrSample,
-    ) {
-        // Do nothing
-    }
-
-    @Deprecated("", replaceWith = ReplaceWith(""))
-    override fun polarFtpFeatureReady(identifier: String) {
-        // Do nothing
-    }
-
-    @Deprecated("", replaceWith = ReplaceWith(""))
-    override fun sdkModeFeatureAvailable(identifier: String) {
-        // Do nothing
-    }
-
-    @Deprecated("", replaceWith = ReplaceWith(""))
-    override fun streamingFeaturesReady(
-        identifier: String,
-        features: Set<PolarDeviceDataType>,
     ) {
         // Do nothing
     }
@@ -640,6 +625,9 @@ class StreamingChannel(
                         identifier,
                         settings,
                     )
+                PolarDeviceDataType.PRESSURE -> throw IllegalArgumentException("Pressure not supported")
+                PolarDeviceDataType.SKIN_TEMPERATURE -> throw IllegalArgumentException("Skin temperature not supported")
+                PolarDeviceDataType.LOCATION -> throw IllegalArgumentException("Location not supported")
             }
 
         subscription =
