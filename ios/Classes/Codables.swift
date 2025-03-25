@@ -412,6 +412,48 @@ class LedConfigCodable: Decodable {
   }
 }
 
+class PolarFirstTimeUseConfigCodable : Decodable {
+    let data: PolarFirstTimeUseConfig
+    
+    required init(from decoder: Decoder) {
+        guard let container = try? decoder.container(keyedBy: CodingKeys.self),
+              let genderString = try? container.decode(String.self, forKey: .gender),
+              let gender = Gender(rawValue: genderString),
+              let birthDate = try? container.decode(Date.self, forKey: .birthDate),
+              let height = try? container.decode(Float.self, forKey: .height),
+              let weight = try? container.decode(Float.self, forKey: .weight),
+              let maxHeartRate = try? container.decode(Int.self, forKey: .maxHeartRate),
+              let vo2Max = try? container.decode(Int.self, forKey: .vo2Max),
+              let restingHeartRate = try? container.decode(Int.self, forKey: .restingHeartRate),
+              let trainingBackgroundValue = try? container.decode(Int.self, forKey: .trainingBackground),
+              let trainingBackground = TrainingBackground(rawValue: trainingBackgroundValue),
+              let deviceTime = try? container.decode(String.self, forKey: .deviceTime),
+              let typicalDayValue = try? container.decode(Int.self, forKey: .typicalDay),
+              let typicalDay = TypicalDay(rawValue: typicalDayValue),
+              let sleepGoalMinutes = try? container.decode(Int.self, forKey: .sleepGoalMinutes)
+        else {
+            data = PolarFirstTimeUseConfig(gender: Gender.male, birthDate: Date.init(), height: 170, weight: 170, maxHeartRate: 180, vo2Max: 50, restingHeartRate: 60, trainingBackground: TrainingBackground.occasional, deviceTime: "", typicalDay: TypicalDay.mostlySitting, sleepGoalMinutes: 480)
+          return
+        }
+
+        data = PolarFirstTimeUseConfig(gender: gender, birthDate: birthDate, height: height, weight: weight, maxHeartRate: maxHeartRate, vo2Max: vo2Max, restingHeartRate: restingHeartRate, trainingBackground: trainingBackground, deviceTime: deviceTime, typicalDay: typicalDay, sleepGoalMinutes: sleepGoalMinutes)
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case gender
+        case birthDate
+        case height
+        case weight
+        case maxHeartRate
+        case vo2Max
+        case restingHeartRate
+        case trainingBackground
+        case deviceTime
+        case typicalDay
+        case sleepGoalMinutes
+    }
+}
+
 extension Date {
   var millisecondsSince1970: Int64 {
     Int64((timeIntervalSince1970 * 1000).rounded())
