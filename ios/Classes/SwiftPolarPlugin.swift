@@ -3,6 +3,7 @@ import Flutter
 import PolarBleSdk
 import RxSwift
 import UIKit
+import Foundation
 
 private let encoder = JSONEncoder()
 private let decoder = JSONDecoder()
@@ -106,6 +107,8 @@ public class SwiftPolarPlugin:
         removeExercise(call, result)
       case "setLedConfig":
         setLedConfig(call, result)
+      case "setLocalTime":
+        setLocalTime(call, result)
       case "doFactoryReset":
         doFactoryReset(call, result)
       case "enableSdkMode":
@@ -349,6 +352,26 @@ public class SwiftPolarPlugin:
         result(
           FlutterError(
             code: "Error setting led config", message: error.localizedDescription, details: nil))
+      })
+  }
+
+  func setLocalTime(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+    let identifier = call.arguments as! String
+    let time: Date = Date()
+    let timeZone = TimeZone.current
+
+    _ = api.setLocalTime(
+      identifier, 
+      time:time, 
+      zone:timeZone
+    ).subscribe(
+      onCompleted: {
+        result(nil)
+      },
+      onError: { error in
+        result(
+          FlutterError(
+            code: "Error setting local time", message: error.localizedDescription, details: nil))     
       })
   }
 
