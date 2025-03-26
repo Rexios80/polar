@@ -573,7 +573,7 @@ class PolarWrapper(
         identifier: String,
         data: PolarHealthThermometerData, 
     ) {
-        /// Not yet implemented
+       // Do nothing
     }
 
     @Deprecated("", replaceWith = ReplaceWith(""))
@@ -625,9 +625,9 @@ class StreamingChannel(
                         identifier,
                         settings,
                     )
-                PolarDeviceDataType.PRESSURE -> throw IllegalArgumentException("Pressure not supported")
-                PolarDeviceDataType.SKIN_TEMPERATURE -> throw IllegalArgumentException("Skin temperature not supported")
-                PolarDeviceDataType.LOCATION -> throw IllegalArgumentException("Location not supported")
+                PolarDeviceDataType.PRESSURE -> api.startPressureStreaming(identifier, settings)
+                PolarDeviceDataType.SKIN_TEMPERATURE -> api.startSkinTemperatureStreaming(identifier, settings)
+                PolarDeviceDataType.LOCATION -> api.startLocationStreaming(identifier, settings)
             }
 
         subscription =
