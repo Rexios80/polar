@@ -1,10 +1,21 @@
 /// Enum representing the training background levels
 enum TrainingBackground {
+  /// Occasional training (1-2 times per week)
   occasional(10),
+
+  /// Regular training (2-3 times per week)
   regular(20),
+
+  /// Frequent training (3-4 times per week)
   frequent(30),
+
+  /// Heavy training (4-5 times per week)
   heavy(40),
+
+  /// Semi-professional training (5-6 times per week)
   semiPro(50),
+
+  /// Professional training (6+ times per week)
   pro(60);
 
   final int value;

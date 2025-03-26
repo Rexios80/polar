@@ -18,7 +18,8 @@ PolarOfflineRecordingEntry _$PolarOfflineRecordingEntryFromJson(
 }
 
 Map<String, dynamic> _$PolarOfflineRecordingEntryToJson(
-        PolarOfflineRecordingEntry instance) =>
+  PolarOfflineRecordingEntry instance,
+) =>
     <String, dynamic>{
       'path': instance.path,
       'size': instance.size,
