@@ -850,7 +850,7 @@ class PolarWrapper @OptIn(ExperimentalStdlibApi::class) constructor(
     }
 
     private fun success(
-        method: String,
+        event: String,
         data: Any?,
     ) {
         runOnUiThread { sinks.values.forEach { it.success(mapOf("event" to event, "data" to data)) } }
