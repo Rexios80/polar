@@ -16,7 +16,7 @@ PODS:
     - SwiftProtobuf (~> 1.0)
     - Zip (~> 2.1.2)
   - RxSwift (6.5.0)
-  - SwiftProtobuf (1.28.1)
+  - SwiftProtobuf (1.29.0)
   - Zip (2.1.2)
 
 DEPENDENCIES:
@@ -48,16 +48,16 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Alamofire: 3ca42e259043ee0dc5c0cdd76c4bc568b8e42af7
-  device_info_plus: 97af1d7e84681a90d0693e63169a5d50e0839a0d
+  device_info_plus: 21fcca2080fbcd348be798aa36c3e5ed849eefbe
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  integration_test: 252f60fa39af5e17c3aa9899d35d908a0721b573
-  permission_handler_apple: 9878588469a2b0d0fc1e048d9f43605f92e6cec2
-  polar: 72c115bddd9aef3e3cc3eaba1196ecd99c59b8b6
+  integration_test: d5929033778cc4991a187e4e1a85396fa4f59b3a
+  permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
+  polar: bc78b0a6fce15cad0a88ad8eb831fa76f709df7b
   PolarBleSdk: e3df6f62b6ed34701d2e1d74ebe24fd8245062ca
   RxSwift: 5710a9e6b17f3c3d6e40d6e559b9fa1e813b2ef8
-  SwiftProtobuf: cc47329e2a10c235e35ba4faed831742ae5135ce
+  SwiftProtobuf: b7aa08087e2ab6d162862d143020091254095f69
   Zip: b3fef584b147b6e582b2256a9815c897d60ddc67
 
 PODFILE CHECKSUM: c24c27344913105c54b95f33f73882923a0bd103
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.16.2
