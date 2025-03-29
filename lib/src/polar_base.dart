@@ -411,7 +411,9 @@ class Polar {
   ///   - onError: see `PolarErrors` for possible errors invoked
   Future<PolarRecordingStatus> requestRecordingStatus(String identifier) async {
     final result = await _methodChannel.invokeListMethod(
-        'requestRecordingStatus', identifier);
+      'requestRecordingStatus',
+      identifier,
+    );
 
     return PolarRecordingStatus(ongoing: result![0], entryId: result[1]);
   }

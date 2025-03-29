@@ -81,6 +81,7 @@ class PolarPlugin :
     // Binary messenger for dynamic EventChannel registration
     private lateinit var messenger: BinaryMessenger
 
+    // Method channel
     private lateinit var methodChannel: MethodChannel
 
     // Event channel
@@ -825,14 +826,14 @@ class PolarPlugin :
     }
 }
 
-class PolarWrapper @OptIn(ExperimentalStdlibApi::class) constructor(
+class PolarWrapper(
     context: Context,
     val api: PolarBleApi =
         PolarBleApiDefaultImpl.defaultImplementation(
             context,
             PolarBleSdkFeature.values().toSet(),
         ),
-        private val sinks: MutableMap<Int, EventSink> = mutableMapOf(),
+    private val sinks: MutableMap<Int, EventSink> = mutableMapOf(),
 ) : PolarBleApiCallbackProvider {
     init {
         api.setApiCallback(this)
