@@ -33,7 +33,10 @@ enum PolarSdkFeature {
   sdkMode,
 
   /// Feature to enable or disable SDK mode blinking LED animation.
-  ledAnimation;
+  ledAnimation,
+
+  /// Feature to enable or disable file transfer.
+  fileTransfer;
 
   static const _featureStringMap = {
     hr: 'FEATURE_HR',
@@ -45,6 +48,7 @@ enum PolarSdkFeature {
     deviceTimeSetup: 'FEATURE_POLAR_DEVICE_TIME_SETUP',
     sdkMode: 'FEATURE_POLAR_SDK_MODE',
     ledAnimation: 'FEATURE_POLAR_LED_ANIMATION',
+    fileTransfer: 'FEATURE_POLAR_FILE_TRANSFER',
   };
 
   static final _stringFeatureMap =
@@ -55,8 +59,14 @@ enum PolarSdkFeature {
     if (Platform.isIOS) {
       return PolarSdkFeature.values[json as int];
     } else {
-      // This is android
-      return _stringFeatureMap[json as String]!;
+      // This is Android
+      if (json is String && _stringFeatureMap.containsKey(json)) {
+        return _stringFeatureMap[json]!;
+      } else {
+        // Handle the case where json is not a valid key
+        return PolarSdkFeature
+            .offlineRecording; // Default to hr or another appropriate default
+      }
     }
   }
 
@@ -66,7 +76,11 @@ enum PolarSdkFeature {
       return PolarSdkFeature.values.indexOf(this);
     } else {
       // This is Android
-      return _featureStringMap[this]!;
+      if (_featureStringMap.containsKey(this)) {
+        return _featureStringMap[this];
+      } else {
+        return 'FEATURE_POLAR_OFFLINE_RECORDING'; // Default value if the key is not found
+      }
     }
   }
 }
