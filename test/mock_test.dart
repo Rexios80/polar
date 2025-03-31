@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ffi';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -164,6 +165,7 @@ class StreamingHandler extends MockStreamHandler {
         data = PolarPpiData(
           samples: [
             PolarPpiSample(
+              timeStamp: 0,
               ppi: 0,
               errorEstimate: 0,
               hr: 0,
@@ -195,6 +197,8 @@ class StreamingHandler extends MockStreamHandler {
           samples: [
             PolarHrSample(
               hr: 0,
+              ppgQuality: 0,
+              correctedHr: 0,
               rrsMs: [],
               contactStatus: false,
               contactStatusSupported: false,
@@ -216,6 +220,36 @@ class StreamingHandler extends MockStreamHandler {
             PolarPressureSample(
               timeStamp: DateTime.now(),
               pressure: 0,
+            ),
+          ],
+        );
+      case PolarDataType.skinTemperature:
+        data = PolarTemperatureData(
+          samples: [
+            PolarTemperatureSample(
+              timeStamp: DateTime.now(),
+              temperature: 0,
+            ),
+          ],
+        );
+      case PolarDataType.location:
+        data = PolarLocationData(
+          samples: [
+            PolarLocationDataSample(
+              timeStamp: DateTime.now(),
+              latitude: 0,
+              longitude: 0,
+              time: '',
+              speed: 0,
+              cumulativeDistance: 0,
+              usedAccelerationSpeed: 0,
+              coordinateSpeed: 0,
+              accelerationSpeedFactor: 0,
+              course: 0,
+              gpsChipSpeed: 0,
+              fix: true,
+              speedFlag: 0,
+              fusionState: 0,
             ),
           ],
         );

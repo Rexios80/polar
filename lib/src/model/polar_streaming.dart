@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/foundation.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:polar/src/model/convert.dart';
@@ -41,6 +43,8 @@ class PolarStreamingData<T> {
         return _fromJson(json, _$PolarTemperatureSampleFromJson);
       case const (PolarPressureData):
         return _fromJson(json, _$PolarPressureSampleFromJson);
+      case const (PolarLocationData):
+        return _fromJson(json, _$PolarLocationDataSampleFromJson);
       default:
         throw UnsupportedError('Unsupported type: $T');
     }
@@ -68,6 +72,8 @@ class PolarStreamingData<T> {
         return _toJson(_$PolarTemperatureSampleToJson);
       case const (PolarPressureData):
         return _toJson(_$PolarPressureSampleToJson);
+      case const (PolarLocationData):
+        return _toJson(_$PolarLocationDataSampleToJson);
       default:
         throw UnsupportedError('Unsupported type: $T');
     }
@@ -79,6 +85,12 @@ class PolarStreamingData<T> {
 class PolarHrSample {
   /// hr in BPM
   final int hr;
+
+  /// ppgQuality
+  final int ppgQuality;
+
+  /// corrected HR in BPM
+  final int correctedHr;
 
   /// rrs RR interval in ms.
   final List<int> rrsMs;
@@ -92,6 +104,8 @@ class PolarHrSample {
   /// Constructor
   PolarHrSample({
     required this.hr,
+    required this.ppgQuality,
+    required this.correctedHr,
     required this.rrsMs,
     required this.contactStatus,
     required this.contactStatusSupported,
@@ -257,6 +271,9 @@ class PolarPpgData extends PolarStreamingData<PolarPpgSample> {
 /// Polar ppi sample
 @JsonSerializable()
 class PolarPpiSample {
+  /// timestamp
+  final int timeStamp;
+
   /// ppInMs Pulse to Pulse interval in milliseconds.
   /// The value indicates the quality of PP-intervals.
   /// When error estimate is below 10ms the PP-intervals are probably very accurate.
@@ -285,6 +302,7 @@ class PolarPpiSample {
 
   /// Constructor
   PolarPpiSample({
+    required this.timeStamp,
     required this.ppi,
     required this.errorEstimate,
     required this.hr,
@@ -324,7 +342,7 @@ class PolarPressureSample {
   @PolarSampleTimestampConverter()
   final DateTime timeStamp;
 
-  /// pressure value in pascal
+  /// pressure value in bar
   final double pressure;
 
   /// Constructor
@@ -336,6 +354,74 @@ class PolarPressureSample {
 
 /// Polar pressure data
 typedef PolarPressureData = PolarStreamingData<PolarPressureSample>;
+
+/// Polar location sample
+@JsonSerializable()
+class PolarLocationDataSample {
+  /// moment sample is taken in nanoseconds. The epoch of timestamp is 1.1.2000
+  @PolarSampleTimestampConverter()
+  final DateTime timeStamp;
+
+  /// lat value
+  final double latitude;
+
+  /// long value
+  final double longitude;
+
+  /// time in format "yyyy-MM-dd'T'HH:mm:ss.SSS"
+  final String time;
+
+  /// cumulative distance in dm
+  final double cumulativeDistance;
+
+  /// speed in km/h
+  final double speed;
+
+  /// used acceleration speed
+  final double usedAccelerationSpeed;
+
+  /// coordinate speed
+  final double coordinateSpeed;
+
+  /// acceleration speed factor
+  final double accelerationSpeedFactor;
+
+  /// course in degrees
+  final double course;
+
+  /// speed in knots
+  final double gpsChipSpeed;
+
+  /// fix
+  final bool fix;
+
+  /// speed flag
+  final int speedFlag;
+
+  /// fusion state
+  final int fusionState;
+
+  /// Constructor
+  PolarLocationDataSample({
+    required this.timeStamp,
+    required this.latitude,
+    required this.longitude,
+    required this.time,
+    required this.cumulativeDistance,
+    required this.speed,
+    required this.usedAccelerationSpeed,
+    required this.coordinateSpeed,
+    required this.accelerationSpeedFactor,
+    required this.course,
+    required this.gpsChipSpeed,
+    required this.fix,
+    required this.speedFlag,
+    required this.fusionState,
+  });
+}
+
+/// Polar skin temperature data
+typedef PolarLocationData = PolarStreamingData<PolarLocationDataSample>;
 
 Object? _readErrorEstimate(Map json, String key) => readPlatformValue(
       json,

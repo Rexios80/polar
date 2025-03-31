@@ -27,6 +27,8 @@ Map<String, dynamic> _$PolarStreamingDataToJson<T>(
 PolarHrSample _$PolarHrSampleFromJson(Map<String, dynamic> json) =>
     PolarHrSample(
       hr: (json['hr'] as num).toInt(),
+      ppgQuality: (json['ppgQuality'] as num).toInt(),
+      correctedHr: (json['correctedHr'] as num).toInt(),
       rrsMs: (json['rrsMs'] as List<dynamic>)
           .map((e) => (e as num).toInt())
           .toList(),
@@ -37,6 +39,8 @@ PolarHrSample _$PolarHrSampleFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$PolarHrSampleToJson(PolarHrSample instance) =>
     <String, dynamic>{
       'hr': instance.hr,
+      'ppgQuality': instance.ppgQuality,
+      'correctedHr': instance.correctedHr,
       'rrsMs': instance.rrsMs,
       'contactStatus': instance.contactStatus,
       'contactStatusSupported': instance.contactStatusSupported,
@@ -143,6 +147,7 @@ Map<String, dynamic> _$PolarPpgDataToJson(PolarPpgData instance) =>
 
 PolarPpiSample _$PolarPpiSampleFromJson(Map<String, dynamic> json) =>
     PolarPpiSample(
+      timeStamp: (json['timeStamp'] as num).toInt(),
       ppi: (_readPpi(json, 'ppi') as num).toInt(),
       errorEstimate: (_readErrorEstimate(json, 'errorEstimate') as num).toInt(),
       hr: (json['hr'] as num).toInt(),
@@ -155,6 +160,7 @@ PolarPpiSample _$PolarPpiSampleFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$PolarPpiSampleToJson(PolarPpiSample instance) =>
     <String, dynamic>{
+      'timeStamp': instance.timeStamp,
       'ppi': instance.ppi,
       'errorEstimate': instance.errorEstimate,
       'hr': instance.hr,
@@ -195,4 +201,45 @@ Map<String, dynamic> _$PolarPressureSampleToJson(
       'timeStamp':
           const PolarSampleTimestampConverter().toJson(instance.timeStamp),
       'pressure': instance.pressure,
+    };
+
+PolarLocationDataSample _$PolarLocationDataSampleFromJson(
+        Map<String, dynamic> json) =>
+    PolarLocationDataSample(
+      timeStamp: const PolarSampleTimestampConverter()
+          .fromJson((json['timeStamp'] as num).toInt()),
+      latitude: (json['latitude'] as num).toDouble(),
+      longitude: (json['longitude'] as num).toDouble(),
+      time: json['time'] as String,
+      cumulativeDistance: (json['cumulativeDistance'] as num).toDouble(),
+      speed: (json['speed'] as num).toDouble(),
+      usedAccelerationSpeed: (json['usedAccelerationSpeed'] as num).toDouble(),
+      coordinateSpeed: (json['coordinateSpeed'] as num).toDouble(),
+      accelerationSpeedFactor:
+          (json['accelerationSpeedFactor'] as num).toDouble(),
+      course: (json['course'] as num).toDouble(),
+      gpsChipSpeed: (json['gpsChipSpeed'] as num).toDouble(),
+      fix: json['fix'] as bool,
+      speedFlag: (json['speedFlag'] as num).toInt(),
+      fusionState: (json['fusionState'] as num).toInt(),
+    );
+
+Map<String, dynamic> _$PolarLocationDataSampleToJson(
+        PolarLocationDataSample instance) =>
+    <String, dynamic>{
+      'timeStamp':
+          const PolarSampleTimestampConverter().toJson(instance.timeStamp),
+      'latitude': instance.latitude,
+      'longitude': instance.longitude,
+      'time': instance.time,
+      'cumulativeDistance': instance.cumulativeDistance,
+      'speed': instance.speed,
+      'usedAccelerationSpeed': instance.usedAccelerationSpeed,
+      'coordinateSpeed': instance.coordinateSpeed,
+      'accelerationSpeedFactor': instance.accelerationSpeedFactor,
+      'course': instance.course,
+      'gpsChipSpeed': instance.gpsChipSpeed,
+      'fix': instance.fix,
+      'speedFlag': instance.speedFlag,
+      'fusionState': instance.fusionState,
     };
