@@ -27,7 +27,7 @@ void main() async {
       PolarDataType.hr,
       PolarDataType.acc,
       PolarDataType.ppi,
-      PolarDataType.skinTemperature
+      PolarDataType.skinTemperature,
     },
   );
   testSdkMode(identifier);
