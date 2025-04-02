@@ -31,5 +31,5 @@ void main() async {
     },
   );
   testSdkMode(identifier);
-  testMisc(identifier, isVerity: true);
+  testMisc(identifier, supportsLedConfig: true);
 }
