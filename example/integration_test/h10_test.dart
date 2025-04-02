@@ -29,5 +29,5 @@ void main() async {
     },
   );
   testRecording(identifier);
-  testMisc(identifier, isVerity: false);
+  testMisc(identifier, supportsLedConfig: false);
 }

@@ -37,7 +37,7 @@ void main() {
   testStreaming(identifier, features: PolarDataType.values.toSet());
   testRecording(identifier, wait: false);
   testSdkMode(identifier);
-  testMisc(identifier, isVerity: true);
+  testMisc(identifier, supportsLedConfig: true);
 }
 
 Future<void> invoke(String method, [dynamic arguments]) {

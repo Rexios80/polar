@@ -243,12 +243,12 @@ void testSdkMode(String identifier) {
   });
 }
 
-void testMisc(String identifier, {required bool isVerity}) {
+void testMisc(String identifier, {required bool supportsLedConfig}) {
   test('misc', () async {
     await connect(identifier);
     // Wait to ensure device is connected (not sure why this is necessary)
     await Future.delayed(const Duration(seconds: 3));
-    if (isVerity) {
+    if (supportsLedConfig) {
       await polar.setLedConfig(
         identifier,
         LedConfig(ppiModeLedEnabled: false, sdkModeLedEnabled: false),
