@@ -442,6 +442,12 @@ public class SwiftPolarPlugin:
     invokeMethod("batteryLevelReceived", arguments: [identifier, batteryLevel])
   }
 
+  public func batteryChargingStatusReceived(
+    _ identifier: String, chargingStatus: BleBasClient.ChargeState
+  ) {
+    invokeMethod("batteryChargingStatusReceived", arguments: [identifier, chargingStatus])
+  }
+
   public func blePowerOn() {
     invokeMethod("blePowerStateChanged", arguments: true)
   }

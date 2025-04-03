@@ -46,7 +46,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   device_info_plus: 21fcca2080fbcd348be798aa36c3e5ed849eefbe
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  integration_test: d5929033778cc4991a187e4e1a85396fa4f59b3a
+  integration_test: 4a889634ef21a45d28d50d622cf412dc6d9f586e
   permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
   polar: 8de29670ee05a88f92d72a2a0e06c109feeba7ef
   PolarBleSdk: 44d260bdc73676ec948d0ee7a87443119b71c23b
