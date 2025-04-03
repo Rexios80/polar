@@ -569,6 +569,13 @@ class PolarWrapper(
         invoke("batteryLevelReceived", listOf(identifier, level))
     }
 
+    override fun batteryChargingStatusReceived(
+        identifier: String,
+        chargingStatus: ChargeState,
+    ) {
+        invoke("batteryChargingStatusReceived", listOf(identifier, chargingStatus))
+    }
+
     override fun htsNotificationReceived(
         identifier: String,
         data: PolarHealthThermometerData, 

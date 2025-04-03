@@ -25,6 +25,8 @@ class Polar {
   final _disInformation =
       StreamController<PolarDisInformationEvent>.broadcast();
   final _batteryLevel = StreamController<PolarBatteryLevelEvent>.broadcast();
+  final _batteryChargingStatus =
+      StreamController<PolarBatteryChargingStatusEvent>.broadcast();
 
   /// helper to ask ble power state
   Stream<bool> get blePowerState => _blePowerState.stream;
@@ -63,6 +65,10 @@ class Polar {
   ///   - identifier: Polar device id
   ///   - batteryLevel: battery level in precentage 0-100%
   Stream<PolarBatteryLevelEvent> get batteryLevel => _batteryLevel.stream;
+
+  /// Battery charging status received from device.
+  Stream<PolarBatteryChargingStatusEvent> get batteryChargingStatus =>
+      _batteryChargingStatus.stream;
 
   /// Will request location permission on Android S+ if false
   final bool _bluetoothScanNeverForLocation;
@@ -120,6 +126,14 @@ class Polar {
       case 'batteryLevelReceived':
         _batteryLevel.add(
           PolarBatteryLevelEvent(
+            call.arguments[0],
+            call.arguments[1],
+          ),
+        );
+        return;
+      case 'batteryChargingStatusReceived':
+        _batteryChargingStatus.add(
+          PolarBatteryChargingStatusEvent(
             call.arguments[0],
             call.arguments[1],
           ),
