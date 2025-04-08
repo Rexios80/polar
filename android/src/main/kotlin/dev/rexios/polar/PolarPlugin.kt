@@ -23,6 +23,7 @@ import com.polar.sdk.api.PolarH10OfflineExerciseApi.SampleType
 import com.polar.sdk.api.model.LedConfig
 import com.polar.sdk.api.model.PolarDeviceInfo
 import com.polar.sdk.api.model.PolarExerciseEntry
+import com.polar.sdk.api.model.PolarHealthThermometerData
 import com.polar.sdk.api.model.PolarHrData
 import com.polar.sdk.api.model.PolarSensorSetting
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -575,8 +576,17 @@ class PolarWrapper(
         success("batteryLevelReceived", listOf(identifier, level))
     }
 
-    @Deprecated("", replaceWith = ReplaceWith(""))
-    override fun hrFeatureReady(identifier: String) {
+    override fun batteryChargingStatusReceived(
+        identifier: String,
+        chargingStatus: ChargeState,
+    ) {
+        success("batteryChargingStatusReceived", listOf(identifier, chargingStatus))
+    }
+
+    override fun htsNotificationReceived(
+        identifier: String,
+        data: PolarHealthThermometerData,
+    ) {
         // Do nothing
     }
 
@@ -584,24 +594,6 @@ class PolarWrapper(
     override fun hrNotificationReceived(
         identifier: String,
         data: PolarHrData.PolarHrSample,
-    ) {
-        // Do nothing
-    }
-
-    @Deprecated("", replaceWith = ReplaceWith(""))
-    override fun polarFtpFeatureReady(identifier: String) {
-        // Do nothing
-    }
-
-    @Deprecated("", replaceWith = ReplaceWith(""))
-    override fun sdkModeFeatureAvailable(identifier: String) {
-        // Do nothing
-    }
-
-    @Deprecated("", replaceWith = ReplaceWith(""))
-    override fun streamingFeaturesReady(
-        identifier: String,
-        features: Set<PolarDeviceDataType>,
     ) {
         // Do nothing
     }
@@ -647,6 +639,9 @@ class StreamingChannel(
                         identifier,
                         settings,
                     )
+                PolarDeviceDataType.PRESSURE -> api.startPressureStreaming(identifier, settings)
+                PolarDeviceDataType.SKIN_TEMPERATURE -> api.startSkinTemperatureStreaming(identifier, settings)
+                PolarDeviceDataType.LOCATION -> api.startLocationStreaming(identifier, settings)
             }
 
         subscription =
