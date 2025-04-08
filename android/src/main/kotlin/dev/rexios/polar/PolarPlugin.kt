@@ -23,9 +23,9 @@ import com.polar.sdk.api.PolarH10OfflineExerciseApi.SampleType
 import com.polar.sdk.api.model.LedConfig
 import com.polar.sdk.api.model.PolarDeviceInfo
 import com.polar.sdk.api.model.PolarExerciseEntry
+import com.polar.sdk.api.model.PolarHealthThermometerData
 import com.polar.sdk.api.model.PolarHrData
 import com.polar.sdk.api.model.PolarSensorSetting
-import com.polar.sdk.api.model.PolarHealthThermometerData
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -585,9 +585,9 @@ class PolarWrapper(
 
     override fun htsNotificationReceived(
         identifier: String,
-        data: PolarHealthThermometerData, 
+        data: PolarHealthThermometerData,
     ) {
-       // Do nothing
+        // Do nothing
     }
 
     @Deprecated("", replaceWith = ReplaceWith(""))
