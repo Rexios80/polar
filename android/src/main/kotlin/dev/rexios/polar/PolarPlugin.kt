@@ -72,12 +72,16 @@ private val wrapper: PolarWrapper
 class PolarPlugin :
     FlutterPlugin,
     MethodCallHandler,
+    EventChannel.StreamHandler,
     ActivityAware {
     // Binary messenger for dynamic EventChannel registration
     private lateinit var messenger: BinaryMessenger
 
     // Method channel
-    private lateinit var channel: MethodChannel
+    private lateinit var methodChannel: MethodChannel
+
+    // Event channel
+    private lateinit var eventChannel: EventChannel
 
     // Search channel
     private lateinit var searchChannel: EventChannel
@@ -88,24 +92,14 @@ class PolarPlugin :
     // Streaming channels
     private val streamingChannels = mutableMapOf<String, StreamingChannel>()
 
-    // Apparently you have to call invokeMethod on the UI thread
-    private fun invokeOnUiThread(
-        method: String,
-        arguments: Any?,
-        callback: Result? = null,
-    ) {
-        runOnUiThread { channel.invokeMethod(method, arguments, callback) }
-    }
-
-    private val polarCallback = { method: String, arguments: Any? ->
-        invokeOnUiThread(method, arguments)
-    }
-
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         messenger = flutterPluginBinding.binaryMessenger
 
-        channel = MethodChannel(flutterPluginBinding.binaryMessenger, "polar")
-        channel.setMethodCallHandler(this)
+        methodChannel = MethodChannel(flutterPluginBinding.binaryMessenger, "polar/methods")
+        methodChannel.setMethodCallHandler(this)
+
+        eventChannel = EventChannel(flutterPluginBinding.binaryMessenger, "polar/events")
+        eventChannel.setStreamHandler(this)
 
         searchChannel = EventChannel(flutterPluginBinding.binaryMessenger, "polar/search")
         searchChannel.setStreamHandler(searchHandler)
@@ -114,7 +108,8 @@ class PolarPlugin :
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
-        channel.setMethodCallHandler(null)
+        methodChannel.setMethodCallHandler(null)
+        eventChannel.setStreamHandler(null)
         searchChannel.setStreamHandler(null)
         streamingChannels.values.forEach { it.dispose() }
         shutDown()
@@ -124,7 +119,6 @@ class PolarPlugin :
         if (wrapperInternal == null) {
             wrapperInternal = PolarWrapper(context)
         }
-        wrapper.addCallback(polarCallback)
     }
 
     override fun onMethodCall(
@@ -160,6 +154,18 @@ class PolarPlugin :
             "isSdkModeEnabled" -> isSdkModeEnabled(call, result)
             else -> result.notImplemented()
         }
+    }
+
+    override fun onListen(
+        arguments: Any?,
+        events: EventSink,
+    ) {
+        initApi()
+        wrapper.addSink(arguments as Int, events)
+    }
+
+    override fun onCancel(arguments: Any?) {
+        wrapper.removeSink(arguments as Int)
     }
 
     private val searchHandler =
@@ -227,7 +233,6 @@ class PolarPlugin :
 
     private fun shutDown() {
         if (wrapperInternal == null) return
-        wrapper.removeCallback(polarCallback)
         wrapper.shutDown()
     }
 
@@ -487,31 +492,33 @@ class PolarWrapper(
             context,
             PolarBleSdkFeature.values().toSet(),
         ),
-    private val callbacks: MutableSet<(String, Any?) -> Unit> = mutableSetOf(),
+    private val sinks: MutableMap<Int, EventSink> = mutableMapOf(),
 ) : PolarBleApiCallbackProvider {
     init {
         api.setApiCallback(this)
     }
 
-    fun addCallback(callback: (String, Any?) -> Unit) {
-        if (callbacks.contains(callback)) return
-        callbacks.add(callback)
-    }
-
-    fun removeCallback(callback: (String, Any?) -> Unit) {
-        callbacks.remove(callback)
-    }
-
-    private fun invoke(
-        method: String,
-        arguments: Any?,
+    fun addSink(
+        id: Int,
+        sink: EventSink,
     ) {
-        callbacks.forEach { it(method, arguments) }
+        sinks[id] = sink
+    }
+
+    fun removeSink(id: Int) {
+        sinks.remove(id)
+    }
+
+    private fun success(
+        event: String,
+        data: Any?,
+    ) {
+        runOnUiThread { sinks.values.forEach { it.success(mapOf("event" to event, "data" to data)) } }
     }
 
     fun shutDown() {
         // Do not shutdown the api if other engines are still using it
-        if (callbacks.isNotEmpty()) return
+        if (sinks.isNotEmpty()) return
         try {
             api.shutDown()
         } catch (e: Exception) {
@@ -520,26 +527,26 @@ class PolarWrapper(
     }
 
     override fun blePowerStateChanged(powered: Boolean) {
-        invoke("blePowerStateChanged", powered)
+        success("blePowerStateChanged", powered)
     }
 
     override fun bleSdkFeatureReady(
         identifier: String,
         feature: PolarBleSdkFeature,
     ) {
-        invoke("sdkFeatureReady", listOf(identifier, feature.name))
+        success("sdkFeatureReady", listOf(identifier, feature.name))
     }
 
     override fun deviceConnected(polarDeviceInfo: PolarDeviceInfo) {
-        invoke("deviceConnected", gson.toJson(polarDeviceInfo))
+        success("deviceConnected", gson.toJson(polarDeviceInfo))
     }
 
     override fun deviceConnecting(polarDeviceInfo: PolarDeviceInfo) {
-        invoke("deviceConnecting", gson.toJson(polarDeviceInfo))
+        success("deviceConnecting", gson.toJson(polarDeviceInfo))
     }
 
     override fun deviceDisconnected(polarDeviceInfo: PolarDeviceInfo) {
-        invoke(
+        success(
             "deviceDisconnected",
             // The second argument is the `pairingError` field on iOS
             // Since Android doesn't implement that, always send false
@@ -552,28 +559,28 @@ class PolarWrapper(
         uuid: UUID,
         value: String,
     ) {
-        invoke("disInformationReceived", listOf(identifier, uuid.toString(), value))
+        success("disInformationReceived", listOf(identifier, uuid.toString(), value))
     }
 
     override fun disInformationReceived(
         identifier: String,
         disInfo: DisInfo,
     ) {
-        invoke("disInformationReceived", listOf(identifier, disInfo.key, disInfo.value))
+        success("disInformationReceived", listOf(identifier, disInfo.key, disInfo.value))
     }
 
     override fun batteryLevelReceived(
         identifier: String,
         level: Int,
     ) {
-        invoke("batteryLevelReceived", listOf(identifier, level))
+        success("batteryLevelReceived", listOf(identifier, level))
     }
 
     override fun batteryChargingStatusReceived(
         identifier: String,
         chargingStatus: ChargeState,
     ) {
-        invoke("batteryChargingStatusReceived", listOf(identifier, chargingStatus))
+        success("batteryChargingStatusReceived", listOf(identifier, chargingStatus))
     }
 
     override fun htsNotificationReceived(
