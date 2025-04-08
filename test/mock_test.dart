@@ -66,6 +66,10 @@ Future<dynamic> handleMethodCall(MethodCall call) async {
         await invoke('deviceConnected', info);
         await invoke('disInformationReceived', [identifier, '', '']);
         await invoke('batteryLevelReceived', [identifier, 100]);
+        await invoke('batteryChargingStatusReceived', [
+          identifier,
+          jsonEncode(PolarChargeState.dischargingActive.toJson()),
+        ]);
         for (final feature in PolarSdkFeature.values) {
           await invoke('sdkFeatureReady', [identifier, feature.toJson()]);
         }

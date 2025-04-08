@@ -135,7 +135,7 @@ class Polar {
         _batteryChargingStatus.add(
           PolarBatteryChargingStatusEvent(
             call.arguments[0],
-            call.arguments[1],
+            PolarChargeState.fromJson(jsonDecode(call.arguments[1])),
           ),
         );
         return;

@@ -71,7 +71,10 @@ void testBasicData(String identifier) {
 
     test('batteryChargingStatus', () async {
       final chargeState = await polar.batteryChargingStatus.first;
-      expect(chargeState, PolarChargeState.dischargingActive);
+      expect(
+        chargeState.chargingStatus,
+        PolarChargeState.dischargingActive,
+      );
     });
   });
 }
