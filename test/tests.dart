@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:polar/polar.dart';
+import 'package:polar/src/model/polar_charge_state.dart';
 import 'package:uuid/uuid.dart';
 
 final polar = Polar();
@@ -67,6 +68,11 @@ void testBasicData(String identifier) {
     test('batteryLevel', () async {
       final batteryEvent = await polar.batteryLevel.first;
       expect(batteryEvent.level, greaterThan(0));
+    });
+
+    test('batteryChargingStatus', () async {
+      final chargeState = await polar.batteryChargingStatus.first;
+      expect(chargeState, PolarChargeState.dischargingActive);
     });
   });
 }
