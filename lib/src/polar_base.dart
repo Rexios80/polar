@@ -99,7 +99,7 @@ class Polar {
           .map(
             (e) => PolarBatteryChargingStatusEvent(
               e.data[0],
-              PolarChargeState.fromJson(jsonDecode(e.data[1])),
+              PolarChargeState.fromJson(e.data[1]),
             ),
           );
 

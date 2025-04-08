@@ -120,7 +120,7 @@ class EventHandler extends MockStreamHandler {
       'event': 'batteryChargingStatusReceived',
       'data': [
         identifier,
-        jsonEncode(PolarChargeState.dischargingActive.toJson()),
+        PolarChargeState.dischargingActive.toJson(),
       ],
     });
     for (final feature in PolarSdkFeature.values) {
