@@ -34,7 +34,7 @@ enum PolarChargeState {
     }
   }
 
-  /// Convert a [PolarSdkFeature] to json
+  /// Convert a [PolarChargeState] to json
   dynamic toJson() {
     if (Platform.isIOS) {
       return PolarChargeState.values.indexOf(this);
