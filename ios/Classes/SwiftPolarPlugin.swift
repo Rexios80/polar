@@ -20,6 +20,7 @@ private func jsonEncode(_ value: Encodable) -> String? {
 public class SwiftPolarPlugin:
   NSObject,
   FlutterPlugin,
+  FlutterStreamHandler,
   PolarBleApiObserver,
   PolarBleApiPowerStateObserver,
   PolarBleApiDeviceFeaturesObserver,
@@ -29,7 +30,10 @@ public class SwiftPolarPlugin:
   let messenger: FlutterBinaryMessenger
 
   /// Method channel
-  let channel: FlutterMethodChannel
+  let methodChannel: FlutterMethodChannel
+
+  /// Event channel
+  let eventChannel: FlutterEventChannel
 
   /// Search channel
   let searchChannel: FlutterEventChannel
@@ -38,14 +42,17 @@ public class SwiftPolarPlugin:
   var streamingChannels = [String: StreamingChannel]()
 
   var api: PolarBleApi!
+  var events: FlutterEventSink?
 
   init(
     messenger: FlutterBinaryMessenger,
-    channel: FlutterMethodChannel,
+    methodChannel: FlutterMethodChannel,
+    eventChannel: FlutterEventChannel,
     searchChannel: FlutterEventChannel
   ) {
     self.messenger = messenger
-    self.channel = channel
+    self.methodChannel = methodChannel
+    self.eventChannel = eventChannel
     self.searchChannel = searchChannel
   }
 
@@ -61,17 +68,21 @@ public class SwiftPolarPlugin:
   }
 
   public static func register(with registrar: FlutterPluginRegistrar) {
-    let channel = FlutterMethodChannel(name: "polar", binaryMessenger: registrar.messenger())
+    let methodChannel = FlutterMethodChannel(
+      name: "polar/methods", binaryMessenger: registrar.messenger())
+    let eventChannel = FlutterEventChannel(
+      name: "polar/events", binaryMessenger: registrar.messenger())
     let searchChannel = FlutterEventChannel(
       name: "polar/search", binaryMessenger: registrar.messenger())
 
     let instance = SwiftPolarPlugin(
       messenger: registrar.messenger(),
-      channel: channel,
-      searchChannel: searchChannel
-    )
+      methodChannel: methodChannel,
+      eventChannel: eventChannel,
+      searchChannel: searchChannel)
 
-    registrar.addMethodCallDelegate(instance, channel: channel)
+    registrar.addMethodCallDelegate(instance, channel: methodChannel)
+    eventChannel.setStreamHandler(instance)
     searchChannel.setStreamHandler(instance.searchHandler)
   }
 
@@ -121,6 +132,19 @@ public class SwiftPolarPlugin:
         FlutterError(
           code: "Error in Polar plugin", message: error.localizedDescription, details: nil))
     }
+  }
+
+  public func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink)
+    -> FlutterError?
+  {
+    initApi()
+    self.events = events
+    return nil
+  }
+
+  public func onCancel(withArguments arguments: Any?) -> FlutterError? {
+    events = nil
+    return nil
   }
 
   var searchSubscription: Disposable?
@@ -285,8 +309,7 @@ public class SwiftPolarPlugin:
       },
       onCompleted: {
         result(exercises)
-      }
-    )
+      })
   }
 
   func fetchExercise(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
@@ -408,9 +431,9 @@ public class SwiftPolarPlugin:
       })
   }
 
-  private func invokeMethod(_ methodName: String, arguments: Any? = nil) {
+  private func success(_ event: String, data: Any? = nil) {
     DispatchQueue.main.async {
-      self.channel.invokeMethod(methodName, arguments: arguments)
+      self.events?(["event": event, "data": data])
     }
   }
 
@@ -419,7 +442,7 @@ public class SwiftPolarPlugin:
     else {
       return
     }
-    invokeMethod("deviceConnecting", arguments: data)
+    success("deviceConnecting", data: data)
   }
 
   public func deviceConnected(_ polarDeviceInfo: PolarDeviceInfo) {
@@ -427,7 +450,7 @@ public class SwiftPolarPlugin:
     else {
       return
     }
-    invokeMethod("deviceConnected", arguments: data)
+    success("deviceConnected", data: data)
   }
 
   public func deviceDisconnected(_ polarDeviceInfo: PolarDeviceInfo, pairingError: Bool) {
@@ -435,45 +458,45 @@ public class SwiftPolarPlugin:
     else {
       return
     }
-    invokeMethod("deviceDisconnected", arguments: [data, pairingError])
+    success("deviceDisconnected", data: [data, pairingError])
   }
 
   public func batteryLevelReceived(_ identifier: String, batteryLevel: UInt) {
-    invokeMethod("batteryLevelReceived", arguments: [identifier, batteryLevel])
+    success("batteryLevelReceived", data: [identifier, batteryLevel])
   }
 
   public func batteryChargingStatusReceived(
     _ identifier: String, chargingStatus: BleBasClient.ChargeState
   ) {
-    invokeMethod("batteryChargingStatusReceived", arguments: [identifier, chargingStatus])
+    success("batteryChargingStatusReceived", data: [identifier, chargingStatus])
   }
 
   public func blePowerOn() {
-    invokeMethod("blePowerStateChanged", arguments: true)
+    success("blePowerStateChanged", data: true)
   }
 
   public func blePowerOff() {
-    invokeMethod("blePowerStateChanged", arguments: false)
+    success("blePowerStateChanged", data: false)
   }
 
   public func bleSdkFeatureReady(_ identifier: String, feature: PolarBleSdkFeature) {
-    invokeMethod(
+    success(
       "sdkFeatureReady",
-      arguments: [
+      data: [
         identifier,
         PolarBleSdkFeature.allCases.firstIndex(of: feature)!,
       ])
   }
 
   public func disInformationReceived(_ identifier: String, uuid: CBUUID, value: String) {
-    invokeMethod(
-      "disInformationReceived", arguments: [identifier, uuid.uuidString, value])
+    success(
+      "disInformationReceived", data: [identifier, uuid.uuidString, value])
   }
 
   public func disInformationReceivedWithKeysAsStrings(
     _ identifier: String, key: String, value: String
   ) {
-    channel.invokeMethod("disInformationReceived", arguments: [identifier, key, value])
+    success("disInformationReceived", data: [identifier, key, value])
   }
 
   // MARK: Deprecated functions

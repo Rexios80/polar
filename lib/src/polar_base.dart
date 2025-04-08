@@ -6,76 +6,20 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:polar/polar.dart';
+import 'package:polar/src/model/polar_event_wrapper.dart';
 
 /// Flutter implementation of the [PolarBleSdk]
 class Polar {
-  static const _channel = MethodChannel('polar');
+  static const _methodChannel = MethodChannel('polar/methods');
+  static const _eventChannel = EventChannel('polar/events');
   static const _searchChannel = EventChannel('polar/search');
 
   static Polar? _instance;
 
-  // Other data
-  final _blePowerState = StreamController<bool>.broadcast();
-  final _sdkFeatureReady =
-      StreamController<PolarSdkFeatureReadyEvent>.broadcast();
-  final _deviceConnected = StreamController<PolarDeviceInfo>.broadcast();
-  final _deviceConnecting = StreamController<PolarDeviceInfo>.broadcast();
-  final _deviceDisconnected =
-      StreamController<PolarDeviceDisconnectedEvent>.broadcast();
-  final _disInformation =
-      StreamController<PolarDisInformationEvent>.broadcast();
-  final _batteryLevel = StreamController<PolarBatteryLevelEvent>.broadcast();
-  final _batteryChargingStatus =
-      StreamController<PolarBatteryChargingStatusEvent>.broadcast();
-
-  /// helper to ask ble power state
-  Stream<bool> get blePowerState => _blePowerState.stream;
-
-  /// feature ready callback
-  Stream<PolarSdkFeatureReadyEvent> get sdkFeatureReady =>
-      _sdkFeatureReady.stream;
-
-  /// Device connection has been established.
-  ///
-  /// - Parameter identifier: Polar device info
-  Stream<PolarDeviceInfo> get deviceConnected => _deviceConnected.stream;
-
-  /// Callback when connection attempt is started to device
-  ///
-  /// - Parameter identifier: Polar device info
-  Stream<PolarDeviceInfo> get deviceConnecting => _deviceConnecting.stream;
-
-  /// Connection lost to device.
-  /// If PolarBleApi#disconnectFromPolarDevice is not called, a new connection attempt is dispatched automatically.
-  ///
-  /// - Parameter identifier: Polar device info
-  Stream<PolarDeviceDisconnectedEvent> get deviceDisconnected =>
-      _deviceDisconnected.stream;
-
-  ///  Received DIS info.
-  ///
-  /// - Parameters:
-  ///   - identifier: Polar device id
-  ///   - fwVersion: firmware version in format major.minor.patch
-  Stream<PolarDisInformationEvent> get disInformation => _disInformation.stream;
-
-  /// Battery level received from device.
-  ///
-  /// - Parameters:
-  ///   - identifier: Polar device id
-  ///   - batteryLevel: battery level in precentage 0-100%
-  Stream<PolarBatteryLevelEvent> get batteryLevel => _batteryLevel.stream;
-
-  /// Battery charging status received from device.
-  Stream<PolarBatteryChargingStatusEvent> get batteryChargingStatus =>
-      _batteryChargingStatus.stream;
-
   /// Will request location permission on Android S+ if false
   final bool _bluetoothScanNeverForLocation;
 
-  Polar._(this._bluetoothScanNeverForLocation) {
-    _channel.setMethodCallHandler(_handleMethodCall);
-  }
+  Polar._(this._bluetoothScanNeverForLocation);
 
   /// Initialize the Polar API. Returns a singleton.
   ///
@@ -85,64 +29,74 @@ class Polar {
   factory Polar({bool bluetoothScanNeverForLocation = true}) =>
       _instance ??= Polar._(bluetoothScanNeverForLocation);
 
-  Future<void> _handleMethodCall(MethodCall call) async {
-    switch (call.method) {
-      case 'blePowerStateChanged':
-        _blePowerState.add(call.arguments);
-        return;
-      case 'sdkFeatureReady':
-        _sdkFeatureReady.add(
-          PolarSdkFeatureReadyEvent(
-            call.arguments[0],
-            PolarSdkFeature.fromJson(call.arguments[1]),
-          ),
-        );
-        return;
-      case 'deviceConnected':
-        _deviceConnected
-            .add(PolarDeviceInfo.fromJson(jsonDecode(call.arguments)));
-        return;
-      case 'deviceConnecting':
-        _deviceConnecting
-            .add(PolarDeviceInfo.fromJson(jsonDecode(call.arguments)));
-        return;
-      case 'deviceDisconnected':
-        _deviceDisconnected.add(
-          PolarDeviceDisconnectedEvent(
-            PolarDeviceInfo.fromJson(jsonDecode(call.arguments[0])),
-            call.arguments[1],
-          ),
-        );
-        return;
-      case 'disInformationReceived':
-        _disInformation.add(
-          PolarDisInformationEvent(
-            call.arguments[0],
-            call.arguments[1],
-            call.arguments[2],
-          ),
-        );
-        return;
-      case 'batteryLevelReceived':
-        _batteryLevel.add(
-          PolarBatteryLevelEvent(
-            call.arguments[0],
-            call.arguments[1],
-          ),
-        );
-        return;
-      case 'batteryChargingStatusReceived':
-        _batteryChargingStatus.add(
-          PolarBatteryChargingStatusEvent(
-            call.arguments[0],
-            PolarChargeState.fromJson(jsonDecode(call.arguments[1])),
-          ),
-        );
-        return;
-      default:
-        throw UnimplementedError(call.method);
-    }
-  }
+  late final _eventStream = _eventChannel
+      .receiveBroadcastStream(identityHashCode(this))
+      .map((e) => (e as Map).cast<String, dynamic>())
+      .map(PolarEventWrapper.fromJson);
+
+  /// helper to ask ble power state
+  Stream<bool> get blePowerState => _eventStream
+      .where((e) => e.event == PolarEvent.blePowerStateChanged)
+      .map((e) => e.data);
+
+  /// feature ready callback
+  Stream<PolarSdkFeatureReadyEvent> get sdkFeatureReady =>
+      _eventStream.where((e) => e.event == PolarEvent.sdkFeatureReady).map(
+            (e) => PolarSdkFeatureReadyEvent(
+              e.data[0],
+              PolarSdkFeature.fromJson(e.data[1]),
+            ),
+          );
+
+  /// Device connection has been established.
+  ///
+  /// - Parameter identifier: Polar device info
+  Stream<PolarDeviceInfo> get deviceConnected => _eventStream
+      .where((e) => e.event == PolarEvent.deviceConnected)
+      .map((e) => PolarDeviceInfo.fromJson(jsonDecode(e.data)));
+
+  /// Callback when connection attempt is started to device
+  ///
+  /// - Parameter identifier: Polar device info
+  Stream<PolarDeviceInfo> get deviceConnecting => _eventStream
+      .where((e) => e.event == PolarEvent.deviceConnecting)
+      .map((e) => PolarDeviceInfo.fromJson(jsonDecode(e.data)));
+
+  /// Connection lost to device.
+  /// If PolarBleApi#disconnectFromPolarDevice is not called, a new connection attempt is dispatched automatically.
+  ///
+  /// - Parameter identifier: Polar device info
+  Stream<PolarDeviceDisconnectedEvent> get deviceDisconnected =>
+      _eventStream.where((e) => e.event == PolarEvent.deviceDisconnected).map(
+            (e) => PolarDeviceDisconnectedEvent(
+              PolarDeviceInfo.fromJson(jsonDecode(e.data[0])),
+              e.data[1],
+            ),
+          );
+
+  ///  Received DIS info.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id
+  ///   - fwVersion: firmware version in format major.minor.patch
+  Stream<PolarDisInformationEvent> get disInformation => _eventStream
+      .where((e) => e.event == PolarEvent.disInformationReceived)
+      .map((e) => PolarDisInformationEvent(e.data[0], e.data[1], e.data[2]));
+
+  /// Battery level received from device.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id
+  ///   - batteryLevel: battery level in precentage 0-100%
+  Stream<PolarBatteryLevelEvent> get batteryLevel => _eventStream
+      .where((e) => e.event == PolarEvent.batteryLevelReceived)
+      .map((e) => PolarBatteryLevelEvent(e.data[0], e.data[1]));
+
+  /// Battery charging status received from device.
+  Stream<PolarBatteryChargingStatusEvent> get batteryChargingStatus =>
+      _eventStream
+          .where((e) => e.event == PolarEvent.batteryChargingStatusReceived)
+          .map((e) => PolarBatteryChargingStatusEvent(e.data[0], e.data[1]));
 
   /// Start searching for Polar device(s)
   ///
@@ -168,7 +122,7 @@ class Polar {
       await this.requestPermissions();
     }
 
-    unawaited(_channel.invokeMethod('connectToDevice', identifier));
+    unawaited(_methodChannel.invokeMethod('connectToDevice', identifier));
   }
 
   /// Request the necessary permissions on Android
@@ -197,7 +151,7 @@ class Polar {
   /// - Parameter identifier: Polar device id
   /// - Throws: InvalidArgument if identifier is invalid polar device id or invalid uuid
   Future<void> disconnectFromDevice(String identifier) {
-    return _channel.invokeMethod('disconnectFromDevice', identifier);
+    return _methodChannel.invokeMethod('disconnectFromDevice', identifier);
   }
 
   ///  Get the data types available in this device for online streaming
@@ -210,7 +164,7 @@ class Polar {
   Future<Set<PolarDataType>> getAvailableOnlineStreamDataTypes(
     String identifier,
   ) async {
-    final response = await _channel.invokeMethod(
+    final response = await _methodChannel.invokeMethod(
       'getAvailableOnlineStreamDataTypes',
       identifier,
     );
@@ -233,7 +187,7 @@ class Polar {
     String identifier,
     PolarDataType feature,
   ) async {
-    final response = await _channel.invokeMethod(
+    final response = await _methodChannel.invokeMethod(
       'requestStreamSettings',
       [identifier, feature.toJson()],
     );
@@ -249,7 +203,7 @@ class Polar {
 
     final channelName = 'polar/streaming/$identifier/${feature.name}';
 
-    await _channel.invokeMethod('createStreamingChannel', [
+    await _methodChannel.invokeMethod('createStreamingChannel', [
       channelName,
       identifier,
       feature.toJson(),
@@ -481,7 +435,7 @@ class Polar {
     required RecordingInterval interval,
     required SampleType sampleType,
   }) {
-    return _channel.invokeMethod(
+    return _methodChannel.invokeMethod(
       'startRecording',
       [identifier, exerciseId, interval.toJson(), sampleType.toJson()],
     );
@@ -495,7 +449,7 @@ class Polar {
   ///   - success: recording stopped
   ///   - onError: see `PolarErrors` for possible errors invoked
   Future<void> stopRecording(String identifier) {
-    return _channel.invokeMethod('stopRecording', identifier);
+    return _methodChannel.invokeMethod('stopRecording', identifier);
   }
 
   /// Request current recording status. Supported only by Polar H10. Requires `polarFileTransfer` feature.
@@ -506,8 +460,10 @@ class Polar {
   ///   - success: see `PolarRecordingStatus`
   ///   - onError: see `PolarErrors` for possible errors invoked
   Future<PolarRecordingStatus> requestRecordingStatus(String identifier) async {
-    final result =
-        await _channel.invokeListMethod('requestRecordingStatus', identifier);
+    final result = await _methodChannel.invokeListMethod(
+      'requestRecordingStatus',
+      identifier,
+    );
 
     return PolarRecordingStatus(ongoing: result![0], entryId: result[1]);
   }
@@ -520,7 +476,8 @@ class Polar {
   ///   - onNext: see `PolarExerciseEntry`
   ///   - onError: see `PolarErrors` for possible errors invoked
   Future<List<PolarExerciseEntry>> listExercises(String identifier) async {
-    final result = await _channel.invokeListMethod('listExercises', identifier);
+    final result =
+        await _methodChannel.invokeListMethod('listExercises', identifier);
     if (result == null) {
       return [];
     }
@@ -542,7 +499,7 @@ class Polar {
     String identifier,
     PolarExerciseEntry entry,
   ) async {
-    final result = await _channel
+    final result = await _methodChannel
         .invokeMethod('fetchExercise', [identifier, jsonEncode(entry)]);
     return PolarExerciseData.fromJson(jsonDecode(result));
   }
@@ -556,7 +513,7 @@ class Polar {
   ///   - complete: entry successfully removed
   ///   - onError: see `PolarErrors` for possible errors invoked
   Future<void> removeExercise(String identifier, PolarExerciseEntry entry) {
-    return _channel
+    return _methodChannel
         .invokeMethod('removeExercise', [identifier, jsonEncode(entry)]);
   }
 
@@ -569,7 +526,7 @@ class Polar {
   ///   - success: when enable or disable sent to device
   ///   - onError: see `PolarErrors` for possible errors invoked
   Future<void> setLedConfig(String identifier, LedConfig config) {
-    return _channel
+    return _methodChannel
         .invokeMethod('setLedConfig', [identifier, jsonEncode(config)]);
   }
 
@@ -585,7 +542,7 @@ class Polar {
     String identifier,
     bool preservePairingInformation,
   ) {
-    return _channel.invokeMethod(
+    return _methodChannel.invokeMethod(
       'doFactoryReset',
       [identifier, preservePairingInformation],
     );
@@ -593,12 +550,12 @@ class Polar {
 
   ///  Enables SDK mode.
   Future<void> enableSdkMode(String identifier) {
-    return _channel.invokeMethod('enableSdkMode', identifier);
+    return _methodChannel.invokeMethod('enableSdkMode', identifier);
   }
 
   /// Disables SDK mode.
   Future<void> disableSdkMode(String identifier) {
-    return _channel.invokeMethod('disableSdkMode', identifier);
+    return _methodChannel.invokeMethod('disableSdkMode', identifier);
   }
 
   /// Check if SDK mode currently enabled.
@@ -606,7 +563,7 @@ class Polar {
   /// Note, SDK status check is supported by VeritySense starting from firmware 2.1.0
   Future<bool> isSdkModeEnabled(String identifier) async {
     final result =
-        await _channel.invokeMethod<bool>('isSdkModeEnabled', identifier);
+        await _methodChannel.invokeMethod<bool>('isSdkModeEnabled', identifier);
     return result!;
   }
 }

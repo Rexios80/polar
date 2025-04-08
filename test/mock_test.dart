@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
@@ -17,7 +16,8 @@ final info = jsonEncode(
     isConnectable: true,
   ),
 );
-const channel = MethodChannel('polar');
+const methodChannel = MethodChannel('polar/methods');
+const eventChannel = EventChannel('polar/events');
 const searchChannel = EventChannel('polar/search');
 
 void main() {
@@ -25,7 +25,9 @@ void main() {
 
   setUpAll(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(channel, handleMethodCall);
+        .setMockMethodCallHandler(methodChannel, handleMethodCall);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockStreamHandler(eventChannel, EventHandler());
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockStreamHandler(searchChannel, SearchHandler());
   });
@@ -40,19 +42,6 @@ void main() {
   testMisc(identifier, supportsLedConfig: true);
 }
 
-Future<void> invoke(String method, [dynamic arguments]) {
-  return TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-      .handlePlatformMessage(
-    channel.name,
-    channel.codec.encodeMethodCall(MethodCall(method, arguments)),
-    null,
-  );
-}
-
-void executeLater<T>(FutureOr<T> Function() computation) {
-  Future.delayed(Duration.zero, computation);
-}
-
 final exercises = <PolarExerciseEntry>[];
 var recording = false;
 var exerciseId = '';
@@ -61,22 +50,8 @@ var sdkModeEnabled = false;
 Future<dynamic> handleMethodCall(MethodCall call) async {
   switch (call.method) {
     case 'connectToDevice':
-      executeLater(() async {
-        await invoke('deviceConnecting', info);
-        await invoke('deviceConnected', info);
-        await invoke('disInformationReceived', [identifier, '', '']);
-        await invoke('batteryLevelReceived', [identifier, 100]);
-        await invoke('batteryChargingStatusReceived', [
-          identifier,
-          jsonEncode(PolarChargeState.dischargingActive.toJson()),
-        ]);
-        for (final feature in PolarSdkFeature.values) {
-          await invoke('sdkFeatureReady', [identifier, feature.toJson()]);
-        }
-      });
       return null;
     case 'disconnectFromDevice':
-      executeLater(() => invoke('deviceDisconnected', [info, false]));
       return null;
     case 'getAvailableOnlineStreamDataTypes':
       return jsonEncode(PolarDataType.values.map((e) => e.toJson()).toList());
@@ -126,6 +101,36 @@ Future<dynamic> handleMethodCall(MethodCall call) async {
     default:
       throw UnimplementedError();
   }
+}
+
+class EventHandler extends MockStreamHandler {
+  @override
+  void onListen(dynamic arguments, MockStreamHandlerEventSink events) {
+    events.success({'event': 'deviceConnecting', 'data': info});
+    events.success({'event': 'deviceConnected', 'data': info});
+    events.success({
+      'event': 'disInformationReceived',
+      'data': [identifier, '', ''],
+    });
+    events.success({
+      'event': 'batteryLevelReceived',
+      'data': [identifier, 100],
+    });
+    for (final feature in PolarSdkFeature.values) {
+      events.success({
+        'event': 'sdkFeatureReady',
+        'data': [identifier, feature.toJson()],
+      });
+    }
+
+    events.success({
+      'event': 'deviceDisconnected',
+      'data': [info, false],
+    });
+  }
+
+  @override
+  void onCancel(dynamic arguments) {}
 }
 
 class SearchHandler extends MockStreamHandler {

@@ -236,6 +236,9 @@ void testSdkMode(String identifier) {
   test('sdk mode', () async {
     await connect(identifier);
 
+    await polar.sdkFeatureReady
+        .firstWhere((e) => e.feature == PolarSdkFeature.sdkMode);
+
     final status1 = await polar.isSdkModeEnabled(identifier);
     expect(status1, false);
 
