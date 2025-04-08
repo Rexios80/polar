@@ -96,7 +96,12 @@ class Polar {
   Stream<PolarBatteryChargingStatusEvent> get batteryChargingStatus =>
       _eventStream
           .where((e) => e.event == PolarEvent.batteryChargingStatusReceived)
-          .map((e) => PolarBatteryChargingStatusEvent(e.data[0], e.data[1]));
+          .map(
+            (e) => PolarBatteryChargingStatusEvent(
+              e.data[0],
+              PolarChargeState.fromJson(jsonDecode(e.data[1])),
+            ),
+          );
 
   /// Start searching for Polar device(s)
   ///
