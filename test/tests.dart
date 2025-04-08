@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:polar/polar.dart';
-import 'package:polar/src/model/polar_charge_state.dart';
 import 'package:uuid/uuid.dart';
 
 final polar = Polar();
