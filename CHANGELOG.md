@@ -1,3 +1,7 @@
+## NEXT
+
+- Converts native method invocations to `EventChannel` to fix background callback issues
+
 ## 7.5.1
 
 - Dependency upgrades
