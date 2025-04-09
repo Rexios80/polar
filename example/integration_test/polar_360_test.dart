@@ -3,7 +3,7 @@ import 'package:polar/polar.dart';
 
 import '../../test/tests.dart';
 
-const identifier = '1C709B20';
+const identifier = 'E0729E20';
 
 void main() async {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -11,13 +11,14 @@ void main() async {
   await requestPermissions();
   testSearch(identifier);
   testConnection(identifier);
+
+  /// TODO: Add FTU
   testBasicData(identifier);
   testBleSdkFeatures(
     identifier,
     features: PolarSdkFeature.values.toSet().difference({
       PolarSdkFeature.offlineRecording,
-      PolarSdkFeature.sdkMode,
-      PolarSdkFeature.ledAnimation,
+      PolarSdkFeature.h10ExerciseRecording,
     }),
   );
   testStreaming(
@@ -25,9 +26,10 @@ void main() async {
     features: {
       PolarDataType.hr,
       PolarDataType.acc,
-      PolarDataType.ecg,
+      PolarDataType.ppi,
+      PolarDataType.temperature,
     },
   );
-  testRecording(identifier);
-  testMisc(identifier, supportsLedConfig: false);
+  testSdkMode(identifier);
+  testMisc(identifier, supportsLedConfig: true);
 }

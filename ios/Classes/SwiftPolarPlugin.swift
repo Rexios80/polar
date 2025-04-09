@@ -503,6 +503,12 @@ public class SwiftPolarPlugin:
     success("batteryLevelReceived", data: [identifier, batteryLevel])
   }
 
+  public func batteryChargingStatusReceived(
+    _ identifier: String, chargingStatus: BleBasClient.ChargeState
+  ) {
+    success("batteryChargingStatusReceived", data: [identifier, chargingStatus])
+  }
+
   public func blePowerOn() {
     success("blePowerStateChanged", data: true)
   }
@@ -641,9 +647,8 @@ class StreamingChannel: NSObject, FlutterStreamHandler {
       stream = api.startTemperatureStreaming(identifier, settings: settings!)
     case .pressure:
       stream = api.startPressureStreaming(identifier, settings: settings!)
-    default:
-      /// case in which something is not implemented.
-      return nil
+    case .skinTemperature:
+      stream = api.startSkinTemperatureStreaming(identifier, settings: settings!)
     }
 
     subscription = stream.anySubscribe(

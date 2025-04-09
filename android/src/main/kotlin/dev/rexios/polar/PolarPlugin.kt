@@ -615,11 +615,18 @@ class PolarWrapper(
         success("batteryLevelReceived", listOf(identifier, level))
     }
 
+    override fun batteryChargingStatusReceived(
+        identifier: String,
+        chargingStatus: ChargeState,
+    ) {
+        success("batteryChargingStatusReceived", listOf(identifier, chargingStatus))
+    }
+
     override fun htsNotificationReceived(
         identifier: String,
-        data: PolarHealthThermometerData
+        data: PolarHealthThermometerData,
     ) {
-        invoke("htNotificationReceived", listOf(identifier, data))
+        // Do nothing
     }
 
     @Deprecated("", replaceWith = ReplaceWith(""))
@@ -671,7 +678,9 @@ class StreamingChannel(
                         identifier,
                         settings,
                     )
-                else -> throw IllegalArgumentException("Unsupported feature: $feature")
+                PolarDeviceDataType.PRESSURE -> api.startPressureStreaming(identifier, settings)
+                PolarDeviceDataType.SKIN_TEMPERATURE -> api.startSkinTemperatureStreaming(identifier, settings)
+                PolarDeviceDataType.LOCATION -> api.startLocationStreaming(identifier, settings)
             }
 
         subscription =

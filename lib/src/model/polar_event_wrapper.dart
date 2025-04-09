@@ -44,4 +44,7 @@ enum PolarEvent {
 
   /// Battery level received
   batteryLevelReceived,
+
+  /// Battery charging status received
+  batteryChargingStatusReceived,
 }
