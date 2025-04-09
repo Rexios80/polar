@@ -68,6 +68,14 @@ void testBasicData(String identifier) {
       final batteryEvent = await polar.batteryLevel.first;
       expect(batteryEvent.level, greaterThan(0));
     });
+
+    test('batteryChargingStatus', () async {
+      final chargeState = await polar.batteryChargingStatus.first;
+      expect(
+        chargeState.chargingStatus,
+        PolarChargeState.dischargingActive,
+      );
+    });
   });
 }
 
@@ -246,12 +254,12 @@ void testSdkMode(String identifier) {
   });
 }
 
-void testMisc(String identifier, {required bool isVerity}) {
+void testMisc(String identifier, {required bool supportsLedConfig}) {
   test('misc', () async {
     await connect(identifier);
     // Wait to ensure device is connected (not sure why this is necessary)
     await Future.delayed(const Duration(seconds: 3));
-    if (isVerity) {
+    if (supportsLedConfig) {
       await polar.setLedConfig(
         identifier,
         LedConfig(ppiModeLedEnabled: false, sdkModeLedEnabled: false),

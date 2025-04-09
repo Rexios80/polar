@@ -52,18 +52,18 @@ class PolarDataCodable<T>: Encodable {
     if let data = data as? PolarHrData {
       codables = data.map(PolarHrSampleCodable.init)
     } else if let data = data as? PolarEcgData {
-      codables = data.samples.map(PolarEcgSampleCodable.init)
+      codables = data.map(PolarEcgSampleCodable.init)
     } else if let data = data as? PolarAccData {
-      codables = data.samples.map(PolarAccSampleCodable.init)
+      codables = data.map(PolarAccSampleCodable.init)
     } else if let data = data as? PolarPpgData {
       try? container.encode(data.type.rawValue, forKey: .type)
       codables = data.samples.map(PolarPpgSampleCodable.init)
     } else if let data = data as? PolarPpiData {
       codables = data.samples.map(PolarPpiSampleCodable.init)
     } else if let data = data as? PolarGyroData {
-      codables = data.samples.map(PolarGyroSampleCodable.init)
+      codables = data.map(PolarGyroSampleCodable.init)
     } else if let data = data as? PolarMagnetometerData {
-      codables = data.samples.map(PolarMagnetometerSampleCodable.init)
+      codables = data.map(PolarMagnetometerSampleCodable.init)
     } else if let data = data as? PolarTemperatureData {
       codables = data.samples.map(PolarTemperatureSampleCodable.init)
     } else if let data = data as? PolarPressureData {
@@ -77,7 +77,8 @@ class PolarDataCodable<T>: Encodable {
 }
 
 typealias PolarHrSample = (
-  hr: UInt8, rrsMs: [Int], rrAvailable: Bool, contactStatus: Bool, contactStatusSupported: Bool
+  hr: UInt8, ppgQuality: UInt8, correctedHr: UInt8, rrsMs: [Int], rrAvailable: Bool,
+  contactStatus: Bool, contactStatusSupported: Bool
 )
 
 class PolarHrSampleCodable: Encodable {
@@ -89,6 +90,8 @@ class PolarHrSampleCodable: Encodable {
 
   enum CodingKeys: String, CodingKey {
     case hr
+    case ppgQuality
+    case correctedHr
     case rrsMs
     case rrAvailable
     case contactStatus
@@ -98,6 +101,8 @@ class PolarHrSampleCodable: Encodable {
   func encode(to encoder: Encoder) {
     var container = encoder.container(keyedBy: CodingKeys.self)
     try? container.encode(data.hr, forKey: .hr)
+    try? container.encode(data.ppgQuality, forKey: .ppgQuality)
+    try? container.encode(data.correctedHr, forKey: .correctedHr)
     try? container.encode(data.rrsMs, forKey: .rrsMs)
     try? container.encode(data.rrAvailable, forKey: .rrAvailable)
     try? container.encode(data.contactStatus, forKey: .contactStatus)
@@ -242,7 +247,8 @@ class PolarPpgSampleCodable: Encodable {
 }
 
 typealias PolarPpiSample = (
-  hr: Int, ppInMs: UInt16, ppErrorEstimate: UInt16, blockerBit: Int, skinContactStatus: Int,
+  timeStamp: UInt64, hr: Int, ppInMs: UInt16, ppErrorEstimate: UInt16, blockerBit: Int,
+  skinContactStatus: Int,
   skinContactSupported: Int
 )
 
@@ -254,6 +260,7 @@ class PolarPpiSampleCodable: Encodable {
   }
 
   enum CodingKeys: String, CodingKey {
+    case timeStamp
     case hr
     case ppInMs
     case ppErrorEstimate
@@ -264,6 +271,7 @@ class PolarPpiSampleCodable: Encodable {
 
   func encode(to encoder: Encoder) {
     var container = encoder.container(keyedBy: CodingKeys.self)
+    try? container.encode(data.timeStamp, forKey: .timeStamp)
     try? container.encode(data.hr, forKey: .hr)
     try? container.encode(data.ppInMs, forKey: .ppInMs)
     try? container.encode(data.ppErrorEstimate, forKey: .ppErrorEstimate)
@@ -410,6 +418,48 @@ class LedConfigCodable: Decodable {
     case sdkModeLedEnabled
     case ppiModeLedEnabled
   }
+}
+
+class PolarFirstTimeUseConfigCodable : Decodable {
+    let data: PolarFirstTimeUseConfig
+    
+    required init(from decoder: Decoder) {
+        guard let container = try? decoder.container(keyedBy: CodingKeys.self),
+              let genderString = try? container.decode(String.self, forKey: .gender),
+              let gender = Gender(rawValue: genderString),
+              let birthDate = try? container.decode(Date.self, forKey: .birthDate),
+              let height = try? container.decode(Float.self, forKey: .height),
+              let weight = try? container.decode(Float.self, forKey: .weight),
+              let maxHeartRate = try? container.decode(Int.self, forKey: .maxHeartRate),
+              let vo2Max = try? container.decode(Int.self, forKey: .vo2Max),
+              let restingHeartRate = try? container.decode(Int.self, forKey: .restingHeartRate),
+              let trainingBackgroundValue = try? container.decode(Int.self, forKey: .trainingBackground),
+              let trainingBackground = TrainingBackground(rawValue: trainingBackgroundValue),
+              let deviceTime = try? container.decode(String.self, forKey: .deviceTime),
+              let typicalDayValue = try? container.decode(Int.self, forKey: .typicalDay),
+              let typicalDay = TypicalDay(rawValue: typicalDayValue),
+              let sleepGoalMinutes = try? container.decode(Int.self, forKey: .sleepGoalMinutes)
+        else {
+            data = PolarFirstTimeUseConfig(gender: Gender.male, birthDate: Date.init(), height: 170, weight: 170, maxHeartRate: 180, vo2Max: 50, restingHeartRate: 60, trainingBackground: TrainingBackground.occasional, deviceTime: "", typicalDay: TypicalDay.mostlySitting, sleepGoalMinutes: 480)
+          return
+        }
+
+        data = PolarFirstTimeUseConfig(gender: gender, birthDate: birthDate, height: height, weight: weight, maxHeartRate: maxHeartRate, vo2Max: vo2Max, restingHeartRate: restingHeartRate, trainingBackground: trainingBackground, deviceTime: deviceTime, typicalDay: typicalDay, sleepGoalMinutes: sleepGoalMinutes)
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case gender
+        case birthDate
+        case height
+        case weight
+        case maxHeartRate
+        case vo2Max
+        case restingHeartRate
+        case trainingBackground
+        case deviceTime
+        case typicalDay
+        case sleepGoalMinutes
+    }
 }
 
 extension Date {
