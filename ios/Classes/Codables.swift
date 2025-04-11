@@ -425,8 +425,7 @@ class PolarFirstTimeUseConfigCodable : Decodable {
     
     required init(from decoder: Decoder) {
         guard let container = try? decoder.container(keyedBy: CodingKeys.self),
-              let genderString = try? container.decode(String.self, forKey: .gender),
-              let gender = Gender(rawValue: genderString),
+              let gender = try? container.decode(PolarFirstTimeUseConfig.Gender.self, forKey: .gender),
               let birthDate = try? container.decode(Date.self, forKey: .birthDate),
               let height = try? container.decode(Float.self, forKey: .height),
               let weight = try? container.decode(Float.self, forKey: .weight),
@@ -434,13 +433,13 @@ class PolarFirstTimeUseConfigCodable : Decodable {
               let vo2Max = try? container.decode(Int.self, forKey: .vo2Max),
               let restingHeartRate = try? container.decode(Int.self, forKey: .restingHeartRate),
               let trainingBackgroundValue = try? container.decode(Int.self, forKey: .trainingBackground),
-              let trainingBackground = TrainingBackground(rawValue: trainingBackgroundValue),
+              let trainingBackground = PolarFirstTimeUseConfig.TrainingBackground(rawValue: trainingBackgroundValue),
               let deviceTime = try? container.decode(String.self, forKey: .deviceTime),
               let typicalDayValue = try? container.decode(Int.self, forKey: .typicalDay),
-              let typicalDay = TypicalDay(rawValue: typicalDayValue),
+              let typicalDay = PolarFirstTimeUseConfig.TypicalDay(rawValue: typicalDayValue),
               let sleepGoalMinutes = try? container.decode(Int.self, forKey: .sleepGoalMinutes)
         else {
-            data = PolarFirstTimeUseConfig(gender: Gender.male, birthDate: Date.init(), height: 170, weight: 170, maxHeartRate: 180, vo2Max: 50, restingHeartRate: 60, trainingBackground: TrainingBackground.occasional, deviceTime: "", typicalDay: TypicalDay.mostlySitting, sleepGoalMinutes: 480)
+            data = PolarFirstTimeUseConfig(gender: PolarFirstTimeUseConfig.Gender.male, birthDate: Date.init(), height: 170, weight: 170, maxHeartRate: 180, vo2Max: 50, restingHeartRate: 60, trainingBackground: PolarFirstTimeUseConfig.TrainingBackground.occasional, deviceTime: "", typicalDay: PolarFirstTimeUseConfig.TypicalDay.mostlySitting, sleepGoalMinutes: 480)
           return
         }
 
@@ -471,3 +470,31 @@ extension Date {
     self = Date(timeIntervalSince1970: TimeInterval(milliseconds) / 1000)
   }
 }
+
+extension PolarFirstTimeUseConfig.Gender : Codable {
+    
+    
+    public init(from decoder: Decoder) throws {
+        var container = try decoder.singleValueContainer()
+        let v = try container.decode(String.self)
+        switch v {
+        case "male":
+            self = .male
+        case "female":
+            self = .female
+        default:
+            self = .male
+        }
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        switch self{
+        case .male:
+            try container.encode("male")
+        case .female:
+            try container.encode("female")
+        }
+    }
+}
+

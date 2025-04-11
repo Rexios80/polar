@@ -565,13 +565,14 @@ class Polar {
     String identifier,
     PolarFirstTimeUseConfig config,
   ) {
-    return _channel
+    return _methodChannel
         .invokeMethod('doFirstTimeUse', [identifier, jsonEncode(config)]);
   }
 
   /// Checks if the first time use (FTU) operation has been done on a given device
   Future<bool> isFtuDone(String identifier) async {
-    final result = await _channel.invokeMethod<bool>('isFtuDone', identifier);
+    final result =
+        await _methodChannel.invokeMethod<bool>('isFtuDone', identifier);
     return result!;
   }
 
