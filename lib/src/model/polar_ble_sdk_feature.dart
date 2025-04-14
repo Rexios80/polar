@@ -39,7 +39,19 @@ enum PolarSdkFeature {
   featurePolarFirmwareUpdate,
 
   /// Feature to receive activity data from Polar device.
-  featurePolarActivityData;
+  featurePolarActivityData,
+
+  /// Feature to transfer files to and from Polar device.
+  featurePolarFileTransfer,
+
+  /// Feature to receive HTS data from Polar device.
+  featureHts,
+
+  /// Feature to receive sleep data from Polar device.
+  featurePolarSleepData,
+
+  /// Feature to receive temperature data from Polar device.
+  featurePolarTemperatureData;
 
   static const _featureStringMap = {
     hr: 'FEATURE_HR',
@@ -53,6 +65,10 @@ enum PolarSdkFeature {
     ledAnimation: 'FEATURE_POLAR_LED_ANIMATION',
     featurePolarFirmwareUpdate: 'FEATURE_POLAR_FIRMWARE_UPDATE',
     featurePolarActivityData: 'FEATURE_POLAR_ACTIVITY_DATA',
+    featurePolarFileTransfer: 'FEATURE_POLAR_FILE_TRANSFER',
+    featureHts: 'FEATURE_HTS',
+    featurePolarSleepData: 'FEATURE_POLAR_SLEEP_DATA',
+    featurePolarTemperatureData: 'FEATURE_POLAR_TEMPERATURE_DATA',
   };
 
   static final _stringFeatureMap =

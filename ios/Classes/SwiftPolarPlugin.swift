@@ -450,7 +450,7 @@ public class SwiftPolarPlugin:
       onError: { error in
         result(
           FlutterError(
-            code: "Error doing first time setup", message: error.localizedDescription, details: nil)
+            code: "Error doing first time setup", message: error.localizedDescription, details: error)
         )
       })
   }

@@ -12,18 +12,18 @@ PolarFirstTimeUseConfig _$PolarFirstTimeUseConfigFromJson(
         Map<String, dynamic> json) =>
     PolarFirstTimeUseConfig(
       gender:
-          $enumDecodeNullable(_$GenderEnumMap, json['gender']) ?? Gender.male,
-      birthDate: DateTime.parse(json['birthDate'] as String),
+          $enumDecodeNullable(_$GenderEnumMap, json['gender']) ?? Gender.MALE,
+      birthDate: json['birthDate'] as String,
       trainingBackground: (json['trainingBackground'] as num).toInt(),
+      deviceTime: json['deviceTime'] as String,
       height: (json['height'] as num?)?.toDouble() ?? 165,
       weight: (json['weight'] as num?)?.toDouble() ?? 70,
       maxHeartRate: (json['maxHeartRate'] as num?)?.toInt() ?? 220,
       vo2Max: (json['vo2Max'] as num?)?.toInt() ?? 40,
       restingHeartRate: (json['restingHeartRate'] as num?)?.toInt() ?? 60,
-      deviceTime: json['deviceTime'] as String? ?? '',
       typicalDay:
           $enumDecodeNullable(_$TypicalDayEnumMap, json['typicalDay']) ??
-              TypicalDay.mostlySitting,
+              TypicalDay.MOSTLY_SITTING,
       sleepGoalMinutes: (json['sleepGoalMinutes'] as num?)?.toInt() ?? 480,
     );
 
@@ -31,7 +31,7 @@ Map<String, dynamic> _$PolarFirstTimeUseConfigToJson(
         PolarFirstTimeUseConfig instance) =>
     <String, dynamic>{
       'gender': _$GenderEnumMap[instance.gender]!,
-      'birthDate': instance.birthDate.toIso8601String(),
+      'birthDate': instance.birthDate,
       'height': instance.height,
       'weight': instance.weight,
       'maxHeartRate': instance.maxHeartRate,
@@ -44,12 +44,12 @@ Map<String, dynamic> _$PolarFirstTimeUseConfigToJson(
     };
 
 const _$GenderEnumMap = {
-  Gender.male: 'male',
-  Gender.female: 'female',
+  Gender.MALE: 'MALE',
+  Gender.FEMALE: 'FEMALE',
 };
 
 const _$TypicalDayEnumMap = {
-  TypicalDay.mostlySitting: 'mostlySitting',
-  TypicalDay.mostlyStanding: 'mostlyStanding',
-  TypicalDay.mostlyMoving: 'mostlyMoving',
+  TypicalDay.MOSTLY_SITTING: 'MOSTLY_SITTING',
+  TypicalDay.MOSTLY_STANDING: 'MOSTLY_STANDING',
+  TypicalDay.MOSTLY_MOVING: 'MOSTLY_MOVING',
 };

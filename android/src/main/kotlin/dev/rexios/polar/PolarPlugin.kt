@@ -615,12 +615,12 @@ class PolarWrapper(
         success("batteryLevelReceived", listOf(identifier, level))
     }
 
-    override fun batteryChargingStatusReceived(
-        identifier: String,
-        chargingStatus: ChargeState,
-    ) {
-        success("batteryChargingStatusReceived", listOf(identifier, chargingStatus))
-    }
+    // override fun batteryChargingStatusReceived(
+    //     identifier: String,
+    //     chargingStatus: ChargeState,
+    // ) {
+    //     success("batteryChargingStatusReceived", listOf(identifier, chargingStatus))
+    // }
 
     override fun htsNotificationReceived(
         identifier: String,

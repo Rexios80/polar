@@ -8,8 +8,8 @@ class PolarFirstTimeUseConfig {
   /// Gender of the user
   final Gender gender;
 
-  /// Date of birth
-  final DateTime birthDate;
+  /// Date of birth, in ms since epoch
+  final String birthDate;
 
   /// Height of the user in centimeters
   final double height;
@@ -40,16 +40,16 @@ class PolarFirstTimeUseConfig {
 
   /// Constructor
   PolarFirstTimeUseConfig({
-    this.gender = Gender.male,
+    this.gender = Gender.MALE,
     required this.birthDate,
     required this.trainingBackground,
+    required this.deviceTime,
     this.height = 165,
     this.weight = 70,
     this.maxHeartRate = 220,
     this.vo2Max = 40,
     this.restingHeartRate = 60,
-    this.deviceTime = '',
-    this.typicalDay = TypicalDay.mostlySitting,
+    this.typicalDay = TypicalDay.MOSTLY_SITTING,
     this.sleepGoalMinutes = 480,
   });
 
@@ -64,10 +64,10 @@ class PolarFirstTimeUseConfig {
 /// Gender enum
 enum Gender {
   /// male
-  male,
+  MALE,
 
   /// female
-  female,
+  FEMALE,
 }
 
 /// Training background enum with associated values
@@ -100,13 +100,13 @@ enum TrainingBackground {
 /// Typical day activity level enum with associated values and names
 enum TypicalDay {
   /// sitting
-  mostlySitting(1, 'Mostly Sitting'),
+  MOSTLY_SITTING(1, 'Mostly Sitting'),
 
   /// standing
-  mostlyStanding(2, 'Mostly Standing'),
+  MOSTLY_STANDING(2, 'Mostly Standing'),
 
   /// moving
-  mostlyMoving(3, 'Mostly Moving');
+  MOSTLY_MOVING(3, 'Mostly Moving');
 
   /// value associated with the enum
   final int value;
