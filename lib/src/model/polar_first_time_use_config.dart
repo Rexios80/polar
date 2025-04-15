@@ -1,3 +1,6 @@
+// ignoring because android uses the enum names as all caps, so our enum names should be too
+// ignore_for_file: constant_identifier_names
+
 import 'package:json_annotation/json_annotation.dart';
 
 part 'polar_first_time_use_config.g.dart';
@@ -44,12 +47,12 @@ class PolarFirstTimeUseConfig {
     required this.birthDate,
     required this.trainingBackground,
     required this.deviceTime,
-    this.height = 165,
+    this.typicalDay = TypicalDay.MOSTLY_STANDING,
+    this.height = 173,
     this.weight = 70,
     this.maxHeartRate = 220,
-    this.vo2Max = 40,
+    this.vo2Max = 50,
     this.restingHeartRate = 60,
-    this.typicalDay = TypicalDay.MOSTLY_SITTING,
     this.sleepGoalMinutes = 480,
   });
 

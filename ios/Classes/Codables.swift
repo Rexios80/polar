@@ -424,9 +424,13 @@ class PolarFirstTimeUseConfigCodable : Decodable {
     let data: PolarFirstTimeUseConfig
     
     required init(from decoder: Decoder) {
+        let dateFormatter = DateFormatter()
+        // Set Date Format
+        dateFormatter.dateFormat = "MM/dd/yyyy"
         guard let container = try? decoder.container(keyedBy: CodingKeys.self),
               let gender = try? container.decode(PolarFirstTimeUseConfig.Gender.self, forKey: .gender),
-              let birthDate = try? container.decode(Date.self, forKey: .birthDate),
+              let birthDateString = try? container.decode(String.self, forKey: .birthDate),
+              let birthDate = try? dateFormatter.date(from: birthDateString),
               let height = try? container.decode(Float.self, forKey: .height),
               let weight = try? container.decode(Float.self, forKey: .weight),
               let maxHeartRate = try? container.decode(Int.self, forKey: .maxHeartRate),
@@ -435,15 +439,15 @@ class PolarFirstTimeUseConfigCodable : Decodable {
               let trainingBackgroundValue = try? container.decode(Int.self, forKey: .trainingBackground),
               let trainingBackground = PolarFirstTimeUseConfig.TrainingBackground(rawValue: trainingBackgroundValue),
               let deviceTime = try? container.decode(String.self, forKey: .deviceTime),
-              let typicalDayValue = try? container.decode(Int.self, forKey: .typicalDay),
-              let typicalDay = PolarFirstTimeUseConfig.TypicalDay(rawValue: typicalDayValue),
+              let typicalDay = try? container.decode(PolarFirstTimeUseConfig.TypicalDay.self, forKey: .typicalDay),
               let sleepGoalMinutes = try? container.decode(Int.self, forKey: .sleepGoalMinutes)
         else {
             data = PolarFirstTimeUseConfig(gender: PolarFirstTimeUseConfig.Gender.male, birthDate: Date.init(), height: 170, weight: 170, maxHeartRate: 180, vo2Max: 50, restingHeartRate: 60, trainingBackground: PolarFirstTimeUseConfig.TrainingBackground.occasional, deviceTime: "", typicalDay: PolarFirstTimeUseConfig.TypicalDay.mostlySitting, sleepGoalMinutes: 480)
           return
         }
-
         data = PolarFirstTimeUseConfig(gender: gender, birthDate: birthDate, height: height, weight: weight, maxHeartRate: maxHeartRate, vo2Max: vo2Max, restingHeartRate: restingHeartRate, trainingBackground: trainingBackground, deviceTime: deviceTime, typicalDay: typicalDay, sleepGoalMinutes: sleepGoalMinutes)
+
+        //data = PolarFirstTimeUseConfig(gender: gender, birthDate: birthDate, height: height, weight: weight, maxHeartRate: maxHeartRate, vo2Max: vo2Max, restingHeartRate: restingHeartRate, trainingBackground: trainingBackground, deviceTime: deviceTime, typicalDay: typicalDay, sleepGoalMinutes: sleepGoalMinutes)
     }
     
     enum CodingKeys: String, CodingKey {
@@ -472,15 +476,13 @@ extension Date {
 }
 
 extension PolarFirstTimeUseConfig.Gender : Codable {
-    
-    
     public init(from decoder: Decoder) throws {
         var container = try decoder.singleValueContainer()
         let v = try container.decode(String.self)
         switch v {
-        case "male":
+        case "MALE":
             self = .male
-        case "female":
+        case "FEMALE":
             self = .female
         default:
             self = .male
@@ -491,9 +493,38 @@ extension PolarFirstTimeUseConfig.Gender : Codable {
         var container = encoder.singleValueContainer()
         switch self{
         case .male:
-            try container.encode("male")
+            try container.encode("MALE")
         case .female:
-            try container.encode("female")
+            try container.encode("FEMALE")
+        }
+    }
+}
+
+extension PolarFirstTimeUseConfig.TypicalDay : Codable {
+    public init(from decoder: Decoder) throws {
+        var container = try decoder.singleValueContainer()
+        let v = try container.decode(String.self)
+        switch v {
+        case "MOSTLY_SITTING":
+            self = .mostlySitting
+        case "MOSTLY_STANDING":
+            self = .mostlyStanding
+        case "MOSTLY_MOVING":
+            self = .mostlyMoving
+        default:
+            self = .mostlySitting
+        }
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        switch self{
+        case .mostlySitting:
+            try container.encode("MOSTLY_SITTING")
+        case .mostlyStanding:
+            try container.encode("MOSTLY_STANDING")
+        case .mostlyMoving:
+            try container.encode("MOSTLY_MOVING")
         }
     }
 }
