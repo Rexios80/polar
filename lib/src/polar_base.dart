@@ -553,7 +553,7 @@ class Polar {
     );
   }
 
-  /// Perform first time use (FTU) operation for a given device.
+  /// Perform first time use (FTU) operation for a given device. This operation can only be done once DeviceTime SDK feature is ready.
   ///
   /// - Parameters:
   ///   - identifier: polar device id or UUID
@@ -571,7 +571,7 @@ class Polar {
         .invokeMethod('doFirstTimeUse', [identifier, jsonEncode(config)]);
   }
 
-  /// Checks if the first time use (FTU) operation has been done on a given device
+  /// Checks if the first time use (FTU) operation has been done on a given device. This operation can only be done once DeviceTime SDK feature is ready.
   Future<bool> isFtuDone(String identifier) async {
     final result =
         await _methodChannel.invokeMethod<bool>('isFtuDone', identifier);
