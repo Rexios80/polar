@@ -28,4 +28,5 @@ const _$PolarEventEnumMap = {
   PolarEvent.deviceDisconnected: 'deviceDisconnected',
   PolarEvent.disInformationReceived: 'disInformationReceived',
   PolarEvent.batteryLevelReceived: 'batteryLevelReceived',
+  PolarEvent.batteryChargingStatusReceived: 'batteryChargingStatusReceived',
 };

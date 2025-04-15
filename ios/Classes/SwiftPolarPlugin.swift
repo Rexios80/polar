@@ -125,6 +125,10 @@ public class SwiftPolarPlugin:
         disableSdkMode(call, result)
       case "isSdkModeEnabled":
         isSdkModeEnabled(call, result)
+      case "doFirstTimeUse":
+        doFirstTimeUse(call, result)
+      case "isFtuDone":
+        isFtuDone(call, result)
       default: result(FlutterMethodNotImplemented)
       }
     } catch {
@@ -431,6 +435,40 @@ public class SwiftPolarPlugin:
       })
   }
 
+  func doFirstTimeUse(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+    let arguments = call.arguments as! [Any]
+    let identifier = arguments[0] as! String
+    let config = try! decoder.decode(
+      PolarFirstTimeUseConfigCodable.self,
+      from: (arguments[1] as! String)
+        .data(using: .utf8)!
+    ).data
+    _ = api.doFirstTimeUse(identifier, ftuConfig: config).subscribe(
+      onCompleted: {
+        result(nil)
+      },
+      onError: { error in
+        result(
+          FlutterError(
+            code: "Error doing first time setup", message: error.localizedDescription, details: error)
+        )
+      })
+  }
+
+  func isFtuDone(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+    let identifier = call.arguments as! String
+    _ = api.isFtuDone(identifier).subscribe(
+      onSuccess: {
+        result($0)
+      },
+      onFailure: { error in
+        result(
+          FlutterError(
+            code: "Error checking FTU status", message: error.localizedDescription,
+            details: nil))
+      })
+  }
+
   private func success(_ event: String, data: Any? = nil) {
     DispatchQueue.main.async {
       self.events?(["event": event, "data": data])
@@ -464,6 +502,12 @@ public class SwiftPolarPlugin:
   public func batteryLevelReceived(_ identifier: String, batteryLevel: UInt) {
     success("batteryLevelReceived", data: [identifier, batteryLevel])
   }
+
+  // public func batteryChargingStatusReceived(
+  //   _ identifier: String, chargingStatus: BleBasClient.ChargeState
+  // ) {
+  //     success("batteryChargingStatusReceived", data: [identifier, String(describing: chargingStatus)])
+  // }
 
   public func blePowerOn() {
     success("blePowerStateChanged", data: true)
@@ -603,6 +647,8 @@ class StreamingChannel: NSObject, FlutterStreamHandler {
       stream = api.startTemperatureStreaming(identifier, settings: settings!)
     case .pressure:
       stream = api.startPressureStreaming(identifier, settings: settings!)
+    case .skinTemperature:
+      stream = api.startSkinTemperatureStreaming(identifier, settings: settings!)
     }
 
     subscription = stream.anySubscribe(

@@ -40,6 +40,18 @@ class PolarBatteryLevelEvent {
   PolarBatteryLevelEvent(this.identifier, this.level);
 }
 
+/// battery charging status
+class PolarBatteryChargingStatusEvent {
+  /// Polar device id
+  final String identifier;
+
+  /// true if charging
+  final PolarChargeState chargingStatus;
+
+  /// Constructor
+  PolarBatteryChargingStatusEvent(this.identifier, this.chargingStatus);
+}
+
 /// Polar disconnect event
 class PolarDeviceDisconnectedEvent {
   /// The polar device info

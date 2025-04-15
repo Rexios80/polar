@@ -30,7 +30,13 @@ enum PolarDataType {
   temperature,
 
   /// Pressure
-  pressure;
+  pressure,
+
+  /// skin temperature
+  skinTemperature,
+
+  /// location
+  location;
 
   /// If this feature supports stream settings
   final bool supportsStreamSettings;
