@@ -561,6 +561,8 @@ class Polar {
   /// - Returns: Completable stream
   ///   - success: when FTU notification sent to device
   ///   - onError: see `PolarErrors` for possible errors invoked
+  ///
+  /// IMPORTANT: FTU birthDate needs to be in the format 'MM/DD/YYYY' on IOS and in Milliseconds since epoch on Android!
   Future<void> doFirstTimeUse(
     String identifier,
     PolarFirstTimeUseConfig config,
