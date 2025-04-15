@@ -446,8 +446,6 @@ class PolarFirstTimeUseConfigCodable : Decodable {
           return
         }
         data = PolarFirstTimeUseConfig(gender: gender, birthDate: birthDate, height: height, weight: weight, maxHeartRate: maxHeartRate, vo2Max: vo2Max, restingHeartRate: restingHeartRate, trainingBackground: trainingBackground, deviceTime: deviceTime, typicalDay: typicalDay, sleepGoalMinutes: sleepGoalMinutes)
-
-        //data = PolarFirstTimeUseConfig(gender: gender, birthDate: birthDate, height: height, weight: weight, maxHeartRate: maxHeartRate, vo2Max: vo2Max, restingHeartRate: restingHeartRate, trainingBackground: trainingBackground, deviceTime: deviceTime, typicalDay: typicalDay, sleepGoalMinutes: sleepGoalMinutes)
     }
     
     enum CodingKeys: String, CodingKey {
