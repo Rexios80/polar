@@ -581,7 +581,7 @@ class PolarWrapper(
         identifier: String,
         chargingStatus: ChargeState,
     ) {
-        success("batteryChargingStatusReceived", listOf(identifier, chargingStatus))
+        success("batteryChargingStatusReceived", listOf(identifier, chargingStatus.name))
     }
 
     override fun htsNotificationReceived(
