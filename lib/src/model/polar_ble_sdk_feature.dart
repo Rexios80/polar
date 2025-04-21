@@ -1,5 +1,3 @@
-import 'dart:io';
-
 /// Features available in Polar BLE SDK library
 enum PolarSdkFeature {
   /// Hr feature to receive hr and rr data from Polar or any other BLE device
