@@ -1,7 +1,7 @@
 ## NEXT
 
 - Converts native method invocations to `EventChannel` to fix background callback issues
-- Upgrades Polar SDK to `6.0.0` (by [@HaveANiceDay33](https://github.com/HaveANiceDay33) in [#52](https://github.com/Rexios80/polar/pull/52))
+- Upgrades Polar SDK to `6.1.1` (by [@HaveANiceDay33](https://github.com/HaveANiceDay33) in [#52](https://github.com/Rexios80/polar/pull/52))
 
 ## 7.5.1
 
