@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:integration_test/integration_test.dart';
 import 'package:polar/polar.dart';
 
@@ -19,7 +21,7 @@ void main() async {
       PolarSdkFeature.sdkMode,
       PolarSdkFeature.ledAnimation,
       PolarSdkFeature.activityData,
-      PolarSdkFeature.fileTransfer,
+      if (Platform.isIOS) PolarSdkFeature.fileTransfer,
       PolarSdkFeature.hts,
       PolarSdkFeature.sleepData,
       PolarSdkFeature.temperatureData,
