@@ -18,6 +18,11 @@ void main() async {
       PolarSdkFeature.offlineRecording,
       PolarSdkFeature.sdkMode,
       PolarSdkFeature.ledAnimation,
+      PolarSdkFeature.activityData,
+      PolarSdkFeature.fileTransfer,
+      PolarSdkFeature.hts,
+      PolarSdkFeature.sleepData,
+      PolarSdkFeature.temperatureData,
     }),
   );
   testStreaming(

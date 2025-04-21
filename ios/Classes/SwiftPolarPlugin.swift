@@ -483,10 +483,7 @@ public class SwiftPolarPlugin:
   public func bleSdkFeatureReady(_ identifier: String, feature: PolarBleSdkFeature) {
     success(
       "sdkFeatureReady",
-      data: [
-        identifier,
-        PolarBleSdkFeature.allCases.firstIndex(of: feature)!,
-      ])
+      data: [identifier, String(describing: feature)])
   }
 
   public func disInformationReceived(_ identifier: String, uuid: CBUUID, value: String) {

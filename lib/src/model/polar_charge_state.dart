@@ -27,7 +27,7 @@ enum PolarChargeState {
   /// Create a [PolarChargeState] from json
   static PolarChargeState fromJson(dynamic json) {
     if (Platform.isIOS) {
-      return PolarChargeState.values[json as int];
+      return PolarChargeState.values.byName(json as String);
     } else {
       // This is android
       return _stringFeatureMap[json as String]!;
@@ -37,7 +37,7 @@ enum PolarChargeState {
   /// Convert a [PolarChargeState] to json
   dynamic toJson() {
     if (Platform.isIOS) {
-      return PolarChargeState.values.indexOf(this);
+      return name;
     } else {
       // This is Android
       return _featureStringMap[this]!;

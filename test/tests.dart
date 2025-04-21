@@ -49,7 +49,10 @@ Future<void> disconnect(String identifier) async {
   await polar.deviceDisconnected.first;
 }
 
-void testBasicData(String identifier) {
+void testBasicData(
+  String identifier, {
+  PolarChargeState expectedChargeState = PolarChargeState.unknown,
+}) {
   group('basic data', () {
     setUp(() async {
       await connect(identifier);
@@ -71,10 +74,7 @@ void testBasicData(String identifier) {
 
     test('batteryChargingStatus', () async {
       final chargeState = await polar.batteryChargingStatus.first;
-      expect(
-        chargeState.chargingStatus,
-        PolarChargeState.dischargingActive,
-      );
+      expect(chargeState.chargingStatus, expectedChargeState);
     });
   });
 }
@@ -85,10 +85,13 @@ void testBleSdkFeatures(
 }) {
   test('Ble sdk features', () async {
     await connect(identifier);
-    final available = await polar.sdkFeatureReady
-        .take(features.length)
-        .map((e) => e.feature)
-        .toSet();
+
+    final available = <PolarSdkFeature>{};
+    final sub = polar.sdkFeatureReady.listen((e) => available.add(e.feature));
+    addTearDown(sub.cancel);
+
+    await Future.delayed(const Duration(seconds: 3));
+
     expect(setEquals(available, features), true);
     await disconnect(identifier);
   });

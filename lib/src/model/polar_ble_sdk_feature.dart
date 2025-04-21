@@ -36,22 +36,22 @@ enum PolarSdkFeature {
   ledAnimation,
 
   /// Firmware update for Polar device.
-  featurePolarFirmwareUpdate,
+  firmwareUpdate,
 
   /// Feature to receive activity data from Polar device.
-  featurePolarActivityData,
+  activityData,
 
   /// Feature to transfer files to and from Polar device.
-  featurePolarFileTransfer,
+  fileTransfer,
 
   /// Feature to receive HTS data from Polar device.
-  featureHts,
+  hts,
 
   /// Feature to receive sleep data from Polar device.
-  featurePolarSleepData,
+  sleepData,
 
   /// Feature to receive temperature data from Polar device.
-  featurePolarTemperatureData;
+  temperatureData;
 
   static const _featureStringMap = {
     hr: 'FEATURE_HR',
@@ -63,12 +63,12 @@ enum PolarSdkFeature {
     deviceTimeSetup: 'FEATURE_POLAR_DEVICE_TIME_SETUP',
     sdkMode: 'FEATURE_POLAR_SDK_MODE',
     ledAnimation: 'FEATURE_POLAR_LED_ANIMATION',
-    featurePolarFirmwareUpdate: 'FEATURE_POLAR_FIRMWARE_UPDATE',
-    featurePolarActivityData: 'FEATURE_POLAR_ACTIVITY_DATA',
-    featurePolarFileTransfer: 'FEATURE_POLAR_FILE_TRANSFER',
-    featureHts: 'FEATURE_HTS',
-    featurePolarSleepData: 'FEATURE_POLAR_SLEEP_DATA',
-    featurePolarTemperatureData: 'FEATURE_POLAR_TEMPERATURE_DATA',
+    firmwareUpdate: 'FEATURE_POLAR_FIRMWARE_UPDATE',
+    activityData: 'FEATURE_POLAR_ACTIVITY_DATA',
+    fileTransfer: 'FEATURE_POLAR_FILE_TRANSFER',
+    hts: 'FEATURE_HTS',
+    sleepData: 'FEATURE_POLAR_SLEEP_DATA',
+    temperatureData: 'FEATURE_POLAR_TEMPERATURE_DATA',
   };
 
   static final _stringFeatureMap =
@@ -76,21 +76,12 @@ enum PolarSdkFeature {
 
   /// Create a [PolarSdkFeature] from json
   static PolarSdkFeature fromJson(dynamic json) {
-    if (Platform.isIOS) {
-      return PolarSdkFeature.values[json as int];
-    } else {
-      // This is android
-      return _stringFeatureMap[json as String]!;
-    }
+    final featureString = (json as String).toUpperCase();
+    return _stringFeatureMap[featureString]!;
   }
 
   /// Convert a [PolarSdkFeature] to json
   dynamic toJson() {
-    if (Platform.isIOS) {
-      return PolarSdkFeature.values.indexOf(this);
-    } else {
-      // This is Android
-      return _featureStringMap[this]!;
-    }
+    return _featureStringMap[this]!;
   }
 }
