@@ -92,6 +92,17 @@ class Polar {
       .where((e) => e.event == PolarEvent.batteryLevelReceived)
       .map((e) => PolarBatteryLevelEvent(e.data[0], e.data[1]));
 
+  /// Battery charging status received from device.
+  Stream<PolarBatteryChargingStatusEvent> get batteryChargingStatus =>
+      _eventStream
+          .where((e) => e.event == PolarEvent.batteryChargingStatusReceived)
+          .map(
+            (e) => PolarBatteryChargingStatusEvent(
+              e.data[0],
+              PolarChargeState.fromJson(e.data[1]),
+            ),
+          );
+
   /// Start searching for Polar device(s)
   ///
   /// - Parameter onNext: Invoked once for each device
@@ -371,6 +382,46 @@ class Polar {
       identifier,
       settings: settings,
     ).map(PolarPressureData.fromJson);
+  }
+
+  /// Start skin temperature stream. Skin temperature stream is stopped if the connection is closed,
+  /// error occurs or stream is disposed.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or device address
+  ///   - settings: selected settings to start the stream
+  /// - Returns: Observable stream
+  ///   - onNext: for every air packet received. see `PolarSkinTemperatureData`
+  ///   - onError: see `PolarErrors` for possible errors invoked
+  Stream<PolarTemperatureData> startSkinTemperatureStreaming(
+    String identifier, {
+    PolarSensorSetting? settings,
+  }) {
+    return _startStreaming(
+      PolarDataType.skinTemperature,
+      identifier,
+      settings: settings,
+    ).map(PolarTemperatureData.fromJson);
+  }
+
+  /// Start location stream. Location stream is stopped if the connection is closed,
+  /// error occurs or stream is disposed. This is not supported on IOS.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or device address
+  ///   - settings: selected settings to start the stream
+  /// - Returns: Observable stream
+  ///   - onNext: for every air packet received. see `PolarLocationData`
+  ///   - onError: see `PolarErrors` for possible errors invoked
+  Stream<PolarLocationData> startLocationStreaming(
+    String identifier, {
+    PolarSensorSetting? settings,
+  }) {
+    return _startStreaming(
+      PolarDataType.location,
+      identifier,
+      settings: settings,
+    ).map(PolarLocationData.fromJson);
   }
 
   /// Request start recording. Supported only by Polar H10. Requires `polarFileTransfer` feature.

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:polar/polar.dart';
@@ -49,7 +51,10 @@ Future<void> disconnect(String identifier) async {
   await polar.deviceDisconnected.first;
 }
 
-void testBasicData(String identifier) {
+void testBasicData(
+  String identifier, {
+  PolarChargeState expectedChargeState = PolarChargeState.unknown,
+}) {
   group('basic data', () {
     setUp(() async {
       await connect(identifier);
@@ -68,6 +73,11 @@ void testBasicData(String identifier) {
       final batteryEvent = await polar.batteryLevel.first;
       expect(batteryEvent.level, greaterThan(0));
     });
+
+    test('batteryChargingStatus', () async {
+      final chargeState = await polar.batteryChargingStatus.first;
+      expect(chargeState.chargingStatus, expectedChargeState);
+    });
   });
 }
 
@@ -77,10 +87,12 @@ void testBleSdkFeatures(
 }) {
   test('Ble sdk features', () async {
     await connect(identifier);
-    final available = await polar.sdkFeatureReady
-        .take(features.length)
-        .map((e) => e.feature)
-        .toSet();
+
+    final available = <PolarSdkFeature>{};
+    final sub = polar.sdkFeatureReady.listen((e) => available.add(e.feature));
+    await Future.delayed(const Duration(seconds: 3));
+    unawaited(sub.cancel());
+
     expect(setEquals(available, features), true);
     await disconnect(identifier);
   });
@@ -246,12 +258,12 @@ void testSdkMode(String identifier) {
   });
 }
 
-void testMisc(String identifier, {required bool isVerity}) {
+void testMisc(String identifier, {required bool supportsLedConfig}) {
   test('misc', () async {
     await connect(identifier);
     // Wait to ensure device is connected (not sure why this is necessary)
     await Future.delayed(const Duration(seconds: 3));
-    if (isVerity) {
+    if (supportsLedConfig) {
       await polar.setLedConfig(
         identifier,
         LedConfig(ppiModeLedEnabled: false, sdkModeLedEnabled: false),

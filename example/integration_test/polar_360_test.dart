@@ -1,11 +1,9 @@
-import 'dart:io';
-
 import 'package:integration_test/integration_test.dart';
 import 'package:polar/polar.dart';
 
 import '../../test/tests.dart';
 
-const identifier = 'AE0F8E27';
+const identifier = 'E5C32C2E';
 
 void main() async {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -13,16 +11,14 @@ void main() async {
   await requestPermissions();
   testSearch(identifier);
   testConnection(identifier);
+
+  /// TODO: Add FTU
   testBasicData(identifier);
   testBleSdkFeatures(
     identifier,
     features: PolarSdkFeature.values.toSet().difference({
+      PolarSdkFeature.offlineRecording,
       PolarSdkFeature.h10ExerciseRecording,
-      PolarSdkFeature.activityData,
-      if (Platform.isIOS) PolarSdkFeature.fileTransfer,
-      PolarSdkFeature.hts,
-      PolarSdkFeature.sleepData,
-      PolarSdkFeature.temperatureData,
     }),
   );
   testStreaming(
@@ -30,10 +26,8 @@ void main() async {
     features: {
       PolarDataType.hr,
       PolarDataType.acc,
-      PolarDataType.ppg,
       PolarDataType.ppi,
-      PolarDataType.gyro,
-      PolarDataType.magnetometer,
+      PolarDataType.temperature,
     },
   );
   testSdkMode(identifier);

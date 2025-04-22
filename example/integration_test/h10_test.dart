@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:integration_test/integration_test.dart';
 import 'package:polar/polar.dart';
 
@@ -18,6 +20,11 @@ void main() async {
       PolarSdkFeature.offlineRecording,
       PolarSdkFeature.sdkMode,
       PolarSdkFeature.ledAnimation,
+      PolarSdkFeature.activityData,
+      if (Platform.isIOS) PolarSdkFeature.fileTransfer,
+      PolarSdkFeature.hts,
+      PolarSdkFeature.sleepData,
+      PolarSdkFeature.temperatureData,
     }),
   );
   testStreaming(
@@ -29,5 +36,5 @@ void main() async {
     },
   );
   testRecording(identifier);
-  testMisc(identifier, isVerity: false);
+  testMisc(identifier, supportsLedConfig: false);
 }
