@@ -16,7 +16,8 @@ dependencies:
   device_info_plus: ^11.0.0
   recase: ^4.0.0
   json_annotation: ^4.8.1
-
+  intl: ^0.18.0
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter

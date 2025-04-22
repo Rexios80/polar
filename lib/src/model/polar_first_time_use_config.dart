@@ -18,34 +18,63 @@ enum TrainingBackground {
   /// Professional training (6+ times per week)
   pro(60);
 
+  /// The numeric value representing the training background level
   final int value;
   const TrainingBackground(this.value);
 }
 
 /// Enum representing the typical day activity levels
 enum TypicalDay {
+  /// Mostly moving throughout the day
   mostlyMoving(1),
+
+  /// Mostly sitting throughout the day
   mostlySitting(2),
+
+  /// Mostly standing throughout the day
   mostlyStanding(3);
 
+  /// The numeric value representing the typical day activity level
   final int value;
   const TypicalDay(this.value);
 }
 
 /// Configuration class for First Time Use setup
 class PolarFirstTimeUseConfig {
+  /// The gender of the user ('Male' or 'Female')
   final String gender;
+
+  /// The user's birth date
   final DateTime birthDate;
+
+  /// The user's height in centimeters (90-240)
   final int height;
+
+  /// The user's weight in kilograms (15-300)
   final int weight;
+
+  /// The user's maximum heart rate in bpm (100-240)
   final int maxHeartRate;
+
+  /// The user's VO2 max (10-95)
   final int vo2Max;
+
+  /// The user's resting heart rate in bpm (20-120)
   final int restingHeartRate;
+
+  /// The user's training background level
   final TrainingBackground trainingBackground;
+
+  /// The device time in ISO 8601 format
   final String deviceTime;
+
+  /// The user's typical daily activity level
   final TypicalDay typicalDay;
+
+  /// The user's sleep goal in minutes
   final int sleepGoalMinutes;
 
+  /// Creates a new [PolarFirstTimeUseConfig] instance
   PolarFirstTimeUseConfig({
     required this.gender,
     required this.birthDate,
@@ -80,6 +109,7 @@ class PolarFirstTimeUseConfig {
     }
   }
 
+  /// Converts this configuration to a map for JSON serialization
   Map<String, dynamic> toMap() {
     return {
       'gender': gender,

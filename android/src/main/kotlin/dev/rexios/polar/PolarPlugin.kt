@@ -1,6 +1,8 @@
 package dev.rexios.polar
 
+import android.annotation.TargetApi
 import android.content.Context
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import androidx.lifecycle.Lifecycle.Event
@@ -45,6 +47,8 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.UUID
+import java.time.Instant
+import java.time.ZoneId
 
 fun Any?.discard() = Unit
 
@@ -173,6 +177,9 @@ class PolarPlugin :
             "setLocalTime" -> setLocalTime(call, result)
             "doFirstTimeUse" -> doFirstTimeUse(call, result)
             "isFtuDone" -> isFtuDone(call, result)
+            "deleteStoredDeviceData" -> deleteStoredDeviceData(call, result)
+            "deleteDeviceDateFolders" -> deleteDeviceDateFolders(call, result)
+            "getSteps" -> getSteps(call, result)
 
             else -> result.notImplemented()
         }
@@ -821,6 +828,81 @@ class PolarPlugin :
                 runOnUiThread {
                     result.error(it.toString(), it.message, null)
                 }
+            })
+            .discard()
+    }
+
+    @TargetApi(Build.VERSION_CODES.O)
+    private fun deleteStoredDeviceData(call: MethodCall, result: Result) {
+        val arguments = call.arguments as List<*>
+        val identifier = arguments[0] as String
+        val dataType = gson.fromJson(arguments[1] as String, PolarBleApi.PolarStoredDataType::class.java)
+        val until = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(arguments[2] as String)
+            .toInstant()
+            .atZone(ZoneId.systemDefault())
+            .toLocalDate()
+
+        wrapper.api
+            .deleteStoredDeviceData(identifier, dataType, until)
+            .subscribe({ paths ->
+                runOnUiThread { result.success(gson.toJson(paths)) }
+            }, {
+                runOnUiThread {
+                    result.error(it.toString(), it.message, null)
+                }
+            })
+            .discard()
+    }
+
+    @TargetApi(Build.VERSION_CODES.O)
+    private fun deleteDeviceDateFolders(call: MethodCall, result: Result) {
+        val arguments = call.arguments as List<*>
+        val identifier = arguments[0] as String
+        val fromDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(arguments[1] as String)
+            .toInstant()
+            .atZone(ZoneId.systemDefault())
+            .toLocalDate()
+        val toDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(arguments[2] as String)
+            .toInstant()
+            .atZone(ZoneId.systemDefault())
+            .toLocalDate()
+
+        wrapper.api
+            .deleteDeviceDateFolders(identifier, fromDate, toDate)
+            .subscribe({
+                runOnUiThread { result.success(null) }
+            }, {
+                runOnUiThread {
+                    result.error(it.toString(), it.message, null)
+                }
+            })
+            .discard()
+    }
+
+    private fun getSteps(call: MethodCall, result: Result) {
+        val arguments = call.arguments as List<*>
+        val identifier = arguments[0] as String
+        val fromDateString = arguments[1] as String
+        val toDateString = arguments[2] as String
+
+        val fromDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(fromDateString)
+        val toDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(toDateString)
+
+        wrapper.api
+            .getSteps(identifier, fromDate, toDate)
+
+            .subscribe({ stepsDataList: List<com.polar.sdk.api.model.activity.PolarStepsData> ->
+                val response = stepsDataList.map { stepsData ->
+                    mapOf(
+                        "date" to SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(stepsData.date),
+                        "steps" to stepsData.steps
+                    )
+                }
+                runOnUiThread { result.success(gson.toJson(response)) }
+            }, { error ->
+                // This should never be called due to onErrorResumeWith
+                android.util.Log.e("PolarPlugin", "Unexpected error in subscribe: ${error.message}")
+                runOnUiThread { result.success(gson.toJson(emptyList<Map<String, Any>>())) }
             })
             .discard()
     }

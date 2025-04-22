@@ -586,6 +586,25 @@ class PolarDiskSpaceDataCodable: Encodable {
     }
 }
 
+class PolarStepsDataCodable: Encodable {
+    let data: PolarStepsData
+
+    init(_ data: PolarStepsData) {
+        self.data = data
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case date
+        case steps
+    }
+
+    func encode(to encoder: Encoder) {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try? container.encode(data.date, forKey: .date)
+        try? container.encode(data.steps, forKey: .steps)
+    }
+}
+
 extension Date {
   var millisecondsSince1970: Int64 {
     Int64((timeIntervalSince1970 * 1000).rounded())

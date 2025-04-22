@@ -9,6 +9,7 @@ import 'package:polar/polar.dart';
 import 'package:polar/src/model/convert.dart';
 import 'package:polar/src/model/polar_event_wrapper.dart';
 import 'package:polar/src/model/polar_offline_recording_data.dart';
+import 'package:intl/intl.dart';
 
 /// Flutter implementation of the [PolarBleSdk]
 class Polar {
@@ -84,6 +85,7 @@ class Polar {
       .where((e) => e.event == PolarEvent.disInformationReceived)
       .map((e) => PolarDisInformationEvent(e.data[0], e.data[1], e.data[2]));
 
+  /// Stream of battery level events from the Polar device
   Stream<PolarBatteryLevelEvent> get batteryLevel => _eventStream
       .where((e) => e.event == PolarEvent.batteryLevelReceived)
       .map((e) => PolarBatteryLevelEvent(e.data[0], e.data[1]));
@@ -815,5 +817,87 @@ class Polar {
 
     // If the result is null, default to false for safety
     return result ?? false;
+  }
+
+  /// Deletes stored device data of a specific type up to a given date.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or address
+  ///   - dataType: The type of data to delete
+  ///   - until: Delete data up to this date
+  /// - Returns: A list of paths of deleted data
+  ///   - success: Returns a list of paths of deleted data
+  ///   - onError: Possible errors are returned as exceptions
+  // Future<List<String>> deleteStoredDeviceData(
+  //   String identifier,
+  //   PolarStoredDataType dataType,
+  //   DateTime until,
+  // ) async {
+  //   final result = await _methodChannel.invokeMethod<String>(
+  //     'deleteStoredDeviceData',
+  //     [
+  //       identifier,
+  //       dataType.toJson(),
+  //       DateFormat('yyyy-MM-dd').format(until),
+  //     ],
+  //   );
+
+  //   if (result == null) return [];
+  //   return (jsonDecode(result) as List).cast<String>();
+  // }
+
+  /// Deletes device date folders between two dates.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or address
+  ///   - fromDate: Start date for deletion
+  ///   - toDate: End date for deletion
+  /// - Returns: Future<void>
+  ///   - success: Completes when deletion is successful
+  ///   - onError: Possible errors are returned as exceptions
+  // Future<void> deleteDeviceDateFolders(
+  //   String identifier,
+  //   DateTime fromDate,
+  //   DateTime toDate,
+  // ) async {
+  //   await _methodChannel.invokeMethod(
+  //     'deleteDeviceDateFolders',
+  //     [
+  //       identifier,
+  //       DateFormat('yyyy-MM-dd').format(fromDate),
+  //       DateFormat('yyyy-MM-dd').format(toDate),
+  //     ],
+  //   );
+  // }
+
+  /// Gets the steps data for a specific date range.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or address
+  ///   - fromDate: Start date for the range
+  ///   - toDate: End date for the range
+  /// - Returns: List of steps data for the given date range
+  ///   - success: Returns a list of steps data
+  ///   - onError: Possible errors are returned as exceptions
+  Future<List<PolarStepsData>> getSteps(
+    String identifier,
+    DateTime fromDate,
+    DateTime toDate,
+  ) async {
+    final result = await _methodChannel.invokeMethod<String>(
+      'getSteps',
+      [
+        identifier,
+        DateFormat('yyyy-MM-dd').format(fromDate),
+        DateFormat('yyyy-MM-dd').format(toDate),
+      ],
+    );
+
+    if (result == null) return [];
+
+    final data = jsonDecode(result) as List;
+    return data
+        .map((e) => PolarStepsData.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 }
