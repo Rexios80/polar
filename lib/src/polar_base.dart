@@ -571,4 +571,38 @@ class Polar {
         await _methodChannel.invokeMethod<bool>('isSdkModeEnabled', identifier);
     return result!;
   }
+
+  /// Performs the First Time Use setup for a Polar 360 device.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or address.
+  ///   - config: Configuration data for the first-time use.
+  /// - Returns: Future<void>.
+  ///   - success: Completes when the configuration is sent to device.
+  ///   - onError: Possible errors are returned as exceptions.
+  Future<void> doFirstTimeUse(
+    String identifier,
+    PolarFirstTimeUseConfig config,
+  ) async {
+    await _methodChannel.invokeMethod('doFirstTimeUse', {
+      'identifier': identifier,
+      'config': config.toMap(),
+    });
+  }
+
+  /// Checks if First Time Use setup has been completed for a Polar device.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or address.
+  /// - Returns: A boolean indicating if FTU is completed.
+  ///   - success: Returns true if FTU is done, false otherwise.
+  ///   - onError: Possible errors are returned as exceptions.
+  Future<bool> isFtuDone(String identifier) async {
+    // Call the native method to check FTU status
+    final result =
+        await _methodChannel.invokeMethod<bool>('isFtuDone', identifier);
+
+    // If the result is null, default to false for safety
+    return result ?? false;
+  }
 }

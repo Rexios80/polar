@@ -42,6 +42,9 @@ import io.reactivex.rxjava3.disposables.Disposable
 import java.lang.reflect.Type
 import java.util.Date
 import java.util.UUID
+import com.polar.sdk.api.model.PolarFirstTimeUseConfig
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 fun Any?.discard() = Unit
 
@@ -153,6 +156,8 @@ class PolarPlugin :
             "enableSdkMode" -> enableSdkMode(call, result)
             "disableSdkMode" -> disableSdkMode(call, result)
             "isSdkModeEnabled" -> isSdkModeEnabled(call, result)
+            "doFirstTimeUse" -> doFirstTimeUse(call, result)
+            "isFtuDone" -> isFtuDone(call, result)
             else -> result.notImplemented()
         }
     }
@@ -477,6 +482,110 @@ class PolarPlugin :
             .isSDKModeEnabled(identifier)
             .subscribe({
                 runOnUiThread { result.success(it) }
+            }, {
+                runOnUiThread {
+                    result.error(it.toString(), it.message, null)
+                }
+            })
+            .discard()
+    }
+
+        private fun doFirstTimeUse(call: MethodCall, result: Result) {
+        val arguments = call.arguments as Map<*, *>
+        val identifier = arguments["identifier"] as? String
+        val configMap = arguments["config"] as? Map<*, *>
+
+        if (identifier == null || configMap == null) {
+            result.error(
+                "INVALID_ARGUMENTS",
+                "Expected identifier and config map",
+                null
+            )
+            return
+        }
+        // Extract configuration values
+        val gender = configMap["gender"] as? String
+        val birthDateString = configMap["birthDate"] as? String
+        val height = (configMap["height"] as? Int)?.toFloat()
+        val weight = (configMap["weight"] as? Int)?.toFloat()
+        val maxHeartRate = configMap["maxHeartRate"] as? Int
+        val vo2Max = configMap["vo2Max"] as? Int
+        val restingHeartRate = configMap["restingHeartRate"] as? Int
+        val trainingBackground = configMap["trainingBackground"] as? Int
+        val deviceTime = configMap["deviceTime"] as? String
+        val typicalDay = configMap["typicalDay"] as? Int
+        val sleepGoalMinutes = configMap["sleepGoalMinutes"] as? Int
+
+        // Validate required parameters
+        if (gender == null || birthDateString == null || height == null || weight == null ||
+            maxHeartRate == null || vo2Max == null || restingHeartRate == null ||
+            trainingBackground == null || deviceTime == null || typicalDay == null ||
+            sleepGoalMinutes == null
+        ) {
+            result.error(
+                "INVALID_CONFIG",
+                "Invalid configuration parameters",
+                null
+            )
+            return
+        }
+
+        // Parse birth date
+        val birthDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(birthDateString)
+
+        // Map gender string to PolarFirstTimeUseConfig.Gender enum
+        val genderEnum = when (gender) {
+            "Male" -> PolarFirstTimeUseConfig.Gender.MALE
+            "Female" -> PolarFirstTimeUseConfig.Gender.FEMALE
+            else -> throw IllegalArgumentException("Invalid gender value")
+        }
+
+        // Map typicalDay to PolarFirstTimeUseConfig.TypicalDay enum
+        val typicalDayEnum = when (typicalDay) {
+            1 -> PolarFirstTimeUseConfig.TypicalDay.MOSTLY_MOVING
+            2 -> PolarFirstTimeUseConfig.TypicalDay.MOSTLY_SITTING
+            3 -> PolarFirstTimeUseConfig.TypicalDay.MOSTLY_STANDING
+            else -> PolarFirstTimeUseConfig.TypicalDay.MOSTLY_SITTING // Default
+        }
+
+        // Create PolarFirstTimeUseConfig instance
+        val ftuConfig = PolarFirstTimeUseConfig(
+            genderEnum,
+            birthDate,
+            height,
+            weight,
+            maxHeartRate,
+            vo2Max,
+            restingHeartRate,
+            trainingBackground,
+            deviceTime,
+            typicalDayEnum,
+            sleepGoalMinutes
+        )
+
+        // Call the Polar API
+        wrapper.api
+            .doFirstTimeUse(identifier, ftuConfig)
+            .subscribe({
+                runOnUiThread { result.success(null) }
+            }, {
+                runOnUiThread {
+                    result.error(it.toString(), it.message, null)
+                }
+            })
+            .discard()
+    }
+
+    private fun isFtuDone(call: MethodCall, result: Result) {
+        val identifier = call.arguments as? String ?: run {
+            result.error("ERROR_INVALID_ARGUMENT", "Expected a single String argument", null)
+            return
+        }
+
+        wrapper.api
+            .isFtuDone(identifier)
+            .subscribe({ isFtuDone ->
+                runOnUiThread { result.success(isFtuDone) }
             }, {
                 runOnUiThread {
                     result.error(it.toString(), it.message, null)
