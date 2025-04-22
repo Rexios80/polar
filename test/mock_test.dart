@@ -34,7 +34,10 @@ void main() {
 
   testSearch(identifier);
   testConnection(identifier);
-  testBasicData(identifier);
+  testBasicData(
+    identifier,
+    expectedChargeState: PolarChargeState.dischargingActive,
+  );
   testBleSdkFeatures(identifier, features: PolarSdkFeature.values.toSet());
   testStreaming(identifier, features: PolarDataType.values.toSet());
   testRecording(identifier, wait: false);

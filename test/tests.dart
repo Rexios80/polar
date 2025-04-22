@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:polar/polar.dart';
@@ -88,9 +90,8 @@ void testBleSdkFeatures(
 
     final available = <PolarSdkFeature>{};
     final sub = polar.sdkFeatureReady.listen((e) => available.add(e.feature));
-    addTearDown(sub.cancel);
-
     await Future.delayed(const Duration(seconds: 3));
+    unawaited(sub.cancel());
 
     expect(setEquals(available, features), true);
     await disconnect(identifier);
