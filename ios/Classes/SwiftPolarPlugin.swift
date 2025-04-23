@@ -495,6 +495,13 @@ private func success(_ event: String, data: Any? = nil) {
     success("batteryLevelReceived", data: [identifier, batteryLevel])
   }
 
+  public func batteryChargingStatusReceived(
+    _ identifier: String, chargingStatus: BleBasClient.ChargeState
+  ) {
+    success(
+      "batteryChargingStatusReceived", data: [identifier, String(describing: chargingStatus)])
+  }
+
   public func blePowerOn() {
     success("blePowerStateChanged", data: true)
   }

@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:polar/polar.dart';
 import 'package:polar/src/model/convert.dart';
+import 'package:polar/src/model/polar_charge_state.dart';
 import 'package:polar/src/model/polar_event_wrapper.dart';
 import 'package:polar/src/model/polar_offline_recording_data.dart';
 import 'package:intl/intl.dart';
@@ -89,6 +90,17 @@ class Polar {
   Stream<PolarBatteryLevelEvent> get batteryLevel => _eventStream
       .where((e) => e.event == PolarEvent.batteryLevelReceived)
       .map((e) => PolarBatteryLevelEvent(e.data[0], e.data[1]));
+
+  /// Battery charging status received from device.
+  Stream<PolarBatteryChargingStatusEvent> get batteryChargingStatus =>
+      _eventStream
+          .where((e) => e.event == PolarEvent.batteryChargingStatusReceived)
+          .map(
+            (e) => PolarBatteryChargingStatusEvent(
+              e.data[0],
+              PolarChargeState.fromJson(e.data[1]),
+            ),
+          );
 
   /// Start searching for Polar device(s)
   ///
@@ -877,27 +889,48 @@ class Polar {
   ///   - fromDate: Start date for the range
   ///   - toDate: End date for the range
   /// - Returns: List of steps data for the given date range
-  ///   - success: Returns a list of steps data
+  ///   - success: Returns a list of steps data (may be empty if no data available)
   ///   - onError: Possible errors are returned as exceptions
   Future<List<PolarStepsData>> getSteps(
     String identifier,
     DateTime fromDate,
     DateTime toDate,
   ) async {
-    final result = await _methodChannel.invokeMethod<String>(
-      'getSteps',
-      [
-        identifier,
-        DateFormat('yyyy-MM-dd').format(fromDate),
-        DateFormat('yyyy-MM-dd').format(toDate),
-      ],
-    );
+    try {
+      // Ensure dates are properly formatted with hours and minutes in UTC
+      final formattedFromDate =
+          DateFormat('yyyy-MM-dd HH:mm').format(fromDate.toUtc());
+      final formattedToDate =
+          DateFormat('yyyy-MM-dd HH:mm').format(toDate.toUtc());
 
-    if (result == null) return [];
+      final result = await _methodChannel.invokeMethod<String>(
+        'getSteps',
+        [
+          identifier,
+          formattedFromDate,
+          formattedToDate,
+        ],
+      );
 
-    final data = jsonDecode(result) as List;
-    return data
-        .map((e) => PolarStepsData.fromJson(e as Map<String, dynamic>))
-        .toList();
+      // If result is null, return an empty list
+      if (result == null || result.isEmpty) {
+        return [];
+      }
+
+      // Try to parse the JSON response
+      try {
+        final data = jsonDecode(result) as List;
+        return data
+            .map((e) => PolarStepsData.fromJson(e as Map<String, dynamic>))
+            .toList();
+      } catch (e) {
+        print("Error parsing steps data: $e");
+        return [];
+      }
+    } catch (e) {
+      print("Error getting steps data: $e");
+      // Return empty list instead of throwing, as no data is not an exceptional situation
+      return [];
+    }
   }
 }
