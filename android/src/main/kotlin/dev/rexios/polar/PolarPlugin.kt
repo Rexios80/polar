@@ -5,6 +5,7 @@ import android.os.Handler
 import android.os.Looper
 import androidx.lifecycle.Lifecycle.Event
 import androidx.lifecycle.LifecycleEventObserver
+import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
@@ -71,6 +72,35 @@ private val gson = GsonBuilder().registerTypeAdapter(Date::class.java, DateSeria
 private var wrapperInternal: PolarWrapper? = null
 private val wrapper: PolarWrapper
     get() = wrapperInternal!!
+
+data class FirstTimeUseConfig(
+    val gender: String,
+    val birthDate: String,
+    val height: Int,
+    val weight: Int,
+    val maxHeartRate: Int,
+    val vo2Max: Int,
+    val restingHeartRate: Int,
+    val trainingBackground: Int,
+    val deviceTime: String,
+    val typicalDay: Int,
+    val sleepGoalMinutes: Int
+)
+
+object PolarEnumMapper {
+    fun genderFromString(gender: String): PolarFirstTimeUseConfig.Gender = when (gender) {
+        "Male" -> PolarFirstTimeUseConfig.Gender.MALE
+        "Female" -> PolarFirstTimeUseConfig.Gender.FEMALE
+        else -> throw IllegalArgumentException("Invalid gender value: $gender")
+    }
+
+    fun typicalDayFromInt(day: Int): PolarFirstTimeUseConfig.TypicalDay = when (day) {
+        1 -> PolarFirstTimeUseConfig.TypicalDay.MOSTLY_MOVING
+        2 -> PolarFirstTimeUseConfig.TypicalDay.MOSTLY_SITTING
+        3 -> PolarFirstTimeUseConfig.TypicalDay.MOSTLY_STANDING
+        else -> PolarFirstTimeUseConfig.TypicalDay.MOSTLY_SITTING
+    }
+}
 
 /** PolarPlugin */
 class PolarPlugin :
@@ -490,80 +520,58 @@ class PolarPlugin :
             .discard()
     }
 
-        private fun doFirstTimeUse(call: MethodCall, result: Result) {
-        val arguments = call.arguments as Map<*, *>
-        val identifier = arguments["identifier"] as? String
-        val configMap = arguments["config"] as? Map<*, *>
+    private fun doFirstTimeUse(call: MethodCall, result: Result) {
+        val arguments = call.arguments as List<*>
+        val identifier = arguments[0] as? String
+        val configJson = arguments[1] as? String
 
-        if (identifier == null || configMap == null) {
+        if (identifier == null || configJson == null) {
             result.error(
                 "INVALID_ARGUMENTS",
-                "Expected identifier and config map",
-                null
-            )
-            return
-        }
-        // Extract configuration values
-        val gender = configMap["gender"] as? String
-        val birthDateString = configMap["birthDate"] as? String
-        val height = (configMap["height"] as? Int)?.toFloat()
-        val weight = (configMap["weight"] as? Int)?.toFloat()
-        val maxHeartRate = configMap["maxHeartRate"] as? Int
-        val vo2Max = configMap["vo2Max"] as? Int
-        val restingHeartRate = configMap["restingHeartRate"] as? Int
-        val trainingBackground = configMap["trainingBackground"] as? Int
-        val deviceTime = configMap["deviceTime"] as? String
-        val typicalDay = configMap["typicalDay"] as? Int
-        val sleepGoalMinutes = configMap["sleepGoalMinutes"] as? Int
-
-        // Validate required parameters
-        if (gender == null || birthDateString == null || height == null || weight == null ||
-            maxHeartRate == null || vo2Max == null || restingHeartRate == null ||
-            trainingBackground == null || deviceTime == null || typicalDay == null ||
-            sleepGoalMinutes == null
-        ) {
-            result.error(
-                "INVALID_CONFIG",
-                "Invalid configuration parameters",
+                "Expected identifier and config JSON",
                 null
             )
             return
         }
 
-        // Parse birth date
-        val birthDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(birthDateString)
-
-        // Map gender string to PolarFirstTimeUseConfig.Gender enum
-        val genderEnum = when (gender) {
-            "Male" -> PolarFirstTimeUseConfig.Gender.MALE
-            "Female" -> PolarFirstTimeUseConfig.Gender.FEMALE
-            else -> throw IllegalArgumentException("Invalid gender value")
+        val gson = Gson()
+        val config: FirstTimeUseConfig = try {
+            gson.fromJson(configJson, FirstTimeUseConfig::class.java)
+        } catch (e: Exception) {
+            result.error("JSON_PARSE_ERROR", "Invalid config JSON: ${e.message}", null)
+            return
         }
 
-        // Map typicalDay to PolarFirstTimeUseConfig.TypicalDay enum
-        val typicalDayEnum = when (typicalDay) {
-            1 -> PolarFirstTimeUseConfig.TypicalDay.MOSTLY_MOVING
-            2 -> PolarFirstTimeUseConfig.TypicalDay.MOSTLY_SITTING
-            3 -> PolarFirstTimeUseConfig.TypicalDay.MOSTLY_STANDING
-            else -> PolarFirstTimeUseConfig.TypicalDay.MOSTLY_SITTING // Default
+        val birthDate = try {
+            SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(config.birthDate)
+        } catch (e: Exception) {
+            result.error("INVALID_DATE", "Could not parse birthDate: ${e.message}", null)
+            return
         }
 
-        // Create PolarFirstTimeUseConfig instance
+        val genderEnum = try {
+            PolarEnumMapper.genderFromString(config.gender)
+        } catch (e: IllegalArgumentException) {
+            result.error("INVALID_GENDER", e.message, null)
+            return
+        }
+
+        val typicalDayEnum = PolarEnumMapper.typicalDayFromInt(config.typicalDay)
+
         val ftuConfig = PolarFirstTimeUseConfig(
             genderEnum,
             birthDate,
-            height,
-            weight,
-            maxHeartRate,
-            vo2Max,
-            restingHeartRate,
-            trainingBackground,
-            deviceTime,
+            config.height.toFloat(),
+            config.weight.toFloat(),
+            config.maxHeartRate,
+            config.vo2Max,
+            config.restingHeartRate,
+            config.trainingBackground,
+            config.deviceTime,
             typicalDayEnum,
-            sleepGoalMinutes
+            config.sleepGoalMinutes
         )
 
-        // Call the Polar API
         wrapper.api
             .doFirstTimeUse(identifier, ftuConfig)
             .subscribe({

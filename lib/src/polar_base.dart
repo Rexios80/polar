@@ -582,12 +582,12 @@ class Polar {
   ///   - onError: Possible errors are returned as exceptions.
   Future<void> doFirstTimeUse(
     String identifier,
-    PolarFirstTimeUseConfig config,
+    PolarFirstTimeUseConfig entry,
   ) async {
-    await _methodChannel.invokeMethod('doFirstTimeUse', {
-      'identifier': identifier,
-      'config': config.toMap(),
-    });
+    await _methodChannel.invokeMethod('doFirstTimeUse', [
+      identifier,
+      jsonEncode(entry),
+    ]);
   }
 
   /// Checks if First Time Use setup has been completed for a Polar device.

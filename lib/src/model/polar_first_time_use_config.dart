@@ -1,3 +1,9 @@
+import 'package:json_annotation/json_annotation.dart';
+import 'dart:convert';
+import 'dart:io' show Platform;
+
+part 'polar_first_time_use_config.g.dart';
+
 /// Enum representing the training background levels
 enum TrainingBackground {
   /// Occasional training (1-2 times per week)
@@ -40,6 +46,7 @@ enum TypicalDay {
 }
 
 /// Configuration class for First Time Use setup
+@JsonSerializable()
 class PolarFirstTimeUseConfig {
   /// The gender of the user ('Male' or 'Female')
   final String gender;
@@ -109,20 +116,21 @@ class PolarFirstTimeUseConfig {
     }
   }
 
-  /// Converts this configuration to a map for JSON serialization
-  Map<String, dynamic> toMap() {
-    return {
-      'gender': gender,
-      'birthDate': birthDate.toIso8601String().split('T')[0],
-      'height': height,
-      'weight': weight,
-      'maxHeartRate': maxHeartRate,
-      'vo2Max': vo2Max,
-      'restingHeartRate': restingHeartRate,
-      'trainingBackground': trainingBackground.value,
-      'deviceTime': deviceTime,
-      'typicalDay': typicalDay.value,
-      'sleepGoalMinutes': sleepGoalMinutes,
-    };
+  /// Create a PolarFirstTimeUseConfig from JSON
+  factory PolarFirstTimeUseConfig.fromJson(Map<String, dynamic> json) =>
+      _$PolarFirstTimeUseConfigFromJson(json);
+
+  /// Convert to JSON
+  Map<String, dynamic> toJson() {
+    final json = _$PolarFirstTimeUseConfigToJson(this);
+    // Override the enum values with their integer values for Android
+    if (Platform.isAndroid) {
+      json['trainingBackground'] = trainingBackground.value;
+      json['typicalDay'] = typicalDay.value;
+    }
+    return json;
   }
+
+  /// Convert to a Map for platform channel
+  String toMap() => jsonEncode(toJson());
 }

@@ -435,88 +435,14 @@ public class SwiftPolarPlugin:
       })
   }
 
-    func doFirstTimeUse(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
-    guard let args = call.arguments as? [String: Any],
-      let identifier = args["identifier"] as? String,
-      let configDict = args["config"] as? [String: Any]
-    else {
-      result(
-        FlutterError(
-          code: "INVALID_ARGUMENTS",
-          message: "Expected identifier and config dictionary",
-          details: nil))
-      return
-    }
-
-    // Convert the dictionary to PolarFirstTimeUseConfig
-    guard let gender = configDict["gender"] as? String,
-      let birthDateString = configDict["birthDate"] as? String,
-      let height = configDict["height"] as? Int,
-      let weight = configDict["weight"] as? Int,
-      let maxHeartRate = configDict["maxHeartRate"] as? Int,
-      let vo2Max = configDict["vo2Max"] as? Int,
-      let restingHeartRate = configDict["restingHeartRate"] as? Int,
-      let trainingBackground = configDict["trainingBackground"] as? Int,
-      let deviceTime = configDict["deviceTime"] as? String,
-      let typicalDay = configDict["typicalDay"] as? Int,
-      let sleepGoalMinutes = configDict["sleepGoalMinutes"] as? Int
-    else {
-      result(
-        FlutterError(
-          code: "INVALID_CONFIG",
-          message: "Invalid configuration parameters",
-          details: nil))
-      return
-    }
-
-    // Convert string date to Date object
-    let dateFormatter = DateFormatter()
-    dateFormatter.dateFormat = "yyyy-MM-dd"
-    guard let birthDate = dateFormatter.date(from: birthDateString) else {
-      result(
-        FlutterError(
-          code: "INVALID_DATE",
-          message: "Invalid birth date format",
-          details: nil))
-      return
-    }
-
-    // Convert training background value to appropriate enum case
-    let trainingBackgroundLevel: PolarFirstTimeUseConfig.TrainingBackground
-    switch trainingBackground {
-    case 10: trainingBackgroundLevel = .occasional
-    case 20: trainingBackgroundLevel = .regular
-    case 30: trainingBackgroundLevel = .frequent
-    case 40: trainingBackgroundLevel = .heavy
-    case 50: trainingBackgroundLevel = .semiPro
-    case 60: trainingBackgroundLevel = .pro
-    default: trainingBackgroundLevel = .occasional  // default fallback
-    }
-
-    // Convert typical day to enum
-    let typicalDayEnum: PolarFirstTimeUseConfig.TypicalDay
-    switch typicalDay {
-    case 1: typicalDayEnum = .mostlyMoving
-    case 2: typicalDayEnum = .mostlySitting
-    case 3: typicalDayEnum = .mostlyStanding
-    default: typicalDayEnum = .mostlySitting
-    }
-
-    // Create config object with validation
-    let config = PolarBleSdk.PolarFirstTimeUseConfig(
-      gender: gender == "Male" ? .male : .female,
-      birthDate: birthDate,
-      height: Float(height),
-      weight: Float(weight),
-      maxHeartRate: maxHeartRate,
-      vo2Max: vo2Max,
-      restingHeartRate: restingHeartRate,
-      trainingBackground: trainingBackgroundLevel,
-      deviceTime: deviceTime,
-      typicalDay: typicalDayEnum,
-      sleepGoalMinutes: sleepGoalMinutes
-    )
-
+  func doFirstTimeUse(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+    let arguments = call.arguments as! [Any]
+    let identifier = arguments[0] as! String
+    let config = try! decoder.decode(
+      PolarFirstTimeUseConfigCodable.self,
+      from: (arguments[1] as! String).data(using: .utf8)!
+    ).data
+    
     _ = api.doFirstTimeUse(identifier, ftuConfig: config).subscribe(
       onCompleted: {
         result(nil)
