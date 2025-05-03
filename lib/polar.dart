@@ -13,3 +13,8 @@ export 'src/model/polar_sensor_setting.dart';
 export 'src/model/polar_streaming.dart';
 export 'src/model/polar_offline_record_entry.dart';
 export 'src/model/polar_first_time_use_config.dart';
+export 'src/model/polar_steps_data.dart';
+export 'src/model/polar_distance_data.dart';
+export 'src/model/polar_active_time_data.dart';
+export 'src/model/polar_active_time.dart';
+export 'src/model/polar_stored_data_type.dart';

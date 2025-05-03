@@ -1,6 +1,8 @@
 package dev.rexios.polar
 
+import android.annotation.TargetApi
 import android.content.Context
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import androidx.lifecycle.Lifecycle.Event
@@ -13,6 +15,7 @@ import com.google.gson.JsonPrimitive
 import com.google.gson.JsonSerializationContext
 import com.google.gson.JsonSerializer
 import com.polar.androidcommunications.api.ble.model.DisInfo
+import com.polar.androidcommunications.api.ble.model.gatt.client.ChargeState
 import com.polar.sdk.api.PolarBleApi
 import com.polar.sdk.api.PolarBleApi.PolarBleSdkFeature
 import com.polar.sdk.api.PolarBleApi.PolarDeviceDataType
@@ -45,6 +48,8 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.UUID
+import java.time.Instant
+import java.time.ZoneId
 
 fun Any?.discard() = Unit
 
@@ -160,7 +165,6 @@ class PolarPlugin :
                 call,
                 result
             )
-
             "requestOfflineRecordingSettings" -> requestOfflineRecordingSettings(call, result)
             "startOfflineRecording" -> startOfflineRecording(call, result)
             "stopOfflineRecording" -> stopOfflineRecording(call, result)
@@ -173,7 +177,11 @@ class PolarPlugin :
             "setLocalTime" -> setLocalTime(call, result)
             "doFirstTimeUse" -> doFirstTimeUse(call, result)
             "isFtuDone" -> isFtuDone(call, result)
-
+            "deleteStoredDeviceData" -> deleteStoredDeviceData(call, result)
+            "deleteDeviceDateFolders" -> deleteDeviceDateFolders(call, result)
+            "getSteps" -> getSteps(call, result)
+            "getDistance" -> getDistance(call, result)
+            "getActiveTime" -> getActiveTime(call, result)
             else -> result.notImplemented()
         }
     }
@@ -824,7 +832,353 @@ class PolarPlugin :
             })
             .discard()
     }
-}
+
+    @TargetApi(Build.VERSION_CODES.O)
+    private fun deleteStoredDeviceData(call: MethodCall, result: Result) {
+        val arguments = call.arguments as List<*>
+        val identifier = arguments[0] as String
+        val dataType = gson.fromJson(arguments[1] as String, PolarBleApi.PolarStoredDataType::class.java)
+        val until = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(arguments[2] as String)
+            .toInstant()
+            .atZone(ZoneId.systemDefault())
+            .toLocalDate()
+
+        wrapper.api
+            .deleteStoredDeviceData(identifier, dataType, until)
+            .subscribe({ paths ->
+                runOnUiThread { result.success(gson.toJson(paths)) }
+            }, {
+                runOnUiThread {
+                    result.error(it.toString(), it.message, null)
+                }
+            })
+            .discard()
+    }
+
+    @TargetApi(Build.VERSION_CODES.O)
+    private fun deleteDeviceDateFolders(call: MethodCall, result: Result) {
+        val arguments = call.arguments as List<*>
+        val identifier = arguments[0] as String
+        val fromDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(arguments[1] as String)
+            .toInstant()
+            .atZone(ZoneId.systemDefault())
+            .toLocalDate()
+        val toDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(arguments[2] as String)
+            .toInstant()
+            .atZone(ZoneId.systemDefault())
+            .toLocalDate()
+
+        wrapper.api
+            .deleteDeviceDateFolders(identifier, fromDate, toDate)
+            .subscribe({
+                runOnUiThread { result.success(null) }
+            }, {
+                runOnUiThread {
+                    result.error(it.toString(), it.message, null)
+                }
+            })
+            .discard()
+    }
+
+    private fun getSteps(call: MethodCall, result: Result) {
+        try {
+            android.util.Log.d("PolarPlugin", "getSteps called with arguments: ${call.arguments}")
+            
+            val arguments = call.arguments as? List<*>
+            if (arguments == null) {
+                android.util.Log.e("PolarPlugin", "Arguments are null or not a List")
+                result.error("INVALID_ARGUMENTS", "Arguments must be a non-null List", null)
+                return
+            }
+            
+            if (arguments.size < 3) {
+                android.util.Log.e("PolarPlugin", "Arguments list size is less than 3: ${arguments.size}")
+                result.error("INVALID_ARGUMENTS", "Expected 3 arguments: identifier, fromDate, toDate", null)
+                return
+            }
+            
+            val identifier = arguments[0] as? String
+            if (identifier == null) {
+                android.util.Log.e("PolarPlugin", "Identifier is null or not a String")
+                result.error("INVALID_ARGUMENTS", "Device identifier must be a non-null String", null)
+                return
+            }
+            
+            val fromDateString = arguments[1] as? String
+            if (fromDateString == null) {
+                android.util.Log.e("PolarPlugin", "fromDate is null or not a String")
+                result.error("INVALID_ARGUMENTS", "fromDate must be a non-null String", null)
+                return
+            }
+            
+            val toDateString = arguments[2] as? String
+            if (toDateString == null) {
+                android.util.Log.e("PolarPlugin", "toDate is null or not a String")
+                result.error("INVALID_ARGUMENTS", "toDate must be a non-null String", null)
+                return
+            }
+            
+            android.util.Log.d("PolarPlugin", "Parsing dates: fromDate=$fromDateString, toDate=$toDateString")
+            
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            val fromDate = dateFormat.parse(fromDateString)
+            val toDate = dateFormat.parse(toDateString)
+            
+            if (fromDate == null || toDate == null) {
+                android.util.Log.e("PolarPlugin", "Failed to parse dates: fromDate=$fromDate, toDate=$toDate")
+                result.error("INVALID_DATE_FORMAT", "Could not parse date strings", null)
+                return
+            }
+            
+            android.util.Log.d("PolarPlugin", "Calling Polar API getSteps with identifier=$identifier, fromDate=$fromDate, toDate=$toDate")
+            
+            // Handle common errors from the Polar API
+            wrapper.api
+                .getSteps(identifier, fromDate, toDate)
+                .onErrorReturn { error ->
+                    // Log the error for debugging
+                    android.util.Log.e("PolarPlugin", "Error in getSteps API call: ${error.message}", error)
+                    
+                    // Special handling for specific error types
+                    if (error.toString().contains("PftpResponseError") && error.toString().contains("Error: 103")) {
+                        android.util.Log.e("PolarPlugin", "PSFTP Protocol error 103 - likely no steps data available for the requested period")
+                        // Return an empty list instead of throwing an error
+                        emptyList()
+                    } else {
+                        // For other errors, throw them to be caught by the error handler
+                        throw error
+                    }
+                }
+                .subscribe({ stepsDataList: List<com.polar.sdk.api.model.activity.PolarStepsData> ->
+                    android.util.Log.d("PolarPlugin", "Received steps data: ${stepsDataList.size} entries")
+                    val response = stepsDataList.map { stepsData ->
+                        mapOf(
+                            "date" to SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(stepsData.date),
+                            "steps" to stepsData.steps
+                        )
+                    }
+                    runOnUiThread { 
+                        android.util.Log.d("PolarPlugin", "Returning steps data as JSON")
+                        result.success(gson.toJson(response)) 
+                    }
+                }, { error ->
+                    android.util.Log.e("PolarPlugin", "Error in getSteps subscription: ${error.message}", error)
+                    runOnUiThread { 
+                        result.error("GET_STEPS_ERROR", "Error fetching steps data: ${error.message}", null) 
+                    }
+                })
+                .discard()
+        } catch (e: Exception) {
+            android.util.Log.e("PolarPlugin", "Exception in getSteps", e)
+            result.error("UNEXPECTED_ERROR", "Unexpected error in getSteps: ${e.message}", null)
+        }
+    }
+
+    private fun getDistance(call: MethodCall, result: Result) {
+        try {
+            android.util.Log.d("PolarPlugin", "getDistance called with arguments: ${call.arguments}")
+            
+            val arguments = call.arguments as? List<*>
+            if (arguments == null) {
+                android.util.Log.e("PolarPlugin", "Arguments are null or not a List")
+                result.error("INVALID_ARGUMENTS", "Arguments must be a non-null List", null)
+                return
+            }
+            
+            if (arguments.size < 3) {
+                android.util.Log.e("PolarPlugin", "Arguments list size is less than 3: ${arguments.size}")
+                result.error("INVALID_ARGUMENTS", "Expected 3 arguments: identifier, fromDate, toDate", null)
+                return
+            }
+            
+            val identifier = arguments[0] as? String
+            if (identifier == null) {
+                android.util.Log.e("PolarPlugin", "Identifier is null or not a String")
+                result.error("INVALID_ARGUMENTS", "Device identifier must be a non-null String", null)
+                return
+            }
+            
+            val fromDateString = arguments[1] as? String
+            if (fromDateString == null) {
+                android.util.Log.e("PolarPlugin", "fromDate is null or not a String")
+                result.error("INVALID_ARGUMENTS", "fromDate must be a non-null String", null)
+                return
+            }
+            
+            val toDateString = arguments[2] as? String
+            if (toDateString == null) {
+                android.util.Log.e("PolarPlugin", "toDate is null or not a String")
+                result.error("INVALID_ARGUMENTS", "toDate must be a non-null String", null)
+                return
+            }
+            
+            android.util.Log.d("PolarPlugin", "Parsing dates: fromDate=$fromDateString, toDate=$toDateString")
+            
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            val fromDate = dateFormat.parse(fromDateString)
+            val toDate = dateFormat.parse(toDateString)
+            
+            if (fromDate == null || toDate == null) {
+                android.util.Log.e("PolarPlugin", "Failed to parse dates: fromDate=$fromDate, toDate=$toDate")
+                result.error("INVALID_DATE_FORMAT", "Could not parse date strings", null)
+                return
+            }
+            
+            android.util.Log.d("PolarPlugin", "Calling Polar API getDistance with identifier=$identifier, fromDate=$fromDate, toDate=$toDate")
+            
+            wrapper.api
+                .getDistance(identifier, fromDate, toDate)
+                .onErrorReturn { error ->
+                    // Log the error for debugging
+                    android.util.Log.e("PolarPlugin", "Error in getDistance API call: ${error.message}", error)
+                    
+                    // Special handling for specific error types
+                    if (error.toString().contains("PftpResponseError") && error.toString().contains("Error: 103")) {
+                        android.util.Log.e("PolarPlugin", "PSFTP Protocol error 103 - likely no distance data available for the requested period")
+                        // Return an empty list instead of throwing an error
+                        emptyList()
+                    } else {
+                        // For other errors, throw them to be caught by the error handler
+                        throw error
+                    }
+                }
+                .subscribe({ distanceDataList: List<com.polar.sdk.api.model.activity.PolarDistanceData> ->
+                    android.util.Log.d("PolarPlugin", "Received distance data: ${distanceDataList.size} entries")
+                    val response = distanceDataList.map { distanceData ->
+                        mapOf(
+                            "date" to SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(distanceData.date),
+                            "distanceMeters" to distanceData.distanceMeters
+                        )
+                    }
+                    runOnUiThread { 
+                        android.util.Log.d("PolarPlugin", "Returning distance data as JSON")
+                        result.success(gson.toJson(response)) 
+                    }
+                }, { error ->
+                    android.util.Log.e("PolarPlugin", "Error in getDistance subscription: ${error.message}", error)
+                    runOnUiThread { 
+                        result.error("GET_DISTANCE_ERROR", "Error fetching distance data: ${error.message}", null) 
+                    }
+                })
+                .discard()
+        } catch (e: Exception) {
+            android.util.Log.e("PolarPlugin", "Exception in getDistance", e)
+            result.error("UNEXPECTED_ERROR", "Unexpected error in getDistance: ${e.message}", null)
+        }
+    }
+
+    private fun getActiveTime(call: MethodCall, result: Result) {
+        try {
+            android.util.Log.d("PolarPlugin", "getActiveTime called with arguments: ${call.arguments}")
+            
+            val arguments = call.arguments as? List<*>
+            if (arguments == null) {
+                android.util.Log.e("PolarPlugin", "Arguments are null or not a List")
+                result.error("INVALID_ARGUMENTS", "Arguments must be a non-null List", null)
+                return
+            }
+            
+            if (arguments.size < 3) {
+                android.util.Log.e("PolarPlugin", "Arguments list size is less than 3: ${arguments.size}")
+                result.error("INVALID_ARGUMENTS", "Expected 3 arguments: identifier, fromDate, toDate", null)
+                return
+            }
+            
+            val identifier = arguments[0] as? String
+            if (identifier == null) {
+                android.util.Log.e("PolarPlugin", "Identifier is null or not a String")
+                result.error("INVALID_ARGUMENTS", "Device identifier must be a non-null String", null)
+                return
+            }
+            
+            val fromDateString = arguments[1] as? String
+            if (fromDateString == null) {
+                android.util.Log.e("PolarPlugin", "fromDate is null or not a String")
+                result.error("INVALID_ARGUMENTS", "fromDate must be a non-null String", null)
+                return
+            }
+            
+            val toDateString = arguments[2] as? String
+            if (toDateString == null) {
+                android.util.Log.e("PolarPlugin", "toDate is null or not a String")
+                result.error("INVALID_ARGUMENTS", "toDate must be a non-null String", null)
+                return
+            }
+            
+            android.util.Log.d("PolarPlugin", "Parsing dates: fromDate=$fromDateString, toDate=$toDateString")
+            
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            val fromDate = dateFormat.parse(fromDateString)
+            val toDate = dateFormat.parse(toDateString)
+            
+            if (fromDate == null || toDate == null) {
+                android.util.Log.e("PolarPlugin", "Failed to parse dates: fromDate=$fromDate, toDate=$toDate")
+                result.error("INVALID_DATE_FORMAT", "Could not parse date strings", null)
+                return
+            }
+            
+            android.util.Log.d("PolarPlugin", "Calling Polar API getActiveTime with identifier=$identifier, fromDate=$fromDate, toDate=$toDate")
+            
+            wrapper.api
+                .getActiveTime(identifier, fromDate, toDate)
+                .onErrorReturn { error ->
+                    // Log the error for debugging
+                    android.util.Log.e("PolarPlugin", "Error in getActiveTime API call: ${error.message}", error)
+                    
+                    // Special handling for specific error types
+                    if (error.toString().contains("PftpResponseError") && error.toString().contains("Error: 103")) {
+                        android.util.Log.e("PolarPlugin", "PSFTP Protocol error 103 - likely no active time data available for the requested period")
+                        // Return an empty list instead of throwing an error
+                        emptyList()
+                    } else {
+                        // For other errors, throw them to be caught by the error handler
+                        throw error
+                    }
+                }
+                .subscribe({ activeTimeDataList: List<com.polar.sdk.api.model.activity.PolarActiveTimeData> ->
+                    android.util.Log.d("PolarPlugin", "Received active time data: ${activeTimeDataList.size} entries")
+                    val response = activeTimeDataList.map { activeTimeData ->
+                        mapOf(
+                            "date" to SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(activeTimeData.date),
+                            "timeNonWear" to mapActiveTime(activeTimeData.timeNonWear),
+                            "timeSleep" to mapActiveTime(activeTimeData.timeSleep),
+                            "timeSedentary" to mapActiveTime(activeTimeData.timeSedentary),
+                            "timeLightActivity" to mapActiveTime(activeTimeData.timeLightActivity),
+                            "timeContinuousModerateActivity" to mapActiveTime(activeTimeData.timeContinuousModerateActivity),
+                            "timeIntermittentModerateActivity" to mapActiveTime(activeTimeData.timeIntermittentModerateActivity),
+                            "timeContinuousVigorousActivity" to mapActiveTime(activeTimeData.timeContinuousVigorousActivity),
+                            "timeIntermittentVigorousActivity" to mapActiveTime(activeTimeData.timeIntermittentVigorousActivity)
+                        )
+                    }
+                    runOnUiThread { 
+                        android.util.Log.d("PolarPlugin", "Returning active time data as JSON")
+                        result.success(gson.toJson(response)) 
+                    }
+                }, { error ->
+                    android.util.Log.e("PolarPlugin", "Error in getActiveTime subscription: ${error.message}", error)
+                    runOnUiThread { 
+                        result.error("GET_ACTIVE_TIME_ERROR", "Error fetching active time data: ${error.message}", null) 
+                    }
+                })
+                .discard()
+        } catch (e: Exception) {
+            android.util.Log.e("PolarPlugin", "Exception in getActiveTime", e)
+            result.error("UNEXPECTED_ERROR", "Unexpected error in getActiveTime: ${e.message}", null)
+        }
+    }
+
+    // Helper function to map PolarActiveTime
+    private fun mapActiveTime(time: com.polar.sdk.api.model.activity.PolarActiveTime?): Map<String, Int?>? {
+        if (time == null) return null
+        
+        return mapOf(
+            "hours" to time.hours,
+            "minutes" to time.minutes,
+            "seconds" to time.seconds,
+            "millis" to time.millis
+        )
+    }
+    }
 
 class PolarWrapper(
     context: Context,
@@ -917,37 +1271,25 @@ class PolarWrapper(
         success("batteryLevelReceived", listOf(identifier, level))
     }
 
-    @Deprecated("", replaceWith = ReplaceWith(""))
-    fun hrFeatureReady(identifier: String) {
+    override fun batteryChargingStatusReceived(
+        identifier: String,
+        chargingStatus: ChargeState,
+    ) {
+        success("batteryChargingStatusReceived", listOf(identifier, chargingStatus.name))
+    }
+
+    override fun htsNotificationReceived(
+        identifier: String,
+        data: PolarHealthThermometerData,
+    ) {
         // Do nothing
     }
+
 
     @Deprecated("", replaceWith = ReplaceWith(""))
     override fun hrNotificationReceived(
         identifier: String,
         data: PolarHrData.PolarHrSample,
-    ) {
-        // Do nothing
-    }
-
-    override fun htsNotificationReceived(identifier: String, data: PolarHealthThermometerData) {
-        TODO("Not yet implemented")
-    }
-
-    @Deprecated("", replaceWith = ReplaceWith(""))
-    fun polarFtpFeatureReady(identifier: String) {
-        // Do nothing
-    }
-
-    @Deprecated("", replaceWith = ReplaceWith(""))
-    fun sdkModeFeatureAvailable(identifier: String) {
-        // Do nothing
-    }
-
-    @Deprecated("", replaceWith = ReplaceWith(""))
-    fun streamingFeaturesReady(
-        identifier: String,
-        features: Set<PolarDeviceDataType>,
     ) {
         // Do nothing
     }
@@ -993,10 +1335,9 @@ class StreamingChannel(
                         identifier,
                         settings,
                     )
-
-                PolarDeviceDataType.PRESSURE -> TODO()
-                PolarDeviceDataType.LOCATION -> TODO()
-                PolarDeviceDataType.SKIN_TEMPERATURE -> TODO()
+                PolarDeviceDataType.PRESSURE -> api.startPressureStreaming(identifier, settings)
+                PolarDeviceDataType.SKIN_TEMPERATURE -> api.startSkinTemperatureStreaming(identifier, settings)
+                PolarDeviceDataType.LOCATION -> api.startLocationStreaming(identifier, settings)
             }
 
         subscription =

@@ -1,4 +1,5 @@
 import 'package:polar/polar.dart';
+import 'package:polar/src/model/polar_charge_state.dart';
 
 /// The feature is available in this device and it is ready. Called only for
 /// the features which are specified in [PolarBleApi] construction.
@@ -38,6 +39,18 @@ class PolarBatteryLevelEvent {
 
   /// Constructor
   PolarBatteryLevelEvent(this.identifier, this.level);
+}
+
+/// battery charging status
+class PolarBatteryChargingStatusEvent {
+  /// Polar device id
+  final String identifier;
+
+  /// true if charging
+  final PolarChargeState chargingStatus;
+
+  /// Constructor
+  PolarBatteryChargingStatusEvent(this.identifier, this.chargingStatus);
 }
 
 /// Polar disconnect event
