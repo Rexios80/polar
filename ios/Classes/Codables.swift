@@ -598,10 +598,85 @@ class PolarStepsDataCodable: Encodable {
         case steps
     }
 
-    func encode(to encoder: Encoder) {
+    func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try? container.encode(data.date, forKey: .date)
-        try? container.encode(data.steps, forKey: .steps)
+        try container.encode(data.date, forKey: .date)
+        try container.encode(data.steps, forKey: .steps)
+    }
+}
+
+class PolarDistanceDataCodable: Encodable {
+    let data: PolarDistanceData
+
+    init(_ data: PolarDistanceData) {
+        self.data = data
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case date
+        case distanceMeters
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(data.date, forKey: .date)
+        try container.encode(data.distanceMeters, forKey: .distanceMeters)
+    }
+}
+
+class PolarActiveTimeCodable: Encodable {
+    let data: PolarActiveTime
+
+    init(_ data: PolarActiveTime) {
+        self.data = data
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case hours
+        case minutes
+        case seconds
+        case millis
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try? container.encode(data.hours, forKey: .hours)
+        try? container.encode(data.minutes, forKey: .minutes)
+        try? container.encode(data.seconds, forKey: .seconds)
+        try? container.encode(data.millis, forKey: .millis)
+    }
+}
+
+class PolarActiveTimeDataCodable: Encodable {
+    let data: PolarActiveTimeData
+
+    init(_ data: PolarActiveTimeData) {
+        self.data = data
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case date
+        case timeNonWear
+        case timeSleep
+        case timeSedentary
+        case timeLightActivity
+        case timeContinuousModerateActivity
+        case timeIntermittentModerateActivity
+        case timeContinuousVigorousActivity
+        case timeIntermittentVigorousActivity
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(data.date, forKey: .date)  
+        try container.encode(PolarActiveTimeCodable(data.timeNonWear), forKey: .timeNonWear)
+        try container.encode(PolarActiveTimeCodable(data.timeSleep), forKey: .timeSleep)
+        try container.encode(PolarActiveTimeCodable(data.timeSedentary), forKey: .timeSedentary)
+        try container.encode(PolarActiveTimeCodable(data.timeLightActivity), forKey: .timeLightActivity)
+        try container.encode(PolarActiveTimeCodable(data.timeContinuousModerateActivity), forKey: .timeContinuousModerateActivity)
+        try container.encode(PolarActiveTimeCodable(data.timeIntermittentModerateActivity), forKey: .timeIntermittentModerateActivity)
+        try container.encode(PolarActiveTimeCodable(data.timeContinuousVigorousActivity), forKey: .timeContinuousVigorousActivity)
+        try container.encode(PolarActiveTimeCodable(data.timeIntermittentVigorousActivity), forKey: .timeIntermittentVigorousActivity)
     }
 }
 

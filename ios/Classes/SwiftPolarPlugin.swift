@@ -152,8 +152,16 @@ public class SwiftPolarPlugin:
         doFirstTimeUse(call, result)
       case "isFtuDone":
         isFtuDone(call, result)
+      case "deleteStoredDeviceData":
+        deleteStoredDeviceData(call, result)
+      case "deleteDeviceDateFolders":
+        deleteDeviceDateFolders(call, result)
       case "getSteps":
         getSteps(call, result)
+      case "getDistance":
+        getDistance(call, result)
+      case "getActiveTime":
+        getActiveTime(call, result)
       default: result(FlutterMethodNotImplemented)
       }
     } catch {
@@ -702,7 +710,7 @@ private func success(_ event: String, data: Any? = nil) {
           var jsonStringList: [String] = []
 
           do {
-            encoder.dateEncodingStrategy = .millisecondsSince1970
+            encoder.dateEncodingStrategy = .iso8601
             for entry in entries {
               // Use PolarOfflineRecordingEntryCodable for encoding
               let entryCodable = PolarOfflineRecordingEntryCodable(entry)
@@ -1005,6 +1013,87 @@ private func success(_ event: String, data: Any? = nil) {
     )
   }
 
+  func deleteStoredDeviceData(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+    guard let arguments = call.arguments as? [Any],
+          arguments.count == 3,
+          let identifier = arguments[0] as? String,
+          let dataTypeIndex = arguments[1] as? Int,
+          let untilDateString = arguments[2] as? String else {
+        result(FlutterError(code: "INVALID_ARGUMENTS",
+                          message: "Expected [identifier, dataType, untilDate]",
+                          details: nil))
+        return
+    }
+
+    // Convert dataType index to PolarStoredDataType
+    guard dataTypeIndex < PolarBleSdk.PolarStoredDataType.StoredDataType.allCases.count else {
+        result(FlutterError(code: "INVALID_DATA_TYPE",
+                          message: "Invalid data type index",
+                          details: nil))
+        return
+    }
+    let dataType = PolarBleSdk.PolarStoredDataType.StoredDataType.allCases[dataTypeIndex]
+
+    // Parse the until date
+    let dateFormatter = DateFormatter()
+    dateFormatter.dateFormat = "yyyy-MM-dd"
+    guard let untilDate = dateFormatter.date(from: untilDateString) else {
+        result(FlutterError(code: "INVALID_DATE_FORMAT",
+                          message: "Date must be in yyyy-MM-dd format",
+                          details: nil))
+        return
+    }
+
+    _ = api.deleteStoredDeviceData(identifier, dataType: dataType, until: untilDate)
+        .subscribe(
+            onCompleted: {
+                result(nil)
+            },
+            onError: { error in
+                result(FlutterError(code: "ERROR_DELETING_DATA",
+                                  message: error.localizedDescription,
+                                  details: nil))
+            }
+        )
+  }
+
+  func deleteDeviceDateFolders(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+    guard let arguments = call.arguments as? [Any],
+          arguments.count == 3,
+          let identifier = arguments[0] as? String,
+          let fromDateString = arguments[1] as? String,
+          let toDateString = arguments[2] as? String else {
+        result(FlutterError(code: "INVALID_ARGUMENTS",
+                          message: "Expected [identifier, fromDate, toDate]",
+                          details: nil))
+        return
+    }
+
+    // Parse the dates
+    let dateFormatter = DateFormatter()
+    dateFormatter.dateFormat = "yyyy-MM-dd"
+    
+    guard let fromDate = dateFormatter.date(from: fromDateString),
+          let toDate = dateFormatter.date(from: toDateString) else {
+        result(FlutterError(code: "INVALID_DATE_FORMAT",
+                          message: "Dates must be in yyyy-MM-dd format",
+                          details: nil))
+        return
+    }
+
+    _ = api.deleteDeviceDateFolders(identifier, fromDate: fromDate, toDate: toDate)
+        .subscribe(
+            onCompleted: {
+                result(nil)
+            },
+            onError: { error in
+                result(FlutterError(code: "ERROR_DELETING_FOLDERS",
+                                  message: error.localizedDescription,
+                                  details: nil))
+            }
+        )
+  }
+
   func getSteps(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
         guard let arguments = call.arguments as? [Any],
               arguments.count == 3,
@@ -1032,10 +1121,16 @@ private func success(_ event: String, data: Any? = nil) {
             .subscribe(
                 onSuccess: { stepsData in
                     do {
-                        let codables = stepsData.map(PolarStepsDataCodable.init)
-                        let jsonData = try JSONEncoder().encode(codables)
-                        let jsonString = String(data: jsonData, encoding: .utf8)
-                        result(jsonString)
+                        let encoder = JSONEncoder()
+                        encoder.dateEncodingStrategy = .iso8601
+                        let jsonData = try encoder.encode(stepsData)
+                        if let jsonString = String(data: jsonData, encoding: .utf8) {
+                            result(jsonString)
+                        } else {
+                            result(FlutterError(code: "ENCODING_ERROR",
+                                              message: "Failed to convert JSON data to string",
+                                              details: nil))
+                        }
                     } catch {
                         result(FlutterError(code: "ENCODING_ERROR",
                                           message: "Failed to encode steps data: \(error.localizedDescription)",
@@ -1044,6 +1139,110 @@ private func success(_ event: String, data: Any? = nil) {
                 },
                 onFailure: { error in
                     result(FlutterError(code: "ERROR_GETTING_STEPS",
+                                      message: error.localizedDescription,
+                                      details: nil))
+                }
+            )
+    }
+
+  func getDistance(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        guard let arguments = call.arguments as? [Any],
+              arguments.count == 3,
+              let identifier = arguments[0] as? String,
+              let fromDateString = arguments[1] as? String,
+              let toDateString = arguments[2] as? String else {
+            result(FlutterError(code: "INVALID_ARGUMENTS",
+                              message: "Expected [identifier, fromDate, toDate]",
+                              details: nil))
+            return
+        }
+
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        
+        guard let fromDate = dateFormatter.date(from: fromDateString),
+              let toDate = dateFormatter.date(from: toDateString) else {
+            result(FlutterError(code: "INVALID_DATE_FORMAT",
+                              message: "Dates must be in yyyy-MM-dd format",
+                              details: nil))
+            return
+        }
+
+        _ = api.getDistance(identifier: identifier, fromDate: fromDate, toDate: toDate)
+            .subscribe(
+                onSuccess: { distanceData in
+                    do {
+                        let encoder = JSONEncoder()
+                        encoder.dateEncodingStrategy = .iso8601
+                        let codables = distanceData.map(PolarDistanceDataCodable.init)
+                        let jsonData = try encoder.encode(codables)
+                        if let jsonString = String(data: jsonData, encoding: .utf8) {
+                            result(jsonString)
+                        } else {
+                            result(FlutterError(code: "ENCODING_ERROR",
+                                              message: "Failed to convert JSON data to string",
+                                              details: nil))
+                        }
+                    } catch {
+                        result(FlutterError(code: "ENCODING_ERROR",
+                                          message: "Failed to encode distance data: \(error.localizedDescription)",
+                                          details: nil))
+                    }
+                },
+                onFailure: { error in
+                    result(FlutterError(code: "ERROR_GETTING_DISTANCE",
+                                      message: error.localizedDescription,
+                                      details: nil))
+                }
+            )
+    }
+
+  func getActiveTime(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        guard let arguments = call.arguments as? [Any],
+              arguments.count == 3,
+              let identifier = arguments[0] as? String,
+              let fromDateString = arguments[1] as? String,
+              let toDateString = arguments[2] as? String else {
+            result(FlutterError(code: "INVALID_ARGUMENTS",
+                              message: "Expected [identifier, fromDate, toDate]",
+                              details: nil))
+            return
+        }
+
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        
+        guard let fromDate = dateFormatter.date(from: fromDateString),
+              let toDate = dateFormatter.date(from: toDateString) else {
+            result(FlutterError(code: "INVALID_DATE_FORMAT",
+                              message: "Dates must be in yyyy-MM-dd format",
+                              details: nil))
+            return
+        }
+
+        _ = api.getActiveTime(identifier: identifier, fromDate: fromDate, toDate: toDate)
+            .subscribe(
+                onSuccess: { activeTimeData in
+                    do {
+                        let encoder = JSONEncoder()
+                        encoder.dateEncodingStrategy = .iso8601
+                        let codables = activeTimeData.map(PolarActiveTimeDataCodable.init)
+                        let jsonData = try encoder.encode(codables)
+                        if let jsonString = String(data: jsonData, encoding: .utf8) {
+                            result(jsonString)
+                        } else {
+                            result(FlutterError(code: "ENCODING_ERROR",
+                                              message: "Failed to convert JSON data to string",
+                                              details: nil))
+                        }
+                    } catch {
+                        result(FlutterError(code: "ENCODING_ERROR",
+                                          message: "Failed to encode active time data: \(error.localizedDescription)",
+                                          details: nil))
+                    }
+                },
+                onFailure: { error in
+                    result(FlutterError(code: "ERROR_GETTING_ACTIVE_TIME",
                                       message: error.localizedDescription,
                                       details: nil))
                 }

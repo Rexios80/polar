@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:polar/polar.dart';
@@ -924,11 +925,112 @@ class Polar {
             .map((e) => PolarStepsData.fromJson(e as Map<String, dynamic>))
             .toList();
       } catch (e) {
-        print("Error parsing steps data: $e");
+        debugPrint('Error parsing steps data: $e');
         return [];
       }
     } catch (e) {
-      print("Error getting steps data: $e");
+      debugPrint('Error getting steps data: $e');
+      // Return empty list instead of throwing, as no data is not an exceptional situation
+      return [];
+    }
+  }
+
+  /// Gets the distance data for a specific date range.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or address
+  ///   - fromDate: Start date for the range
+  ///   - toDate: End date for the range
+  /// - Returns: List of distance data for the given date range
+  ///   - success: Returns a list of distance data (may be empty if no data available)
+  ///   - onError: Possible errors are returned as exceptions
+  Future<List<PolarDistanceData>> getDistance(
+    String identifier,
+    DateTime fromDate,
+    DateTime toDate,
+  ) async {
+    try {
+      // Ensure dates are properly formatted with hours and minutes in UTC
+      final formattedFromDate =
+          DateFormat('yyyy-MM-dd HH:mm').format(fromDate.toUtc());
+      final formattedToDate =
+          DateFormat('yyyy-MM-dd HH:mm').format(toDate.toUtc());
+      final result = await _methodChannel.invokeMethod<String>(
+        'getDistance',
+        [
+          identifier,
+          formattedFromDate,
+          formattedToDate,
+        ],
+      );
+
+      // If result is null, return an empty list
+      if (result == null || result.isEmpty) {
+        return [];
+      }
+
+      // Try to parse the JSON response
+      try {
+        final data = jsonDecode(result) as List;
+        return data
+            .map((e) => PolarDistanceData.fromJson(e as Map<String, dynamic>))
+            .toList();
+      } catch (e) {
+        debugPrint('Error parsing distance data: $e');
+        return [];
+      }
+    } catch (e) {
+      debugPrint('Error getting distance data: $e');
+      // Return empty list instead of throwing, as no data is not an exceptional situation
+      return [];
+    }
+  }
+
+  /// Gets the active time data for a specific date range.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or address
+  ///   - fromDate: Start date for the range
+  ///   - toDate: End date for the range
+  /// - Returns: List of active time data for the given date range
+  ///   - success: Returns a list of active time data (may be empty if no data available)
+  ///   - onError: Possible errors are returned as exceptions
+  Future<List<PolarActiveTimeData>> getActiveTime(
+    String identifier,
+    DateTime fromDate,
+    DateTime toDate,
+  ) async {
+    try {
+      // Ensure dates are properly formatted with hours and minutes in UTC
+      final formattedFromDate = DateFormat('yyyy-MM-dd').format(fromDate);
+      final formattedToDate = DateFormat('yyyy-MM-dd').format(toDate);
+
+      final result = await _methodChannel.invokeMethod<String>(
+        'getActiveTime',
+        [
+          identifier,
+          formattedFromDate,
+          formattedToDate,
+        ],
+      );
+
+      // If result is null, return an empty list
+      if (result == null || result.isEmpty) {
+        return [];
+      }
+
+      // Try to parse the JSON response
+      try {
+        final data = jsonDecode(result) as List;
+        return data
+            .map((e) => PolarActiveTimeData.fromJson(e as Map<String, dynamic>))
+            .toList();
+      } catch (e) {
+        debugPrint('Error parsing active time data: $e');
+        return [];
+      }
+    } catch (e) {
+      debugPrint('Error getting active time data: $e');
       // Return empty list instead of throwing, as no data is not an exceptional situation
       return [];
     }

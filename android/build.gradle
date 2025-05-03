@@ -2,7 +2,7 @@ group 'dev.rexios.polar'
 version '1.0-SNAPSHOT'
 
 buildscript {
-    ext.kotlin_version = '1.8.22'
+    ext.kotlin_version = '1.9.0'
     repositories {
         google()
         mavenCentral()
@@ -38,12 +38,12 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = '11'
+        jvmTarget = '17'
     }
 
     namespace "dev.rexios.polar"
@@ -52,10 +52,16 @@ android {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 
-    // Dependencies for Polar SDK
-    api 'com.github.polarofficial:polar-ble-sdk:5.16.0'
+    // Polar SDK with explicit version
+    api 'com.github.polarofficial:polar-ble-sdk:6.1.1'
+    
+    // RxJava dependencies
     implementation 'io.reactivex.rxjava3:rxjava:3.1.6'
     implementation 'io.reactivex.rxjava3:rxandroid:3.0.2'
-
+    
     implementation 'com.google.code.gson:gson:2.10'
+    
+    // Add Android SDK dependencies that might be needed
+    implementation 'androidx.core:core-ktx:1.10.1'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
 }
