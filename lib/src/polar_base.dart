@@ -899,10 +899,8 @@ class Polar {
   ) async {
     try {
       // Ensure dates are properly formatted with hours and minutes in UTC
-      final formattedFromDate =
-          DateFormat('yyyy-MM-dd HH:mm').format(fromDate.toUtc());
-      final formattedToDate =
-          DateFormat('yyyy-MM-dd HH:mm').format(toDate.toUtc());
+      final formattedFromDate = DateFormat('yyyy-MM-dd').format(fromDate);
+      final formattedToDate = DateFormat('yyyy-MM-dd').format(toDate);
 
       final result = await _methodChannel.invokeMethod<String>(
         'getSteps',
@@ -951,10 +949,8 @@ class Polar {
   ) async {
     try {
       // Ensure dates are properly formatted with hours and minutes in UTC
-      final formattedFromDate =
-          DateFormat('yyyy-MM-dd HH:mm').format(fromDate.toUtc());
-      final formattedToDate =
-          DateFormat('yyyy-MM-dd HH:mm').format(toDate.toUtc());
+      final formattedFromDate = DateFormat('yyyy-MM-dd').format(fromDate);
+      final formattedToDate = DateFormat('yyyy-MM-dd').format(toDate);
       final result = await _methodChannel.invokeMethod<String>(
         'getDistance',
         [
