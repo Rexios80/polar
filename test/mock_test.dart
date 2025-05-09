@@ -43,6 +43,7 @@ void main() {
   testRecording(identifier, wait: false);
   testSdkMode(identifier);
   testMisc(identifier, supportsLedConfig: true);
+  testFtu(identifier);
 }
 
 final exercises = <PolarExerciseEntry>[];
@@ -101,6 +102,10 @@ Future<dynamic> handleMethodCall(MethodCall call) async {
       return sdkModeEnabled;
     case 'doFactoryReset':
       return null;
+    case 'doFirstTimeUse':
+      return null;
+    case 'isFtuDone':
+      return true;
     default:
       throw UnimplementedError();
   }
