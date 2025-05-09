@@ -1,3 +1,7 @@
+## 7.6.1
+
+- Dependency upgrades
+
 ## 7.6.0
 
 - Converts native method invocations to `EventChannel` to fix background callback issues
