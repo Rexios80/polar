@@ -42,6 +42,7 @@ import io.reactivex.rxjava3.disposables.Disposable
 import java.lang.reflect.Type
 import java.util.Date
 import java.util.UUID
+import java.util.Calendar
 
 fun Any?.discard() = Unit
 
@@ -152,6 +153,7 @@ class PolarPlugin :
             "doFactoryReset" -> doFactoryReset(call, result)
             "enableSdkMode" -> enableSdkMode(call, result)
             "disableSdkMode" -> disableSdkMode(call, result)
+            "setLocalTime" -> setLocalTime(call,result)
             "isSdkModeEnabled" -> isSdkModeEnabled(call, result)
             else -> result.notImplemented()
         }
@@ -254,6 +256,30 @@ class PolarPlugin :
             })
             .discard()
     }
+
+    private fun setLocalTime(
+        call: MethodCall,
+        result: Result
+    ) {
+        val identifier = call.arguments as String
+        val calendar = Calendar.getInstance()
+        calendar.time = Date()
+
+        wrapper.api
+            .setLocalTime(identifier, calendar)
+            .subscribe(
+                {
+                    runOnUiThread { result.success(null) }
+                },
+                {
+                    runOnUiThread {
+                        result.error(it.toString(), it.message, null)
+                    }
+                }
+            )
+            .discard()
+    }
+
 
     private fun requestStreamSettings(
         call: MethodCall,
