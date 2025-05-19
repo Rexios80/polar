@@ -8,8 +8,8 @@ PODS:
     - Flutter
   - polar (0.0.1):
     - Flutter
-    - PolarBleSdk (~> 6.1.0)
-  - PolarBleSdk (6.1.0):
+    - PolarBleSdk (~> 6.3.0)
+  - PolarBleSdk (6.3.0):
     - RxSwift (~> 6.8.0)
     - SwiftProtobuf (~> 1.0)
     - Zip (~> 2.1.2)
@@ -48,8 +48,8 @@ SPEC CHECKSUMS:
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   integration_test: 4a889634ef21a45d28d50d622cf412dc6d9f586e
   permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
-  polar: 0374f6063ade7e2dd85d626f87cbe2393d3eda7c
-  PolarBleSdk: bfb57cf8350f0c53d441b8632ba6df363ce7c79f
+  polar: d32021620a28db30f7d6e5d8f73a902f720c2b61
+  PolarBleSdk: 9b7422b822c9e75d1bc2cdb3efe1011ff05ce7ee
   RxSwift: 4e28be97cbcfeee614af26d83415febbf2bf6f45
   SwiftProtobuf: b7aa08087e2ab6d162862d143020091254095f69
   Zip: b3fef584b147b6e582b2256a9815c897d60ddc67
