@@ -140,6 +140,7 @@ class PolarPlugin :
             }
 
             "getAvailableOnlineStreamDataTypes" -> getAvailableOnlineStreamDataTypes(call, result)
+            "getAvailableHrServiceDataTypes" -> getAvailableHrServiceDataTypes(call, result)
             "requestStreamSettings" -> requestStreamSettings(call, result)
             "createStreamingChannel" -> createStreamingChannel(call, result)
             "startRecording" -> startRecording(call, result)
@@ -245,6 +246,24 @@ class PolarPlugin :
 
         wrapper.api
             .getAvailableOnlineStreamDataTypes(identifier)
+            .subscribe({
+                runOnUiThread { result.success(gson.toJson(it)) }
+            }, {
+                runOnUiThread {
+                    result.error(it.toString(), it.message, null)
+                }
+            })
+            .discard()
+    }
+
+    private fun getAvailableHrServiceDataTypes(
+        call: MethodCall,
+        result: Result,
+    ) {
+        val identifier = call.arguments as String
+
+        wrapper.api
+            .getAvailableHRServiceDataTypes(identifier)
             .subscribe({
                 runOnUiThread { result.success(gson.toJson(it)) }
             }, {

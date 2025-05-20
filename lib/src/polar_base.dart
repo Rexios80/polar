@@ -177,6 +177,25 @@ class Polar {
     return (jsonDecode(response) as List).map(PolarDataType.fromJson).toSet();
   }
 
+  ///  Find out if the HR service is available in the device. Use this API method in a case where the device does not support Polar Measurement Data service.
+  ///  In such a case using 'getAvailableOnlineStreamDataTypes' will return error; use this method instead.
+  ///
+  /// - Parameters:
+  ///   - identifier: polar device id
+  /// - Returns: Single stream
+  ///   - success: onSuccess the set with HR service, if available
+  ///   - onError: see `PolarErrors` for possible errors invoked
+  Future<Set<PolarDataType>> getAvailableHrServiceDataTypes(
+    String identifier,
+  ) async {
+    final response = await _methodChannel.invokeMethod(
+      'getAvailableHrServiceDataTypes',
+      identifier,
+    );
+    if (response == null) return {};
+    return (jsonDecode(response) as List).map(PolarDataType.fromJson).toSet();
+  }
+
   ///  Request the stream settings available in current operation mode. This request shall be used before the stream is started
   ///  to decide currently available settings. The available settings depend on the state of the device. For example, if any stream(s)
   ///  or optical heart rate measurement is already enabled, then the device may limit the offer of possible settings for other stream feature.

@@ -1,3 +1,8 @@
+## 7.7.0
+
+- Upgrades Polar SDK to `6.3.0`
+- Adds support for `getAvailableHRServiceDataTypes`
+
 ## 7.6.1
 
 - Dependency upgrades

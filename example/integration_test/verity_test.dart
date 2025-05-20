@@ -25,6 +25,7 @@ void main() async {
       PolarSdkFeature.temperatureData,
     }),
   );
+  testHrService(identifier);
   testStreaming(
     identifier,
     features: {
