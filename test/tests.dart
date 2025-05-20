@@ -98,6 +98,17 @@ void testBleSdkFeatures(
   });
 }
 
+void testHrService(String identifier) {
+  test('hr service', () async {
+    await connect(identifier);
+    await polar.sdkFeatureReady
+        .firstWhere((e) => e.feature == PolarSdkFeature.hr);
+    final available = await polar.getAvailableHrServiceDataTypes(identifier);
+    expect(setEquals(available, {PolarDataType.hr}), true);
+    await disconnect(identifier);
+  });
+}
+
 void testStreaming(
   String identifier, {
   required Set<PolarDataType> features,

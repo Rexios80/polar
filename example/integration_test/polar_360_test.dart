@@ -21,6 +21,7 @@ void main() async {
       PolarSdkFeature.h10ExerciseRecording,
     }),
   );
+  testHrService(identifier);
   testStreaming(
     identifier,
     features: {
