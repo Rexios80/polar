@@ -221,7 +221,7 @@ public class SwiftPolarPlugin:
             message: $0.localizedDescription, details: nil))
       })
   }
-  
+
   func getAvailableHrServiceDataTypes(
     _ call: FlutterMethodCall, _ result: @escaping FlutterResult
   ) {
