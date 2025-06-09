@@ -87,21 +87,6 @@ data class FirstTimeUseConfig(
     val sleepGoalMinutes: Int
 )
 
-object PolarEnumMapper {
-    fun genderFromString(gender: String): PolarFirstTimeUseConfig.Gender = when (gender) {
-        "Male" -> PolarFirstTimeUseConfig.Gender.MALE
-        "Female" -> PolarFirstTimeUseConfig.Gender.FEMALE
-        else -> throw IllegalArgumentException("Invalid gender value: $gender")
-    }
-
-    fun typicalDayFromInt(day: Int): PolarFirstTimeUseConfig.TypicalDay = when (day) {
-        1 -> PolarFirstTimeUseConfig.TypicalDay.MOSTLY_MOVING
-        2 -> PolarFirstTimeUseConfig.TypicalDay.MOSTLY_SITTING
-        3 -> PolarFirstTimeUseConfig.TypicalDay.MOSTLY_STANDING
-        else -> PolarFirstTimeUseConfig.TypicalDay.MOSTLY_SITTING
-    }
-}
-
 /** PolarPlugin */
 class PolarPlugin :
     FlutterPlugin,
@@ -520,7 +505,10 @@ class PolarPlugin :
             .discard()
     }
 
-    private fun doFirstTimeUse(call: MethodCall, result: Result) {
+    private fun doFirstTimeUse(
+        call: MethodCall,
+        result: Result,
+    ) {
         val arguments = call.arguments as List<*>
         val identifier = arguments[0] as? String
         val configJson = arguments[1] as? String
@@ -549,17 +537,8 @@ class PolarPlugin :
             return
         }
 
-        val genderEnum = try {
-            PolarEnumMapper.genderFromString(config.gender)
-        } catch (e: IllegalArgumentException) {
-            result.error("INVALID_GENDER", e.message, null)
-            return
-        }
-
-        val typicalDayEnum = PolarEnumMapper.typicalDayFromInt(config.typicalDay)
-
         val ftuConfig = PolarFirstTimeUseConfig(
-            genderEnum,
+            if (config.gender == "Male") PolarFirstTimeUseConfig.Gender.MALE else PolarFirstTimeUseConfig.Gender.FEMALE,
             birthDate,
             config.height.toFloat(),
             config.weight.toFloat(),
@@ -568,7 +547,12 @@ class PolarPlugin :
             config.restingHeartRate,
             config.trainingBackground,
             config.deviceTime,
-            typicalDayEnum,
+            when (config.typicalDay) {
+                1 -> PolarFirstTimeUseConfig.TypicalDay.MOSTLY_MOVING
+                2 -> PolarFirstTimeUseConfig.TypicalDay.MOSTLY_SITTING
+                3 -> PolarFirstTimeUseConfig.TypicalDay.MOSTLY_STANDING
+                else -> PolarFirstTimeUseConfig.TypicalDay.MOSTLY_SITTING
+            },
             config.sleepGoalMinutes
         )
 
