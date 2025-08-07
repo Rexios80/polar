@@ -67,6 +67,28 @@ class PpiOfflineRecording extends PolarOfflineRecordingData {
   }
 }
 
+/// A class representing HR (Heartrate Interval) offline recording data from a Polar device,
+/// extending the generic [PolarOfflineRecordingData].
+class HrOfflineRecording extends PolarOfflineRecordingData {
+  /// The HR data.
+  final PolarHrData data;
+
+  /// Constructor for [HrOfflineRecording].
+  HrOfflineRecording({required this.data, required super.startTime});
+
+  /// Factory method to create an instance from JSON.
+  factory HrOfflineRecording.fromJson(Map<String, dynamic> json) {
+    return HrOfflineRecording(
+      data: PolarHrData.fromJson(json['data']),
+      startTime: Platform.isIOS
+          ? DateTime.fromMillisecondsSinceEpoch(json['startTime'])
+          : const MapToDateTimeConverter().fromJson(
+              json['startTime'],
+            ),
+    );
+  }
+}
+
 /// A class representing PPI (Peak-to-Peak Interval) offline recording data from a Polar device,
 /// extending the generic [PolarOfflineRecordingData].
 class PpgOfflineRecording extends PolarOfflineRecordingData {

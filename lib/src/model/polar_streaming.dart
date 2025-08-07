@@ -96,6 +96,13 @@ class PolarHrSample {
     required this.contactStatus,
     required this.contactStatusSupported,
   });
+
+  /// From json
+  factory PolarHrSample.fromJson(Map<String, dynamic> json) =>
+      _$PolarHrSampleFromJson(json);
+
+  /// To json
+  Map<String, dynamic> toJson() => _$PolarHrSampleToJson(this);
 }
 
 /// Polar HR data
