@@ -377,7 +377,11 @@ class PolarSensorSettingCodable: Codable {
         }
     )
 
-    data = PolarSensorSetting(newDict)
+    do {
+      data = try PolarSensorSetting(newDict)
+    } catch {
+      data = try! PolarSensorSetting([:])
+    }
   }
 
   enum CodingKeys: String, CodingKey {
@@ -563,6 +567,7 @@ class PolarOfflineRecordingDataCodable: Encodable {
             let skinTemperatureDataCodable = PolarDataCodable(skinTemperatureData)
             try container.encode(skinTemperatureDataCodable, forKey: .data)
             try container.encode(startTime.millisecondsSince1970, forKey: .startTime)
+        case .emptyData(startTime: let startTime):
         }
     }
 }
