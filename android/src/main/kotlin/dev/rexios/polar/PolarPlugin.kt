@@ -550,26 +550,18 @@ class PolarPlugin :
         val arguments = call.arguments as List<*>
         val identifier = arguments[0] as String
         val feature = gson.fromJson(arguments[1] as String, PolarDeviceDataType::class.java)
-        val settings = if (arguments[2] != null) {
-            gson.fromJson(arguments[2] as String, PolarSensorSetting::class.java)
-        } else {
-            null
-        }
+        val settings = gson.fromJson(arguments[2] as String, PolarSensorSetting::class.java)
 
-        val apiCall = if (settings != null) {
-            wrapper.api.startOfflineRecording(identifier, feature, settings, null)
-        } else {
-            wrapper.api.startOfflineRecording(identifier, feature)
-        }
-    
-        apiCall.subscribe({
-            runOnUiThread { result.success(null) }
-        }, {
-            runOnUiThread {
-                result.error("ERROR_STARTING_RECORDING", it.message, null)
-            }
-        })
-        .discard()
+        wrapper.api
+            .startOfflineRecording(identifier, feature, settings)
+            .subscribe({
+                runOnUiThread { result.success(null) }
+            }, {
+                runOnUiThread {
+                    result.error("ERROR_STARTING_RECORDING", it.message, null)
+                }
+            })
+            .discard()
     }
 
     private fun stopOfflineRecording(call: MethodCall, result: Result) {
@@ -853,8 +845,8 @@ class PolarPlugin :
 
         wrapper.api
             .deleteStoredDeviceData(identifier, dataType, until)
-            .subscribe({ paths ->
-                runOnUiThread { result.success(gson.toJson(paths)) }
+            .subscribe({
+                runOnUiThread { result.success(null) }
             }, {
                 runOnUiThread {
                     result.error(it.toString(), it.message, null)
