@@ -568,6 +568,8 @@ class PolarOfflineRecordingDataCodable: Encodable {
             try container.encode(skinTemperatureDataCodable, forKey: .data)
             try container.encode(startTime.millisecondsSince1970, forKey: .startTime)
         case .emptyData(startTime: let startTime):
+            try container.encode("emptyData", forKey: .type)
+            try container.encode(startTime.millisecondsSince1970, forKey: .startTime)
         }
     }
 }
