@@ -182,6 +182,8 @@ class PolarPlugin :
             "getSteps" -> getSteps(call, result)
             "getDistance" -> getDistance(call, result)
             "getActiveTime" -> getActiveTime(call, result)
+            "sendInitializationAndStartSyncNotifications" -> sendInitializationAndStartSyncNotifications(call, result)
+            "sendTerminateAndStopSyncNotifications" -> sendTerminateAndStopSyncNotifications(call, result)
             else -> result.notImplemented()
         }
     }
@@ -1177,6 +1179,42 @@ class PolarPlugin :
             "seconds" to time.seconds,
             "millis" to time.millis
         )
+    }
+
+    private fun sendInitializationAndStartSyncNotifications(call: MethodCall, result: Result) {
+        val identifier = call.arguments as? String ?: run {
+            result.error("ERROR_INVALID_ARGUMENT", "Expected a single String argument", null)
+            return
+        }
+
+        wrapper.api
+            .sendInitializationAndStartSyncNotifications(identifier)
+            .subscribe({ success ->
+                runOnUiThread { result.success(success) }
+            }, { error ->
+                runOnUiThread {
+                    result.error(error.toString(), error.message, null)
+                }
+            })
+            .discard()
+    }
+
+    private fun sendTerminateAndStopSyncNotifications(call: MethodCall, result: Result) {
+        val identifier = call.arguments as? String ?: run {
+            result.error("ERROR_INVALID_ARGUMENT", "Expected a single String argument", null)
+            return
+        }
+
+        wrapper.api
+            .sendTerminateAndStopSyncNotifications(identifier)
+            .subscribe({
+                runOnUiThread { result.success(null) }
+            }, { error ->
+                runOnUiThread {
+                    result.error(error.toString(), error.message, null)
+                }
+            })
+            .discard()
     }
     }
 

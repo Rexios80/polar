@@ -162,6 +162,10 @@ public class SwiftPolarPlugin:
         getDistance(call, result)
       case "getActiveTime":
         getActiveTime(call, result)
+      case "sendInitializationAndStartSyncNotifications":
+        sendInitializationAndStartSyncNotifications(call, result)
+      case "sendTerminateAndStopSyncNotifications":
+        sendTerminateAndStopSyncNotifications(call, result)
       default: result(FlutterMethodNotImplemented)
       }
     } catch {
@@ -1248,6 +1252,48 @@ private func success(_ event: String, data: Any? = nil) {
                 }
             )
     }
+
+  func sendInitializationAndStartSyncNotifications(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+    guard let identifier = call.arguments as? String else {
+      result(FlutterError(code: "ERROR_INVALID_ARGUMENT",
+                        message: "Expected a single String argument",
+                        details: nil))
+      return
+    }
+
+    _ = api.sendInitializationAndStartSyncNotifications(identifier: identifier)
+      .subscribe(
+        onCompleted: {
+          result(nil)
+        },
+        onError: { error in
+          result(FlutterError(code: error.localizedDescription,
+                            message: error.localizedDescription,
+                            details: nil))
+        }
+      )
+  }
+
+  func sendTerminateAndStopSyncNotifications(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+    guard let identifier = call.arguments as? String else {
+      result(FlutterError(code: "ERROR_INVALID_ARGUMENT",
+                        message: "Expected a single String argument",
+                        details: nil))
+      return
+    }
+
+    _ = api.sendTerminateAndStopSyncNotifications(identifier: identifier)
+      .subscribe(
+        onCompleted: {
+          result(nil)
+        },
+        onError: { error in
+          result(FlutterError(code: error.localizedDescription,
+                            message: error.localizedDescription,
+                            details: nil))
+        }
+      )
+  }
 }
 
 class StreamHandler: NSObject, FlutterStreamHandler {

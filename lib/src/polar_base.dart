@@ -1052,4 +1052,35 @@ class Polar {
       return [];
     }
   }
+
+  /// Notify device of the incoming data transfer operation(s).
+  ///
+  /// By using this method the device will handle data transfer operations more
+  /// efficiently by setting it to faster data transfer mode. It also will cause
+  /// the device to flush the latest data to files giving you the most up-to-date data.
+  ///
+  /// [identifier] Polar device ID or BT address
+  /// Returns true if start sync notifications sending was successful, false otherwise.
+  Future<bool> sendInitializationAndStartSyncNotifications(
+    String identifier,
+  ) async {
+    final result = await _methodChannel.invokeMethod<bool>(
+      'sendInitializationAndStartSyncNotifications',
+      identifier,
+    );
+    return result ?? false;
+  }
+
+  /// Notify device that data transfer operations are completed.
+  ///
+  /// By calling this API device will set itself back to normal data transfer mode
+  /// that will use less battery.
+  ///
+  /// [identifier] Polar device ID or BT address
+  Future<void> sendTerminateAndStopSyncNotifications(String identifier) {
+    return _methodChannel.invokeMethod(
+      'sendTerminateAndStopSyncNotifications',
+      identifier,
+    );
+  }
 }
