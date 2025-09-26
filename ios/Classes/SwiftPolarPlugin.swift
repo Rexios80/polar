@@ -1281,50 +1281,11 @@ private func success(_ event: String, data: Any? = nil) {
         _ = api.getActivitySampleData(identifier: identifier, fromDate: fromDate, toDate: toDate)
             .subscribe(
                 onSuccess: { activityDayDataList in
-                    // Extract all PolarActivitySamplesData as requested
-                    var activityDataResponse: [[String: Any]] = []
-                    
-                    for dayData in activityDayDataList {
-                        // Extract all samples data for this day
-                        var samplesDataList: [[String: Any]] = []
-                        
-                        // Process each PolarActivityData in the day
-                        for activityData in dayData.polarActivityDataList {
-                            // Extract activity info for this sample
-                            var activityInfoList: [[String: Any]] = []
-                            for activityInfo in activityData.polarActivityInfo {
-                                let activityInfoDict: [String: Any] = [
-                                    "timeStamp": ISO8601DateFormatter().string(from: activityInfo.timeStamp),
-                                    "activityClass": activityInfo.activityClass?.rawValue ?? NSNull(),
-                                    "factor": activityInfo.factor ?? NSNull()
-                                ]
-                                activityInfoList.append(activityInfoDict)
-                            }
-                            
-                            // Create complete samples data object
-                            let samplesDataDict: [String: Any] = [
-                                "startTime": ISO8601DateFormatter().string(from: activityData.startTime),
-                                "metRecordingInterval": activityData.metRecordingInterval ?? NSNull(),
-                                "metSamples": activityData.metSamples ?? NSNull(),
-                                "stepRecordingInterval": activityData.stepRecordingInterval ?? NSNull(),
-                                "stepSamples": activityData.stepSamples ?? NSNull(),
-                                "activityInfoList": activityInfoList
-                            ]
-                            samplesDataList.append(samplesDataDict)
-                        }
-                        
-                        // Use the first activity data's date if available, otherwise use fromDate
-                        let dayDate = dayData.polarActivityDataList.first?.date ?? fromDate
-                        let dayActivityInfo: [String: Any] = [
-                            "date": dateFormatter.string(from: dayDate),
-                            "samplesDataList": samplesDataList
-                        ]
-                        
-                        activityDataResponse.append(dayActivityInfo)
-                    }
-                    
+                    // Use the same approach as the iOS example - encode directly to JSON
                     do {
-                        let jsonData = try JSONSerialization.data(withJSONObject: activityDataResponse, options: [])
+                        let encoder = JSONEncoder()
+                        encoder.dateEncodingStrategy = .iso8601
+                        let jsonData = try encoder.encode(activityDayDataList)
                         if let jsonString = String(data: jsonData, encoding: .utf8) {
                             result(jsonString)
                         } else {
