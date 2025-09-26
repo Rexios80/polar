@@ -1053,6 +1053,63 @@ class Polar {
     }
   }
 
+  /// Gets activity sample data for a specific date range.
+  ///
+  /// This method retrieves activity classification data that includes information
+  /// about different activity levels such as SEDENTARY, LIGHT, CONTINUOUS_MODERATE,
+  /// INTERMITTENT_MODERATE, CONTINUOUS_VIGOROUS, INTERMITTENT_VIGOROUS, etc.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or address
+  ///   - fromDate: Start date for the range
+  ///   - toDate: End date for the range
+  /// - Returns: List of activity sample data for the given date range
+  ///   - success: Returns a list of activity sample data (may be empty if no data available)
+  ///   - onError: Possible errors are returned as exceptions
+  ///
+  /// Note: This method requires Android API level 26+ due to Java 8 time API usage.
+  Future<List<PolarActivitySampleData>> getActivitySampleData(
+    String identifier,
+    DateTime fromDate,
+    DateTime toDate,
+  ) async {
+    try {
+      // Format dates as required by the native implementation
+      final formattedFromDate = DateFormat('yyyy-MM-dd').format(fromDate);
+      final formattedToDate = DateFormat('yyyy-MM-dd').format(toDate);
+
+      final result = await _methodChannel.invokeMethod<String>(
+        'getActivitySampleData',
+        [
+          identifier,
+          formattedFromDate,
+          formattedToDate,
+        ],
+      );
+
+      // If result is null, return an empty list
+      if (result == null || result.isEmpty) {
+        return [];
+      }
+
+      // Try to parse the JSON response
+      try {
+        final data = jsonDecode(result) as List;
+        return data
+            .map((e) =>
+                PolarActivitySampleData.fromJson(e as Map<String, dynamic>))
+            .toList();
+      } catch (e) {
+        debugPrint('Error parsing activity sample data: $e');
+        return [];
+      }
+    } catch (e) {
+      debugPrint('Error getting activity sample data: $e');
+      // Return empty list instead of throwing, as no data is not an exceptional situation
+      return [];
+    }
+  }
+
   /// Notify device of the incoming data transfer operation(s).
   ///
   /// By using this method the device will handle data transfer operations more
@@ -1069,6 +1126,34 @@ class Polar {
       identifier,
     );
     return result ?? false;
+  }
+
+  /// Deletes device day (YYYYMMDD) folders from the given date range.
+  ///
+  /// The date range is inclusive. Deletes the day folder (plus all sub-folders
+  /// with any contents).
+  ///
+  /// Note: This method requires Android API level 26+ due to Java 8 time API usage.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device ID or BT address
+  ///   - fromDate: The starting date to delete date folders from
+  ///   - toDate: The ending date of last date to delete folders from
+  /// - Returns: Future completing when operation is done
+  ///   - success: Operation completed successfully
+  ///   - onError: Possible errors are returned as exceptions
+  Future<void> deleteDeviceDateFolders(
+    String identifier,
+    DateTime fromDate,
+    DateTime toDate,
+  ) {
+    final fromDateString = DateFormat('yyyy-MM-dd').format(fromDate);
+    final toDateString = DateFormat('yyyy-MM-dd').format(toDate);
+
+    return _methodChannel.invokeMethod(
+      'deleteDeviceDateFolders',
+      [identifier, fromDateString, toDateString],
+    );
   }
 
   /// Notify device that data transfer operations are completed.

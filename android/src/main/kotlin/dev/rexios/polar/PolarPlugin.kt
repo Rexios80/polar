@@ -5,6 +5,7 @@ import android.content.Context
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.Lifecycle.Event
 import androidx.lifecycle.LifecycleEventObserver
 import com.google.gson.GsonBuilder
@@ -49,6 +50,7 @@ import java.util.Date
 import java.util.Locale
 import java.util.UUID
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 
 fun Any?.discard() = Unit
@@ -130,6 +132,7 @@ class PolarPlugin :
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onMethodCall(
         call: MethodCall,
         result: Result,
@@ -182,6 +185,7 @@ class PolarPlugin :
             "getSteps" -> getSteps(call, result)
             "getDistance" -> getDistance(call, result)
             "getActiveTime" -> getActiveTime(call, result)
+            "getActivitySampleData" -> getActivitySampleData(call, result)
             "sendInitializationAndStartSyncNotifications" -> sendInitializationAndStartSyncNotifications(call, result)
             "sendTerminateAndStopSyncNotifications" -> sendTerminateAndStopSyncNotifications(call, result)
             else -> result.notImplemented()
@@ -1179,6 +1183,131 @@ class PolarPlugin :
             "seconds" to time.seconds,
             "millis" to time.millis
         )
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun getActivitySampleData(call: MethodCall, result: Result) {
+        try {
+            android.util.Log.d("PolarPlugin", "getActivitySampleData called with arguments: ${call.arguments}")
+            
+            val arguments = call.arguments as? List<*>
+            if (arguments == null) {
+                android.util.Log.e("PolarPlugin", "Arguments are null or not a List")
+                result.error("INVALID_ARGUMENTS", "Arguments must be a non-null List", null)
+                return
+            }
+            
+            if (arguments.size < 3) {
+                android.util.Log.e("PolarPlugin", "Arguments list size is less than 3: ${arguments.size}")
+                result.error("INVALID_ARGUMENTS", "Expected 3 arguments: identifier, fromDate, toDate", null)
+                return
+            }
+            
+            val identifier = arguments[0] as? String
+            if (identifier == null) {
+                android.util.Log.e("PolarPlugin", "Identifier is null or not a String")
+                result.error("INVALID_ARGUMENTS", "Device identifier must be a non-null String", null)
+                return
+            }
+            
+            val fromDateString = arguments[1] as? String
+            if (fromDateString == null) {
+                android.util.Log.e("PolarPlugin", "fromDate is null or not a String")
+                result.error("INVALID_ARGUMENTS", "fromDate must be a non-null String", null)
+                return
+            }
+            
+            val toDateString = arguments[2] as? String
+            if (toDateString == null) {
+                android.util.Log.e("PolarPlugin", "toDate is null or not a String")
+                result.error("INVALID_ARGUMENTS", "toDate must be a non-null String", null)
+                return
+            }
+            
+            android.util.Log.d("PolarPlugin", "Parsing dates: fromDate=$fromDateString, toDate=$toDateString")
+            
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            val fromDateParsed = dateFormat.parse(fromDateString)
+            val toDateParsed = dateFormat.parse(toDateString)
+            
+            if (fromDateParsed == null || toDateParsed == null) {
+                android.util.Log.e("PolarPlugin", "Failed to parse dates: fromDate=$fromDateParsed, toDate=$toDateParsed")
+                result.error("INVALID_DATE_FORMAT", "Could not parse date strings", null)
+                return
+            }
+            
+            // Convert Date to LocalDate using Java 8 time APIs (API 26+)
+            val fromDate = fromDateParsed!!.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+            val toDate = toDateParsed!!.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+            
+            android.util.Log.d("PolarPlugin", "Calling Polar API getActivitySampleData with identifier=$identifier, fromDate=$fromDate, toDate=$toDate")
+            
+            wrapper.api
+                .getActivitySampleData(identifier, fromDate, toDate)
+                .onErrorReturn { error ->
+                    android.util.Log.e("PolarPlugin", "Error in getActivitySampleData API call: ${error.message}", error)
+                    
+                    if (error.toString().contains("PftpResponseError") && error.toString().contains("Error: 103")) {
+                        android.util.Log.e("PolarPlugin", "PSFTP Protocol error 103 - likely no activity sample data available for the requested period")
+                        emptyList()
+                    } else {
+                        throw error
+                    }
+                }
+                .subscribe({ activitySampleDataList: List<com.polar.sdk.api.model.activity.PolarActivitySamplesDayData> ->
+                    android.util.Log.d("PolarPlugin", "Received activity sample data: ${activitySampleDataList.size} entries")
+                    
+                    val response = activitySampleDataList.map { dayData ->
+                        // Extract all samples data for this day
+                        val samplesDataList = mutableListOf<Map<String, Any?>>()
+                        
+                        dayData.polarActivitySamplesDataList?.let { samplesList ->
+                            for (samplesData in samplesList) {
+                                // Extract activity info for this sample
+                                val activityInfoList = mutableListOf<Map<String, Any?>>()
+                                samplesData.activityInfoList?.let { infoList ->
+                                    for (activityInfo in infoList) {
+                                        activityInfoList.add(mapOf(
+                                            "timeStamp" to activityInfo.timeStamp.toString(),
+                                            "activityClass" to activityInfo.activityClass?.name,
+                                            "factor" to activityInfo.factor
+                                        ))
+                                    }
+                                }
+                                
+                                // Create complete samples data object
+                                samplesDataList.add(mapOf(
+                                    "startTime" to samplesData.startTime.toString(),
+                                    "metRecordingInterval" to samplesData.metRecordingInterval,
+                                    "metSamples" to samplesData.metSamples,
+                                    "stepRecordingInterval" to samplesData.stepRecordingInterval,
+                                    "stepSamples" to samplesData.stepSamples,
+                                    "activityInfoList" to activityInfoList
+                                ))
+                            }
+                        }
+                        
+                        mapOf(
+                            "date" to dayData.polarActivitySamplesDataList?.firstOrNull()?.startTime?.toLocalDate()?.toString(),
+                            "samplesDataList" to samplesDataList
+                        )
+                    }
+                    
+                    runOnUiThread { 
+                        android.util.Log.d("PolarPlugin", "Returning activity sample data as JSON")
+                        result.success(gson.toJson(response)) 
+                    }
+                }, { error ->
+                    android.util.Log.e("PolarPlugin", "Error in getActivitySampleData subscription: ${error.message}", error)
+                    runOnUiThread { 
+                        result.error("GET_ACTIVITY_SAMPLE_DATA_ERROR", "Error fetching activity sample data: ${error.message}", null) 
+                    }
+                })
+                .discard()
+        } catch (e: Exception) {
+            android.util.Log.e("PolarPlugin", "Exception in getActivitySampleData", e)
+            result.error("UNEXPECTED_ERROR", "Unexpected error in getActivitySampleData: ${e.message}", null)
+        }
     }
 
     private fun sendInitializationAndStartSyncNotifications(call: MethodCall, result: Result) {

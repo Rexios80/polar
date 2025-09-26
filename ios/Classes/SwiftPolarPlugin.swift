@@ -162,6 +162,8 @@ public class SwiftPolarPlugin:
         getDistance(call, result)
       case "getActiveTime":
         getActiveTime(call, result)
+      case "getActivitySampleData":
+        getActivitySampleData(call, result)
       case "sendInitializationAndStartSyncNotifications":
         sendInitializationAndStartSyncNotifications(call, result)
       case "sendTerminateAndStopSyncNotifications":
@@ -1247,6 +1249,97 @@ private func success(_ event: String, data: Any? = nil) {
                 },
                 onFailure: { error in
                     result(FlutterError(code: "ERROR_GETTING_ACTIVE_TIME",
+                                      message: error.localizedDescription,
+                                      details: nil))
+                }
+            )
+    }
+
+  func getActivitySampleData(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        guard let arguments = call.arguments as? [Any],
+              arguments.count == 3,
+              let identifier = arguments[0] as? String,
+              let fromDateString = arguments[1] as? String,
+              let toDateString = arguments[2] as? String else {
+            result(FlutterError(code: "INVALID_ARGUMENTS",
+                              message: "Expected [identifier, fromDate, toDate]",
+                              details: nil))
+            return
+        }
+
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        
+        guard let fromDate = dateFormatter.date(from: fromDateString),
+              let toDate = dateFormatter.date(from: toDateString) else {
+            result(FlutterError(code: "INVALID_DATE_FORMAT",
+                              message: "Dates must be in yyyy-MM-dd format",
+                              details: nil))
+            return
+        }
+
+        _ = api.getActivitySampleData(identifier: identifier, fromDate: fromDate, toDate: toDate)
+            .subscribe(
+                onSuccess: { activityDayDataList in
+                    // Extract all PolarActivitySamplesData as requested
+                    var activityDataResponse: [[String: Any]] = []
+                    
+                    for dayData in activityDayDataList {
+                        // Extract all samples data for this day
+                        var samplesDataList: [[String: Any]] = []
+                        
+                        // Process each PolarActivityData in the day
+                        for activityData in dayData.polarActivityDataList {
+                            // Extract activity info for this sample
+                            var activityInfoList: [[String: Any]] = []
+                            for activityInfo in activityData.polarActivityInfo {
+                                let activityInfoDict: [String: Any] = [
+                                    "timeStamp": ISO8601DateFormatter().string(from: activityInfo.timeStamp),
+                                    "activityClass": activityInfo.activityClass?.rawValue ?? NSNull(),
+                                    "factor": activityInfo.factor ?? NSNull()
+                                ]
+                                activityInfoList.append(activityInfoDict)
+                            }
+                            
+                            // Create complete samples data object
+                            let samplesDataDict: [String: Any] = [
+                                "startTime": ISO8601DateFormatter().string(from: activityData.startTime),
+                                "metRecordingInterval": activityData.metRecordingInterval ?? NSNull(),
+                                "metSamples": activityData.metSamples ?? NSNull(),
+                                "stepRecordingInterval": activityData.stepRecordingInterval ?? NSNull(),
+                                "stepSamples": activityData.stepSamples ?? NSNull(),
+                                "activityInfoList": activityInfoList
+                            ]
+                            samplesDataList.append(samplesDataDict)
+                        }
+                        
+                        // Use the first activity data's date if available, otherwise use fromDate
+                        let dayDate = dayData.polarActivityDataList.first?.date ?? fromDate
+                        let dayActivityInfo: [String: Any] = [
+                            "date": dateFormatter.string(from: dayDate),
+                            "samplesDataList": samplesDataList
+                        ]
+                        
+                        activityDataResponse.append(dayActivityInfo)
+                    }
+                    
+                    do {
+                        let jsonData = try JSONSerialization.data(withJSONObject: activityDataResponse, options: [])
+                        if let jsonString = String(data: jsonData, encoding: .utf8) {
+                            result(jsonString)
+                        } else {
+                            result(FlutterError(code: "ENCODING_ERROR",
+                                              message: "Failed to convert JSON data to string",
+                                              details: nil))
+                        }
+                    } catch {
+                        result(FlutterError(code: "ENCODING_ERROR",
+                                          message: "Failed to encode activity sample data: \(error.localizedDescription)",
+                                          details: nil))
+                    }
+                },
+                onFailure: { error in
+                    result(FlutterError(code: "ERROR_GETTING_ACTIVITY_SAMPLE_DATA",
                                       message: error.localizedDescription,
                                       details: nil))
                 }
