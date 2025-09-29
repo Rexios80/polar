@@ -857,28 +857,25 @@ class Polar {
   ///
   /// - Parameters:
   ///   - identifier: Polar device id or address
-  ///   - dataType: The type of data to delete
+  ///   - dataType: The type of stored data to delete
   ///   - until: Delete data up to this date
-  /// - Returns: A list of paths of deleted data
-  ///   - success: Returns a list of paths of deleted data
+  /// - Returns: Future<void>
+  ///   - success: Data deletion completed
   ///   - onError: Possible errors are returned as exceptions
-  // Future<List<String>> deleteStoredDeviceData(
-  //   String identifier,
-  //   PolarStoredDataType dataType,
-  //   DateTime until,
-  // ) async {
-  //   final result = await _methodChannel.invokeMethod<String>(
-  //     'deleteStoredDeviceData',
-  //     [
-  //       identifier,
-  //       dataType.toJson(),
-  //       DateFormat('yyyy-MM-dd').format(until),
-  //     ],
-  //   );
-
-  //   if (result == null) return [];
-  //   return (jsonDecode(result) as List).cast<String>();
-  // }
+  Future<void> deleteStoredDeviceData(
+    String identifier,
+    PolarStoredDataTypeEnum dataType,
+    DateTime until,
+  ) async {
+    await _methodChannel.invokeMethod<void>(
+      'deleteStoredDeviceData',
+      [
+        identifier,
+        dataType.toInt(),
+        DateFormat('yyyy-MM-dd').format(until),
+      ],
+    );
+  }
 
   /// Deletes device date folders between two dates.
   ///

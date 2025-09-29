@@ -1281,11 +1281,58 @@ private func success(_ event: String, data: Any? = nil) {
         _ = api.getActivitySampleData(identifier: identifier, fromDate: fromDate, toDate: toDate)
             .subscribe(
                 onSuccess: { activityDayDataList in
-                    // Use the same approach as the iOS example - encode directly to JSON
                     do {
-                        let encoder = JSONEncoder()
-                        encoder.dateEncodingStrategy = .iso8601
-                        let jsonData = try encoder.encode(activityDayDataList)
+                        // Convert the data directly from the native structures
+                        let response = activityDayDataList.map { dayData -> [String: Any] in
+                            let samplesDataList = dayData.polarActivityDataList.compactMap { activityData -> [String: Any]? in
+                                // Access the samples directly from the activityData
+                                guard let samples = activityData.samples else { return nil }
+                                
+                                // Convert startTime to ISO8601 string
+                                let formatter = ISO8601DateFormatter()
+                                let startTimeString = formatter.string(from: samples.startTime)
+                                
+                                // Convert activityInfoList
+                                let activityInfoList = samples.activityInfoList.map { activityInfo in
+                                    [
+                                        "timeStamp": formatter.string(from: activityInfo.timeStamp),
+                                        "activityClass": activityInfo.activityClass.rawValue,
+                                        "factor": activityInfo.factor
+                                    ]
+                                }
+                                
+                                return [
+                                    "startTime": startTimeString,
+                                    "metRecordingInterval": samples.metRecordingInterval,
+                                    "metSamples": samples.metSamples ?? [],
+                                    "stepRecordingInterval": samples.stepRecordingInterval,
+                                    "stepSamples": samples.stepSamples ?? [],
+                                    "activityInfoList": activityInfoList
+                                ]
+                            }
+                            
+                            // Extract date string from first sample's startTime
+                            let dateString: String
+                            if let firstSample = samplesDataList.first,
+                               let startTime = firstSample["startTime"] as? String,
+                               !startTime.isEmpty {
+                                // Extract date part from ISO8601 string (YYYY-MM-DD)
+                                if let dateRange = startTime.range(of: "T") {
+                                    dateString = String(startTime[..<dateRange.lowerBound])
+                                } else {
+                                    dateString = startTime
+                                }
+                            } else {
+                                dateString = ""
+                            }
+                            
+                            return [
+                                "date": dateString,
+                                "samplesDataList": samplesDataList
+                            ]
+                        }
+                        
+                        let jsonData = try JSONSerialization.data(withJSONObject: response, options: [])
                         if let jsonString = String(data: jsonData, encoding: .utf8) {
                             result(jsonString)
                         } else {

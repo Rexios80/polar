@@ -675,7 +675,7 @@ class PolarActiveTimeDataCodable: Encodable {
 
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(data.date, forKey: .date)  
+        try container.encode(data.date, forKey: .date)
         try container.encode(PolarActiveTimeCodable(data.timeNonWear), forKey: .timeNonWear)
         try container.encode(PolarActiveTimeCodable(data.timeSleep), forKey: .timeSleep)
         try container.encode(PolarActiveTimeCodable(data.timeSedentary), forKey: .timeSedentary)
@@ -684,6 +684,66 @@ class PolarActiveTimeDataCodable: Encodable {
         try container.encode(PolarActiveTimeCodable(data.timeIntermittentModerateActivity), forKey: .timeIntermittentModerateActivity)
         try container.encode(PolarActiveTimeCodable(data.timeContinuousVigorousActivity), forKey: .timeContinuousVigorousActivity)
         try container.encode(PolarActiveTimeCodable(data.timeIntermittentVigorousActivity), forKey: .timeIntermittentVigorousActivity)
+    }
+}
+
+// Activity Sample Data Codables
+class PolarActivityInfoCodable: Encodable {
+    let timeStamp: String
+    let activityClass: String
+    let factor: Float
+
+    init(timeStamp: String, activityClass: String, factor: Float) {
+        self.timeStamp = timeStamp
+        self.activityClass = activityClass
+        self.factor = factor
+    }
+    
+    // Helper to convert from PolarActivityInfo
+    init(from activityInfo: PolarActivityData.PolarActivityInfo) {
+        let formatter = ISO8601DateFormatter()
+        self.timeStamp = formatter.string(from: activityInfo.timeStamp)
+        self.activityClass = activityInfo.activityClass.rawValue
+        self.factor = activityInfo.factor
+    }
+}
+
+class PolarActivitySamplesDataCodable: Encodable {
+    let startTime: String
+    let metRecordingInterval: Int
+    let metSamples: [Float]
+    let stepRecordingInterval: Int
+    let stepSamples: [UInt32]
+    let activityInfoList: [PolarActivityInfoCodable]
+
+    init(startTime: String, metRecordingInterval: Int, metSamples: [Float], stepRecordingInterval: Int, stepSamples: [UInt32], activityInfoList: [PolarActivityInfoCodable]) {
+        self.startTime = startTime
+        self.metRecordingInterval = metRecordingInterval
+        self.metSamples = metSamples
+        self.stepRecordingInterval = stepRecordingInterval
+        self.stepSamples = stepSamples
+        self.activityInfoList = activityInfoList
+    }
+    
+    // Helper to convert from PolarActivitySamples
+    init(from samples: PolarActivityData.PolarActivitySamples) {
+        let formatter = ISO8601DateFormatter()
+        self.startTime = formatter.string(from: samples.startTime)
+        self.metRecordingInterval = samples.metRecordingInterval
+        self.metSamples = samples.metSamples ?? []
+        self.stepRecordingInterval = samples.stepRecordingInterval
+        self.stepSamples = samples.stepSamples ?? []
+        self.activityInfoList = samples.activityInfoList.map { PolarActivityInfoCodable(from: $0) }
+    }
+}
+
+class PolarActivitySamplesDayDataCodable: Encodable {
+    let date: String
+    let samplesDataList: [PolarActivitySamplesDataCodable]
+
+    init(date: String, samplesDataList: [PolarActivitySamplesDataCodable]) {
+        self.date = date
+        self.samplesDataList = samplesDataList
     }
 }
 
