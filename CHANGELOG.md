@@ -1,3 +1,7 @@
+## 7.7.1
+
+- Upgrades `device_info_plus` to `12.0.0` (by [@iarata](https://github.com/iarata) in [#63](https://github.com/Rexios80/polar/pull/63))
+
 ## 7.7.0
 
 - Upgrades Polar SDK to `6.3.0`
