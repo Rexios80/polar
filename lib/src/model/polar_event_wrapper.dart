@@ -47,4 +47,7 @@ enum PolarEvent {
 
   /// Battery charging status received
   batteryChargingStatusReceived,
+
+  /// Power sources state received
+  powerSourcesStateReceived,
 }

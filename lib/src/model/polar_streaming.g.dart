@@ -166,6 +166,8 @@ Map<String, dynamic> _$PolarPpiSampleToJson(PolarPpiSample instance) =>
           const PlatformBooleanConverter().toJson(instance.skinContactStatus),
       'skinContactSupported': const PlatformBooleanConverter()
           .toJson(instance.skinContactSupported),
+      'timeStamp':
+          const PolarSampleTimestampConverter().toJson(instance.timeStamp),
     };
 
 PolarTemperatureSample _$PolarTemperatureSampleFromJson(

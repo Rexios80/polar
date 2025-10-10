@@ -1,5 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
+// ignore_for_file: document_ignores, unnecessary_cast, require_trailing_commas
+
 part of 'polar_offline_record_entry.dart';
 
 // **************************************************************************
@@ -7,19 +9,16 @@ part of 'polar_offline_record_entry.dart';
 // **************************************************************************
 
 PolarOfflineRecordingEntry _$PolarOfflineRecordingEntryFromJson(
-  Map<String, dynamic> json,
-) {
-  return PolarOfflineRecordingEntry(
-    path: json['path'] as String,
-    size: json['size'] as int,
-    date: const UnixTimeConverter().fromJson((json['date'] as num).toInt()),
-    type: const PolarDataTypeConverter().fromJson(json['type']),
-  );
-}
+        Map<String, dynamic> json) =>
+    PolarOfflineRecordingEntry(
+      path: json['path'] as String,
+      size: (json['size'] as num).toInt(),
+      date: const UnixTimeConverter().fromJson((json['date'] as num).toInt()),
+      type: const PolarDataTypeConverter().fromJson(json['type']),
+    );
 
 Map<String, dynamic> _$PolarOfflineRecordingEntryToJson(
-  PolarOfflineRecordingEntry instance,
-) =>
+        PolarOfflineRecordingEntry instance) =>
     <String, dynamic>{
       'path': instance.path,
       'size': instance.size,
