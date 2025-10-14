@@ -190,6 +190,15 @@ void testStreaming(
       },
       skip: !features.contains(PolarDataType.ppi),
     );
+
+    test(
+      'skin-temperature',
+      () async {
+        final temperatureData = await polar.startSkinTemperatureStreaming(identifier).first;
+        expect(temperatureData.samples.length, greaterThan(0));
+      },
+      skip: !features.contains(PolarDataType.skinTemperature),
+    );
   });
 }
 
