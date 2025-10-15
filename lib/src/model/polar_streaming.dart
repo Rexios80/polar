@@ -37,7 +37,7 @@ class PolarStreamingData<T> {
         return _fromJson(json, _$PolarMagnetometerSampleFromJson);
       case const (PolarPpiSample):
         return _fromJson(json, _$PolarPpiSampleFromJson);
-      case const (PolarTemperatureSample):
+      case const (PolarTemperatureData):
         return _fromJson(json, _$PolarTemperatureSampleFromJson);
       case const (PolarPressureData):
         return _fromJson(json, _$PolarPressureSampleFromJson);
@@ -66,7 +66,7 @@ class PolarStreamingData<T> {
         return _toJson(_$PolarMagnetometerSampleToJson);
       case const (PolarPpiSample):
         return _toJson(_$PolarPpiSampleToJson);
-      case const (PolarTemperatureSample):
+      case const (PolarTemperatureData):
         return _toJson(_$PolarTemperatureSampleToJson);
       case const (PolarPressureData):
         return _toJson(_$PolarPressureSampleToJson);
