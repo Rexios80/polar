@@ -499,18 +499,22 @@ class Polar {
   ///
   /// - Parameters:
   ///   - identifier: polar device id or UUID
-  ///   - preservePairingInformation: preserve pairing information during factory reset
   /// - Returns: Completable stream
   ///   - success: when factory reset notification sent to device
   ///   - onError: see `PolarErrors` for possible errors invoked
-  Future<void> doFactoryReset(
-    String identifier,
-    bool preservePairingInformation,
-  ) {
-    return _methodChannel.invokeMethod(
-      'doFactoryReset',
-      [identifier, preservePairingInformation],
-    );
+  Future<void> doFactoryReset(String identifier) {
+    return _methodChannel.invokeMethod('doFactoryReset', identifier);
+  }
+
+  /// Perform restart device.
+  ///
+  /// - Parameters:
+  ///   - identifier: polar device id or UUID
+  /// - Returns: Completable stream
+  ///   - success: when restart notification sent to device
+  ///   - onError: see `PolarErrors` for possible errors invoked
+  Future<void> doRestart(String identifier) {
+    return _methodChannel.invokeMethod('doRestart', identifier);
   }
 
   ///  Enables SDK mode.

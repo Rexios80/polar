@@ -163,6 +163,7 @@ class PolarPlugin :
             "removeExercise" -> removeExercise(call, result)
             "setLedConfig" -> setLedConfig(call, result)
             "doFactoryReset" -> doFactoryReset(call, result)
+            "doRestart" -> doRestart(call, result)
             "enableSdkMode" -> enableSdkMode(call, result)
             "disableSdkMode" -> disableSdkMode(call, result)
             "isSdkModeEnabled" -> isSdkModeEnabled(call, result)
@@ -455,12 +456,27 @@ class PolarPlugin :
         call: MethodCall,
         result: Result,
     ) {
-        val arguments = call.arguments as List<*>
-        val identifier = arguments[0] as String
-        val preservePairingInformation = arguments[1] as Boolean
+        val identifier = call.arguments as String
 
         wrapper.api
-            .doFactoryReset(identifier, preservePairingInformation)
+            .doFactoryReset(identifier)
+            .subscribe({
+                runOnUiThread { result.success(null) }
+            }, {
+                runOnUiThread {
+                    result.error(it.toString(), it.message, null)
+                }
+            })
+            .discard()
+    }
+
+    private fun doRestart(
+        call: MethodCall,
+        result: Result,
+    ) {
+        val identifier = call.arguments as String
+        wrapper.api
+            .doRestart(identifier)
             .subscribe({
                 runOnUiThread { result.success(null) }
             }, {

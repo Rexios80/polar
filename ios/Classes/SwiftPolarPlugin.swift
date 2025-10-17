@@ -120,6 +120,8 @@ public class SwiftPolarPlugin:
         setLedConfig(call, result)
       case "doFactoryReset":
         doFactoryReset(call, result)
+      case "doRestart":
+        doRestart(call, result)
       case "enableSdkMode":
         enableSdkMode(call, result)
       case "disableSdkMode":
@@ -420,10 +422,8 @@ public class SwiftPolarPlugin:
   }
 
   func doFactoryReset(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
-    let arguments = call.arguments as! [Any]
-    let identifier = arguments[0] as! String
-    let preservePairingInformation = arguments[1] as! Bool
-    _ = api.doFactoryReset(identifier, preservePairingInformation: preservePairingInformation)
+    let identifier = call.arguments as! String
+    _ = api.doFactoryReset(identifier)
       .subscribe(
         onCompleted: {
           result(nil)
@@ -432,6 +432,20 @@ public class SwiftPolarPlugin:
           result(
             FlutterError(
               code: "Error doing factory reset", message: error.localizedDescription, details: nil))
+        })
+  }
+
+  func doRestart(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+    let identifier = call.arguments as! String
+    _ = api.doRestart(identifier)
+      .subscribe(
+        onCompleted: {
+          result(nil)
+        },
+        onError: { error in
+          result(
+            FlutterError(
+              code: "Error doing restart", message: error.localizedDescription, details: nil))
         })
   }
 
