@@ -495,17 +495,6 @@ class Polar {
         .invokeMethod('setLedConfig', [identifier, jsonEncode(config)]);
   }
 
-  /// Perform factory reset to given device.
-  ///
-  /// - Parameters:
-  ///   - identifier: polar device id or UUID
-  /// - Returns: Completable stream
-  ///   - success: when factory reset notification sent to device
-  ///   - onError: see `PolarErrors` for possible errors invoked
-  Future<void> doFactoryReset(String identifier) {
-    return _methodChannel.invokeMethod('doFactoryReset', identifier);
-  }
-
   /// Perform restart device.
   ///
   /// - Parameters:
