@@ -1,3 +1,7 @@
+## 7.7.2
+
+- Fixes issue with sample data deserialization (by [@thpir](https://github.com/thpir) in [#64](https://github.com/Rexios80/polar/pull/64))
+
 ## 7.7.1
 
 - Upgrades `device_info_plus` to `12.0.0` (by [@iarata](https://github.com/iarata) in [#63](https://github.com/Rexios80/polar/pull/63))
