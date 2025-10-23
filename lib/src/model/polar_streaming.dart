@@ -37,11 +37,11 @@ class PolarStreamingData<T> {
         return _fromJson(json, _$PolarMagnetometerSampleFromJson);
       case const (PolarPpiSample):
         return _fromJson(json, _$PolarPpiSampleFromJson);
-      case const (PolarTemperatureData):
+      case const (PolarTemperatureSample):
         return _fromJson(json, _$PolarTemperatureSampleFromJson);
-      case const (PolarPressureData):
+      case const (PolarPressureSample):
         return _fromJson(json, _$PolarPressureSampleFromJson);
-      case const (PolarLocationData):
+      case const (PolarLocationDataSample):
         return _fromJson(json, _$PolarLocationDataSampleFromJson);
       default:
         throw UnsupportedError('Unsupported type: $T');
@@ -66,11 +66,11 @@ class PolarStreamingData<T> {
         return _toJson(_$PolarMagnetometerSampleToJson);
       case const (PolarPpiSample):
         return _toJson(_$PolarPpiSampleToJson);
-      case const (PolarTemperatureData):
+      case const (PolarTemperatureSample):
         return _toJson(_$PolarTemperatureSampleToJson);
-      case const (PolarPressureData):
+      case const (PolarPressureSample):
         return _toJson(_$PolarPressureSampleToJson);
-      case const (PolarLocationData):
+      case const (PolarLocationDataSample):
         return _toJson(_$PolarLocationDataSampleToJson);
       default:
         throw UnsupportedError('Unsupported type: $T');
