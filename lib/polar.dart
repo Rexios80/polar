@@ -12,3 +12,4 @@ export 'src/model/polar_recording.dart';
 export 'src/model/polar_sensor_setting.dart';
 export 'src/model/polar_charge_state.dart';
 export 'src/model/polar_streaming.dart';
+export 'src/model/polar_first_time_use_config.dart';

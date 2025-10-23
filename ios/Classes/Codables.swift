@@ -429,3 +429,82 @@ extension Date {
     self = Date(timeIntervalSince1970: TimeInterval(milliseconds) / 1000)
   }
 }
+
+class PolarFirstTimeUseConfigCodable: Decodable {
+  let data: PolarFirstTimeUseConfig
+
+  required init(from decoder: Decoder) {
+    let container = try? decoder.container(keyedBy: CodingKeys.self)
+    
+    // Extract values with proper defaults
+    let genderString = (try? container?.decode(String.self, forKey: .gender)) ?? "Male"
+    let gender: PolarFirstTimeUseConfig.Gender = genderString == "Male" ? .male : .female
+    
+    let birthDateString = (try? container?.decode(String.self, forKey: .birthDate)) ?? ""
+    let dateFormatter = DateFormatter()
+    dateFormatter.dateFormat = "yyyy-MM-dd"
+    let birthDate = dateFormatter.date(from: birthDateString) ?? Date()
+    
+    let height = Float((try? container?.decode(Int.self, forKey: .height)) ?? 170)
+    let weight = Float((try? container?.decode(Int.self, forKey: .weight)) ?? 70)
+    let maxHeartRate = (try? container?.decode(Int.self, forKey: .maxHeartRate)) ?? 190
+    let vo2Max = (try? container?.decode(Int.self, forKey: .vo2Max)) ?? 50
+    let restingHeartRate = (try? container?.decode(Int.self, forKey: .restingHeartRate)) ?? 60
+    
+    // Training background
+    let trainingBackgroundValue = (try? container?.decode(Int.self, forKey: .trainingBackground)) ?? 10
+    let trainingBackground: PolarFirstTimeUseConfig.TrainingBackground
+    switch trainingBackgroundValue {
+    case 10: trainingBackground = .occasional
+    case 20: trainingBackground = .regular
+    case 30: trainingBackground = .frequent
+    case 40: trainingBackground = .heavy
+    case 50: trainingBackground = .semiPro
+    case 60: trainingBackground = .pro
+    default: trainingBackground = .occasional
+    }
+    
+    let deviceTime = (try? container?.decode(String.self, forKey: .deviceTime)) ?? ""
+    
+    // Typical day
+    let typicalDayValue = (try? container?.decode(Int.self, forKey: .typicalDay)) ?? 2
+    let typicalDay: PolarFirstTimeUseConfig.TypicalDay
+    switch typicalDayValue {
+    case 1: typicalDay = .mostlyMoving
+    case 2: typicalDay = .mostlySitting
+    case 3: typicalDay = .mostlyStanding
+    default: typicalDay = .mostlySitting
+    }
+    
+    let sleepGoalMinutes = (try? container?.decode(Int.self, forKey: .sleepGoalMinutes)) ?? 480
+    
+    // Create config
+    data = PolarFirstTimeUseConfig(
+      gender: gender,
+      birthDate: birthDate,
+      height: height,
+      weight: weight,
+      maxHeartRate: maxHeartRate,
+      vo2Max: vo2Max,
+      restingHeartRate: restingHeartRate,
+      trainingBackground: trainingBackground,
+      deviceTime: deviceTime,
+      typicalDay: typicalDay,
+      sleepGoalMinutes: sleepGoalMinutes
+    )
+  }
+
+  enum CodingKeys: String, CodingKey {
+    case gender
+    case birthDate
+    case height
+    case weight
+    case maxHeartRate
+    case vo2Max
+    case restingHeartRate
+    case trainingBackground
+    case deviceTime
+    case typicalDay
+    case sleepGoalMinutes
+  }
+}
