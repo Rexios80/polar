@@ -194,7 +194,8 @@ void testStreaming(
     test(
       'skin-temperature',
       () async {
-        final temperatureData = await polar.startSkinTemperatureStreaming(identifier).first;
+        final temperatureData =
+            await polar.startSkinTemperatureStreaming(identifier).first;
         expect(temperatureData.samples.length, greaterThan(0));
       },
       skip: !features.contains(PolarDataType.skinTemperature),
@@ -203,7 +204,8 @@ void testStreaming(
     test(
       'pressure',
       () async {
-        final pressureData = await polar.startPressureStreaming(identifier).first;
+        final pressureData =
+            await polar.startPressureStreaming(identifier).first;
         expect(pressureData.samples.length, greaterThan(0));
       },
       skip: !features.contains(PolarDataType.pressure),
@@ -212,7 +214,8 @@ void testStreaming(
     test(
       'location',
       () async {
-        final locationData = await polar.startLocationStreaming(identifier).first;
+        final locationData =
+            await polar.startLocationStreaming(identifier).first;
         expect(locationData.samples.length, greaterThan(0));
       },
       skip: !features.contains(PolarDataType.location),
