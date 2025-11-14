@@ -511,7 +511,7 @@ class PolarWrapper(
     val api: PolarBleApi =
         PolarBleApiDefaultImpl.defaultImplementation(
             context,
-            PolarBleSdkFeature.entries.toSet(),
+            PolarBleSdkFeature.values().toSet(),
         ),
     private val sinks: MutableMap<Int, EventSink> = mutableMapOf(),
 ) : PolarBleApiCallbackProvider {
@@ -542,7 +542,7 @@ class PolarWrapper(
         if (sinks.isNotEmpty()) return
         try {
             api.shutDown()
-        } catch (_: Exception) {
+        } catch (e: Exception) {
             // This will throw if the API is already shut down
         }
     }
