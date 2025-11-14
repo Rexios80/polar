@@ -14,6 +14,7 @@ import com.google.gson.JsonSerializationContext
 import com.google.gson.JsonSerializer
 import com.polar.androidcommunications.api.ble.model.DisInfo
 import com.polar.androidcommunications.api.ble.model.gatt.client.ChargeState
+import com.polar.androidcommunications.api.ble.model.gatt.client.PowerSourcesState
 import com.polar.sdk.api.PolarBleApi
 import com.polar.sdk.api.PolarBleApi.PolarBleSdkFeature
 import com.polar.sdk.api.PolarBleApi.PolarDeviceDataType
@@ -510,7 +511,7 @@ class PolarWrapper(
     val api: PolarBleApi =
         PolarBleApiDefaultImpl.defaultImplementation(
             context,
-            PolarBleSdkFeature.values().toSet(),
+            PolarBleSdkFeature.entries.toSet(),
         ),
     private val sinks: MutableMap<Int, EventSink> = mutableMapOf(),
 ) : PolarBleApiCallbackProvider {
@@ -541,7 +542,7 @@ class PolarWrapper(
         if (sinks.isNotEmpty()) return
         try {
             api.shutDown()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             // This will throw if the API is already shut down
         }
     }
@@ -608,6 +609,13 @@ class PolarWrapper(
         data: PolarHealthThermometerData,
     ) {
         // Do nothing
+    }
+
+    override fun powerSourcesStateReceived(
+        identifier: String,
+        powerSourcesState: PowerSourcesState
+    ) {
+        TODO("Not yet implemented")
     }
 
     @Deprecated("", replaceWith = ReplaceWith(""))

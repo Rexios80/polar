@@ -1,3 +1,8 @@
+## 7.7.3
+
+- Upgrades Polar SDK to `6.10.0`
+- Android dependency upgrades
+
 ## 7.7.2
 
 - Fixes issue with sample data deserialization (by [@thpir](https://github.com/thpir) in [#64](https://github.com/Rexios80/polar/pull/64))
