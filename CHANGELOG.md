@@ -1,6 +1,7 @@
 ## 7.7.3
 
 - Upgrades Polar SDK to `6.10.0`
+- Android compileSdkVersion 36
 - Android dependency upgrades
 
 ## 7.7.2
