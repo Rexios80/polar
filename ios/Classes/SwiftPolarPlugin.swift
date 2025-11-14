@@ -499,6 +499,10 @@ public class SwiftPolarPlugin:
     success(
       "batteryChargingStatusReceived", data: [identifier, String(describing: chargingStatus)])
   }
+  
+  public func batteryPowerSourcesStateReceived(_ identifier: String, powerSourcesState: BleBasClient.PowerSourcesState) {
+    // TODO
+  }
 
   public func blePowerOn() {
     success("blePowerStateChanged", data: true)
