@@ -613,7 +613,7 @@ class PolarWrapper(
 
     override fun powerSourcesStateReceived(
         identifier: String,
-        powerSourcesState: PowerSourcesState
+        powerSourcesState: PowerSourcesState,
     ) {
         TODO("Not yet implemented")
     }
