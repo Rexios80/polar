@@ -1,5 +1,3 @@
-library polar;
-
 export 'src/polar_base.dart';
 export 'src/events.dart';
 

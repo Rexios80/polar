@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:recase/recase.dart';
+
 /// represents the charge state of a Polar device
 enum PolarChargeState {
   /// unknown
@@ -14,23 +16,13 @@ enum PolarChargeState {
   /// not charging, inactive
   dischargingInactive;
 
-  static const _featureStringMap = {
-    unknown: 'UNKNOWN',
-    charging: 'CHARGING',
-    dischargingActive: 'DISCHARGING_ACTIVE',
-    dischargingInactive: 'DISCHARGING_INACTIVE',
-  };
-
-  static final _stringFeatureMap =
-      _featureStringMap.map((k, v) => MapEntry(v, k));
-
   /// Create a [PolarChargeState] from json
   static PolarChargeState fromJson(dynamic json) {
     if (Platform.isIOS) {
       return PolarChargeState.values.byName(json as String);
     } else {
       // This is android
-      return _stringFeatureMap[json as String]!;
+      return PolarChargeState.values.byName((json as String).camelCase);
     }
   }
 
@@ -40,7 +32,7 @@ enum PolarChargeState {
       return name;
     } else {
       // This is Android
-      return _featureStringMap[this]!;
+      return name.snakeCase.toUpperCase();
     }
   }
 }

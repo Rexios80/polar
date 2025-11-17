@@ -1,9 +1,11 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:meta/meta.dart';
 
 part 'polar_event_wrapper.g.dart';
 
 /// Wrapper for events received from the native code
 @JsonSerializable()
+@immutable
 class PolarEventWrapper {
   /// The event type
   final PolarEvent event;
@@ -12,7 +14,7 @@ class PolarEventWrapper {
   final dynamic data;
 
   /// Constructor
-  PolarEventWrapper(this.event, this.data);
+  const PolarEventWrapper(this.event, this.data);
 
   /// From json
   factory PolarEventWrapper.fromJson(Map<String, dynamic> json) =>

@@ -49,6 +49,7 @@ enum SampleType {
 }
 
 /// Polar Recording status
+@immutable
 class PolarRecordingStatus {
   /// true recording running
   final bool ongoing;
@@ -57,10 +58,7 @@ class PolarRecordingStatus {
   final String entryId;
 
   /// Constructor
-  PolarRecordingStatus({
-    required this.ongoing,
-    required this.entryId,
-  });
+  const PolarRecordingStatus({required this.ongoing, required this.entryId});
 
   @override
   String toString() {
@@ -70,6 +68,7 @@ class PolarRecordingStatus {
 
 /// Polar exercise entry
 @JsonSerializable()
+@immutable
 class PolarExerciseEntry {
   /// Resource location in the device
   final String path;
@@ -83,7 +82,7 @@ class PolarExerciseEntry {
   final String entryId;
 
   /// Constructor
-  PolarExerciseEntry({
+  const PolarExerciseEntry({
     required this.path,
     required this.date,
     required this.entryId,
@@ -95,9 +94,9 @@ class PolarExerciseEntry {
 
   /// To json
   Map<String, dynamic> toJson() => {
-        ..._$PolarExerciseEntryToJson(this),
-        _entryIdKeys[defaultTargetPlatform]!: entryId,
-      };
+    ..._$PolarExerciseEntryToJson(this),
+    ...writePlatformValue(_entryIdKeys, entryId),
+  };
 
   @override
   String toString() {
@@ -115,6 +114,7 @@ Object? _readEntryId(Map json, String key) =>
 
 /// Polar Exercise Data
 @JsonSerializable()
+@immutable
 class PolarExerciseData {
   /// in seconds
   @JsonKey(readValue: _readInterval)
@@ -125,10 +125,7 @@ class PolarExerciseData {
   final List<int> samples;
 
   /// Constructor
-  PolarExerciseData({
-    required this.interval,
-    required this.samples,
-  });
+  const PolarExerciseData({required this.interval, required this.samples});
 
   /// From json
   factory PolarExerciseData.fromJson(Map<String, dynamic> json) =>
@@ -144,11 +141,11 @@ class PolarExerciseData {
 }
 
 Object? _readInterval(Map json, String key) => readPlatformValue(json, {
-      TargetPlatform.iOS: 'interval',
-      TargetPlatform.android: 'recordingInterval',
-    });
+  TargetPlatform.iOS: 'interval',
+  TargetPlatform.android: 'recordingInterval',
+});
 
 Object? _readSamples(Map json, String key) => readPlatformValue(json, {
-      TargetPlatform.iOS: 'samples',
-      TargetPlatform.android: 'hrSamples',
-    });
+  TargetPlatform.iOS: 'samples',
+  TargetPlatform.android: 'hrSamples',
+});

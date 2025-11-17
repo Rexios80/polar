@@ -6,6 +6,7 @@ part 'polar_device_info.g.dart';
 
 /// Polar device info
 @JsonSerializable()
+@immutable
 class PolarDeviceInfo {
   /// polar device id or UUID for 3rd party sensors
   final String deviceId;
@@ -26,7 +27,7 @@ class PolarDeviceInfo {
   final bool isConnectable;
 
   /// Constructor
-  PolarDeviceInfo({
+  const PolarDeviceInfo({
     required this.deviceId,
     required this.address,
     required this.rssi,
@@ -42,10 +43,7 @@ class PolarDeviceInfo {
   Map<String, dynamic> toJson() => _$PolarDeviceInfoToJson(this);
 }
 
-Object? _readConnectable(Map json, String key) => readPlatformValue(
-      json,
-      {
-        TargetPlatform.iOS: 'connectable',
-        TargetPlatform.android: 'isConnectable',
-      },
-    );
+Object? _readConnectable(Map json, String key) => readPlatformValue(json, {
+  TargetPlatform.iOS: 'connectable',
+  TargetPlatform.android: 'isConnectable',
+});
