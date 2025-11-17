@@ -285,17 +285,17 @@ void testFtu(String identifier) {
   test('ftu', () async {
     await connect(identifier);
     final config = PolarFirstTimeUseConfig(
-      gender: 'Male',
+      gender: FtuGender.male,
       birthDate: DateTime(1990, 1, 1),
       height: 177,
       weight: 77,
       maxHeartRate: 220 - 35,
       vo2Max: 40,
       restingHeartRate: 60,
-      trainingBackground: TrainingBackground.occasional,
+      trainingBackground: FtuTrainingBackground.occasional,
       sleepGoalMinutes: 480,
-      typicalDay: TypicalDay.mostlySitting,
-      deviceTime: '${DateTime.now().toIso8601String().substring(0, 19)}Z',
+      typicalDay: FtuTypicalDay.mostlySitting,
+      deviceTime: DateTime.timestamp(),
     );
 
     await polar.doFirstTimeUse(identifier, config);
