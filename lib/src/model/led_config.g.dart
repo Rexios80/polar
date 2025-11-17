@@ -9,11 +9,11 @@ part of 'led_config.dart';
 // **************************************************************************
 
 LedConfig _$LedConfigFromJson(Map<String, dynamic> json) => LedConfig(
-      sdkModeLedEnabled: json['sdkModeLedEnabled'] as bool? ?? true,
-      ppiModeLedEnabled: json['ppiModeLedEnabled'] as bool? ?? true,
-    );
+  sdkModeLedEnabled: json['sdkModeLedEnabled'] as bool? ?? true,
+  ppiModeLedEnabled: json['ppiModeLedEnabled'] as bool? ?? true,
+);
 
 Map<String, dynamic> _$LedConfigToJson(LedConfig instance) => <String, dynamic>{
-      'sdkModeLedEnabled': instance.sdkModeLedEnabled,
-      'ppiModeLedEnabled': instance.ppiModeLedEnabled,
-    };
+  'sdkModeLedEnabled': instance.sdkModeLedEnabled,
+  'ppiModeLedEnabled': instance.ppiModeLedEnabled,
+};

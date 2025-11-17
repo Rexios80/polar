@@ -11,7 +11,8 @@ part of 'polar_sensor_setting.dart';
 PolarSensorSetting _$PolarSensorSettingFromJson(Map<String, dynamic> json) =>
     PolarSensorSetting._(
       settings: PolarSensorSetting._settingsFromJson(
-          json['settings'] as Map<String, dynamic>),
+        json['settings'] as Map<String, dynamic>,
+      ),
     );
 
 Map<String, dynamic> _$PolarSensorSettingToJson(PolarSensorSetting instance) =>

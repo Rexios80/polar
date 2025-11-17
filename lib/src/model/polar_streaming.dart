@@ -24,6 +24,8 @@ class PolarStreamingData<T> {
 
   /// Convert from json
   factory PolarStreamingData.fromJson(Map<String, dynamic> json) {
+    // We don't have a value to switch on here
+    // ignore: switch_on_type
     switch (T) {
       case const (PolarHrSample):
         return _fromJson(json, _$PolarHrSampleFromJson);
@@ -53,6 +55,8 @@ class PolarStreamingData<T> {
 
   /// Convert to json
   Map<String, dynamic> toJson() {
+    // We don't have a value to switch on here
+    // ignore: switch_on_type
     switch (T) {
       case const (PolarHrSample):
         return _toJson(_$PolarHrSampleToJson);
