@@ -4,11 +4,13 @@ import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/services.dart';
+import 'package:meta/meta.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:polar/polar.dart';
 import 'package:polar/src/model/polar_event_wrapper.dart';
 
 /// Flutter implementation of the [PolarBleSdk]
+@immutable
 class Polar {
   static const _methodChannel = MethodChannel('polar/methods');
   static const _eventChannel = EventChannel('polar/events');

@@ -49,6 +49,7 @@ enum SampleType {
 }
 
 /// Polar Recording status
+@immutable
 class PolarRecordingStatus {
   /// true recording running
   final bool ongoing;
@@ -57,7 +58,7 @@ class PolarRecordingStatus {
   final String entryId;
 
   /// Constructor
-  PolarRecordingStatus({required this.ongoing, required this.entryId});
+  const PolarRecordingStatus({required this.ongoing, required this.entryId});
 
   @override
   String toString() {
@@ -67,6 +68,7 @@ class PolarRecordingStatus {
 
 /// Polar exercise entry
 @JsonSerializable()
+@immutable
 class PolarExerciseEntry {
   /// Resource location in the device
   final String path;
@@ -80,7 +82,7 @@ class PolarExerciseEntry {
   final String entryId;
 
   /// Constructor
-  PolarExerciseEntry({
+  const PolarExerciseEntry({
     required this.path,
     required this.date,
     required this.entryId,
@@ -112,6 +114,7 @@ Object? _readEntryId(Map json, String key) =>
 
 /// Polar Exercise Data
 @JsonSerializable()
+@immutable
 class PolarExerciseData {
   /// in seconds
   @JsonKey(readValue: _readInterval)
@@ -122,7 +125,7 @@ class PolarExerciseData {
   final List<int> samples;
 
   /// Constructor
-  PolarExerciseData({required this.interval, required this.samples});
+  const PolarExerciseData({required this.interval, required this.samples});
 
   /// From json
   factory PolarExerciseData.fromJson(Map<String, dynamic> json) =>

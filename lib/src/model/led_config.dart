@@ -1,9 +1,11 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:meta/meta.dart';
 
 part 'led_config.g.dart';
 
 /// Configuration for the LEDs on the Polar device
 @JsonSerializable()
+@immutable
 class LedConfig {
   /// Whether the SDK mode LED is enabled
   final bool sdkModeLedEnabled;
@@ -12,7 +14,10 @@ class LedConfig {
   final bool ppiModeLedEnabled;
 
   /// Constructor
-  LedConfig({this.sdkModeLedEnabled = true, this.ppiModeLedEnabled = true});
+  const LedConfig({
+    this.sdkModeLedEnabled = true,
+    this.ppiModeLedEnabled = true,
+  });
 
   /// From json
   factory LedConfig.fromJson(Map<String, dynamic> json) =>

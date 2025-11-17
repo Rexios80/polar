@@ -6,6 +6,7 @@ part 'polar_device_info.g.dart';
 
 /// Polar device info
 @JsonSerializable()
+@immutable
 class PolarDeviceInfo {
   /// polar device id or UUID for 3rd party sensors
   final String deviceId;
@@ -26,7 +27,7 @@ class PolarDeviceInfo {
   final bool isConnectable;
 
   /// Constructor
-  PolarDeviceInfo({
+  const PolarDeviceInfo({
     required this.deviceId,
     required this.address,
     required this.rssi,

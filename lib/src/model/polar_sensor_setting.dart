@@ -1,12 +1,14 @@
 import 'dart:math';
 
 import 'package:json_annotation/json_annotation.dart';
+import 'package:meta/meta.dart';
 import 'package:polar/src/model/convert.dart';
 
 part 'polar_sensor_setting.g.dart';
 
 /// polar sensor settings class
 @JsonSerializable(constructor: '_')
+@immutable
 class PolarSensorSetting {
   static const _settingTypeConverter = PolarSettingTypeConverter();
 
@@ -37,7 +39,7 @@ class PolarSensorSetting {
   bool get isSelection => settings.values.every((e) => e.length == 1);
 
   /// Constructor
-  PolarSensorSetting._({required this.settings});
+  const PolarSensorSetting._({required this.settings});
 
   /// Constructor with desired settings
   ///

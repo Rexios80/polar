@@ -7,12 +7,13 @@ part 'polar_streaming.g.dart';
 
 /// Base class for all streaming data
 @JsonSerializable(genericArgumentFactories: true)
+@immutable
 class PolarStreamingData<T> {
   /// Samples
   final List<T> samples;
 
   /// Constructor
-  PolarStreamingData({required this.samples});
+  const PolarStreamingData({required this.samples});
 
   static PolarStreamingData<T> _fromJson<T>(
     Map<String, dynamic> json,
@@ -81,6 +82,7 @@ class PolarStreamingData<T> {
 
 /// Polar HR sample
 @JsonSerializable()
+@immutable
 class PolarHrSample {
   /// hr in BPM
   final int hr;
@@ -101,7 +103,7 @@ class PolarHrSample {
   final bool contactStatusSupported;
 
   /// Constructor
-  PolarHrSample({
+  const PolarHrSample({
     required this.hr,
     required this.ppgQuality,
     required this.correctedHr,
@@ -116,6 +118,7 @@ typedef PolarHrData = PolarStreamingData<PolarHrSample>;
 
 /// Polar ecg sample
 @JsonSerializable()
+@immutable
 class PolarEcgSample {
   /// Moment sample is taken in nanoseconds. The epoch of timestamp is 1.1.2000
   @PolarSampleTimestampConverter()
@@ -125,7 +128,7 @@ class PolarEcgSample {
   final int voltage;
 
   /// Constructor
-  PolarEcgSample({required this.timeStamp, required this.voltage});
+  const PolarEcgSample({required this.timeStamp, required this.voltage});
 }
 
 /// Polar ecg data
@@ -133,6 +136,7 @@ typedef PolarEcgData = PolarStreamingData<PolarEcgSample>;
 
 /// Polar acc sample
 @JsonSerializable()
+@immutable
 class PolarAccSample {
   /// Moment sample is taken in nanoseconds. The epoch of timestamp is 1.1.2000
   @PolarSampleTimestampConverter()
@@ -148,7 +152,7 @@ class PolarAccSample {
   final int z;
 
   /// Constructor
-  PolarAccSample({
+  const PolarAccSample({
     required this.timeStamp,
     required this.x,
     required this.y,
@@ -161,6 +165,7 @@ typedef PolarAccData = PolarStreamingData<PolarAccSample>;
 
 /// Polar gyro sample
 @JsonSerializable()
+@immutable
 class PolarGyroSample {
   /// Moment sample is taken in nanoseconds. The epoch of timestamp is 1.1.2000
   @PolarSampleTimestampConverter()
@@ -176,7 +181,7 @@ class PolarGyroSample {
   final double z;
 
   /// Constructor
-  PolarGyroSample({
+  const PolarGyroSample({
     required this.timeStamp,
     required this.x,
     required this.y,
@@ -189,6 +194,7 @@ typedef PolarGyroData = PolarStreamingData<PolarGyroSample>;
 
 /// Polar magnetometer sample
 @JsonSerializable()
+@immutable
 class PolarMagnetometerSample {
   /// Moment sample is taken in nanoseconds. The epoch of timestamp is 1.1.2000
   @PolarSampleTimestampConverter()
@@ -204,7 +210,7 @@ class PolarMagnetometerSample {
   final double z;
 
   /// Constructor
-  PolarMagnetometerSample({
+  const PolarMagnetometerSample({
     required this.timeStamp,
     required this.x,
     required this.y,
@@ -217,6 +223,7 @@ typedef PolarMagnetometerData = PolarStreamingData<PolarMagnetometerSample>;
 
 /// Polar ohr sample
 @JsonSerializable()
+@immutable
 class PolarPpgSample {
   /// Moment sample is taken in nanoseconds. The epoch of timestamp is 1.1.2000
   @PolarSampleTimestampConverter()
@@ -228,7 +235,7 @@ class PolarPpgSample {
   final List<int> channelSamples;
 
   /// Constructor
-  PolarPpgSample({required this.timeStamp, required this.channelSamples});
+  const PolarPpgSample({required this.timeStamp, required this.channelSamples});
 
   /// From json
   factory PolarPpgSample.fromJson(Map<String, dynamic> json) =>
@@ -247,7 +254,7 @@ class PolarPpgData extends PolarStreamingData<PolarPpgSample> {
   final PpgDataType type;
 
   /// Constructor
-  PolarPpgData({required this.type, required super.samples});
+  const PolarPpgData({required this.type, required super.samples});
 
   /// From json
   factory PolarPpgData.fromJson(Map<String, dynamic> json) =>
@@ -260,6 +267,7 @@ class PolarPpgData extends PolarStreamingData<PolarPpgSample> {
 
 /// Polar ppi sample
 @JsonSerializable()
+@immutable
 class PolarPpiSample {
   /// timestamp
   final int timeStamp;
@@ -291,7 +299,7 @@ class PolarPpiSample {
   final bool skinContactSupported;
 
   /// Constructor
-  PolarPpiSample({
+  const PolarPpiSample({
     required this.timeStamp,
     required this.ppi,
     required this.errorEstimate,
@@ -307,6 +315,7 @@ typedef PolarPpiData = PolarStreamingData<PolarPpiSample>;
 
 /// Polar temperature sample
 @JsonSerializable()
+@immutable
 class PolarTemperatureSample {
   /// moment sample is taken in nanoseconds. The epoch of timestamp is 1.1.2000
   @PolarSampleTimestampConverter()
@@ -316,7 +325,10 @@ class PolarTemperatureSample {
   final double temperature;
 
   /// Constructor
-  PolarTemperatureSample({required this.timeStamp, required this.temperature});
+  const PolarTemperatureSample({
+    required this.timeStamp,
+    required this.temperature,
+  });
 }
 
 /// Polar temperature data
@@ -324,6 +336,7 @@ typedef PolarTemperatureData = PolarStreamingData<PolarTemperatureSample>;
 
 /// Polar pressure sample
 @JsonSerializable()
+@immutable
 class PolarPressureSample {
   /// moment sample is taken in nanoseconds. The epoch of timestamp is 1.1.2000
   @PolarSampleTimestampConverter()
@@ -333,7 +346,7 @@ class PolarPressureSample {
   final double pressure;
 
   /// Constructor
-  PolarPressureSample({required this.timeStamp, required this.pressure});
+  const PolarPressureSample({required this.timeStamp, required this.pressure});
 }
 
 /// Polar pressure data
@@ -341,6 +354,7 @@ typedef PolarPressureData = PolarStreamingData<PolarPressureSample>;
 
 /// Polar location sample
 @JsonSerializable()
+@immutable
 class PolarLocationDataSample {
   /// moment sample is taken in nanoseconds. The epoch of timestamp is 1.1.2000
   @PolarSampleTimestampConverter()
@@ -386,7 +400,7 @@ class PolarLocationDataSample {
   final int fusionState;
 
   /// Constructor
-  PolarLocationDataSample({
+  const PolarLocationDataSample({
     required this.timeStamp,
     required this.latitude,
     required this.longitude,

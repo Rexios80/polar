@@ -1,7 +1,9 @@
+import 'package:meta/meta.dart';
 import 'package:polar/polar.dart';
 
 /// The feature is available in this device and it is ready. Called only for
 /// the features which are specified in [PolarBleApi] construction.
+@immutable
 class PolarSdkFeatureReadyEvent {
   /// Polar device id
   final String identifier;
@@ -10,10 +12,11 @@ class PolarSdkFeatureReadyEvent {
   final PolarSdkFeature feature;
 
   /// Constructor
-  PolarSdkFeatureReadyEvent(this.identifier, this.feature);
+  const PolarSdkFeatureReadyEvent(this.identifier, this.feature);
 }
 
 /// Received DIS info.
+@immutable
 class PolarDisInformationEvent {
   /// Polar device id
   final String identifier;
@@ -25,10 +28,11 @@ class PolarDisInformationEvent {
   final String info;
 
   /// Constructor
-  PolarDisInformationEvent(this.identifier, this.uuid, this.info);
+  const PolarDisInformationEvent(this.identifier, this.uuid, this.info);
 }
 
 /// Battery level received from device.
+@immutable
 class PolarBatteryLevelEvent {
   /// Polar device id
   final String identifier;
@@ -37,10 +41,11 @@ class PolarBatteryLevelEvent {
   final int level;
 
   /// Constructor
-  PolarBatteryLevelEvent(this.identifier, this.level);
+  const PolarBatteryLevelEvent(this.identifier, this.level);
 }
 
 /// battery charging status
+@immutable
 class PolarBatteryChargingStatusEvent {
   /// Polar device id
   final String identifier;
@@ -49,10 +54,11 @@ class PolarBatteryChargingStatusEvent {
   final PolarChargeState chargingStatus;
 
   /// Constructor
-  PolarBatteryChargingStatusEvent(this.identifier, this.chargingStatus);
+  const PolarBatteryChargingStatusEvent(this.identifier, this.chargingStatus);
 }
 
 /// Polar disconnect event
+@immutable
 class PolarDeviceDisconnectedEvent {
   /// The polar device info
   final PolarDeviceInfo info;
@@ -63,5 +69,5 @@ class PolarDeviceDisconnectedEvent {
   final bool pairingError;
 
   /// Constructor
-  PolarDeviceDisconnectedEvent(this.info, this.pairingError);
+  const PolarDeviceDisconnectedEvent(this.info, this.pairingError);
 }

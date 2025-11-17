@@ -268,11 +268,11 @@ void testMisc(String identifier, {required bool supportsLedConfig}) {
     if (supportsLedConfig) {
       await polar.setLedConfig(
         identifier,
-        LedConfig(ppiModeLedEnabled: false, sdkModeLedEnabled: false),
+        const LedConfig(ppiModeLedEnabled: false, sdkModeLedEnabled: false),
       );
       await polar.setLedConfig(
         identifier,
-        LedConfig(ppiModeLedEnabled: true, sdkModeLedEnabled: true),
+        const LedConfig(ppiModeLedEnabled: true, sdkModeLedEnabled: true),
       );
     }
 

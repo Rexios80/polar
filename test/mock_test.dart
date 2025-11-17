@@ -2,13 +2,14 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:meta/meta.dart';
 import 'package:polar/polar.dart';
 
 import 'tests.dart';
 
 const identifier = 'asdf';
 final info = jsonEncode(
-  PolarDeviceInfo(
+  const PolarDeviceInfo(
     deviceId: identifier,
     address: '',
     rssi: 0,
@@ -59,7 +60,7 @@ Future<dynamic> handleMethodCall(MethodCall call) async {
     case 'getAvailableOnlineStreamDataTypes':
       return jsonEncode(PolarDataType.values.map((e) => e.toJson()).toList());
     case 'requestStreamSettings':
-      return jsonEncode(PolarSensorSetting({}));
+      return jsonEncode(PolarSensorSetting(const {}));
     case 'createStreamingChannel':
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockStreamHandler(
@@ -74,7 +75,11 @@ Future<dynamic> handleMethodCall(MethodCall call) async {
     case 'stopRecording':
       recording = false;
       exercises.add(
-        PolarExerciseEntry(path: '', date: DateTime.now(), entryId: exerciseId),
+        PolarExerciseEntry(
+          path: '',
+          date: DateTime.timestamp(),
+          entryId: exerciseId,
+        ),
       );
       return null;
     case 'requestRecordingStatus':
@@ -150,10 +155,11 @@ class SearchHandler extends MockStreamHandler {
   void onCancel(dynamic arguments) {}
 }
 
+@immutable
 class StreamingHandler extends MockStreamHandler {
   final PolarDataType type;
 
-  StreamingHandler(this.type);
+  const StreamingHandler(this.type);
 
   @override
   void onListen(dynamic arguments, MockStreamHandlerEventSink events) {
@@ -161,23 +167,28 @@ class StreamingHandler extends MockStreamHandler {
     switch (type) {
       case PolarDataType.ecg:
         data = PolarEcgData(
-          samples: [PolarEcgSample(timeStamp: DateTime.now(), voltage: 0)],
+          samples: [
+            PolarEcgSample(timeStamp: DateTime.timestamp(), voltage: 0),
+          ],
         );
       case PolarDataType.acc:
         data = PolarAccData(
           samples: [
-            PolarAccSample(timeStamp: DateTime.now(), x: 0, y: 0, z: 0),
+            PolarAccSample(timeStamp: DateTime.timestamp(), x: 0, y: 0, z: 0),
           ],
         );
       case PolarDataType.ppg:
         data = PolarPpgData(
           type: PpgDataType.ppg3_ambient1,
           samples: [
-            PolarPpgSample(timeStamp: DateTime.now(), channelSamples: []),
+            PolarPpgSample(
+              timeStamp: DateTime.timestamp(),
+              channelSamples: const [],
+            ),
           ],
         );
       case PolarDataType.ppi:
-        data = PolarPpiData(
+        data = const PolarPpiData(
           samples: [
             PolarPpiSample(
               timeStamp: 0,
@@ -193,14 +204,14 @@ class StreamingHandler extends MockStreamHandler {
       case PolarDataType.gyro:
         data = PolarGyroData(
           samples: [
-            PolarGyroSample(timeStamp: DateTime.now(), x: 0, y: 0, z: 0),
+            PolarGyroSample(timeStamp: DateTime.timestamp(), x: 0, y: 0, z: 0),
           ],
         );
       case PolarDataType.magnetometer:
         data = PolarMagnetometerData(
           samples: [
             PolarMagnetometerSample(
-              timeStamp: DateTime.now(),
+              timeStamp: DateTime.timestamp(),
               x: 0,
               y: 0,
               z: 0,
@@ -208,7 +219,7 @@ class StreamingHandler extends MockStreamHandler {
           ],
         );
       case PolarDataType.hr:
-        data = PolarHrData(
+        data = const PolarHrData(
           samples: [
             PolarHrSample(
               hr: 0,
@@ -223,26 +234,32 @@ class StreamingHandler extends MockStreamHandler {
       case PolarDataType.temperature:
         data = PolarTemperatureData(
           samples: [
-            PolarTemperatureSample(timeStamp: DateTime.now(), temperature: 0),
+            PolarTemperatureSample(
+              timeStamp: DateTime.timestamp(),
+              temperature: 0,
+            ),
           ],
         );
       case PolarDataType.pressure:
         data = PolarPressureData(
           samples: [
-            PolarPressureSample(timeStamp: DateTime.now(), pressure: 0),
+            PolarPressureSample(timeStamp: DateTime.timestamp(), pressure: 0),
           ],
         );
       case PolarDataType.skinTemperature:
         data = PolarTemperatureData(
           samples: [
-            PolarTemperatureSample(timeStamp: DateTime.now(), temperature: 0),
+            PolarTemperatureSample(
+              timeStamp: DateTime.timestamp(),
+              temperature: 0,
+            ),
           ],
         );
       case PolarDataType.location:
         data = PolarLocationData(
           samples: [
             PolarLocationDataSample(
-              timeStamp: DateTime.now(),
+              timeStamp: DateTime.timestamp(),
               latitude: 0,
               longitude: 0,
               time: '',
