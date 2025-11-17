@@ -499,7 +499,11 @@ class Polar {
       identifier,
     );
 
-    return PolarRecordingStatus(ongoing: result![0], entryId: result[1]);
+    if (result == null) {
+      throw StateError('requestRecordingStatus returned null');
+    }
+
+    return PolarRecordingStatus(ongoing: result[0], entryId: result[1]);
   }
 
   /// Api for fetching stored exercises list from Polar H10 device. Requires `polarFileTransfer` feature. This API is working for Polar OH1 and Polar Verity Sense devices too, however in those devices recording of exercise requires that sensor is registered to Polar Flow account.
@@ -608,6 +612,11 @@ class Polar {
       'isSdkModeEnabled',
       identifier,
     );
-    return result!;
+
+    if (result == null) {
+      throw StateError('isSdkModeEnabled returned null');
+    }
+
+    return result;
   }
 }

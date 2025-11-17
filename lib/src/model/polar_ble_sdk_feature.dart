@@ -1,3 +1,5 @@
+import 'package:recase/recase.dart';
+
 /// Features available in Polar BLE SDK library
 enum PolarSdkFeature {
   /// Hr feature to receive hr and rr data from Polar or any other BLE device
@@ -51,36 +53,29 @@ enum PolarSdkFeature {
   /// Feature to receive temperature data from Polar device.
   temperatureData;
 
-  static const _featureStringMap = {
-    hr: 'FEATURE_HR',
-    deviceInfo: 'FEATURE_DEVICE_INFO',
-    batteryInfo: 'FEATURE_BATTERY_INFO',
-    onlineStreaming: 'FEATURE_POLAR_ONLINE_STREAMING',
-    offlineRecording: 'FEATURE_POLAR_OFFLINE_RECORDING',
-    h10ExerciseRecording: 'FEATURE_POLAR_H10_EXERCISE_RECORDING',
-    deviceTimeSetup: 'FEATURE_POLAR_DEVICE_TIME_SETUP',
-    sdkMode: 'FEATURE_POLAR_SDK_MODE',
-    ledAnimation: 'FEATURE_POLAR_LED_ANIMATION',
-    firmwareUpdate: 'FEATURE_POLAR_FIRMWARE_UPDATE',
-    activityData: 'FEATURE_POLAR_ACTIVITY_DATA',
-    fileTransfer: 'FEATURE_POLAR_FILE_TRANSFER',
-    hts: 'FEATURE_HTS',
-    sleepData: 'FEATURE_POLAR_SLEEP_DATA',
-    temperatureData: 'FEATURE_POLAR_TEMPERATURE_DATA',
-  };
+  static const _prefixFeature = 'FEATURE_';
+  static const _prefixFeaturePolar = 'FEATURE_POLAR_';
 
-  static final _stringFeatureMap = _featureStringMap.map(
-    (k, v) => MapEntry(v, k),
-  );
+  String get _platformPrefix => switch (this) {
+    hr || deviceInfo || batteryInfo || hts => _prefixFeature,
+    _ => _prefixFeaturePolar,
+  };
 
   /// Create a [PolarSdkFeature] from json
   static PolarSdkFeature fromJson(dynamic json) {
-    final featureString = (json as String).toUpperCase();
-    return _stringFeatureMap[featureString]!;
+    var featureString = (json as String).toUpperCase();
+
+    if (featureString.startsWith(_prefixFeaturePolar)) {
+      featureString = featureString.substring(_prefixFeaturePolar.length);
+    } else if (featureString.startsWith(_prefixFeature)) {
+      featureString = featureString.substring(_prefixFeature.length);
+    }
+
+    return values.byName(featureString.camelCase);
   }
 
   /// Convert a [PolarSdkFeature] to json
   dynamic toJson() {
-    return _featureStringMap[this]!;
+    return '$_platformPrefix${name.snakeCase.toUpperCase()}';
   }
 }

@@ -7,3 +7,4 @@ targets:
             - document_ignores
             - unnecessary_cast
             - require_trailing_commas
+            - rexios_lints/not_null_assertion

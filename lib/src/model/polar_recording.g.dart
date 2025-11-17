@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-// ignore_for_file: document_ignores, unnecessary_cast, require_trailing_commas
+// ignore_for_file: document_ignores, unnecessary_cast, require_trailing_commas, rexios_lints/not_null_assertion
 
 part of 'polar_recording.dart';
 
