@@ -514,8 +514,8 @@ class PolarPlugin :
     ) {
         val arguments = call.arguments as List<*>
         val identifier = arguments[0] as String
-
         val ftuConfig = gson.fromJson(arguments[1] as String, PolarFirstTimeUseConfig::class.java)
+
         wrapper.api
             .doFirstTimeUse(identifier, ftuConfig)
             .subscribe({

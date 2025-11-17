@@ -487,7 +487,7 @@ public class SwiftPolarPlugin:
   }
 
   func isFtuDone(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
-    guard let identifier = call.arguments as! String
+    let identifier = call.arguments as! String
 
     _ = api.isFtuDone(identifier).subscribe(
       onSuccess: { isFtuDone in
