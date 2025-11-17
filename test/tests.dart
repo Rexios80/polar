@@ -101,25 +101,25 @@ void testBleSdkFeatures(
 void testHrService(String identifier) {
   test('hr service', () async {
     await connect(identifier);
-    await polar.sdkFeatureReady
-        .firstWhere((e) => e.feature == PolarSdkFeature.hr);
+    await polar.sdkFeatureReady.firstWhere(
+      (e) => e.feature == PolarSdkFeature.hr,
+    );
     final available = await polar.getAvailableHrServiceDataTypes(identifier);
     expect(setEquals(available, {PolarDataType.hr}), true);
     await disconnect(identifier);
   });
 }
 
-void testStreaming(
-  String identifier, {
-  required Set<PolarDataType> features,
-}) {
+void testStreaming(String identifier, {required Set<PolarDataType> features}) {
   group('streaming', () {
     setUpAll(() async {
       await connect(identifier);
-      await polar.sdkFeatureReady
-          .firstWhere((e) => e.feature == PolarSdkFeature.onlineStreaming);
-      final available =
-          await polar.getAvailableOnlineStreamDataTypes(identifier);
+      await polar.sdkFeatureReady.firstWhere(
+        (e) => e.feature == PolarSdkFeature.onlineStreaming,
+      );
+      final available = await polar.getAvailableOnlineStreamDataTypes(
+        identifier,
+      );
       expect(setEquals(available, features), true);
     });
 
@@ -127,99 +127,59 @@ void testStreaming(
       await disconnect(identifier);
     });
 
-    test(
-      'hr',
-      () async {
-        final hrData = await polar.startHrStreaming(identifier).first;
-        expect(hrData.samples.length, greaterThan(0));
-      },
-      skip: !features.contains(PolarDataType.hr),
-    );
+    test('hr', () async {
+      final hrData = await polar.startHrStreaming(identifier).first;
+      expect(hrData.samples.length, greaterThan(0));
+    }, skip: !features.contains(PolarDataType.hr));
 
-    test(
-      'ecg',
-      () async {
-        final ecgData = await polar.startEcgStreaming(identifier).first;
-        expect(ecgData.samples.length, greaterThan(0));
-      },
-      skip: !features.contains(PolarDataType.ecg),
-    );
+    test('ecg', () async {
+      final ecgData = await polar.startEcgStreaming(identifier).first;
+      expect(ecgData.samples.length, greaterThan(0));
+    }, skip: !features.contains(PolarDataType.ecg));
 
-    test(
-      'acc',
-      () async {
-        final accData = await polar.startAccStreaming(identifier).first;
-        expect(accData.samples.length, greaterThan(0));
-      },
-      skip: !features.contains(PolarDataType.acc),
-    );
+    test('acc', () async {
+      final accData = await polar.startAccStreaming(identifier).first;
+      expect(accData.samples.length, greaterThan(0));
+    }, skip: !features.contains(PolarDataType.acc));
 
-    test(
-      'ppg',
-      () async {
-        final ppgData = await polar.startPpgStreaming(identifier).first;
-        expect(ppgData.samples.length, greaterThan(0));
-      },
-      skip: !features.contains(PolarDataType.ppg),
-    );
+    test('ppg', () async {
+      final ppgData = await polar.startPpgStreaming(identifier).first;
+      expect(ppgData.samples.length, greaterThan(0));
+    }, skip: !features.contains(PolarDataType.ppg));
 
-    test(
-      'gyro',
-      () async {
-        final gyroData = await polar.startGyroStreaming(identifier).first;
-        expect(gyroData.samples.length, greaterThan(0));
-      },
-      skip: !features.contains(PolarDataType.gyro),
-    );
+    test('gyro', () async {
+      final gyroData = await polar.startGyroStreaming(identifier).first;
+      expect(gyroData.samples.length, greaterThan(0));
+    }, skip: !features.contains(PolarDataType.gyro));
 
-    test(
-      'magnetometer',
-      () async {
-        final magnetometerData =
-            await polar.startMagnetometerStreaming(identifier).first;
-        expect(magnetometerData.samples.length, greaterThan(0));
-      },
-      skip: !features.contains(PolarDataType.magnetometer),
-    );
+    test('magnetometer', () async {
+      final magnetometerData = await polar
+          .startMagnetometerStreaming(identifier)
+          .first;
+      expect(magnetometerData.samples.length, greaterThan(0));
+    }, skip: !features.contains(PolarDataType.magnetometer));
 
-    test(
-      'ppi',
-      () async {
-        final ppiData = await polar.startPpiStreaming(identifier).first;
-        expect(ppiData.samples.length, greaterThan(0));
-      },
-      skip: !features.contains(PolarDataType.ppi),
-    );
+    test('ppi', () async {
+      final ppiData = await polar.startPpiStreaming(identifier).first;
+      expect(ppiData.samples.length, greaterThan(0));
+    }, skip: !features.contains(PolarDataType.ppi));
 
-    test(
-      'skin-temperature',
-      () async {
-        final temperatureData =
-            await polar.startSkinTemperatureStreaming(identifier).first;
-        expect(temperatureData.samples.length, greaterThan(0));
-      },
-      skip: !features.contains(PolarDataType.skinTemperature),
-    );
+    test('skin-temperature', () async {
+      final temperatureData = await polar
+          .startSkinTemperatureStreaming(identifier)
+          .first;
+      expect(temperatureData.samples.length, greaterThan(0));
+    }, skip: !features.contains(PolarDataType.skinTemperature));
 
-    test(
-      'pressure',
-      () async {
-        final pressureData =
-            await polar.startPressureStreaming(identifier).first;
-        expect(pressureData.samples.length, greaterThan(0));
-      },
-      skip: !features.contains(PolarDataType.pressure),
-    );
+    test('pressure', () async {
+      final pressureData = await polar.startPressureStreaming(identifier).first;
+      expect(pressureData.samples.length, greaterThan(0));
+    }, skip: !features.contains(PolarDataType.pressure));
 
-    test(
-      'location',
-      () async {
-        final locationData =
-            await polar.startLocationStreaming(identifier).first;
-        expect(locationData.samples.length, greaterThan(0));
-      },
-      skip: !features.contains(PolarDataType.location),
-    );
+    test('location', () async {
+      final locationData = await polar.startLocationStreaming(identifier).first;
+      expect(locationData.samples.length, greaterThan(0));
+    }, skip: !features.contains(PolarDataType.location));
   });
 }
 
@@ -281,8 +241,9 @@ void testSdkMode(String identifier) {
   test('sdk mode', () async {
     await connect(identifier);
 
-    await polar.sdkFeatureReady
-        .firstWhere((e) => e.feature == PolarSdkFeature.sdkMode);
+    await polar.sdkFeatureReady.firstWhere(
+      (e) => e.feature == PolarSdkFeature.sdkMode,
+    );
 
     final status1 = await polar.isSdkModeEnabled(identifier);
     expect(status1, false);
@@ -307,11 +268,11 @@ void testMisc(String identifier, {required bool supportsLedConfig}) {
     if (supportsLedConfig) {
       await polar.setLedConfig(
         identifier,
-        LedConfig(ppiModeLedEnabled: false, sdkModeLedEnabled: false),
+        const LedConfig(ppiModeLedEnabled: false, sdkModeLedEnabled: false),
       );
       await polar.setLedConfig(
         identifier,
-        LedConfig(ppiModeLedEnabled: true, sdkModeLedEnabled: true),
+        const LedConfig(ppiModeLedEnabled: true, sdkModeLedEnabled: true),
       );
     }
 

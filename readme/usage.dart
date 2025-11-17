@@ -15,8 +15,9 @@ void streamWhenReady() async {
         e.identifier == identifier &&
         e.feature == PolarSdkFeature.onlineStreaming,
   );
-  final availabletypes =
-      await polar.getAvailableOnlineStreamDataTypes(identifier);
+  final availabletypes = await polar.getAvailableOnlineStreamDataTypes(
+    identifier,
+  );
 
   debugPrint('available types: $availabletypes');
 

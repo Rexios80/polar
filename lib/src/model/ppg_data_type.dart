@@ -5,5 +5,5 @@ enum PpgDataType {
   ppg3_ambient1,
 
   /// An unknown [PpgDataType]
-  unknown;
+  unknown,
 }

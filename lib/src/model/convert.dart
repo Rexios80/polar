@@ -6,12 +6,24 @@ import 'package:polar/polar.dart';
 import 'package:recase/recase.dart';
 
 /// Read a value from a JSON object keyed based on the platform
-Object? readPlatformValue(Map json, Map<TargetPlatform, String> keys) {
+Object? readPlatformValue(Map json, Map keys) {
   final key = keys[defaultTargetPlatform];
   if (key == null) {
     throw UnsupportedError('Unsupported platform: $defaultTargetPlatform');
   }
   return json[key];
+}
+
+/// Write a value to a JSON object keyed based on the platform
+Map<String, dynamic> writePlatformValue(
+  Map<TargetPlatform, String> keys,
+  Object? value,
+) {
+  final key = keys[defaultTargetPlatform];
+  if (key == null) {
+    throw UnsupportedError('Unsupported platform: $defaultTargetPlatform');
+  }
+  return {key: value};
 }
 
 /// Converts platform values to booleans
