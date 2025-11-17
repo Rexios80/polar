@@ -5,7 +5,6 @@ import android.os.Handler
 import android.os.Looper
 import androidx.lifecycle.Lifecycle.Event
 import androidx.lifecycle.LifecycleEventObserver
-import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
@@ -45,8 +44,6 @@ import java.lang.reflect.Type
 import java.util.Date
 import java.util.UUID
 import com.polar.sdk.api.model.PolarFirstTimeUseConfig
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 fun Any?.discard() = Unit
 
@@ -73,20 +70,6 @@ private val gson = GsonBuilder().registerTypeAdapter(Date::class.java, DateSeria
 private var wrapperInternal: PolarWrapper? = null
 private val wrapper: PolarWrapper
     get() = wrapperInternal!!
-
-data class FirstTimeUseConfig(
-    val gender: String,
-    val birthDate: String,
-    val height: Int,
-    val weight: Int,
-    val maxHeartRate: Int,
-    val vo2Max: Int,
-    val restingHeartRate: Int,
-    val trainingBackground: Int,
-    val deviceTime: String,
-    val typicalDay: Int,
-    val sleepGoalMinutes: Int
-)
 
 /** PolarPlugin */
 class PolarPlugin :
@@ -530,52 +513,9 @@ class PolarPlugin :
         result: Result,
     ) {
         val arguments = call.arguments as List<*>
-        val identifier = arguments[0] as? String
-        val configJson = arguments[1] as? String
+        val identifier = arguments[0] as String
 
-        if (identifier == null || configJson == null) {
-            result.error(
-                "INVALID_ARGUMENTS",
-                "Expected identifier and config JSON",
-                null
-            )
-            return
-        }
-
-        val gson = Gson()
-        val config: FirstTimeUseConfig = try {
-            gson.fromJson(configJson, FirstTimeUseConfig::class.java)
-        } catch (e: Exception) {
-            result.error("JSON_PARSE_ERROR", "Invalid config JSON: ${e.message}", null)
-            return
-        }
-
-        val birthDate = try {
-            SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(config.birthDate)
-        } catch (e: Exception) {
-            result.error("INVALID_DATE", "Could not parse birthDate: ${e.message}", null)
-            return
-        }
-
-        val ftuConfig = PolarFirstTimeUseConfig(
-            if (config.gender == "Male") PolarFirstTimeUseConfig.Gender.MALE else PolarFirstTimeUseConfig.Gender.FEMALE,
-            birthDate,
-            config.height.toFloat(),
-            config.weight.toFloat(),
-            config.maxHeartRate,
-            config.vo2Max,
-            config.restingHeartRate,
-            config.trainingBackground,
-            config.deviceTime,
-            when (config.typicalDay) {
-                1 -> PolarFirstTimeUseConfig.TypicalDay.MOSTLY_MOVING
-                2 -> PolarFirstTimeUseConfig.TypicalDay.MOSTLY_SITTING
-                3 -> PolarFirstTimeUseConfig.TypicalDay.MOSTLY_STANDING
-                else -> PolarFirstTimeUseConfig.TypicalDay.MOSTLY_SITTING
-            },
-            config.sleepGoalMinutes
-        )
-
+        val ftuConfig = gson.fromJson(arguments[1] as String, PolarFirstTimeUseConfig::class.java)
         wrapper.api
             .doFirstTimeUse(identifier, ftuConfig)
             .subscribe({
@@ -589,10 +529,7 @@ class PolarPlugin :
     }
 
     private fun isFtuDone(call: MethodCall, result: Result) {
-        val identifier = call.arguments as? String ?: run {
-            result.error("ERROR_INVALID_ARGUMENT", "Expected a single String argument", null)
-            return
-        }
+        val identifier = call.arguments as String
 
         wrapper.api
             .isFtuDone(identifier)

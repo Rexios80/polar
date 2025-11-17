@@ -1,11 +1,14 @@
+import 'dart:io';
+
 import 'package:json_annotation/json_annotation.dart';
-import 'dart:convert';
-import 'dart:io' show Platform;
+import 'package:meta/meta.dart';
+import 'package:polar/src/model/convert.dart';
+import 'package:recase/recase.dart';
 
 part 'polar_first_time_use_config.g.dart';
 
 /// Enum representing the training background levels
-enum TrainingBackground {
+enum FtuTrainingBackground {
   /// Occasional training (1-2 times per week)
   occasional(10),
 
@@ -26,11 +29,13 @@ enum TrainingBackground {
 
   /// The numeric value representing the training background level
   final int value;
-  const TrainingBackground(this.value);
+
+  /// Constructor
+  const FtuTrainingBackground(this.value);
 }
 
 /// Enum representing the typical day activity levels
-enum TypicalDay {
+enum FtuTypicalDay {
   /// Mostly moving throughout the day
   mostlyMoving(1),
 
@@ -42,16 +47,30 @@ enum TypicalDay {
 
   /// The numeric value representing the typical day activity level
   final int value;
-  const TypicalDay(this.value);
+
+  /// Constructor
+  const FtuTypicalDay(this.value);
+}
+
+/// Enum representing the gender of the user
+enum FtuGender {
+  /// Male
+  male,
+
+  /// Female
+  female,
 }
 
 /// Configuration class for First Time Use setup
-@JsonSerializable()
+@JsonSerializable(createFactory: false)
+@immutable
 class PolarFirstTimeUseConfig {
-  /// The gender of the user ('Male' or 'Female')
-  final String gender;
+  /// The gender of the user
+  @JsonKey(toJson: _genderToJson)
+  final FtuGender gender;
 
   /// The user's birth date
+  @UnixTimeConverter()
   final DateTime birthDate;
 
   /// The user's height in centimeters (90-240)
@@ -70,19 +89,21 @@ class PolarFirstTimeUseConfig {
   final int restingHeartRate;
 
   /// The user's training background level
-  final TrainingBackground trainingBackground;
+  @JsonKey(toJson: _trainingBackgroundToJson)
+  final FtuTrainingBackground trainingBackground;
 
   /// The device time in ISO 8601 format
-  final String deviceTime;
+  final DateTime deviceTime;
 
   /// The user's typical daily activity level
-  final TypicalDay typicalDay;
+  @JsonKey(toJson: _typicalDayToJson)
+  final FtuTypicalDay typicalDay;
 
   /// The user's sleep goal in minutes
   final int sleepGoalMinutes;
 
   /// Creates a new [PolarFirstTimeUseConfig] instance
-  PolarFirstTimeUseConfig({
+  const PolarFirstTimeUseConfig({
     required this.gender,
     required this.birthDate,
     required this.height,
@@ -94,43 +115,20 @@ class PolarFirstTimeUseConfig {
     required this.deviceTime,
     required this.typicalDay,
     required this.sleepGoalMinutes,
-  }) {
-    // Validate ranges
-    if (height < 90 || height > 240) {
-      throw ArgumentError('Height must be between 90 and 240 cm');
-    }
-    if (weight < 15 || weight > 300) {
-      throw ArgumentError('Weight must be between 15 and 300 kg');
-    }
-    if (maxHeartRate < 100 || maxHeartRate > 240) {
-      throw ArgumentError('Max heart rate must be between 100 and 240 bpm');
-    }
-    if (restingHeartRate < 20 || restingHeartRate > 120) {
-      throw ArgumentError('Resting heart rate must be between 20 and 120 bpm');
-    }
-    if (vo2Max < 10 || vo2Max > 95) {
-      throw ArgumentError('VO2 max must be between 10 and 95');
-    }
-    if (!['Male', 'Female'].contains(gender)) {
-      throw ArgumentError('Gender must be either "Male" or "Female"');
-    }
-  }
-
-  /// Create a PolarFirstTimeUseConfig from JSON
-  factory PolarFirstTimeUseConfig.fromJson(Map<String, dynamic> json) =>
-      _$PolarFirstTimeUseConfigFromJson(json);
+  });
 
   /// Convert to JSON
-  Map<String, dynamic> toJson() {
-    final json = _$PolarFirstTimeUseConfigToJson(this);
-    // Override the enum values with their integer values for Android
-    if (Platform.isAndroid) {
-      json['trainingBackground'] = trainingBackground.value;
-      json['typicalDay'] = typicalDay.value;
-    }
-    return json;
-  }
+  Map<String, dynamic> toJson() => _$PolarFirstTimeUseConfigToJson(this);
+}
 
-  /// Convert to a Map for platform channel
-  String toMap() => jsonEncode(toJson());
+String _genderToJson(FtuGender gender) => gender.name.toUpperCase();
+Object _trainingBackgroundToJson(FtuTrainingBackground trainingBackground) =>
+    trainingBackground.value;
+Object _typicalDayToJson(FtuTypicalDay typicalDay) {
+  if (Platform.isIOS) {
+    return typicalDay.value;
+  } else {
+    // This is android
+    return typicalDay.name.snakeCase.toUpperCase();
+  }
 }

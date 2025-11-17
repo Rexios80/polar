@@ -478,7 +478,7 @@ public class SwiftPolarPlugin:
       onError: { error in
         result(
           FlutterError(
-            code: "FTU_ERROR",
+            code: "Error doing first time use",
             message: error.localizedDescription,
             details: nil
           ))
@@ -487,15 +487,7 @@ public class SwiftPolarPlugin:
   }
 
   func isFtuDone(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
-    guard let identifier = call.arguments as? String else {
-      result(
-        FlutterError(
-          code: "INVALID_ARGUMENTS",
-          message: "Expected a device identifier as a String",
-          details: nil
-        ))
-      return
-    }
+    guard let identifier = call.arguments as! String
 
     _ = api.isFtuDone(identifier).subscribe(
       onSuccess: { isFtuDone in
@@ -504,7 +496,7 @@ public class SwiftPolarPlugin:
       onFailure: { error in
         result(
           FlutterError(
-            code: "FTU_CHECK_ERROR",
+            code: "Error checking FTU status",
             message: error.localizedDescription,
             details: nil
           )
