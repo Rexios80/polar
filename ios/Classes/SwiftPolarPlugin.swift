@@ -99,6 +99,8 @@ public class SwiftPolarPlugin:
         result(nil)
       case "getAvailableOnlineStreamDataTypes":
         getAvailableOnlineStreamDataTypes(call, result)
+      case "getAvailableHrServiceDataTypes":
+        getAvailableHrServiceDataTypes(call, result)
       case "requestStreamSettings":
         try requestStreamSettings(call, result)
       case "createStreamingChannel":
@@ -220,6 +222,32 @@ public class SwiftPolarPlugin:
         result(
           FlutterError(
             code: "Unable to get available online stream data types",
+            message: $0.localizedDescription, details: nil))
+      })
+  }
+
+  func getAvailableHrServiceDataTypes(
+    _ call: FlutterMethodCall, _ result: @escaping FlutterResult
+  ) {
+    let identifier = call.arguments as! String
+
+    _ = api.getAvailableHRServiceDataTypes(identifier: identifier).subscribe(
+      onSuccess: { data in
+        guard let data = jsonEncode(data.map { PolarDeviceDataType.allCases.firstIndex(of: $0)! })
+        else {
+          result(
+            result(
+              FlutterError(
+                code: "Unable to get available HR service data types", message: nil, details: nil
+              )))
+          return
+        }
+        result(data)
+      },
+      onFailure: {
+        result(
+          FlutterError(
+            code: "Unable to get available HR service data types",
             message: $0.localizedDescription, details: nil))
       })
   }
@@ -524,6 +552,12 @@ public class SwiftPolarPlugin:
   ) {
     success(
       "batteryChargingStatusReceived", data: [identifier, String(describing: chargingStatus)])
+  }
+
+  public func batteryPowerSourcesStateReceived(
+    _ identifier: String, powerSourcesState: BleBasClient.PowerSourcesState
+  ) {
+    // TODO
   }
 
   public func blePowerOn() {

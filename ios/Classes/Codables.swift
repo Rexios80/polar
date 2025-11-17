@@ -346,7 +346,7 @@ class PolarSensorSettingCodable: Codable {
         }
     )
 
-    data = PolarSensorSetting(newDict)
+    data = try! PolarSensorSetting(newDict)
   }
 
   enum CodingKeys: String, CodingKey {

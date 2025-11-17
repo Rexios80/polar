@@ -82,26 +82,33 @@ class _MyAppState extends State<MyApp> {
 
   void streamWhenReady() async {
     await polar.sdkFeatureReady.firstWhere(
-      (e) =>
-          e.identifier == identifier &&
-          e.feature == PolarSdkFeature.onlineStreaming,
+      (e) => e.identifier == identifier && e.feature == PolarSdkFeature.hr,
     );
-    final availabletypes =
-        await polar.getAvailableOnlineStreamDataTypes(identifier);
+    final availableHrTypes =
+        await polar.getAvailableHrServiceDataTypes(identifier);
+    debugPrint('available hr types: $availableHrTypes');
 
-    debugPrint('available types: $availabletypes');
-
-    if (availabletypes.contains(PolarDataType.hr)) {
+    if (availableHrTypes.contains(PolarDataType.hr)) {
       polar
           .startHrStreaming(identifier)
           .listen((e) => log('Heart rate: ${e.samples.map((e) => e.hr)}'));
     }
-    if (availabletypes.contains(PolarDataType.ecg)) {
+
+    await polar.sdkFeatureReady.firstWhere(
+      (e) =>
+          e.identifier == identifier &&
+          e.feature == PolarSdkFeature.onlineStreaming,
+    );
+    final availableStreamTypes =
+        await polar.getAvailableOnlineStreamDataTypes(identifier);
+    debugPrint('available stream types: $availableStreamTypes');
+
+    if (availableStreamTypes.contains(PolarDataType.ecg)) {
       polar
           .startEcgStreaming(identifier)
           .listen((e) => log('ECG data received'));
     }
-    if (availabletypes.contains(PolarDataType.acc)) {
+    if (availableStreamTypes.contains(PolarDataType.acc)) {
       polar
           .startAccStreaming(identifier)
           .listen((e) => log('ACC data received'));
