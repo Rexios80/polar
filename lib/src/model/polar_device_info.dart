@@ -42,10 +42,7 @@ class PolarDeviceInfo {
   Map<String, dynamic> toJson() => _$PolarDeviceInfoToJson(this);
 }
 
-Object? _readConnectable(Map json, String key) => readPlatformValue(
-      json,
-      {
-        TargetPlatform.iOS: 'connectable',
-        TargetPlatform.android: 'isConnectable',
-      },
-    );
+Object? _readConnectable(Map json, String key) => readPlatformValue(json, {
+  TargetPlatform.iOS: 'connectable',
+  TargetPlatform.android: 'isConnectable',
+});

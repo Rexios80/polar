@@ -12,10 +12,7 @@ class LedConfig {
   final bool ppiModeLedEnabled;
 
   /// Constructor
-  LedConfig({
-    this.sdkModeLedEnabled = true,
-    this.ppiModeLedEnabled = true,
-  });
+  LedConfig({this.sdkModeLedEnabled = true, this.ppiModeLedEnabled = true});
 
   /// From json
   factory LedConfig.fromJson(Map<String, dynamic> json) =>

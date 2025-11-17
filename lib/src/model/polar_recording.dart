@@ -57,10 +57,7 @@ class PolarRecordingStatus {
   final String entryId;
 
   /// Constructor
-  PolarRecordingStatus({
-    required this.ongoing,
-    required this.entryId,
-  });
+  PolarRecordingStatus({required this.ongoing, required this.entryId});
 
   @override
   String toString() {
@@ -95,9 +92,9 @@ class PolarExerciseEntry {
 
   /// To json
   Map<String, dynamic> toJson() => {
-        ..._$PolarExerciseEntryToJson(this),
-        _entryIdKeys[defaultTargetPlatform]!: entryId,
-      };
+    ..._$PolarExerciseEntryToJson(this),
+    _entryIdKeys[defaultTargetPlatform]!: entryId,
+  };
 
   @override
   String toString() {
@@ -125,10 +122,7 @@ class PolarExerciseData {
   final List<int> samples;
 
   /// Constructor
-  PolarExerciseData({
-    required this.interval,
-    required this.samples,
-  });
+  PolarExerciseData({required this.interval, required this.samples});
 
   /// From json
   factory PolarExerciseData.fromJson(Map<String, dynamic> json) =>
@@ -144,11 +138,11 @@ class PolarExerciseData {
 }
 
 Object? _readInterval(Map json, String key) => readPlatformValue(json, {
-      TargetPlatform.iOS: 'interval',
-      TargetPlatform.android: 'recordingInterval',
-    });
+  TargetPlatform.iOS: 'interval',
+  TargetPlatform.android: 'recordingInterval',
+});
 
 Object? _readSamples(Map json, String key) => readPlatformValue(json, {
-      TargetPlatform.iOS: 'samples',
-      TargetPlatform.android: 'hrSamples',
-    });
+  TargetPlatform.iOS: 'samples',
+  TargetPlatform.android: 'hrSamples',
+});

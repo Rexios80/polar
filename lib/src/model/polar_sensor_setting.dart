@@ -30,32 +30,28 @@ class PolarSensorSetting {
   }
 
   /// current settings available / set
-  @JsonKey(
-    fromJson: _settingsFromJson,
-    toJson: _settingsToJson,
-  )
+  @JsonKey(fromJson: _settingsFromJson, toJson: _settingsToJson)
   final Map<PolarSettingType, List<int>> settings;
 
   /// Verify that this is a selection of settings and not a list of available settings
   bool get isSelection => settings.values.every((e) => e.length == 1);
 
   /// Constructor
-  PolarSensorSetting._({
-    required this.settings,
-  });
+  PolarSensorSetting._({required this.settings});
 
   /// Constructor with desired settings
   ///
   /// - Parameter settings: single key value pairs to start stream
   PolarSensorSetting(Map<PolarSettingType, int> settings)
-      : settings = settings.map((key, value) => MapEntry(key, [value]));
+    : settings = settings.map((key, value) => MapEntry(key, [value]));
 
   /// Helper to retrieve max settings available
   ///
   /// - Returns: PolarSensorSetting with max settings
   PolarSensorSetting maxSettings() {
-    final selected =
-        settings.map((key, value) => MapEntry(key, [value.reduce(max)]));
+    final selected = settings.map(
+      (key, value) => MapEntry(key, [value.reduce(max)]),
+    );
     return PolarSensorSetting._(settings: selected);
   }
 
@@ -85,5 +81,5 @@ enum PolarSettingType {
   channels,
 
   /// type is unknown
-  unknown;
+  unknown,
 }

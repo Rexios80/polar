@@ -63,9 +63,9 @@ Future<dynamic> handleMethodCall(MethodCall call) async {
     case 'createStreamingChannel':
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockStreamHandler(
-        EventChannel(call.arguments[0] as String),
-        StreamingHandler(PolarDataType.fromJson(call.arguments[2])),
-      );
+            EventChannel(call.arguments[0] as String),
+            StreamingHandler(PolarDataType.fromJson(call.arguments[2])),
+          );
       return null;
     case 'startRecording':
       recording = true;
@@ -121,10 +121,7 @@ class EventHandler extends MockStreamHandler {
     });
     events.success({
       'event': 'batteryChargingStatusReceived',
-      'data': [
-        identifier,
-        PolarChargeState.dischargingActive.toJson(),
-      ],
+      'data': [identifier, PolarChargeState.dischargingActive.toJson()],
     });
     for (final feature in PolarSdkFeature.values) {
       events.success({
@@ -226,28 +223,19 @@ class StreamingHandler extends MockStreamHandler {
       case PolarDataType.temperature:
         data = PolarTemperatureData(
           samples: [
-            PolarTemperatureSample(
-              timeStamp: DateTime.now(),
-              temperature: 0,
-            ),
+            PolarTemperatureSample(timeStamp: DateTime.now(), temperature: 0),
           ],
         );
       case PolarDataType.pressure:
         data = PolarPressureData(
           samples: [
-            PolarPressureSample(
-              timeStamp: DateTime.now(),
-              pressure: 0,
-            ),
+            PolarPressureSample(timeStamp: DateTime.now(), pressure: 0),
           ],
         );
       case PolarDataType.skinTemperature:
         data = PolarTemperatureData(
           samples: [
-            PolarTemperatureSample(
-              timeStamp: DateTime.now(),
-              temperature: 0,
-            ),
+            PolarTemperatureSample(timeStamp: DateTime.now(), temperature: 0),
           ],
         );
       case PolarDataType.location:

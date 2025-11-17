@@ -12,15 +12,12 @@ class PolarStreamingData<T> {
   final List<T> samples;
 
   /// Constructor
-  PolarStreamingData({
-    required this.samples,
-  });
+  PolarStreamingData({required this.samples});
 
   static PolarStreamingData<T> _fromJson<T>(
     Map<String, dynamic> json,
     dynamic Function(Map<String, dynamic>) fromJsonT,
-  ) =>
-      _$PolarStreamingDataFromJson(json, (dynamic e) => fromJsonT(e));
+  ) => _$PolarStreamingDataFromJson(json, (dynamic e) => fromJsonT(e));
 
   /// Convert from json
   factory PolarStreamingData.fromJson(Map<String, dynamic> json) {
@@ -128,10 +125,7 @@ class PolarEcgSample {
   final int voltage;
 
   /// Constructor
-  PolarEcgSample({
-    required this.timeStamp,
-    required this.voltage,
-  });
+  PolarEcgSample({required this.timeStamp, required this.voltage});
 }
 
 /// Polar ecg data
@@ -234,10 +228,7 @@ class PolarPpgSample {
   final List<int> channelSamples;
 
   /// Constructor
-  PolarPpgSample({
-    required this.timeStamp,
-    required this.channelSamples,
-  });
+  PolarPpgSample({required this.timeStamp, required this.channelSamples});
 
   /// From json
   factory PolarPpgSample.fromJson(Map<String, dynamic> json) =>
@@ -256,10 +247,7 @@ class PolarPpgData extends PolarStreamingData<PolarPpgSample> {
   final PpgDataType type;
 
   /// Constructor
-  PolarPpgData({
-    required this.type,
-    required super.samples,
-  });
+  PolarPpgData({required this.type, required super.samples});
 
   /// From json
   factory PolarPpgData.fromJson(Map<String, dynamic> json) =>
@@ -328,10 +316,7 @@ class PolarTemperatureSample {
   final double temperature;
 
   /// Constructor
-  PolarTemperatureSample({
-    required this.timeStamp,
-    required this.temperature,
-  });
+  PolarTemperatureSample({required this.timeStamp, required this.temperature});
 }
 
 /// Polar temperature data
@@ -348,10 +333,7 @@ class PolarPressureSample {
   final double pressure;
 
   /// Constructor
-  PolarPressureSample({
-    required this.timeStamp,
-    required this.pressure,
-  });
+  PolarPressureSample({required this.timeStamp, required this.pressure});
 }
 
 /// Polar pressure data
@@ -425,18 +407,12 @@ class PolarLocationDataSample {
 /// Polar skin temperature data
 typedef PolarLocationData = PolarStreamingData<PolarLocationDataSample>;
 
-Object? _readErrorEstimate(Map json, String key) => readPlatformValue(
-      json,
-      {
-        TargetPlatform.iOS: 'ppErrorEstimate',
-        TargetPlatform.android: 'errorEstimate',
-      },
-    );
+Object? _readErrorEstimate(Map json, String key) => readPlatformValue(json, {
+  TargetPlatform.iOS: 'ppErrorEstimate',
+  TargetPlatform.android: 'errorEstimate',
+});
 
-Object? _readPpi(Map json, String key) => readPlatformValue(
-      json,
-      {
-        TargetPlatform.iOS: 'ppInMs',
-        TargetPlatform.android: 'ppi',
-      },
-    );
+Object? _readPpi(Map json, String key) => readPlatformValue(json, {
+  TargetPlatform.iOS: 'ppInMs',
+  TargetPlatform.android: 'ppi',
+});

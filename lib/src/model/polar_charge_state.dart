@@ -21,8 +21,9 @@ enum PolarChargeState {
     dischargingInactive: 'DISCHARGING_INACTIVE',
   };
 
-  static final _stringFeatureMap =
-      _featureStringMap.map((k, v) => MapEntry(v, k));
+  static final _stringFeatureMap = _featureStringMap.map(
+    (k, v) => MapEntry(v, k),
+  );
 
   /// Create a [PolarChargeState] from json
   static PolarChargeState fromJson(dynamic json) {

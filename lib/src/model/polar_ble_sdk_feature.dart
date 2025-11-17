@@ -69,8 +69,9 @@ enum PolarSdkFeature {
     temperatureData: 'FEATURE_POLAR_TEMPERATURE_DATA',
   };
 
-  static final _stringFeatureMap =
-      _featureStringMap.map((k, v) => MapEntry(v, k));
+  static final _stringFeatureMap = _featureStringMap.map(
+    (k, v) => MapEntry(v, k),
+  );
 
   /// Create a [PolarSdkFeature] from json
   static PolarSdkFeature fromJson(dynamic json) {
