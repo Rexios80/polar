@@ -620,14 +620,23 @@ class Polar {
     return result;
   }
 
-  /// Performs the First Time Use setup for a Polar 360 device.
-  ///
+  /// Set [FtuConfig] for device
   /// - Parameters:
-  ///   - identifier: Polar device id or address.
-  ///   - config: Configuration data for the first-time use.
-  /// - Returns: Future<void>.
-  ///   - success: Completes when the configuration is sent to device.
-  ///   - onError: Possible errors are returned as exceptions.
+  ///   - identifier: polar device id or UUID
+  ///   - ftuConfig: Configuration data for the first-time use, encapsulated in [PolarFirstTimeUseConfig].
+  /// - Returns: Completable stream
+  ///   - success: when enable or disable sent to device
+  ///   - onError: see `PolarErrors` for possible errors invoked
+  /// - [PolarFirstTimeUseConfig] class enforces specific ranges and valid values for each parameter:
+  ///   - Gender: "Male" or "Female"
+  ///   - Height: 90 to 240 cm
+  ///   - Weight: 15 to 300 kg
+  ///   - Max heart rate: 100 to 240 bpm
+  ///   - Resting heart rate: 20 to 120 bpm
+  ///   - VO2 max: 10 to 95
+  ///   - Training background: One of the predefined levels (10, 20, 30, 40, 50, 60)
+  ///   - Typical day: One of [TypicalDay] values
+  ///   - Sleep goal: Minutes, valid range [300-660]
   Future<void> doFirstTimeUse(
     String identifier,
     PolarFirstTimeUseConfig entry,
@@ -638,13 +647,12 @@ class Polar {
     ]);
   }
 
-  /// Checks if First Time Use setup has been completed for a Polar device.
-  ///
+  /// Check if the First Time Use has been done for the given Polar device.
   /// - Parameters:
-  ///   - identifier: Polar device id or address.
-  /// - Returns: A boolean indicating if FTU is completed.
-  ///   - success: Returns true if FTU is done, false otherwise.
-  ///   - onError: Possible errors are returned as exceptions.
+  ///   - identifier: Polar device id or UUID
+  /// - Returns: Boolean
+  ///   - success: true when FTU has been done, false otherwise
+  ///   - onError: see `PolarErrors` for possible errors invoked
   Future<bool> isFtuDone(String identifier) async {
     // Call the native method to check FTU status
     final result = await _methodChannel.invokeMethod<bool>(
