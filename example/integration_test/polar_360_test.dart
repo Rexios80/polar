@@ -11,8 +11,7 @@ void main() async {
   await requestPermissions();
   testSearch(identifier);
   testConnection(identifier);
-
-  /// TODO: Add FTU
+  testFtu(identifier);
   testBasicData(identifier);
   testBleSdkFeatures(
     identifier,
@@ -33,5 +32,4 @@ void main() async {
   );
   testSdkMode(identifier);
   testMisc(identifier, supportsLedConfig: true);
-  testFtu(identifier);
 }
