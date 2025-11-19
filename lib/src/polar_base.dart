@@ -647,8 +647,10 @@ class Polar {
   ///   - onError: Possible errors are returned as exceptions.
   Future<bool> isFtuDone(String identifier) async {
     // Call the native method to check FTU status
-    final result =
-        await _methodChannel.invokeMethod<bool>('isFtuDone', identifier);
+    final result = await _methodChannel.invokeMethod<bool>(
+      'isFtuDone',
+      identifier,
+    );
 
     // If the result is null, default to false for safety
     return result ?? false;
