@@ -156,7 +156,6 @@ class _MyAppState extends State<MyApp> {
         final exerciseEntry = this.exerciseEntry;
         if (exerciseEntry == null) {
           log('Exercises not yet listed');
-          await handleRecordingAction(RecordingAction.list);
           return;
         }
         final entry = await polar.fetchExercise(identifier, exerciseEntry);
