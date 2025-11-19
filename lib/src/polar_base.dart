@@ -660,7 +660,6 @@ class Polar {
       identifier,
     );
 
-    // If the result is null, throw StateError for consistency and to detect platform issues
     if (result == null) {
       throw StateError('isFtuDone returned null');
     }
