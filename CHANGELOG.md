@@ -1,3 +1,7 @@
+## NEXT
+
+- Requires Dart `3.8.0`
+
 ## 7.7.3
 
 - Upgrades Polar SDK to `6.10.0`

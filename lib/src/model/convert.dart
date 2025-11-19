@@ -14,6 +14,18 @@ Object? readPlatformValue(Map json, Map<TargetPlatform, String> keys) {
   return json[key];
 }
 
+/// Write a value to a JSON object keyed based on the platform
+Map<String, dynamic> writePlatformValue(
+  Map<TargetPlatform, String> keys,
+  Object? value,
+) {
+  final key = keys[defaultTargetPlatform];
+  if (key == null) {
+    throw UnsupportedError('Unsupported platform: $defaultTargetPlatform');
+  }
+  return {key: value};
+}
+
 /// Converts platform values to booleans
 /// - The iOS SDK uses `0` and `1` for booleans
 /// - The Android SDK uses `true` and `false` for booleans

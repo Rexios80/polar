@@ -153,20 +153,22 @@ class _MyAppState extends State<MyApp> {
         break;
       case RecordingAction.fetch:
         log('Fetching recording');
+        final exerciseEntry = this.exerciseEntry;
         if (exerciseEntry == null) {
           log('Exercises not yet listed');
-          await handleRecordingAction(RecordingAction.list);
+          return;
         }
-        final entry = await polar.fetchExercise(identifier, exerciseEntry!);
+        final entry = await polar.fetchExercise(identifier, exerciseEntry);
         log('Fetched recording: $entry');
         break;
       case RecordingAction.remove:
         log('Removing recording');
+        final exerciseEntry = this.exerciseEntry;
         if (exerciseEntry == null) {
           log('No exercise to remove. Try calling list first.');
           return;
         }
-        await polar.removeExercise(identifier, exerciseEntry!);
+        await polar.removeExercise(identifier, exerciseEntry);
         log('Removed recording');
         break;
     }
