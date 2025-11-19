@@ -625,7 +625,7 @@ class Polar {
   ///   - identifier: polar device id or UUID
   ///   - ftuConfig: Configuration data for the first-time use, encapsulated in [PolarFirstTimeUseConfig].
   /// - Returns: Completable stream
-  ///   - success: when enable or disable sent to device
+  ///   - success: when configuration is successfully sent to device
   ///   - onError: see `PolarErrors` for possible errors invoked
   /// - [PolarFirstTimeUseConfig] class enforces specific ranges and valid values for each parameter:
   ///   - Gender: "Male" or "Female"
