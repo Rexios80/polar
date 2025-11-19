@@ -470,7 +470,7 @@ public class SwiftPolarPlugin:
       PolarFirstTimeUseConfigCodable.self,
       from: (arguments[1] as! String).data(using: .utf8)!
     ).data
-    
+
     _ = api.doFirstTimeUse(identifier, ftuConfig: config).subscribe(
       onCompleted: {
         result(nil)

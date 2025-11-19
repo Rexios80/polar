@@ -25,6 +25,7 @@ import com.polar.sdk.api.PolarH10OfflineExerciseApi.SampleType
 import com.polar.sdk.api.model.LedConfig
 import com.polar.sdk.api.model.PolarDeviceInfo
 import com.polar.sdk.api.model.PolarExerciseEntry
+import com.polar.sdk.api.model.PolarFirstTimeUseConfig
 import com.polar.sdk.api.model.PolarHealthThermometerData
 import com.polar.sdk.api.model.PolarHrData
 import com.polar.sdk.api.model.PolarSensorSetting
@@ -43,7 +44,6 @@ import io.reactivex.rxjava3.disposables.Disposable
 import java.lang.reflect.Type
 import java.util.Date
 import java.util.UUID
-import com.polar.sdk.api.model.PolarFirstTimeUseConfig
 
 fun Any?.discard() = Unit
 
@@ -528,7 +528,10 @@ class PolarPlugin :
             .discard()
     }
 
-    private fun isFtuDone(call: MethodCall, result: Result) {
+    private fun isFtuDone(
+        call: MethodCall,
+        result: Result,
+    ) {
         val identifier = call.arguments as String
 
         wrapper.api
