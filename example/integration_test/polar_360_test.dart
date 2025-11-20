@@ -33,4 +33,5 @@ void main() async {
   );
   testSdkMode(identifier);
   testMisc(identifier, supportsLedConfig: true);
+  testFtu(identifier);
 }

@@ -280,3 +280,28 @@ void testMisc(String identifier, {required bool supportsLedConfig}) {
     await disconnect(identifier);
   });
 }
+
+void testFtu(String identifier) {
+  test('ftu', () async {
+    await connect(identifier);
+    final config = PolarFirstTimeUseConfig(
+      gender: FtuGender.male,
+      birthDate: DateTime(1990, 1, 1),
+      height: 177,
+      weight: 77,
+      maxHeartRate: 220 - 35,
+      vo2Max: 40,
+      restingHeartRate: 60,
+      trainingBackground: FtuTrainingBackground.occasional,
+      sleepGoalMinutes: 480,
+      typicalDay: FtuTypicalDay.mostlySitting,
+      deviceTime: DateTime.timestamp(),
+    );
+
+    await polar.doFirstTimeUse(identifier, config);
+    final status = await polar.isFtuDone(identifier);
+    expect(status, true);
+
+    await disconnect(identifier);
+  });
+}

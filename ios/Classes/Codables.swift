@@ -429,3 +429,45 @@ extension Date {
     self = Date(timeIntervalSince1970: TimeInterval(milliseconds) / 1000)
   }
 }
+
+class PolarFirstTimeUseConfigCodable: Decodable {
+  let data: PolarFirstTimeUseConfig
+
+  required init(from decoder: Decoder) {
+    let container = try! decoder.container(keyedBy: CodingKeys.self)
+
+    let genderString = try! container.decode(String.self, forKey: .gender)
+    let trainingBackgroundValue = try! container.decode(Int.self, forKey: .trainingBackground)
+    let typicalDayValue = try! container.decode(Int.self, forKey: .typicalDay)
+
+    data = PolarFirstTimeUseConfig(
+      gender: genderString == "MALE"
+        ? PolarFirstTimeUseConfig.Gender.male : PolarFirstTimeUseConfig.Gender.female,
+      birthDate: Date(milliseconds: try! container.decode(Int64.self, forKey: .birthDate)),
+      height: Float(try! container.decode(Int.self, forKey: .height)),
+      weight: Float(try! container.decode(Int.self, forKey: .weight)),
+      maxHeartRate: try! container.decode(Int.self, forKey: .maxHeartRate),
+      vo2Max: try! container.decode(Int.self, forKey: .vo2Max),
+      restingHeartRate: try! container.decode(Int.self, forKey: .restingHeartRate),
+      trainingBackground: PolarFirstTimeUseConfig.TrainingBackground(
+        rawValue: trainingBackgroundValue)!,
+      deviceTime: try! container.decode(String.self, forKey: .deviceTime),
+      typicalDay: PolarFirstTimeUseConfig.TypicalDay(rawValue: typicalDayValue)!,
+      sleepGoalMinutes: try! container.decode(Int.self, forKey: .sleepGoalMinutes)
+    )
+  }
+
+  enum CodingKeys: String, CodingKey {
+    case gender
+    case birthDate
+    case height
+    case weight
+    case maxHeartRate
+    case vo2Max
+    case restingHeartRate
+    case trainingBackground
+    case deviceTime
+    case typicalDay
+    case sleepGoalMinutes
+  }
+}

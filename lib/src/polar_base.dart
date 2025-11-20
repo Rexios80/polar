@@ -619,4 +619,50 @@ class Polar {
 
     return result;
   }
+
+  /// Set [FtuConfig] for device
+  /// - Parameters:
+  ///   - identifier: polar device id or UUID
+  ///   - ftuConfig: Configuration data for the first-time use, encapsulated in [PolarFirstTimeUseConfig].
+  /// - Returns: Completable stream
+  ///   - success: when configuration is successfully sent to device
+  ///   - onError: see `PolarErrors` for possible errors invoked
+  /// - [PolarFirstTimeUseConfig] class enforces specific ranges and valid values for each parameter:
+  ///   - Gender: "Male" or "Female"
+  ///   - Height: 90 to 240 cm
+  ///   - Weight: 15 to 300 kg
+  ///   - Max heart rate: 100 to 240 bpm
+  ///   - Resting heart rate: 20 to 120 bpm
+  ///   - VO2 max: 10 to 95
+  ///   - Training background: One of the predefined levels (10, 20, 30, 40, 50, 60)
+  ///   - Typical day: One of [TypicalDay] values
+  ///   - Sleep goal: Minutes, valid range [300-660]
+  Future<void> doFirstTimeUse(
+    String identifier,
+    PolarFirstTimeUseConfig entry,
+  ) async {
+    await _methodChannel.invokeMethod('doFirstTimeUse', [
+      identifier,
+      jsonEncode(entry),
+    ]);
+  }
+
+  /// Check if the First Time Use has been done for the given Polar device.
+  /// - Parameters:
+  ///   - identifier: Polar device id or UUID
+  /// - Returns: Boolean
+  ///   - success: true when FTU has been done, false otherwise
+  ///   - onError: see `PolarErrors` for possible errors invoked
+  Future<bool> isFtuDone(String identifier) async {
+    // Call the native method to check FTU status
+    final result = await _methodChannel.invokeMethod<bool>(
+      'isFtuDone',
+      identifier,
+    );
+
+    if (result == null) {
+      throw StateError('isFtuDone returned null');
+    }
+    return result;
+  }
 }
