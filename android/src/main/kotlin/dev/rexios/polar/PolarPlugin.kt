@@ -171,7 +171,8 @@ class PolarPlugin :
     }
 
     override fun onCancel(arguments: Any?) {
-        wrapper.removeSink(arguments as Int)
+        val id = arguments as? Int ?: return
+        wrapper.removeSink(id)
     }
 
     private val searchHandler =
