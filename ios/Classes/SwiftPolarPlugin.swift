@@ -149,7 +149,7 @@ public class SwiftPolarPlugin:
   }
 
   public func onCancel(withArguments arguments: Any?) -> FlutterError? {
-    guard let id = arguments as? Int else { return }
+    guard let id = arguments as? Int else { return nil }
     self.sinks.removeValue(forKey: id)
     return nil
   }
