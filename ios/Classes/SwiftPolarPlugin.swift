@@ -42,7 +42,7 @@ public class SwiftPolarPlugin:
   var streamingChannels = [String: StreamingChannel]()
 
   var api: PolarBleApi!
-  var events: FlutterEventSink?
+  var sinks: [Int: FlutterEventSink] = [:]
 
   init(
     messenger: FlutterBinaryMessenger,
@@ -144,12 +144,12 @@ public class SwiftPolarPlugin:
     -> FlutterError?
   {
     initApi()
-    self.events = events
+    self.sinks[arguments as! Int] = events
     return nil
   }
 
   public func onCancel(withArguments arguments: Any?) -> FlutterError? {
-    events = nil
+    self.sinks.removeValue(forKey: arguments as! Int)
     return nil
   }
 
@@ -507,7 +507,9 @@ public class SwiftPolarPlugin:
 
   private func success(_ event: String, data: Any? = nil) {
     DispatchQueue.main.async {
-      self.events?(["event": event, "data": data])
+      for sink in self.sinks {
+        sink.value(["event": event, "data": data])
+      }
     }
   }
 

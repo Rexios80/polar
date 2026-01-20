@@ -1,3 +1,7 @@
+## NEXT
+
+- Fixes event channel issue on iOS
+
 ## 7.8.0
 
 - Adds `doFirstTimeUse` and `isFtuDone` to support Polar 360 (by [@Mu2tini](https://github.com/Mu2tini) in [#68](https://github.com/Rexios80/polar/pull/68))
