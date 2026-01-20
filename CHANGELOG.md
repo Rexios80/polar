@@ -1,6 +1,7 @@
-## NEXT
+## 7.9.0
 
-- Fixes event channel issue on iOS
+- Actually implements multi-isolate support on iOS
+- Fixes issue with hot reload on Android
 
 ## 7.8.0
 
