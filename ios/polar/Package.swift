@@ -20,11 +20,6 @@ let package = Package(
             dependencies: [
                 .product(name: "PolarBleSdk", package: "polar-ble-sdk")
             ],
-            resources: [
-                // TODO: If you have other resources that need to be bundled with your plugin, refer to
-                // the following instructions to add them:
-                // https://developer.apple.com/documentation/xcode/bundling-resources-with-a-swift-package
-            ]
         )
     ]
 )
