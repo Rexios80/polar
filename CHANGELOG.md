@@ -1,3 +1,9 @@
+## 7.10.0
+
+- Upgrades Polar SDK to `6.14.0`
+- Adds missing `PolarSdkFeature.featuresConfigurationService`
+- Adds SwiftPM support
+
 ## 7.9.0
 
 - Actually implements multi-isolate support on iOS
