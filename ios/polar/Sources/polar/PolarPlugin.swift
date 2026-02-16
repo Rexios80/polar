@@ -211,10 +211,9 @@ public class PolarPlugin:
         guard let data = jsonEncode(data.map { PolarDeviceDataType.allCases.firstIndex(of: $0)! })
         else {
           result(
-            result(
-              FlutterError(
-                code: "Unable to get available online stream data types", message: nil, details: nil
-              )))
+            FlutterError(
+              code: "Unable to get available online stream data types", message: nil, details: nil
+            ))
           return
         }
         result(data)
@@ -237,10 +236,9 @@ public class PolarPlugin:
         guard let data = jsonEncode(data.map { PolarDeviceDataType.allCases.firstIndex(of: $0)! })
         else {
           result(
-            result(
-              FlutterError(
-                code: "Unable to get available HR service data types", message: nil, details: nil
-              )))
+            FlutterError(
+              code: "Unable to get available HR service data types", message: nil, details: nil
+            ))
           return
         }
         result(data)

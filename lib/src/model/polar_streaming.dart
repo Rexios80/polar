@@ -236,13 +236,13 @@ class PolarPpgSample {
 
   /// List of statuses for the PPG samples, available for frametypes 7, 8, 10
   /// and 13. Status bits of each sample: 0 for no valid data, 1 for valid data.
-  final List<int> statusBits;
+  final List<int>? statusBits;
 
   /// Constructor
   const PolarPpgSample({
     required this.timeStamp,
     required this.channelSamples,
-    required this.statusBits,
+    this.statusBits,
   });
 
   /// From json

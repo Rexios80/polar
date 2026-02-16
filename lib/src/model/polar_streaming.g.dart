@@ -123,8 +123,8 @@ PolarPpgSample _$PolarPpgSampleFromJson(Map<String, dynamic> json) =>
       channelSamples: (json['channelSamples'] as List<dynamic>)
           .map((e) => (e as num).toInt())
           .toList(),
-      statusBits: (json['statusBits'] as List<dynamic>)
-          .map((e) => (e as num).toInt())
+      statusBits: (json['statusBits'] as List<dynamic>?)
+          ?.map((e) => (e as num).toInt())
           .toList(),
     );
 
