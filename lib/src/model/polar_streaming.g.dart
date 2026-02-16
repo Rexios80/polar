@@ -123,6 +123,9 @@ PolarPpgSample _$PolarPpgSampleFromJson(Map<String, dynamic> json) =>
       channelSamples: (json['channelSamples'] as List<dynamic>)
           .map((e) => (e as num).toInt())
           .toList(),
+      statusBits: (json['statusBits'] as List<dynamic>)
+          .map((e) => (e as num).toInt())
+          .toList(),
     );
 
 Map<String, dynamic> _$PolarPpgSampleToJson(
@@ -130,6 +133,7 @@ Map<String, dynamic> _$PolarPpgSampleToJson(
 ) => <String, dynamic>{
   'timeStamp': const PolarSampleTimestampConverter().toJson(instance.timeStamp),
   'channelSamples': instance.channelSamples,
+  'statusBits': instance.statusBits,
 };
 
 PolarPpgData _$PolarPpgDataFromJson(Map<String, dynamic> json) => PolarPpgData(

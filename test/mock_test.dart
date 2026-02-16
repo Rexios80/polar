@@ -189,6 +189,7 @@ class StreamingHandler extends MockStreamHandler {
             PolarPpgSample(
               timeStamp: DateTime.timestamp(),
               channelSamples: const [],
+              statusBits: const [],
             ),
           ],
         );

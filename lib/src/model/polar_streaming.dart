@@ -234,8 +234,16 @@ class PolarPpgSample {
   /// channel + n ambient(s).
   final List<int> channelSamples;
 
+  /// List of statuses for the PPG samples, available for frametypes 7, 8, 10
+  /// and 13. Status bits of each sample: 0 for no valid data, 1 for valid data.
+  final List<int> statusBits;
+
   /// Constructor
-  const PolarPpgSample({required this.timeStamp, required this.channelSamples});
+  const PolarPpgSample({
+    required this.timeStamp,
+    required this.channelSamples,
+    required this.statusBits,
+  });
 
   /// From json
   factory PolarPpgSample.fromJson(Map<String, dynamic> json) =>

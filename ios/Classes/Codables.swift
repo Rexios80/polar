@@ -225,7 +225,7 @@ class PolarMagnetometerSampleCodable: Encodable {
   }
 }
 
-typealias PolarPpgSample = (timeStamp: UInt64, channelSamples: [Int32])
+typealias PolarPpgSample = (timeStamp: UInt64, channelSamples: [Int32], statusBits: [Int8]?)
 
 class PolarPpgSampleCodable: Encodable {
   let data: PolarPpgSample
@@ -237,12 +237,14 @@ class PolarPpgSampleCodable: Encodable {
   enum CodingKeys: String, CodingKey {
     case timeStamp
     case channelSamples
+    case statusBits
   }
 
   func encode(to encoder: Encoder) {
     var container = encoder.container(keyedBy: CodingKeys.self)
     try? container.encode(data.timeStamp, forKey: .timeStamp)
     try? container.encode(data.channelSamples, forKey: .channelSamples)
+    try? container.encode(data.statusBits, forKey: .statusBits)
   }
 }
 
