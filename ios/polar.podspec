@@ -13,9 +13,9 @@ Plugin wrapper for the Polar SDK
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'Rexios' => 'rexios@rexios.dev' }
   s.source           = { :path => '.' }
-  s.source_files = 'Classes/**/*'
+  s.source_files = 'polar/Sources/polar/**/*'
   s.dependency 'Flutter'
-  s.dependency 'PolarBleSdk', '~> 6.14.0'
+  s.dependency 'PolarBleSdk', '6.14.0'
   s.platform = :ios, '14.0'
 
   # Flutter.framework does not contain a i386 slice.

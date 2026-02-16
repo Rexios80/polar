@@ -9,3 +9,5 @@ coverage/
 
 pubspec.lock
 .cxx
+.build/
+.swiftpm/
