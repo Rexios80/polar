@@ -17,7 +17,7 @@ private func jsonEncode(_ value: Encodable) -> String? {
   return data
 }
 
-public class SwiftPolarPlugin:
+public class PolarPlugin:
   NSObject,
   FlutterPlugin,
   FlutterStreamHandler,
@@ -75,7 +75,7 @@ public class SwiftPolarPlugin:
     let searchChannel = FlutterEventChannel(
       name: "polar/search", binaryMessenger: registrar.messenger())
 
-    let instance = SwiftPolarPlugin(
+    let instance = PolarPlugin(
       messenger: registrar.messenger(),
       methodChannel: methodChannel,
       eventChannel: eventChannel,
