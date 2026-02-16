@@ -1,58 +1,21 @@
 PODS:
-  - device_info_plus (0.0.1):
-    - Flutter
   - Flutter (1.0.0)
-  - integration_test (0.0.1):
-    - Flutter
   - permission_handler_apple (9.3.0):
     - Flutter
-  - polar (0.0.1):
-    - Flutter
-    - PolarBleSdk (~> 6.14.0)
-  - PolarBleSdk (6.14.0):
-    - RxSwift (~> 6.8.0)
-    - SwiftProtobuf (~> 1.0)
-    - Zip (~> 2.1.2)
-  - RxSwift (6.8.0)
-  - SwiftProtobuf (1.34.1)
-  - Zip (2.1.2)
 
 DEPENDENCIES:
-  - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - Flutter (from `Flutter`)
-  - integration_test (from `.symlinks/plugins/integration_test/ios`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
-  - polar (from `.symlinks/plugins/polar/ios`)
-
-SPEC REPOS:
-  trunk:
-    - PolarBleSdk
-    - RxSwift
-    - SwiftProtobuf
-    - Zip
 
 EXTERNAL SOURCES:
-  device_info_plus:
-    :path: ".symlinks/plugins/device_info_plus/ios"
   Flutter:
     :path: Flutter
-  integration_test:
-    :path: ".symlinks/plugins/integration_test/ios"
   permission_handler_apple:
     :path: ".symlinks/plugins/permission_handler_apple/ios"
-  polar:
-    :path: ".symlinks/plugins/polar/ios"
 
 SPEC CHECKSUMS:
-  device_info_plus: 21fcca2080fbcd348be798aa36c3e5ed849eefbe
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
-  integration_test: 4a889634ef21a45d28d50d622cf412dc6d9f586e
   permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
-  polar: e3f25fa4a766be2fb5d23418523fc0bbaf01e418
-  PolarBleSdk: 1d56bb7a3ca0a6df04cb4f652fdccb26064df011
-  RxSwift: 4e28be97cbcfeee614af26d83415febbf2bf6f45
-  SwiftProtobuf: c901f00a3e125dc33cac9b16824da85682ee47da
-  Zip: b3fef584b147b6e582b2256a9815c897d60ddc67
 
 PODFILE CHECKSUM: c24c27344913105c54b95f33f73882923a0bd103
 
