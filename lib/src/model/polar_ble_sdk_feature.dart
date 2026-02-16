@@ -51,7 +51,11 @@ enum PolarSdkFeature {
   sleepData,
 
   /// Feature to receive temperature data from Polar device.
-  temperatureData;
+  temperatureData,
+
+  /// Feature to read and set device configuration through Polar Features
+  /// Configuration Service.
+  featuresConfigurationService;
 
   static const _prefixFeature = 'FEATURE_';
   static const _prefixFeaturePolar = 'FEATURE_POLAR_';
