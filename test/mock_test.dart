@@ -45,6 +45,7 @@ void main() {
   testSdkMode(identifier);
   testMisc(identifier, supportsLedConfig: true);
   testFtu(identifier);
+  test247HrSamples(identifier);
 }
 
 final exercises = <PolarExerciseEntry>[];
@@ -111,6 +112,41 @@ Future<dynamic> handleMethodCall(MethodCall call) async {
       return null;
     case 'isFtuDone':
       return true;
+    case 'get247HrSamples':
+      // Mock 24/7 HR samples data
+      // Arguments: [identifier, fromDateString, toDateString]
+      final fromDateString = call.arguments[1] as String;
+      final toDateString = call.arguments[2] as String;
+      final fromDate = DateTime.parse(fromDateString);
+      final toDate = DateTime.parse(toDateString);
+
+      // Generate mock data for the date range
+      final result = <Map<String, dynamic>>[];
+      var currentDate = fromDate;
+      while (currentDate.isBefore(toDate) ||
+          currentDate.isAtSameMomentAs(toDate)) {
+        final samples = <Map<String, dynamic>>[];
+        // Generate some sample HR data for the day
+        for (var i = 0; i < 3; i++) {
+          samples.add({
+            'timeStamp':
+                currentDate.millisecondsSinceEpoch +
+                (i * 3600000), // 1 hour intervals
+            'hr': 60 + i * 10, // Mock HR values: 60, 70, 80
+            'trigger': i % 3, // Cycle through trigger types
+          });
+        }
+
+        result.add({
+          'date':
+              '${currentDate.year.toString().padLeft(4, '0')}-${currentDate.month.toString().padLeft(2, '0')}-${currentDate.day.toString().padLeft(2, '0')}',
+          'samples': samples,
+        });
+
+        currentDate = currentDate.add(const Duration(days: 1));
+      }
+
+      return jsonEncode(result);
     default:
       throw UnimplementedError();
   }

@@ -3,6 +3,7 @@ package dev.rexios.polar
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import androidx.lifecycle.Lifecycle.Event
 import androidx.lifecycle.LifecycleEventObserver
 import com.google.gson.GsonBuilder
@@ -42,6 +43,8 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.reactivex.rxjava3.disposables.Disposable
 import java.lang.reflect.Type
+import java.time.LocalDate
+import java.time.LocalTime
 import java.util.Date
 import java.util.UUID
 
@@ -61,11 +64,49 @@ object DateSerializer : JsonDeserializer<Date>, JsonSerializer<Date> {
     ): JsonElement = JsonPrimitive(src?.time)
 }
 
+object LocalDateSerializer : JsonDeserializer<LocalDate>, JsonSerializer<LocalDate> {
+    override fun deserialize(
+        json: JsonElement?,
+        typeOfT: Type?,
+        context: JsonDeserializationContext?,
+    ): LocalDate {
+        val dateString = json?.asJsonPrimitive?.asString ?: ""
+        return LocalDate.parse(dateString)
+    }
+
+    override fun serialize(
+        src: LocalDate?,
+        typeOfSrc: Type?,
+        context: JsonSerializationContext?,
+    ): JsonElement = JsonPrimitive(src?.toString())
+}
+
+object LocalTimeSerializer : JsonDeserializer<LocalTime>, JsonSerializer<LocalTime> {
+    override fun deserialize(
+        json: JsonElement?,
+        typeOfT: Type?,
+        context: JsonDeserializationContext?,
+    ): LocalTime {
+        val timeString = json?.asJsonPrimitive?.asString ?: ""
+        return LocalTime.parse(timeString)
+    }
+
+    override fun serialize(
+        src: LocalTime?,
+        typeOfSrc: Type?,
+        context: JsonSerializationContext?,
+    ): JsonElement = JsonPrimitive(src?.toString())
+}
+
 private fun runOnUiThread(runnable: () -> Unit) {
     Handler(Looper.getMainLooper()).post { runnable() }
 }
 
-private val gson = GsonBuilder().registerTypeAdapter(Date::class.java, DateSerializer).create()
+private val gson = GsonBuilder()
+    .registerTypeAdapter(Date::class.java, DateSerializer)
+    .registerTypeAdapter(LocalDate::class.java, LocalDateSerializer)
+    .registerTypeAdapter(LocalTime::class.java, LocalTimeSerializer)
+    .create()
 
 private var wrapperInternal: PolarWrapper? = null
 private val wrapper: PolarWrapper
@@ -207,6 +248,10 @@ class PolarPlugin :
 
             "isFtuDone" -> {
                 isFtuDone(call, result)
+            }
+
+            "get247HrSamples" -> {
+                get247HrSamples(call, result)
             }
 
             else -> {
@@ -599,6 +644,32 @@ class PolarPlugin :
             .subscribe({ isFtuDone ->
                 runOnUiThread { result.success(isFtuDone) }
             }, {
+                runOnUiThread {
+                    result.error(it.toString(), it.message, null)
+                }
+            })
+            .discard()
+    }
+
+    private fun get247HrSamples(
+        call: MethodCall,
+        result: Result,
+    ) {
+        Log.d("PolarPlugin", "get247HrSamples called with args: ${call.arguments}")
+        val arguments = call.arguments as List<*>
+        val identifier = arguments[0] as String
+        val fromDate = LocalDate.parse(arguments[1] as String)
+        val toDate = LocalDate.parse(arguments[2] as String)
+
+        Log.d("PolarPlugin", "Fetching 247 HR from $fromDate to $toDate for device: $identifier")
+        wrapper.api
+            .get247HrSamples(identifier, fromDate, toDate)
+            .subscribe({ hrSamplesList ->
+                Log.d("PolarPlugin", "Received ${hrSamplesList.size} day(s) of data")
+                Log.v("PolarPlugin", "Raw data: $hrSamplesList")
+                runOnUiThread { result.success(gson.toJson(hrSamplesList)) }
+            }, {
+                Log.e("PolarPlugin", "Error fetching 247 HR data: ${it.message}", it)
                 runOnUiThread {
                     result.error(it.toString(), it.message, null)
                 }

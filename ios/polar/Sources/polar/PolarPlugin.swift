@@ -7,6 +7,14 @@ import UIKit
 private let encoder = JSONEncoder()
 private let decoder = JSONDecoder()
 
+private let iso8601DateFormatter: DateFormatter = {
+  let formatter = DateFormatter()
+  formatter.dateFormat = "yyyy-MM-dd"
+  formatter.locale = Locale(identifier: "en_US_POSIX")
+  formatter.timeZone = TimeZone(secondsFromGMT: 0)
+  return formatter
+}()
+
 private func jsonEncode(_ value: Encodable) -> String? {
   guard let data = try? encoder.encode(value),
     let data = String(data: data, encoding: .utf8)
@@ -131,6 +139,8 @@ public class PolarPlugin:
         doFirstTimeUse(call, result)
       case "isFtuDone":
         isFtuDone(call, result)
+      case "get247HrSamples":
+        get247HrSamples(call, result)
       default: result(FlutterMethodNotImplemented)
       }
     } catch {
@@ -496,6 +506,52 @@ public class PolarPlugin:
         result(
           FlutterError(
             code: "Error checking FTU status",
+            message: error.localizedDescription,
+            details: nil
+          )
+        )
+      }
+    )
+  }
+
+  func get247HrSamples(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+    let arguments = call.arguments as! [Any]
+    let identifier = arguments[0] as! String
+    let fromDateString = arguments[1] as! String
+    let toDateString = arguments[2] as! String
+
+    guard let fromDate = iso8601DateFormatter.date(from: fromDateString),
+      let toDate = iso8601DateFormatter.date(from: toDateString)
+    else {
+      result(
+        FlutterError(
+          code: "Invalid date format",
+          message: "Date must be in YYYY-MM-DD format",
+          details: nil
+        )
+      )
+      return
+    }
+
+    _ = api.get247HrSamples(identifier: identifier, fromDate: fromDate, toDate: toDate).subscribe(
+      onSuccess: { hrSamplesData in
+        guard let data = jsonEncode(Polar247HrSamplesDataCodable(hrSamplesData))
+        else {
+          result(
+            FlutterError(
+              code: "Error encoding 24/7 HR samples",
+              message: "Failed to encode data",
+              details: nil
+            )
+          )
+          return
+        }
+        result(data)
+      },
+      onFailure: { error in
+        result(
+          FlutterError(
+            code: "Error getting 24/7 HR samples",
             message: error.localizedDescription,
             details: nil
           )
