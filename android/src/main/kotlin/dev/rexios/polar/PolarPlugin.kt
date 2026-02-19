@@ -102,11 +102,12 @@ private fun runOnUiThread(runnable: () -> Unit) {
     Handler(Looper.getMainLooper()).post { runnable() }
 }
 
-private val gson = GsonBuilder()
-    .registerTypeAdapter(Date::class.java, DateSerializer)
-    .registerTypeAdapter(LocalDate::class.java, LocalDateSerializer)
-    .registerTypeAdapter(LocalTime::class.java, LocalTimeSerializer)
-    .create()
+private val gson =
+    GsonBuilder()
+        .registerTypeAdapter(Date::class.java, DateSerializer)
+        .registerTypeAdapter(LocalDate::class.java, LocalDateSerializer)
+        .registerTypeAdapter(LocalTime::class.java, LocalTimeSerializer)
+        .create()
 
 private var wrapperInternal: PolarWrapper? = null
 private val wrapper: PolarWrapper
