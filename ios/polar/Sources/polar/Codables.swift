@@ -503,20 +503,23 @@ class Polar247HrSamplesDataItemCodable: Encodable {
 
   func encode(to encoder: Encoder) throws {
     var container = encoder.container(keyedBy: CodingKeys.self)
-    
+
     // Convert DateComponents to Date
     let calendar = Calendar(identifier: .gregorian)
     guard let date = calendar.date(from: data.date) else {
-      throw EncodingError.invalidValue(data.date, EncodingError.Context(codingPath: [], debugDescription: "Cannot convert DateComponents to Date"))
+      throw EncodingError.invalidValue(
+        data.date,
+        EncodingError.Context(
+          codingPath: [], debugDescription: "Cannot convert DateComponents to Date"))
     }
-    
+
     // Encode date as ISO 8601 string
     let dateFormatter = DateFormatter()
     dateFormatter.dateFormat = "yyyy-MM-dd"
     dateFormatter.locale = Locale(identifier: "en_US_POSIX")
     dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
     let dateString = dateFormatter.string(from: date)
-    
+
     try container.encode(dateString, forKey: .date)
     try container.encode(data.samples.map { Polar247HrSampleCodable($0) }, forKey: .samples)
   }
@@ -537,27 +540,27 @@ class Polar247HrSampleCodable: Encodable {
 
   func encode(to encoder: Encoder) throws {
     var container = encoder.container(keyedBy: CodingKeys.self)
-    
+
     // Convert time DateComponents to time string (HH:mm:ss.SSS)
     let timeString = formatTimeComponents(data.time)
     try container.encode(timeString, forKey: .startTime)
-    
+
     // Convert UInt32 array to Int array
     let hrSamplesInt = data.hrSamples.map { Int($0) }
     try container.encode(hrSamplesInt, forKey: .hrSamples)
-    
+
     // Convert trigger type to string (handle optional)
     let triggerString = data.triggerType?.rawValue ?? "manual"
     try container.encode(triggerString, forKey: .triggerType)
   }
-  
+
   private func formatTimeComponents(_ timeComponents: DateComponents) -> String {
     let hour = timeComponents.hour ?? 0
     let minute = timeComponents.minute ?? 0
     let second = timeComponents.second ?? 0
     let nanosecond = timeComponents.nanosecond ?? 0
     let millisecond = nanosecond / 1_000_000
-    
+
     return String(format: "%02d:%02d:%02d.%03d", hour, minute, second, millisecond)
   }
 }
