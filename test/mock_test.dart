@@ -128,12 +128,15 @@ Future<dynamic> handleMethodCall(MethodCall call) async {
         final samples = <Map<String, dynamic>>[];
         // Generate some sample HR data for the day
         for (var i = 0; i < 3; i++) {
+          final hour = (8 + i).toString().padLeft(2, '0');
           samples.add({
-            'timeStamp':
-                currentDate.millisecondsSinceEpoch +
-                (i * 3600000), // 1 hour intervals
-            'hr': 60 + i * 10, // Mock HR values: 60, 70, 80
-            'trigger': i % 3, // Cycle through trigger types
+            'startTime': '$hour:00:00.000',
+            'hrSamples': [
+              60 + i * 10,
+              62 + i * 10,
+              65 + i * 10,
+            ], // Mock HR values
+            'triggerType': ['Manual', 'Automatic', 'Periodic'][i % 3],
           });
         }
 
