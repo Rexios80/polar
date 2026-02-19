@@ -665,4 +665,39 @@ class Polar {
     }
     return result;
   }
+
+  /// Get 24/7 heart rate samples for a given period.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or device address
+  ///   - fromDate: The starting date of the period to retrieve HR samples from
+  ///   - toDate: The ending date of the period to retrieve HR samples from
+  /// - Returns: List of [Polar247HrSamplesData] representing the HR samples for the specified period
+  ///   - onError: see `PolarErrors` for possible errors invoked
+  Future<List<Polar247HrSamplesData>> get247HrSamples(
+    String identifier,
+    DateTime fromDate,
+    DateTime toDate,
+  ) async {
+    // Format dates as ISO 8601 strings (YYYY-MM-DD)
+    final fromDateString =
+        '${fromDate.year.toString().padLeft(4, '0')}-${fromDate.month.toString().padLeft(2, '0')}-${fromDate.day.toString().padLeft(2, '0')}';
+    final toDateString =
+        '${toDate.year.toString().padLeft(4, '0')}-${toDate.month.toString().padLeft(2, '0')}-${toDate.day.toString().padLeft(2, '0')}';
+
+    final result = await _methodChannel.invokeMethod('get247HrSamples', [
+      identifier,
+      fromDateString,
+      toDateString,
+    ]);
+
+    if (result == null) {
+      return [];
+    }
+
+    final List<dynamic> jsonList = jsonDecode(result);
+    return jsonList
+        .map((e) => Polar247HrSamplesData.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
 }
