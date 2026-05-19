@@ -19,7 +19,7 @@ Map<String, dynamic> _$PolarFirstTimeUseConfigToJson(
   'vo2Max': instance.vo2Max,
   'restingHeartRate': instance.restingHeartRate,
   'trainingBackground': _trainingBackgroundToJson(instance.trainingBackground),
-  'deviceTime': instance.deviceTime.toIso8601String(),
+  'deviceTime': _deviceTimeToJson(instance.deviceTime),
   'typicalDay': _typicalDayToJson(instance.typicalDay),
   'sleepGoalMinutes': instance.sleepGoalMinutes,
 };

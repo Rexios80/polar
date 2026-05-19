@@ -485,11 +485,13 @@ public class PolarPlugin:
         result(nil)
       },
       onError: { error in
+        // Surface the raw Swift error case (e.g. `deviceError(description: …)`)
+        // via `details`; `localizedDescription` only yields "PolarErrors error N".
         result(
           FlutterError(
             code: "Error doing first time use",
             message: error.localizedDescription,
-            details: nil
+            details: "\(String(describing: error))"
           ))
       }
     )
