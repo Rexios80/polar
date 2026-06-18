@@ -93,6 +93,7 @@ class PolarFirstTimeUseConfig {
   final FtuTrainingBackground trainingBackground;
 
   /// The device time in ISO 8601 format
+  @JsonKey(toJson: _deviceTimeToJson)
   final DateTime deviceTime;
 
   /// The user's typical daily activity level
@@ -119,6 +120,19 @@ class PolarFirstTimeUseConfig {
 
   /// Convert to JSON
   Map<String, dynamic> toJson() => _$PolarFirstTimeUseConfigToJson(this);
+}
+
+String _deviceTimeToJson(DateTime dateTime) {
+  final offset = dateTime.timeZoneOffset;
+  final sign = offset.isNegative ? '-' : '+';
+  final hours = offset.inHours.abs().toString().padLeft(2, '0');
+  final minutes = (offset.inMinutes.abs() % 60).toString().padLeft(2, '0');
+  // RFC 3339 to whole-second precision. The Polar iOS SDK parses this with
+  // ISO8601DateFormatter(formatOptions: .withInternetDateTime), which rejects
+  // ANY fractional seconds (even ".000"). Emitting milliseconds here causes
+  // toProto() to return nil → deviceError("Serialization of FTU Config failed.").
+  return '${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')}'
+      'T${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}:${dateTime.second.toString().padLeft(2, '0')}$sign$hours:$minutes';
 }
 
 String _genderToJson(FtuGender gender) => gender.name.toUpperCase();

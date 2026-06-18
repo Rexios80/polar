@@ -1,11 +1,11 @@
-arguments=
+arguments=--init-script /var/folders/yg/5hgw5_z931sd5sx564slbskh0000gq/T/db3b08fc4a9ef609cb16b96b200fa13e563f396e9bb1ed0905fdab7bc3bc513b.gradle --init-script /var/folders/yg/5hgw5_z931sd5sx564slbskh0000gq/T/52cde0cfcf3e28b8b7510e992210d9614505e0911af0c190bd590d7158574963.gradle --init-script /var/folders/yg/5hgw5_z931sd5sx564slbskh0000gq/T/861a75667e10803d304a058d833cb7404195ca44013d0d61d3b653eb084379b8.gradle --init-script /var/folders/yg/5hgw5_z931sd5sx564slbskh0000gq/T/68eb1b6516fe21c6fbba58e63c99c3207ccfc918360613709367eecde56fa77f.gradle
 auto.sync=false
 build.scans.enabled=false
-connection.gradle.distribution=GRADLE_DISTRIBUTION(VERSION(6.8))
+connection.gradle.distribution=GRADLE_DISTRIBUTION(WRAPPER)
 connection.project.dir=
 eclipse.preferences.version=1
 gradle.user.home=
-java.home=/Library/Java/JavaVirtualMachines/adoptopenjdk-11.jdk/Contents/Home
+java.home=/opt/homebrew/Cellar/openjdk@17/17.0.17/libexec/openjdk.jdk/Contents/Home
 jvm.arguments=
 offline.mode=false
 override.workspace.settings=true

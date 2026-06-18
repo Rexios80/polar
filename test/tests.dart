@@ -305,3 +305,153 @@ void testFtu(String identifier) {
     await disconnect(identifier);
   });
 }
+
+void test247HrSamples(String identifier) {
+  group('24/7 HR samples', () {
+    setUp(() async {
+      await connect(identifier);
+    });
+
+    tearDown(() async {
+      await disconnect(identifier);
+    });
+
+    test('get samples for single day', () async {
+      final today = DateTime.timestamp();
+      final todayDate = DateTime(today.year, today.month, today.day);
+
+      final result = await polar.get247HrSamples(
+        identifier,
+        todayDate,
+        todayDate,
+      );
+
+      expect(result.length, 1);
+      expect(result.first.date.year, todayDate.year);
+      expect(result.first.date.month, todayDate.month);
+      expect(result.first.date.day, todayDate.day);
+      expect(result.first.samples.isNotEmpty, true);
+    });
+
+    test('get samples for multiple days', () async {
+      final today = DateTime.timestamp();
+      final todayDate = DateTime(today.year, today.month, today.day);
+      final threeDaysAgo = todayDate.subtract(const Duration(days: 3));
+
+      final result = await polar.get247HrSamples(
+        identifier,
+        threeDaysAgo,
+        todayDate,
+      );
+
+      // Should return 4 days of data (inclusive)
+      expect(result.length, 4);
+
+      // Verify dates are in the correct range
+      for (final data in result) {
+        expect(
+          data.date.isAfter(threeDaysAgo.subtract(const Duration(days: 1))),
+          true,
+        );
+        expect(
+          data.date.isBefore(todayDate.add(const Duration(days: 1))),
+          true,
+        );
+      }
+    });
+
+    test('verify sample data structure', () async {
+      final today = DateTime.timestamp();
+      final todayDate = DateTime(today.year, today.month, today.day);
+
+      final result = await polar.get247HrSamples(
+        identifier,
+        todayDate,
+        todayDate,
+      );
+
+      expect(result.isNotEmpty, true);
+
+      final firstDay = result.first;
+      expect(firstDay.samples.isNotEmpty, true);
+
+      // Verify sample group structure
+      for (final sampleGroup in firstDay.samples) {
+        expect(sampleGroup.startTime.isNotEmpty, true);
+        expect(sampleGroup.hrSamples.isNotEmpty, true);
+        expect(sampleGroup.triggerType.isNotEmpty, true);
+
+        // Verify each HR value is within reasonable range
+        for (final hr in sampleGroup.hrSamples) {
+          expect(hr, greaterThan(0));
+          expect(hr, lessThan(300)); // Sanity check for HR value
+        }
+      }
+    });
+
+    test('verify trigger types', () async {
+      final today = DateTime.timestamp();
+      final todayDate = DateTime(today.year, today.month, today.day);
+
+      final result = await polar.get247HrSamples(
+        identifier,
+        todayDate,
+        todayDate,
+      );
+
+      expect(result.isNotEmpty, true);
+
+      // Check that trigger types are present in the data
+      final allSampleGroups = result.expand((day) => day.samples).toList();
+      final triggerTypes = allSampleGroups.map((s) => s.triggerType).toSet();
+
+      // Should have at least one trigger type
+      expect(triggerTypes.length, greaterThan(0));
+    });
+
+    test('date range ordering', () async {
+      final today = DateTime.timestamp();
+      final todayDate = DateTime(today.year, today.month, today.day);
+      final weekAgo = todayDate.subtract(const Duration(days: 7));
+
+      final result = await polar.get247HrSamples(
+        identifier,
+        weekAgo,
+        todayDate,
+      );
+
+      // Verify results are ordered by date
+      for (var i = 0; i < result.length - 1; i++) {
+        expect(
+          result[i].date.isBefore(result[i + 1].date) ||
+              result[i].date.isAtSameMomentAs(result[i + 1].date),
+          true,
+          reason: 'Dates should be in chronological order',
+        );
+      }
+    });
+
+    test('samples within day are ordered', () async {
+      final today = DateTime.timestamp();
+      final todayDate = DateTime(today.year, today.month, today.day);
+
+      final result = await polar.get247HrSamples(
+        identifier,
+        todayDate,
+        todayDate,
+      );
+
+      expect(result.isNotEmpty, true);
+
+      // Check that data structure is valid
+      for (final dayData in result) {
+        expect(dayData.samples.isNotEmpty, true);
+        // Check that each sample group has valid data
+        for (final sampleGroup in dayData.samples) {
+          expect(sampleGroup.startTime.isNotEmpty, true);
+          expect(sampleGroup.hrSamples.isNotEmpty, true);
+        }
+      }
+    });
+  });
+}

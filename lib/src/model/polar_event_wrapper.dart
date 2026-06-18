@@ -49,4 +49,7 @@ enum PolarEvent {
 
   /// Battery charging status received
   batteryChargingStatusReceived,
+
+  /// SDK features readiness (ready and unavailable features)
+  sdkFeaturesReadiness,
 }
