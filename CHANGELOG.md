@@ -1,4 +1,4 @@
-## NEXT
+## 7.10.3
 
 - Recreates the Android PolarBleApi after shutDown so later sessions can connect again
 
