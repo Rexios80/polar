@@ -68,7 +68,9 @@ public class PolarPlugin:
   }
 
   private func shutDown() {
-    streamingChannels.values.forEach { $0.dispose() }
+    for channel in streamingChannels.values {
+      channel.dispose()
+    }
     streamingChannels.removeAll()
     searchSubscription?.dispose()
     searchSubscription = nil
