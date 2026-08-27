@@ -45,6 +45,7 @@ void main() {
   testSdkMode(identifier);
   testMisc(identifier, supportsLedConfig: true);
   testFtu(identifier);
+  testShutDown(identifier);
 }
 
 final exercises = <PolarExerciseEntry>[];
@@ -111,6 +112,8 @@ Future<dynamic> handleMethodCall(MethodCall call) async {
       return null;
     case 'isFtuDone':
       return true;
+    case 'shutDown':
+      return null;
     default:
       throw UnimplementedError();
   }

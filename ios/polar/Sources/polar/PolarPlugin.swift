@@ -67,6 +67,20 @@ public class PolarPlugin:
     api.deviceInfoObserver = self
   }
 
+  private func shutDown() {
+    streamingChannels.values.forEach { $0.dispose() }
+    streamingChannels.removeAll()
+    searchSubscription?.dispose()
+    searchSubscription = nil
+    guard api != nil else { return }
+    api.cleanup()
+    api.observer = nil
+    api.powerStateObserver = nil
+    api.deviceFeaturesObserver = nil
+    api.deviceInfoObserver = nil
+    api = nil
+  }
+
   public static func register(with registrar: FlutterPluginRegistrar) {
     let methodChannel = FlutterMethodChannel(
       name: "polar/methods", binaryMessenger: registrar.messenger())
@@ -91,6 +105,9 @@ public class PolarPlugin:
 
     do {
       switch call.method {
+      case "shutDown":
+        shutDown()
+        result(nil)
       case "connectToDevice":
         try api.connectToDevice(call.arguments as! String)
         result(nil)

@@ -1,3 +1,7 @@
+## 7.11.0
+
+- Adds `shutDown` to release Polar SDK resources
+
 ## 7.10.2
 
 - Updates minimum supported SDK version to Flutter 3.44/Dart 3.12.

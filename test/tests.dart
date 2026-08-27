@@ -281,6 +281,15 @@ void testMisc(String identifier, {required bool supportsLedConfig}) {
   });
 }
 
+void testShutDown(String identifier) {
+  test('shutDown', () async {
+    await connect(identifier);
+    await polar.shutDown();
+    await connect(identifier);
+    await disconnect(identifier);
+  });
+}
+
 void testFtu(String identifier) {
   test('ftu', () async {
     await connect(identifier);

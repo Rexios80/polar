@@ -665,4 +665,10 @@ class Polar {
     }
     return result;
   }
+
+  /// Releases the SDK resources.
+  Future<void> shutDown() async {
+    await _methodChannel.invokeMethod('shutDown');
+    _instance = null;
+  }
 }

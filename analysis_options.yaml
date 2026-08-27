@@ -1,1 +1,11 @@
 include: package:rexios_lints/flutter/package_extra.yaml
+
+analyzer:
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**

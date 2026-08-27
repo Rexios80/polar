@@ -38,4 +38,5 @@ void main() async {
   );
   testRecording(identifier);
   testMisc(identifier, supportsLedConfig: false);
+  testShutDown(identifier);
 }

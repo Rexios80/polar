@@ -39,4 +39,5 @@ void main() async {
   );
   testSdkMode(identifier);
   testMisc(identifier, supportsLedConfig: true);
+  testShutDown(identifier);
 }

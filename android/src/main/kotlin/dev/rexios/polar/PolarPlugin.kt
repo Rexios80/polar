@@ -131,6 +131,11 @@ class PolarPlugin :
         initApi()
 
         when (call.method) {
+            "shutDown" -> {
+                shutDown()
+                result.success(null)
+            }
+
             "connectToDevice" -> {
                 wrapper.api.connectToDevice(call.arguments as String)
                 result.success(null)
@@ -251,7 +256,12 @@ class PolarPlugin :
             }
 
             override fun onCancel(arguments: Any?) {
+                dispose()
+            }
+
+            fun dispose() {
                 searchSubscription?.dispose()
+                searchSubscription = null
             }
         }
 
@@ -298,8 +308,16 @@ class PolarPlugin :
     override fun onDetachedFromActivity() {}
 
     private fun shutDown() {
-        if (wrapperInternal == null) return
-        wrapper.shutDown()
+        streamingChannels.values.forEach { it.dispose() }
+        streamingChannels.clear()
+        searchHandler.dispose()
+        if (wrapperInternal != null) {
+            try {
+                wrapper.api.shutDown()
+            } catch (_: Exception) {
+            }
+            wrapperInternal = null
+        }
     }
 
     private fun getAvailableOnlineStreamDataTypes(
