@@ -121,7 +121,6 @@ class PolarPlugin :
     private fun initApi() {
         if (wrapperInternal == null) {
             wrapperInternal = PolarWrapper(context)
-            wrapper.api.foregroundEntered()
         }
     }
 
