@@ -121,8 +121,6 @@ class PolarPlugin :
     private fun initApi() {
         if (wrapperInternal == null) {
             wrapperInternal = PolarWrapper(context)
-            // A new API can be created while the activity is already resumed
-            // (session restart), so ON_RESUME will not fire again.
             wrapper.api.foregroundEntered()
         }
     }
@@ -303,8 +301,6 @@ class PolarPlugin :
     private fun shutDown() {
         if (wrapperInternal == null) return
         if (wrapper.shutDown()) {
-            // Without this, the next session's connectToDevice uses the
-            // already-shut-down PolarBleApi and never reconnects.
             wrapperInternal = null
         }
     }
