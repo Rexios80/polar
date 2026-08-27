@@ -121,6 +121,9 @@ class PolarPlugin :
     private fun initApi() {
         if (wrapperInternal == null) {
             wrapperInternal = PolarWrapper(context)
+            // A new API can be created while the activity is already resumed
+            // (session restart), so ON_RESUME will not fire again.
+            wrapper.api.foregroundEntered()
         }
     }
 
@@ -299,7 +302,11 @@ class PolarPlugin :
 
     private fun shutDown() {
         if (wrapperInternal == null) return
-        wrapper.shutDown()
+        if (wrapper.shutDown()) {
+            // Without this, the next session's connectToDevice uses the
+            // already-shut-down PolarBleApi and never reconnects.
+            wrapperInternal = null
+        }
     }
 
     private fun getAvailableOnlineStreamDataTypes(
@@ -638,14 +645,15 @@ class PolarWrapper(
         runOnUiThread { sinks.values.forEach { it.success(mapOf("event" to event, "data" to data)) } }
     }
 
-    fun shutDown() {
+    fun shutDown(): Boolean {
         // Do not shutdown the api if other engines are still using it
-        if (sinks.isNotEmpty()) return
+        if (sinks.isNotEmpty()) return false
         try {
             api.shutDown()
         } catch (e: Exception) {
             // This will throw if the API is already shut down
         }
+        return true
     }
 
     override fun blePowerStateChanged(powered: Boolean) {

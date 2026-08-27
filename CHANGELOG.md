@@ -1,3 +1,7 @@
+## NEXT
+
+- Recreates the Android PolarBleApi after shutDown so later sessions can connect again
+
 ## 7.10.2
 
 - Updates minimum supported SDK version to Flutter 3.44/Dart 3.12.
