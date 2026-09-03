@@ -1,3 +1,7 @@
+## 7.11.1
+
+- Upgrades `permission_handler` to `13.0.1`
+
 ## 7.11.0
 
 - Adds `shutDown` to release Polar SDK resources
