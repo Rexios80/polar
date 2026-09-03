@@ -1,4 +1,4 @@
-## 7.11.1
+## NEXT
 
 - Upgrades `permission_handler` to `13.0.1`
 
