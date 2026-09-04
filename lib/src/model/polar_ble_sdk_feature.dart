@@ -55,7 +55,16 @@ enum PolarSdkFeature {
 
   /// Feature to read and set device configuration through Polar Features
   /// Configuration Service.
-  featuresConfigurationService;
+  featuresConfigurationService,
+
+  /// Feature to record and read offline exercises (v2) from Polar device.
+  offlineExerciseV2,
+
+  /// Feature to receive training data from Polar device.
+  trainingData,
+
+  /// Feature to control Polar device (e.g. restart, factory reset).
+  deviceControl;
 
   static const _prefixFeature = 'FEATURE_';
   static const _prefixFeaturePolar = 'FEATURE_POLAR_';
