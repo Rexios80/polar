@@ -42,14 +42,33 @@ class Polar {
       .map((e) => e.data);
 
   /// feature ready callback
-  Stream<PolarSdkFeatureReadyEvent> get sdkFeatureReady => _eventStream
-      .where((e) => e.event == PolarEvent.sdkFeatureReady)
-      .map(
-        (e) => PolarSdkFeatureReadyEvent(
-          e.data[0],
-          PolarSdkFeature.fromJson(e.data[1]),
+  ///
+  /// Prefer [sdkFeaturesReadiness] to wait until all features have been
+  /// evaluated.
+  Stream<PolarSdkFeatureReadyEvent> get sdkFeatureReady =>
+      sdkFeaturesReadiness.expand(
+        (e) => e.ready.map(
+          (feature) => PolarSdkFeatureReadyEvent(e.identifier, feature),
         ),
       );
+
+  /// Called once all requested features have been evaluated after a device
+  /// connection.
+  ///
+  /// [PolarSdkFeaturesReadinessEvent.ready] contains features confirmed ready
+  /// for use. [PolarSdkFeaturesReadinessEvent.unavailable] contains features
+  /// not supported by this device. Features absent from both sets timed out
+  /// before their readiness could be established.
+  Stream<PolarSdkFeaturesReadinessEvent> get sdkFeaturesReadiness =>
+      _eventStream
+          .where((e) => e.event == PolarEvent.sdkFeaturesReadiness)
+          .map(
+            (e) => PolarSdkFeaturesReadinessEvent(
+              e.data[0],
+              (e.data[1] as List).map(PolarSdkFeature.fromJson).toSet(),
+              (e.data[2] as List).map(PolarSdkFeature.fromJson).toSet(),
+            ),
+          );
 
   /// Device connection has been established.
   ///

@@ -96,6 +96,25 @@ void testBleSdkFeatures(
     expect(setEquals(available, features), true);
     await disconnect(identifier);
   });
+
+  test('Ble sdk features readiness', () async {
+    final eventFuture = polar.sdkFeaturesReadiness.firstWhere(
+      (e) => e.identifier == identifier,
+    );
+    await connect(identifier);
+
+    final event = await eventFuture;
+    expect(setEquals(event.ready, features), true);
+    expect(
+      setEquals(
+        event.unavailable,
+        PolarSdkFeature.values.toSet().difference(features),
+      ),
+      true,
+    );
+
+    await disconnect(identifier);
+  });
 }
 
 void testHrService(String identifier) {

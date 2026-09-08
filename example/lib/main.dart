@@ -81,37 +81,38 @@ class _MyAppState extends State<MyApp> {
   }
 
   void streamWhenReady() async {
-    await polar.sdkFeatureReady.firstWhere(
-      (e) => e.identifier == identifier && e.feature == PolarSdkFeature.hr,
+    final readiness = await polar.sdkFeaturesReadiness.firstWhere(
+      (e) => e.identifier == identifier,
     );
-    final availableHrTypes =
-        await polar.getAvailableHrServiceDataTypes(identifier);
-    debugPrint('available hr types: $availableHrTypes');
 
-    if (availableHrTypes.contains(PolarDataType.hr)) {
-      polar
-          .startHrStreaming(identifier)
-          .listen((e) => log('Heart rate: ${e.samples.map((e) => e.hr)}'));
+    if (readiness.ready.contains(PolarSdkFeature.hr)) {
+      final availableHrTypes = await polar.getAvailableHrServiceDataTypes(
+        identifier,
+      );
+      debugPrint('available hr types: $availableHrTypes');
+
+      if (availableHrTypes.contains(PolarDataType.hr)) {
+        polar
+            .startHrStreaming(identifier)
+            .listen((e) => log('Heart rate: ${e.samples.map((e) => e.hr)}'));
+      }
     }
 
-    await polar.sdkFeatureReady.firstWhere(
-      (e) =>
-          e.identifier == identifier &&
-          e.feature == PolarSdkFeature.onlineStreaming,
-    );
-    final availableStreamTypes =
-        await polar.getAvailableOnlineStreamDataTypes(identifier);
-    debugPrint('available stream types: $availableStreamTypes');
+    if (readiness.ready.contains(PolarSdkFeature.onlineStreaming)) {
+      final availableStreamTypes =
+          await polar.getAvailableOnlineStreamDataTypes(identifier);
+      debugPrint('available stream types: $availableStreamTypes');
 
-    if (availableStreamTypes.contains(PolarDataType.ecg)) {
-      polar
-          .startEcgStreaming(identifier)
-          .listen((e) => log('ECG data received'));
-    }
-    if (availableStreamTypes.contains(PolarDataType.acc)) {
-      polar
-          .startAccStreaming(identifier)
-          .listen((e) => log('ACC data received'));
+      if (availableStreamTypes.contains(PolarDataType.ecg)) {
+        polar
+            .startEcgStreaming(identifier)
+            .listen((e) => log('ECG data received'));
+      }
+      if (availableStreamTypes.contains(PolarDataType.acc)) {
+        polar
+            .startAccStreaming(identifier)
+            .listen((e) => log('ACC data received'));
+      }
     }
   }
 

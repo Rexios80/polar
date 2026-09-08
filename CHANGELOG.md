@@ -1,5 +1,8 @@
 ## NEXT
 
+- Upgrades Polar SDK to `6.16.1`
+- Adds `sdkFeaturesReadiness`
+- Adds `PolarSdkFeature.offlineExerciseV2`, `trainingData`, and `deviceControl`
 - Upgrades `permission_handler` to `13.0.1`
 
 ## 7.11.0

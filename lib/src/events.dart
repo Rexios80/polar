@@ -15,6 +15,26 @@ class PolarSdkFeatureReadyEvent {
   const PolarSdkFeatureReadyEvent(this.identifier, this.feature);
 }
 
+/// All requested features have been evaluated after a device connection.
+@immutable
+class PolarSdkFeaturesReadinessEvent {
+  /// Polar device id
+  final String identifier;
+
+  /// Features confirmed ready for use on this device
+  final Set<PolarSdkFeature> ready;
+
+  /// Features that are not supported by this device
+  final Set<PolarSdkFeature> unavailable;
+
+  /// Constructor
+  const PolarSdkFeaturesReadinessEvent(
+    this.identifier,
+    this.ready,
+    this.unavailable,
+  );
+}
+
 /// Received DIS info.
 @immutable
 class PolarDisInformationEvent {

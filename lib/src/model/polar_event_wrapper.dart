@@ -32,6 +32,9 @@ enum PolarEvent {
   /// SDK feature ready
   sdkFeatureReady,
 
+  /// SDK features readiness
+  sdkFeaturesReadiness,
+
   /// Device connected
   deviceConnected,
 

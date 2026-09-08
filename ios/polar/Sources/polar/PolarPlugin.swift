@@ -581,9 +581,18 @@ public class PolarPlugin:
   }
 
   public func bleSdkFeatureReady(_ identifier: String, feature: PolarBleSdkFeature) {
+  }
+
+  public func bleSdkFeaturesReadiness(
+    _ identifier: String, ready: [PolarBleSdkFeature], unavailable: [PolarBleSdkFeature]
+  ) {
     success(
-      "sdkFeatureReady",
-      data: [identifier, String(describing: feature)])
+      "sdkFeaturesReadiness",
+      data: [
+        identifier,
+        ready.map { String(describing: $0) },
+        unavailable.map { String(describing: $0) },
+      ])
   }
 
   public func disInformationReceived(_ identifier: String, uuid: CBUUID, value: String) {
