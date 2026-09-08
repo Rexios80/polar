@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:polar/polar.dart';
@@ -24,31 +22,42 @@ void testSearch(String identifier) {
 
 void testConnection(String identifier) {
   test('connection', () async {
+    final connecting = polar.deviceConnecting.firstWhere(
+      (e) => e.deviceId == identifier,
+    );
+    final connected = polar.deviceConnected.firstWhere(
+      (e) => e.deviceId == identifier,
+    );
+
     await polar.connectToDevice(identifier);
 
-    final connecting = await polar.deviceConnecting.first;
-    expect(connecting.deviceId, identifier);
+    expect((await connecting).deviceId, identifier);
+    expect((await connected).deviceId, identifier);
 
-    final connected = await polar.deviceConnected.first;
-    expect(connected.deviceId, identifier);
-
+    final disconnected = polar.deviceDisconnected.firstWhere(
+      (e) => e.info.deviceId == identifier,
+    );
     await polar.disconnectFromDevice(identifier);
-
-    final disconnected = await polar.deviceDisconnected.first;
-    expect(disconnected.info.deviceId, identifier);
+    expect((await disconnected).info.deviceId, identifier);
   });
 }
 
 /// Ensure device connects
-Future<void> connect(String identifier) async {
+Future<PolarSdkFeaturesReadinessEvent> connect(String identifier) async {
+  final readiness = polar.sdkFeaturesReadiness.firstWhere(
+    (e) => e.identifier == identifier,
+  );
   await polar.connectToDevice(identifier);
-  await polar.deviceConnected.first;
+  return readiness;
 }
 
 /// Ensure device disconnects
 Future<void> disconnect(String identifier) async {
+  final disconnected = polar.deviceDisconnected.firstWhere(
+    (e) => e.info.deviceId == identifier,
+  );
   await polar.disconnectFromDevice(identifier);
-  await polar.deviceDisconnected.first;
+  await disconnected;
 }
 
 void testBasicData(
@@ -56,26 +65,40 @@ void testBasicData(
   PolarChargeState expectedChargeState = PolarChargeState.unknown,
 }) {
   group('basic data', () {
-    setUp(() async {
+    late PolarDisInformationEvent disInformation;
+    late PolarBatteryLevelEvent batteryEvent;
+    late PolarBatteryChargingStatusEvent chargeState;
+
+    setUpAll(() async {
+      final dis = polar.disInformation.firstWhere(
+        (e) => e.identifier == identifier,
+      );
+      final battery = polar.batteryLevel.firstWhere(
+        (e) => e.identifier == identifier,
+      );
+      final charge = polar.batteryChargingStatus.firstWhere(
+        (e) => e.identifier == identifier,
+      );
+
       await connect(identifier);
+      disInformation = await dis;
+      batteryEvent = await battery;
+      chargeState = await charge;
     });
 
-    tearDown(() async {
+    tearDownAll(() async {
       await disconnect(identifier);
     });
 
-    test('disInformation', () async {
-      final disInformation = await polar.disInformation.first;
+    test('disInformation', () {
       expect(disInformation.identifier, identifier);
     });
 
-    test('batteryLevel', () async {
-      final batteryEvent = await polar.batteryLevel.first;
+    test('batteryLevel', () {
       expect(batteryEvent.level, greaterThan(0));
     });
 
-    test('batteryChargingStatus', () async {
-      final chargeState = await polar.batteryChargingStatus.first;
+    test('batteryChargingStatus', () {
       expect(chargeState.chargingStatus, expectedChargeState);
     });
   });
@@ -85,48 +108,22 @@ void testBleSdkFeatures(
   String identifier, {
   required Set<PolarSdkFeature> features,
 }) {
-  group('ble sdk features', () {
-    setUp(() async {
-      await connect(identifier);
-    });
-
-    tearDown(() async {
-      await disconnect(identifier);
-    });
-
-    test('sdkFeatureReady', () async {
-      final available = <PolarSdkFeature>{};
-      final sub = polar.sdkFeatureReady.listen((e) => available.add(e.feature));
-      await Future.delayed(const Duration(seconds: 3));
-      unawaited(sub.cancel());
-
-      expect(setEquals(available, features), true);
-    });
-
-    test('sdkFeaturesReadiness', () async {
-      final event = await polar.sdkFeaturesReadiness.firstWhere(
-        (e) => e.identifier == identifier,
-      );
-      expect(setEquals(event.ready, features), true);
-      expect(
-        setEquals(
-          event.unavailable,
-          PolarSdkFeature.values.toSet().difference(features),
-        ),
-        true,
-      );
-    });
+  test('ble sdk features', () async {
+    final readiness = await connect(identifier);
+    expect(readiness.ready, unorderedEquals(features));
+    expect(
+      readiness.unavailable,
+      unorderedEquals(PolarSdkFeature.values.toSet().difference(features)),
+    );
+    await disconnect(identifier);
   });
 }
 
 void testHrService(String identifier) {
   test('hr service', () async {
     await connect(identifier);
-    await polar.sdkFeatureReady.firstWhere(
-      (e) => e.feature == PolarSdkFeature.hr,
-    );
     final available = await polar.getAvailableHrServiceDataTypes(identifier);
-    expect(setEquals(available, {PolarDataType.hr}), true);
+    expect(available, unorderedEquals({PolarDataType.hr}));
     await disconnect(identifier);
   });
 }
@@ -135,13 +132,10 @@ void testStreaming(String identifier, {required Set<PolarDataType> features}) {
   group('streaming', () {
     setUpAll(() async {
       await connect(identifier);
-      await polar.sdkFeatureReady.firstWhere(
-        (e) => e.feature == PolarSdkFeature.onlineStreaming,
-      );
       final available = await polar.getAvailableOnlineStreamDataTypes(
         identifier,
       );
-      expect(setEquals(available, features), true);
+      expect(available, unorderedEquals(features));
     });
 
     tearDownAll(() async {
@@ -209,9 +203,6 @@ final exerciseId = const Uuid().v4();
 void testRecording(String identifier, {bool wait = true}) {
   test('recording', () async {
     await connect(identifier);
-    await polar.sdkFeatureReady.firstWhere(
-      (e) => e.feature == PolarSdkFeature.h10ExerciseRecording,
-    );
 
     //! Remove existing recordings (THIS IS DESTRUCTIVE)
     // Polar H10 can only store one recording at a time
@@ -235,6 +226,7 @@ void testRecording(String identifier, {bool wait = true}) {
     expect(status2.ongoing, true);
 
     if (wait) {
+      // RR samples only exist after some recording time; there is no ready event
       await Future.delayed(const Duration(seconds: 5));
     }
     await polar.stopRecording(identifier);
@@ -262,10 +254,6 @@ void testSdkMode(String identifier) {
   test('sdk mode', () async {
     await connect(identifier);
 
-    await polar.sdkFeatureReady.firstWhere(
-      (e) => e.feature == PolarSdkFeature.sdkMode,
-    );
-
     final status1 = await polar.isSdkModeEnabled(identifier);
     expect(status1, false);
 
@@ -284,8 +272,6 @@ void testSdkMode(String identifier) {
 void testMisc(String identifier, {required bool supportsLedConfig}) {
   test('misc', () async {
     await connect(identifier);
-    // Wait to ensure device is connected (not sure why this is necessary)
-    await Future.delayed(const Duration(seconds: 3));
     if (supportsLedConfig) {
       await polar.setLedConfig(
         identifier,
