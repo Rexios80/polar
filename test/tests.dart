@@ -85,35 +85,37 @@ void testBleSdkFeatures(
   String identifier, {
   required Set<PolarSdkFeature> features,
 }) {
-  test('Ble sdk features', () async {
-    await connect(identifier);
+  group('ble sdk features', () {
+    setUp(() async {
+      await connect(identifier);
+    });
 
-    final available = <PolarSdkFeature>{};
-    final sub = polar.sdkFeatureReady.listen((e) => available.add(e.feature));
-    await Future.delayed(const Duration(seconds: 3));
-    unawaited(sub.cancel());
+    tearDown(() async {
+      await disconnect(identifier);
+    });
 
-    expect(setEquals(available, features), true);
-    await disconnect(identifier);
-  });
+    test('sdkFeatureReady', () async {
+      final available = <PolarSdkFeature>{};
+      final sub = polar.sdkFeatureReady.listen((e) => available.add(e.feature));
+      await Future.delayed(const Duration(seconds: 3));
+      unawaited(sub.cancel());
 
-  test('Ble sdk features readiness', () async {
-    final eventFuture = polar.sdkFeaturesReadiness.firstWhere(
-      (e) => e.identifier == identifier,
-    );
-    await connect(identifier);
+      expect(setEquals(available, features), true);
+    });
 
-    final event = await eventFuture;
-    expect(setEquals(event.ready, features), true);
-    expect(
-      setEquals(
-        event.unavailable,
-        PolarSdkFeature.values.toSet().difference(features),
-      ),
-      true,
-    );
-
-    await disconnect(identifier);
+    test('sdkFeaturesReadiness', () async {
+      final event = await polar.sdkFeaturesReadiness.firstWhere(
+        (e) => e.identifier == identifier,
+      );
+      expect(setEquals(event.ready, features), true);
+      expect(
+        setEquals(
+          event.unavailable,
+          PolarSdkFeature.values.toSet().difference(features),
+        ),
+        true,
+      );
+    });
   });
 }
 
