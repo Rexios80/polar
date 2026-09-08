@@ -1,4 +1,4 @@
-## NEXT
+## 7.12.0
 
 - Upgrades Polar SDK to `6.16.1`
 - Adds `sdkFeaturesReadiness`
