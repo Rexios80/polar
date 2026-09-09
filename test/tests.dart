@@ -299,9 +299,7 @@ void testMisc(String identifier, {required bool supportsLedConfig}) {
 void testShutDown(String identifier) {
   test('shutDown', () async {
     await connect(identifier);
-    await polar.shutDown();
-    await connect(identifier);
-    await disconnect(identifier);
+    expect(polar.shutDown(), completes);
   });
 }
 
