@@ -15,8 +15,9 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  static const identifier = '1C709B20'; // H10
-  // static const identifier = 'AE0F8E27'; // Verity
+  static const identifier = 'D780C525'; // H10
+  // static const identifier = 'ADF24B27'; // Verity
+  // static const identifier = 'E5C32C2E'; // Polar 360
 
   final polar = Polar();
   final logs = ['Service started'];
