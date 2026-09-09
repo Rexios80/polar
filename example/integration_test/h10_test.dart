@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:integration_test/integration_test.dart';
 import 'package:polar/polar.dart';
 
@@ -22,7 +24,8 @@ void main() async {
       PolarSdkFeature.hts,
       PolarSdkFeature.sleepData,
       PolarSdkFeature.temperatureData,
-      PolarSdkFeature.offlineExerciseV2,
+      if (Platform.isIOS) PolarSdkFeature.offlineExerciseV2,
+      if (Platform.isAndroid) PolarSdkFeature.trainingData,
     }),
   );
   testHrService(identifier);
