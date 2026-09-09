@@ -45,15 +45,11 @@ class _MyAppState extends State<MyApp> {
           title: const Text('Polar example app'),
           actions: [
             PopupMenuButton(
+              icon: const Icon(Icons.fiber_manual_record),
               itemBuilder: (context) => RecordingAction.values
                   .map((e) => PopupMenuItem(value: e, child: Text(e.name)))
                   .toList(),
               onSelected: handleRecordingAction,
-              child: const IconButton(
-                icon: Icon(Icons.fiber_manual_record),
-                disabledColor: Colors.white,
-                onPressed: null,
-              ),
             ),
             IconButton(
               icon: const Icon(Icons.stop),
