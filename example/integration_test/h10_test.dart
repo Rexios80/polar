@@ -37,6 +37,7 @@ void main() async {
     },
   );
   testRecording(identifier);
+  testFirmwareCheck(identifier);
   testMisc(identifier, supportsLedConfig: false);
   testShutDown(identifier);
 }

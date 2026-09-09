@@ -45,6 +45,8 @@ void main() {
   testSdkMode(identifier);
   testMisc(identifier, supportsLedConfig: true);
   testFtu(identifier);
+  testFirmwareCheck(identifier);
+  testFirmwareUpdate(identifier);
   testShutDown(identifier);
 }
 
@@ -113,6 +115,20 @@ Future<dynamic> handleMethodCall(MethodCall call) async {
     case 'isFtuDone':
       return true;
     case 'shutDown':
+      return null;
+    case 'createFirmwareCheckChannel':
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockStreamHandler(
+            EventChannel(call.arguments[0] as String),
+            FirmwareCheckHandler(),
+          );
+      return null;
+    case 'createFirmwareUpdateChannel':
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockStreamHandler(
+            EventChannel(call.arguments[0] as String),
+            FirmwareUpdateHandler(),
+          );
       return null;
     default:
       throw UnimplementedError();
@@ -288,6 +304,40 @@ class StreamingHandler extends MockStreamHandler {
     }
 
     events.success(jsonEncode(data));
+  }
+
+  @override
+  void onCancel(dynamic arguments) {}
+}
+
+class FirmwareCheckHandler extends MockStreamHandler {
+  @override
+  void onListen(dynamic arguments, MockStreamHandlerEventSink events) {
+    events.success(
+      jsonEncode(
+        const PolarCheckFirmwareUpdateStatus(
+          kind: PolarCheckFirmwareUpdateKind.checkFwUpdateAvailable,
+          details: '3.0.16',
+        ).toJson(),
+      ),
+    );
+  }
+
+  @override
+  void onCancel(dynamic arguments) {}
+}
+
+class FirmwareUpdateHandler extends MockStreamHandler {
+  @override
+  void onListen(dynamic arguments, MockStreamHandlerEventSink events) {
+    events.success(
+      jsonEncode(
+        const PolarFirmwareUpdateStatus(
+          kind: PolarFirmwareUpdateKind.fetchingFwUpdatePackage,
+          details: 'Fetching firmware',
+        ).toJson(),
+      ),
+    );
   }
 
   @override

@@ -647,6 +647,66 @@ class Polar {
     ]);
   }
 
+  /// Checks if a firmware update is available for the given device.
+  ///
+  /// Requires `firmwareUpdate` feature.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or BT address
+  /// - Returns: Observable stream
+  ///   - onNext: see [PolarCheckFirmwareUpdateStatus]
+  ///   - onError: see `PolarErrors` for possible errors invoked
+  Stream<PolarCheckFirmwareUpdateStatus> checkFirmwareUpdate(
+    String identifier,
+  ) async* {
+    final channelName = 'polar/firmware/check/$identifier';
+    await _methodChannel.invokeMethod('createFirmwareCheckChannel', [
+      channelName,
+      identifier,
+    ]);
+    yield* EventChannel(
+      channelName,
+    ).receiveBroadcastStream().cast<String>().map(
+      (e) => PolarCheckFirmwareUpdateStatus.fromJson(
+        jsonDecode(e) as Map<String, dynamic>,
+      ),
+    );
+  }
+
+  /// Updates firmware on the given device.
+  ///
+  /// Requires `firmwareUpdate` feature.
+  ///
+  /// Performing firmware update will erase all data on the device, including
+  /// SDK offline recordings.
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id or BT address
+  ///   - firmwareUrl: optional URL to a firmware file compatible with the
+  ///     device. When omitted, the latest firmware from Polar Firmware
+  ///     Management is used.
+  /// - Returns: Observable stream
+  ///   - onNext: see [PolarFirmwareUpdateStatus]
+  ///   - onError: see `PolarErrors` for possible errors invoked
+  Stream<PolarFirmwareUpdateStatus> updateFirmware(
+    String identifier, {
+    String? firmwareUrl,
+  }) async* {
+    final channelName = 'polar/firmware/update/$identifier';
+    await _methodChannel.invokeMethod('createFirmwareUpdateChannel', [
+      channelName,
+      identifier,
+    ]);
+    yield* EventChannel(channelName)
+        .receiveBroadcastStream(firmwareUrl)
+        .cast<String>()
+        .map(
+          (e) => PolarFirmwareUpdateStatus.fromJson(
+            jsonDecode(e) as Map<String, dynamic>,
+          ),
+        );
+  }
+
   /// Check if the First Time Use has been done for the given Polar device.
   /// - Parameters:
   ///   - identifier: Polar device id or UUID
