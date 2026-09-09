@@ -1,6 +1,6 @@
 ## 7.12.0
 
-- Upgrades Polar SDK to `6.16.1`
+- Upgrades Polar SDK to `6.16.1` (by [@dcajal](https://github.com/dcajal) in [#77](https://github.com/Rexios80/polar/pull/77))
 - Adds `sdkFeaturesReadiness`
 - Adds `PolarSdkFeature.offlineExerciseV2`, `trainingData`, and `deviceControl`
 - Upgrades `permission_handler` to `13.0.1`
