@@ -15,8 +15,9 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  static const identifier = '1C709B20'; // H10
+  static const identifier = 'D780C525'; // H10
   // static const identifier = 'AE0F8E27'; // Verity
+  // static const identifier = 'E5C32C2E'; // Polar 360
 
   final polar = Polar();
   final logs = ['Service started'];
@@ -44,15 +45,18 @@ class _MyAppState extends State<MyApp> {
           title: const Text('Polar example app'),
           actions: [
             PopupMenuButton(
+              icon: const Icon(Icons.fiber_manual_record),
               itemBuilder: (context) => RecordingAction.values
                   .map((e) => PopupMenuItem(value: e, child: Text(e.name)))
                   .toList(),
               onSelected: handleRecordingAction,
-              child: const IconButton(
-                icon: Icon(Icons.fiber_manual_record),
-                disabledColor: Colors.white,
-                onPressed: null,
-              ),
+            ),
+            PopupMenuButton(
+              icon: const Icon(Icons.system_update),
+              itemBuilder: (context) => FirmwareAction.values
+                  .map((e) => PopupMenuItem(value: e, child: Text(e.name)))
+                  .toList(),
+              onSelected: handleFirmwareAction,
             ),
             IconButton(
               icon: const Icon(Icons.stop),
@@ -173,6 +177,33 @@ class _MyAppState extends State<MyApp> {
         break;
     }
   }
+
+  Future<void> handleFirmwareAction(FirmwareAction action) async {
+    switch (action) {
+      case FirmwareAction.check:
+        log('Checking firmware update');
+        try {
+          await for (final status in polar.checkFirmwareUpdate(identifier)) {
+            log('Firmware check: $status');
+          }
+          log('Firmware check finished');
+        } catch (e) {
+          log('Firmware check failed: $e');
+        }
+        break;
+      case FirmwareAction.update:
+        log('Updating firmware (this erases device data)');
+        try {
+          await for (final status in polar.updateFirmware(identifier)) {
+            log('Firmware update: $status');
+          }
+          log('Firmware update finished');
+        } catch (e) {
+          log('Firmware update failed: $e');
+        }
+        break;
+    }
+  }
 }
 
 enum RecordingAction {
@@ -182,4 +213,9 @@ enum RecordingAction {
   list,
   fetch,
   remove,
+}
+
+enum FirmwareAction {
+  check,
+  update,
 }

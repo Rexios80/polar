@@ -41,6 +41,12 @@ public class PolarPlugin:
   /// Streaming channels
   var streamingChannels = [String: StreamingChannel]()
 
+  /// Firmware check channels
+  var firmwareCheckChannels = [String: FirmwareCheckChannel]()
+
+  /// Firmware update channels
+  var firmwareUpdateChannels = [String: FirmwareUpdateChannel]()
+
   var api: PolarBleApi!
   var sinks: [Int: FlutterEventSink] = [:]
 
@@ -72,6 +78,14 @@ public class PolarPlugin:
       channel.dispose()
     }
     streamingChannels.removeAll()
+    for channel in firmwareCheckChannels.values {
+      channel.dispose()
+    }
+    firmwareCheckChannels.removeAll()
+    for channel in firmwareUpdateChannels.values {
+      channel.dispose()
+    }
+    firmwareUpdateChannels.removeAll()
     searchSubscription?.dispose()
     searchSubscription = nil
     guard api != nil else { return }
@@ -150,6 +164,10 @@ public class PolarPlugin:
         doFirstTimeUse(call, result)
       case "isFtuDone":
         isFtuDone(call, result)
+      case "createFirmwareCheckChannel":
+        createFirmwareCheckChannel(call, result)
+      case "createFirmwareUpdateChannel":
+        createFirmwareUpdateChannel(call, result)
       default: result(FlutterMethodNotImplemented)
       }
     } catch {
@@ -215,6 +233,34 @@ public class PolarPlugin:
 
     if streamingChannels[name] == nil {
       streamingChannels[name] = StreamingChannel(messenger, name, api, identifier, feature)
+    }
+
+    result(nil)
+  }
+
+  private func createFirmwareCheckChannel(
+    _ call: FlutterMethodCall, _ result: @escaping FlutterResult
+  ) {
+    let arguments = call.arguments as! [Any]
+    let name = arguments[0] as! String
+    let identifier = arguments[1] as! String
+
+    if firmwareCheckChannels[name] == nil {
+      firmwareCheckChannels[name] = FirmwareCheckChannel(messenger, name, api, identifier)
+    }
+
+    result(nil)
+  }
+
+  private func createFirmwareUpdateChannel(
+    _ call: FlutterMethodCall, _ result: @escaping FlutterResult
+  ) {
+    let arguments = call.arguments as! [Any]
+    let name = arguments[0] as! String
+    let identifier = arguments[1] as! String
+
+    if firmwareUpdateChannels[name] == nil {
+      firmwareUpdateChannels[name] = FirmwareUpdateChannel(messenger, name, api, identifier)
     }
 
     result(nil)
@@ -725,6 +771,166 @@ class StreamingChannel: NSObject, FlutterStreamHandler {
           events(
             FlutterError(
               code: "Error while streaming", message: error.localizedDescription, details: nil))
+        }
+      },
+      onCompleted: {
+        DispatchQueue.main.async {
+          events(FlutterEndOfEventStream)
+        }
+      })
+
+    return nil
+  }
+
+  func onCancel(withArguments arguments: Any?) -> FlutterError? {
+    subscription?.dispose()
+    return nil
+  }
+
+  func dispose() {
+    subscription?.dispose()
+    channel.setStreamHandler(nil)
+  }
+}
+
+private struct FirmwareStatusPayload: Encodable {
+  let kind: String
+  let details: String
+}
+
+private func encodeCheckFirmwareUpdateStatus(_ status: CheckFirmwareUpdateStatus) -> String? {
+  switch status {
+  case .checkFwUpdateAvailable(let version):
+    return jsonEncode(FirmwareStatusPayload(kind: "checkFwUpdateAvailable", details: version))
+  case .checkFwUpdateNotAvailable(let details):
+    return jsonEncode(FirmwareStatusPayload(kind: "checkFwUpdateNotAvailable", details: details))
+  case .checkFwUpdateFailed(let details):
+    return jsonEncode(FirmwareStatusPayload(kind: "checkFwUpdateFailed", details: details))
+  }
+}
+
+private func encodeFirmwareUpdateStatus(_ status: FirmwareUpdateStatus) -> String? {
+  switch status {
+  case .fetchingFwUpdatePackage(let details):
+    return jsonEncode(FirmwareStatusPayload(kind: "fetchingFwUpdatePackage", details: details))
+  case .preparingDeviceForFwUpdate(let details):
+    return jsonEncode(FirmwareStatusPayload(kind: "preparingDeviceForFwUpdate", details: details))
+  case .writingFwUpdatePackage(let details):
+    return jsonEncode(FirmwareStatusPayload(kind: "writingFwUpdatePackage", details: details))
+  case .finalizingFwUpdate(let details):
+    return jsonEncode(FirmwareStatusPayload(kind: "finalizingFwUpdate", details: details))
+  case .fwUpdateCompletedSuccessfully(let details):
+    return jsonEncode(
+      FirmwareStatusPayload(kind: "fwUpdateCompletedSuccessfully", details: details))
+  case .fwUpdateNotAvailable(let details):
+    return jsonEncode(FirmwareStatusPayload(kind: "fwUpdateNotAvailable", details: details))
+  case .fwUpdateFailed(let details):
+    return jsonEncode(FirmwareStatusPayload(kind: "fwUpdateFailed", details: details))
+  }
+}
+
+class FirmwareCheckChannel: NSObject, FlutterStreamHandler {
+  let api: PolarBleApi
+  let identifier: String
+  let channel: FlutterEventChannel
+
+  var subscription: Disposable?
+
+  init(
+    _ messenger: FlutterBinaryMessenger, _ name: String, _ api: PolarBleApi, _ identifier: String
+  ) {
+    self.api = api
+    self.identifier = identifier
+    self.channel = FlutterEventChannel(name: name, binaryMessenger: messenger)
+
+    super.init()
+
+    channel.setStreamHandler(self)
+  }
+
+  func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink)
+    -> FlutterError?
+  {
+    subscription = api.checkFirmwareUpdate(identifier).subscribe(
+      onNext: { status in
+        guard let data = encodeCheckFirmwareUpdateStatus(status) else {
+          return
+        }
+        DispatchQueue.main.async {
+          events(data)
+        }
+      },
+      onError: { error in
+        DispatchQueue.main.async {
+          events(
+            FlutterError(
+              code: "Error checking firmware update", message: error.localizedDescription,
+              details: nil))
+        }
+      },
+      onCompleted: {
+        DispatchQueue.main.async {
+          events(FlutterEndOfEventStream)
+        }
+      })
+
+    return nil
+  }
+
+  func onCancel(withArguments arguments: Any?) -> FlutterError? {
+    subscription?.dispose()
+    return nil
+  }
+
+  func dispose() {
+    subscription?.dispose()
+    channel.setStreamHandler(nil)
+  }
+}
+
+class FirmwareUpdateChannel: NSObject, FlutterStreamHandler {
+  let api: PolarBleApi
+  let identifier: String
+  let channel: FlutterEventChannel
+
+  var subscription: Disposable?
+
+  init(
+    _ messenger: FlutterBinaryMessenger, _ name: String, _ api: PolarBleApi, _ identifier: String
+  ) {
+    self.api = api
+    self.identifier = identifier
+    self.channel = FlutterEventChannel(name: name, binaryMessenger: messenger)
+
+    super.init()
+
+    channel.setStreamHandler(self)
+  }
+
+  func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink)
+    -> FlutterError?
+  {
+    let stream: Observable<FirmwareUpdateStatus>
+    if let urlString = arguments as? String, let url = URL(string: urlString) {
+      stream = api.updateFirmware(identifier, fromFirmwareURL: url)
+    } else {
+      stream = api.updateFirmware(identifier)
+    }
+
+    subscription = stream.subscribe(
+      onNext: { status in
+        guard let data = encodeFirmwareUpdateStatus(status) else {
+          return
+        }
+        DispatchQueue.main.async {
+          events(data)
+        }
+      },
+      onError: { error in
+        DispatchQueue.main.async {
+          events(
+            FlutterError(
+              code: "Error updating firmware", message: error.localizedDescription, details: nil))
         }
       },
       onCompleted: {

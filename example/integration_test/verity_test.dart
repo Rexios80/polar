@@ -38,6 +38,7 @@ void main() async {
     },
   );
   testSdkMode(identifier);
+  testFirmwareCheck(identifier);
   testMisc(identifier, supportsLedConfig: true);
   testShutDown(identifier);
 }

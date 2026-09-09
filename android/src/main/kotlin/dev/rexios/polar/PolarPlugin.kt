@@ -27,6 +27,8 @@ import com.polar.sdk.api.model.PolarDeviceInfo
 import com.polar.sdk.api.model.PolarExerciseEntry
 import com.polar.sdk.api.model.PolarFirstTimeUseConfig
 import com.polar.sdk.api.model.PolarHealthThermometerData
+import com.polar.sdk.api.model.CheckFirmwareUpdateStatus
+import com.polar.sdk.api.model.FirmwareUpdateStatus
 import com.polar.sdk.api.model.PolarHrData
 import com.polar.sdk.api.model.PolarSensorSetting
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -94,6 +96,10 @@ class PolarPlugin :
 
     // Streaming channels
     private val streamingChannels = mutableMapOf<String, StreamingChannel>()
+
+    // Firmware channels
+    private val firmwareCheckChannels = mutableMapOf<String, FirmwareCheckChannel>()
+    private val firmwareUpdateChannels = mutableMapOf<String, FirmwareUpdateChannel>()
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         messenger = flutterPluginBinding.binaryMessenger
@@ -214,6 +220,14 @@ class PolarPlugin :
                 isFtuDone(call, result)
             }
 
+            "createFirmwareCheckChannel" -> {
+                createFirmwareCheckChannel(call, result)
+            }
+
+            "createFirmwareUpdateChannel" -> {
+                createFirmwareUpdateChannel(call, result)
+            }
+
             else -> {
                 result.notImplemented()
             }
@@ -282,6 +296,38 @@ class PolarPlugin :
         result.success(null)
     }
 
+    private fun createFirmwareCheckChannel(
+        call: MethodCall,
+        result: Result,
+    ) {
+        val arguments = call.arguments as List<*>
+        val name = arguments[0] as String
+        val identifier = arguments[1] as String
+
+        if (firmwareCheckChannels[name] == null) {
+            firmwareCheckChannels[name] =
+                FirmwareCheckChannel(messenger, name, wrapper.api, identifier)
+        }
+
+        result.success(null)
+    }
+
+    private fun createFirmwareUpdateChannel(
+        call: MethodCall,
+        result: Result,
+    ) {
+        val arguments = call.arguments as List<*>
+        val name = arguments[0] as String
+        val identifier = arguments[1] as String
+
+        if (firmwareUpdateChannels[name] == null) {
+            firmwareUpdateChannels[name] =
+                FirmwareUpdateChannel(messenger, name, wrapper.api, identifier)
+        }
+
+        result.success(null)
+    }
+
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
         val lifecycle = FlutterLifecycleAdapter.getActivityLifecycle(binding)
         lifecycle.addObserver(
@@ -310,6 +356,10 @@ class PolarPlugin :
     private fun shutDown() {
         streamingChannels.values.forEach { it.dispose() }
         streamingChannels.clear()
+        firmwareCheckChannels.values.forEach { it.dispose() }
+        firmwareCheckChannels.clear()
+        firmwareUpdateChannels.values.forEach { it.dispose() }
+        firmwareUpdateChannels.clear()
         searchHandler.dispose()
         if (wrapperInternal != null) {
             try {
@@ -823,6 +873,139 @@ class StreamingChannel(
         subscription =
             stream.subscribe({
                 runOnUiThread { events.success(gson.toJson(it)) }
+            }, {
+                runOnUiThread {
+                    events.error(it.toString(), it.message, null)
+                }
+            }, {
+                runOnUiThread { events.endOfStream() }
+            })
+    }
+
+    override fun onCancel(arguments: Any?) {
+        subscription?.dispose()
+    }
+
+    fun dispose() {
+        subscription?.dispose()
+        channel.setStreamHandler(null)
+    }
+}
+
+private fun checkFirmwareUpdateStatusToJson(status: CheckFirmwareUpdateStatus): String =
+    when (status) {
+        is CheckFirmwareUpdateStatus.CheckFwUpdateAvailable ->
+            gson.toJson(
+                mapOf(
+                    "kind" to "checkFwUpdateAvailable",
+                    "details" to status.version,
+                ),
+            )
+        is CheckFirmwareUpdateStatus.CheckFwUpdateNotAvailable ->
+            gson.toJson(
+                mapOf(
+                    "kind" to "checkFwUpdateNotAvailable",
+                    "details" to status.details,
+                ),
+            )
+        is CheckFirmwareUpdateStatus.CheckFwUpdateFailed ->
+            gson.toJson(
+                mapOf(
+                    "kind" to "checkFwUpdateFailed",
+                    "details" to status.details,
+                ),
+            )
+        else ->
+            gson.toJson(
+                mapOf(
+                    "kind" to "checkFwUpdateFailed",
+                    "details" to status.toString(),
+                ),
+            )
+    }
+
+private fun firmwareUpdateStatusToJson(status: FirmwareUpdateStatus): String {
+    val kind =
+        when (status) {
+            is FirmwareUpdateStatus.FetchingFwUpdatePackage -> "fetchingFwUpdatePackage"
+            is FirmwareUpdateStatus.PreparingDeviceForFwUpdate -> "preparingDeviceForFwUpdate"
+            is FirmwareUpdateStatus.WritingFwUpdatePackage -> "writingFwUpdatePackage"
+            is FirmwareUpdateStatus.FinalizingFwUpdate -> "finalizingFwUpdate"
+            is FirmwareUpdateStatus.FwUpdateCompletedSuccessfully -> "fwUpdateCompletedSuccessfully"
+            is FirmwareUpdateStatus.FwUpdateNotAvailable -> "fwUpdateNotAvailable"
+            is FirmwareUpdateStatus.FwUpdateFailed -> "fwUpdateFailed"
+            else -> "fwUpdateFailed"
+        }
+    return gson.toJson(mapOf("kind" to kind, "details" to status.details))
+}
+
+class FirmwareCheckChannel(
+    messenger: BinaryMessenger,
+    name: String,
+    private val api: PolarBleApi,
+    private val identifier: String,
+    private val channel: EventChannel = EventChannel(messenger, name),
+) : EventChannel.StreamHandler {
+    private var subscription: Disposable? = null
+
+    init {
+        channel.setStreamHandler(this)
+    }
+
+    override fun onListen(
+        arguments: Any?,
+        events: EventSink,
+    ) {
+        subscription =
+            api.checkFirmwareUpdate(identifier).subscribe({
+                runOnUiThread { events.success(checkFirmwareUpdateStatusToJson(it)) }
+            }, {
+                runOnUiThread {
+                    events.error(it.toString(), it.message, null)
+                }
+            }, {
+                runOnUiThread { events.endOfStream() }
+            })
+    }
+
+    override fun onCancel(arguments: Any?) {
+        subscription?.dispose()
+    }
+
+    fun dispose() {
+        subscription?.dispose()
+        channel.setStreamHandler(null)
+    }
+}
+
+class FirmwareUpdateChannel(
+    messenger: BinaryMessenger,
+    name: String,
+    private val api: PolarBleApi,
+    private val identifier: String,
+    private val channel: EventChannel = EventChannel(messenger, name),
+) : EventChannel.StreamHandler {
+    private var subscription: Disposable? = null
+
+    init {
+        channel.setStreamHandler(this)
+    }
+
+    override fun onListen(
+        arguments: Any?,
+        events: EventSink,
+    ) {
+        val firmwareUrl = arguments as? String
+        val stream =
+            if (firmwareUrl.isNullOrEmpty()) {
+                api.updateFirmware(identifier)
+            } else {
+                api.updateFirmware(identifier, firmwareUrl)
+            }
+
+        subscription =
+            stream.subscribe({
+                runOnUiThread { events.success(firmwareUpdateStatusToJson(it)) }
             }, {
                 runOnUiThread {
                     events.error(it.toString(), it.message, null)

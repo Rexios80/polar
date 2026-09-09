@@ -1,3 +1,7 @@
+## 7.12.0
+
+- Adds `checkFirmwareUpdate` and `updateFirmware`
+
 ## NEXT
 
 - Upgrades `permission_handler` to `13.0.1`

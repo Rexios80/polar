@@ -281,6 +281,29 @@ void testMisc(String identifier, {required bool supportsLedConfig}) {
   });
 }
 
+void testFirmwareCheck(String identifier) {
+  test('firmware check', () async {
+    await connect(identifier);
+    final status = await polar.checkFirmwareUpdate(identifier).first;
+    expect(PolarCheckFirmwareUpdateKind.values, contains(status.kind));
+    await disconnect(identifier);
+  });
+}
+
+void testFirmwareUpdate(String identifier) {
+  test('firmware update', () async {
+    await connect(identifier);
+
+    final check = await polar.checkFirmwareUpdate(identifier).first;
+    expect(check.kind, PolarCheckFirmwareUpdateKind.checkFwUpdateAvailable);
+
+    final update = await polar.updateFirmware(identifier).first;
+    expect(update.kind, PolarFirmwareUpdateKind.fetchingFwUpdatePackage);
+
+    await disconnect(identifier);
+  });
+}
+
 void testShutDown(String identifier) {
   test('shutDown', () async {
     await connect(identifier);
