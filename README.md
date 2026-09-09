@@ -61,13 +61,16 @@ void example() {
 }
 
 void streamWhenReady() async {
-  await polar.sdkFeatureReady.firstWhere(
-    (e) =>
-        e.identifier == identifier &&
-        e.feature == PolarSdkFeature.onlineStreaming,
+  final readiness = await polar.sdkFeaturesReadiness.firstWhere(
+    (e) => e.identifier == identifier,
   );
-  final availabletypes =
-      await polar.getAvailableOnlineStreamDataTypes(identifier);
+  if (!readiness.ready.contains(PolarSdkFeature.onlineStreaming)) {
+    return;
+  }
+
+  final availabletypes = await polar.getAvailableOnlineStreamDataTypes(
+    identifier,
+  );
 
   debugPrint('available types: $availabletypes');
 

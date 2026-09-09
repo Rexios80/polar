@@ -57,13 +57,20 @@ enum PolarSdkFeature {
   /// Configuration Service.
   featuresConfigurationService,
 
-  /// Feature to record and read offline exercises (v2) from Polar device.
+  /// Offline Exercise V2 feature to record exercise data on supported devices
+  /// using the Data Merge protocol.
+  ///
+  /// This feature enables offline exercise recording when the device
+  /// is not connected to the host device.
+  ///
+  /// Requires the device to support the `dm_exercise` capability.
   offlineExerciseV2,
 
-  /// Feature to receive training data from Polar device.
+  /// Feature to access training session data and exercise session controls.
   trainingData,
 
-  /// Feature to control Polar device (e.g. restart, factory reset).
+  /// Feature to control device power/reset behavior via device control
+  /// notifications.
   deviceControl;
 
   static const _prefixFeature = 'FEATURE_';

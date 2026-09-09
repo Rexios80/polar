@@ -21,10 +21,11 @@ void main() async {
       PolarSdkFeature.sdkMode,
       PolarSdkFeature.ledAnimation,
       PolarSdkFeature.activityData,
-      if (Platform.isIOS) PolarSdkFeature.fileTransfer,
       PolarSdkFeature.hts,
       PolarSdkFeature.sleepData,
       PolarSdkFeature.temperatureData,
+      if (Platform.isIOS) PolarSdkFeature.offlineExerciseV2,
+      if (Platform.isAndroid) PolarSdkFeature.trainingData,
     }),
   );
   testHrService(identifier);

@@ -15,8 +15,9 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  static const identifier = '1C709B20'; // H10
-  // static const identifier = 'AE0F8E27'; // Verity
+  static const identifier = 'D780C525'; // H10
+  // static const identifier = 'ADF24B27'; // Verity
+  // static const identifier = 'E5C32C2E'; // Polar 360
 
   final polar = Polar();
   final logs = ['Service started'];
@@ -44,15 +45,11 @@ class _MyAppState extends State<MyApp> {
           title: const Text('Polar example app'),
           actions: [
             PopupMenuButton(
+              icon: const Icon(Icons.fiber_manual_record),
               itemBuilder: (context) => RecordingAction.values
                   .map((e) => PopupMenuItem(value: e, child: Text(e.name)))
                   .toList(),
               onSelected: handleRecordingAction,
-              child: const IconButton(
-                icon: Icon(Icons.fiber_manual_record),
-                disabledColor: Colors.white,
-                onPressed: null,
-              ),
             ),
             IconButton(
               icon: const Icon(Icons.stop),
@@ -81,37 +78,38 @@ class _MyAppState extends State<MyApp> {
   }
 
   void streamWhenReady() async {
-    await polar.sdkFeatureReady.firstWhere(
-      (e) => e.identifier == identifier && e.feature == PolarSdkFeature.hr,
+    final readiness = await polar.sdkFeaturesReadiness.firstWhere(
+      (e) => e.identifier == identifier,
     );
-    final availableHrTypes =
-        await polar.getAvailableHrServiceDataTypes(identifier);
-    debugPrint('available hr types: $availableHrTypes');
 
-    if (availableHrTypes.contains(PolarDataType.hr)) {
-      polar
-          .startHrStreaming(identifier)
-          .listen((e) => log('Heart rate: ${e.samples.map((e) => e.hr)}'));
+    if (readiness.ready.contains(PolarSdkFeature.hr)) {
+      final availableHrTypes = await polar.getAvailableHrServiceDataTypes(
+        identifier,
+      );
+      debugPrint('available hr types: $availableHrTypes');
+
+      if (availableHrTypes.contains(PolarDataType.hr)) {
+        polar
+            .startHrStreaming(identifier)
+            .listen((e) => log('Heart rate: ${e.samples.map((e) => e.hr)}'));
+      }
     }
 
-    await polar.sdkFeatureReady.firstWhere(
-      (e) =>
-          e.identifier == identifier &&
-          e.feature == PolarSdkFeature.onlineStreaming,
-    );
-    final availableStreamTypes =
-        await polar.getAvailableOnlineStreamDataTypes(identifier);
-    debugPrint('available stream types: $availableStreamTypes');
+    if (readiness.ready.contains(PolarSdkFeature.onlineStreaming)) {
+      final availableStreamTypes =
+          await polar.getAvailableOnlineStreamDataTypes(identifier);
+      debugPrint('available stream types: $availableStreamTypes');
 
-    if (availableStreamTypes.contains(PolarDataType.ecg)) {
-      polar
-          .startEcgStreaming(identifier)
-          .listen((e) => log('ECG data received'));
-    }
-    if (availableStreamTypes.contains(PolarDataType.acc)) {
-      polar
-          .startAccStreaming(identifier)
-          .listen((e) => log('ACC data received'));
+      if (availableStreamTypes.contains(PolarDataType.ecg)) {
+        polar
+            .startEcgStreaming(identifier)
+            .listen((e) => log('ECG data received'));
+      }
+      if (availableStreamTypes.contains(PolarDataType.acc)) {
+        polar
+            .startAccStreaming(identifier)
+            .listen((e) => log('ACC data received'));
+      }
     }
   }
 

@@ -5,7 +5,7 @@ import 'package:polar/polar.dart';
 
 import '../../test/tests.dart';
 
-const identifier = 'AE0F8E27';
+const identifier = 'ADF24B27';
 
 void main() async {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -18,11 +18,13 @@ void main() async {
     identifier,
     features: PolarSdkFeature.values.toSet().difference({
       PolarSdkFeature.h10ExerciseRecording,
+      PolarSdkFeature.offlineExerciseV2,
       PolarSdkFeature.activityData,
-      if (Platform.isIOS) PolarSdkFeature.fileTransfer,
       PolarSdkFeature.hts,
       PolarSdkFeature.sleepData,
       PolarSdkFeature.temperatureData,
+      if (Platform.isIOS) PolarSdkFeature.offlineRecording,
+      if (Platform.isAndroid) PolarSdkFeature.trainingData,
     }),
   );
   testHrService(identifier);

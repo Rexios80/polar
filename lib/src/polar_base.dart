@@ -51,6 +51,38 @@ class Polar {
         ),
       );
 
+  /// All features that are listed in [PolarBleApi] construction and are
+  /// supported by this device are ready.
+  /// Constructing with an empty feature set causes SDK to enable all SDK
+  /// features by default.
+  /// SDK calls this method after a device is connected.
+  ///
+  /// This is the simplest way to wait for device to become ready for further
+  /// operations.
+  ///
+  /// The [PolarSdkFeaturesReadinessEvent.ready] list contains features that
+  /// are confirmed ready for use.
+  /// The [PolarSdkFeaturesReadinessEvent.unavailable] list contains features
+  /// that are not supported by this device.
+  /// Features absent from both lists timed out before their readiness could
+  /// be established; they can still become ready later and will be reported
+  /// via [sdkFeatureReady].
+  ///
+  /// - Parameters:
+  ///   - identifier: Polar device id
+  ///   - ready: features that are confirmed ready for use on this device
+  ///   - unavailable: features that are not supported by this device
+  Stream<PolarSdkFeaturesReadinessEvent> get sdkFeaturesReadiness =>
+      _eventStream
+          .where((e) => e.event == PolarEvent.sdkFeaturesReadiness)
+          .map(
+            (e) => PolarSdkFeaturesReadinessEvent(
+              e.data[0],
+              (e.data[1] as List).map(PolarSdkFeature.fromJson).toSet(),
+              (e.data[2] as List).map(PolarSdkFeature.fromJson).toSet(),
+            ),
+          );
+
   /// Device connection has been established.
   ///
   /// - Parameter identifier: Polar device info

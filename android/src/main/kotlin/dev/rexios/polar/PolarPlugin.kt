@@ -42,30 +42,42 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.reactivex.rxjava3.disposables.Disposable
 import java.lang.reflect.Type
-import java.util.Date
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.util.UUID
 
 fun Any?.discard() = Unit
 
-object DateSerializer : JsonDeserializer<Date>, JsonSerializer<Date> {
+object LocalDateTimeSerializer : JsonDeserializer<LocalDateTime>, JsonSerializer<LocalDateTime> {
     override fun deserialize(
         json: JsonElement?,
         typeOfT: Type?,
         context: JsonDeserializationContext?,
-    ): Date = Date(json?.asJsonPrimitive?.asLong ?: 0)
+    ): LocalDateTime =
+        Instant
+            .ofEpochMilli(json?.asJsonPrimitive?.asLong ?: 0)
+            .atZone(ZoneOffset.UTC)
+            .toLocalDateTime()
 
     override fun serialize(
-        src: Date?,
+        src: LocalDateTime?,
         typeOfSrc: Type?,
         context: JsonSerializationContext?,
-    ): JsonElement = JsonPrimitive(src?.time)
+    ): JsonElement =
+        JsonPrimitive(
+            src?.toInstant(ZoneOffset.UTC)?.toEpochMilli() ?: 0,
+        )
 }
 
 private fun runOnUiThread(runnable: () -> Unit) {
     Handler(Looper.getMainLooper()).post { runnable() }
 }
 
-private val gson = GsonBuilder().registerTypeAdapter(Date::class.java, DateSerializer).create()
+private val gson =
+    GsonBuilder()
+        .registerTypeAdapter(LocalDateTime::class.java, LocalDateTimeSerializer)
+        .create()
 
 private var wrapperInternal: PolarWrapper? = null
 private val wrapper: PolarWrapper
@@ -682,9 +694,14 @@ class PolarWrapper(
         ready: List<PolarBleSdkFeature>,
         unavailable: List<PolarBleSdkFeature>,
     ) {
-        ready.forEach { feature ->
-            success("sdkFeatureReady", listOf(identifier, feature.name))
-        }
+        success(
+            "sdkFeaturesReadiness",
+            listOf(
+                identifier,
+                ready.map { it.name },
+                unavailable.map { it.name },
+            ),
+        )
     }
 
     override fun deviceConnected(polarDeviceInfo: PolarDeviceInfo) {

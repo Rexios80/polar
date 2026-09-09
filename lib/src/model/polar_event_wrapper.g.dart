@@ -23,6 +23,7 @@ Map<String, dynamic> _$PolarEventWrapperToJson(PolarEventWrapper instance) =>
 const _$PolarEventEnumMap = {
   PolarEvent.blePowerStateChanged: 'blePowerStateChanged',
   PolarEvent.sdkFeatureReady: 'sdkFeatureReady',
+  PolarEvent.sdkFeaturesReadiness: 'sdkFeaturesReadiness',
   PolarEvent.deviceConnected: 'deviceConnected',
   PolarEvent.deviceConnecting: 'deviceConnecting',
   PolarEvent.deviceDisconnected: 'deviceDisconnected',
