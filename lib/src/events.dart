@@ -3,9 +3,6 @@ import 'package:polar/polar.dart';
 
 /// The feature is available in this device and it is ready. Called only for
 /// the features which are specified in [PolarBleApi] construction.
-///
-/// Prefer [Polar.sdkFeaturesReadiness] to wait until all features have been
-/// evaluated.
 @immutable
 class PolarSdkFeatureReadyEvent {
   /// Polar device id

@@ -581,6 +581,9 @@ public class PolarPlugin:
   }
 
   public func bleSdkFeatureReady(_ identifier: String, feature: PolarBleSdkFeature) {
+    success(
+      "sdkFeatureReady",
+      data: [identifier, String(describing: feature)])
   }
 
   public func bleSdkFeaturesReadiness(

@@ -42,13 +42,12 @@ class Polar {
       .map((e) => e.data);
 
   /// feature ready callback
-  ///
-  /// Prefer [sdkFeaturesReadiness] to wait until all features have been
-  /// evaluated.
-  Stream<PolarSdkFeatureReadyEvent> get sdkFeatureReady =>
-      sdkFeaturesReadiness.expand(
-        (e) => e.ready.map(
-          (feature) => PolarSdkFeatureReadyEvent(e.identifier, feature),
+  Stream<PolarSdkFeatureReadyEvent> get sdkFeatureReady => _eventStream
+      .where((e) => e.event == PolarEvent.sdkFeatureReady)
+      .map(
+        (e) => PolarSdkFeatureReadyEvent(
+          e.data[0],
+          PolarSdkFeature.fromJson(e.data[1]),
         ),
       );
 

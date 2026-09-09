@@ -674,6 +674,7 @@ class PolarWrapper(
         identifier: String,
         feature: PolarBleSdkFeature,
     ) {
+        success("sdkFeatureReady", listOf(identifier, feature.name))
     }
 
     override fun bleSdkFeaturesReadiness(

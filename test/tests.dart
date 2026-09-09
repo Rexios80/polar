@@ -109,12 +109,20 @@ void testBleSdkFeatures(
   required Set<PolarSdkFeature> features,
 }) {
   test('ble sdk features', () async {
+    final readyFeatures = <PolarSdkFeature>{};
+    final sub = polar.sdkFeatureReady
+        .where((e) => e.identifier == identifier)
+        .listen((e) => readyFeatures.add(e.feature));
+
     final readiness = await connect(identifier);
     expect(readiness.ready, unorderedEquals(features));
     expect(
       readiness.unavailable,
       unorderedEquals(PolarSdkFeature.values.toSet().difference(features)),
     );
+    expect(readyFeatures, containsAll(readiness.ready));
+
+    await sub.cancel();
     await disconnect(identifier);
   });
 }
@@ -252,7 +260,11 @@ void testRecording(String identifier, {bool wait = true}) {
 
 void testSdkMode(String identifier) {
   test('sdk mode', () async {
+    final sdkModeReady = polar.sdkFeatureReady.firstWhere(
+      (e) => e.identifier == identifier && e.feature == PolarSdkFeature.sdkMode,
+    );
     await connect(identifier);
+    await sdkModeReady;
 
     final status1 = await polar.isSdkModeEnabled(identifier);
     expect(status1, false);
