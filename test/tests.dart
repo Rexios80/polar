@@ -260,11 +260,7 @@ void testRecording(String identifier, {bool wait = true}) {
 
 void testSdkMode(String identifier) {
   test('sdk mode', () async {
-    final sdkModeReady = polar.sdkFeatureReady.firstWhere(
-      (e) => e.identifier == identifier && e.feature == PolarSdkFeature.sdkMode,
-    );
     await connect(identifier);
-    await sdkModeReady;
 
     final status1 = await polar.isSdkModeEnabled(identifier);
     expect(status1, false);
