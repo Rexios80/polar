@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:integration_test/integration_test.dart';
 import 'package:polar/polar.dart';
 
@@ -16,12 +18,13 @@ void main() async {
     identifier,
     features: PolarSdkFeature.values.toSet().difference({
       PolarSdkFeature.h10ExerciseRecording,
-      PolarSdkFeature.offlineRecording,
       PolarSdkFeature.offlineExerciseV2,
       PolarSdkFeature.activityData,
       PolarSdkFeature.hts,
       PolarSdkFeature.sleepData,
       PolarSdkFeature.temperatureData,
+      if (Platform.isIOS) PolarSdkFeature.offlineRecording,
+      if (Platform.isAndroid) PolarSdkFeature.trainingData,
     }),
   );
   testHrService(identifier);
