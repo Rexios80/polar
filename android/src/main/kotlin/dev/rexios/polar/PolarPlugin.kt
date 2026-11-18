@@ -762,7 +762,7 @@ class PolarWrapper(
         identifier: String,
         powerSourcesState: PowerSourcesState,
     ) {
-        TODO("Not yet implemented")
+        // Not exposed to Dart yet. Must not throw: the SDK calls this on every connect.
     }
 
     @Deprecated("", replaceWith = ReplaceWith(""))
