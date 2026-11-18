@@ -323,11 +323,10 @@ class PolarPlugin :
         streamingChannels.values.forEach { it.dispose() }
         streamingChannels.clear()
         searchHandler.dispose()
-        if (wrapperInternal != null) {
-            try {
-                wrapper.api.shutDown()
-            } catch (_: Exception) {
-            }
+        // Only drop the shared wrapper if the API was really shut down. Other
+        // engines in the same process (for example a background service) may
+        // still be using it.
+        if (wrapperInternal?.shutDown() == true) {
             wrapperInternal = null
         }
     }
@@ -668,14 +667,16 @@ class PolarWrapper(
         runOnUiThread { sinks.values.forEach { it.success(mapOf("event" to event, "data" to data)) } }
     }
 
-    fun shutDown() {
+    /** Returns true if the API was shut down, false if other engines still use it. */
+    fun shutDown(): Boolean {
         // Do not shutdown the api if other engines are still using it
-        if (sinks.isNotEmpty()) return
+        if (sinks.isNotEmpty()) return false
         try {
             api.shutDown()
         } catch (e: Exception) {
             // This will throw if the API is already shut down
         }
+        return true
     }
 
     override fun blePowerStateChanged(powered: Boolean) {
